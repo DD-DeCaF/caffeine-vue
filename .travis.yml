@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+  - "node"
+
+cache: npm 
+
+git:
+  depth: 2
+
+branches:
+  only:
+  - master
+  - devel
+
+before_install:
+  - npm install -g @vue/cli
+
+install:
+  - npm ci
+
+script:
+  - npx vue-cli-service lint --no-fix
+  - npx vue-cli-service test:unit
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: "g6K9w9KarfQQVmxbvWjIaZCMWwWEmj6YOGbuM27ABZ6UWpQ1l61cPRemwGQHtZE4sfZRBiPJwX1AtjTZaCjAL5KjjZsDdkP6C+LJawVrDBcS5PT1TOoap8nibDBaf7J7bd4vlGbPIO7OLEkyWDwWxlFrClmQNVAkYAPwcEX+ountBrTCwOUc3DP7JYwBo3DgLh/KoNJsZ2ibQ1bJu9V7LqiBB5tXQkCrlxYsXaTTNdIHW8XL7tn8CP95Q65TqnaXZ6xo8t3v9B+wGcaVkmFw/TebV12XofabILHqtE1xLHRepnfyGEaiF2Q6WEC971jPpbS2W57TQnSn7IAK/UDrTuzDo3lRIN0ZkNmdB7N7ut+KKyCxBeasJeDJ2boNJamr7V8PL32Ql8uav+xaURni5oCdMO+3CGmd7vednOb0yIr4miNYMNxADzr5XuDv0JtcglXF/s0/LnO/BJSy5mgAIQon1wyuNbBqmx4PjnzVzkQolaHF/7PsHvU80pN5XIKhjm2mOxurbqdymTA5PiHWyWOBwTKIDTN2Gn9CLxaYHboL+3xbgVaRc5Oh5FwVI9CS2SNmpMpERdZuuzTrOWlDdbqqZ6ors7ZztbIiZEojkLUN3H59ynRzegySt12ZgBtFBKoZtGjHtOAdSQYtAtgea1kLgIKtN69/8uCZ8JiaR3M="
+    on_success: change
+    on_failure: change
+    on_pull_requests: false
