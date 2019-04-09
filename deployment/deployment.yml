@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caffeine-vue
+spec:
+  selector:
+    matchLabels:
+      app: caffeine-vue
+      env: staging
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: caffeine-vue
+        env: staging
+    spec:
+      containers:
+      - name: web
+        image: gcr.io/dd-decaf-cfbf6/caffeine-vue:devel
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "2000m"
