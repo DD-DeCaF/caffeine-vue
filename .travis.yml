@@ -12,6 +12,13 @@ branches:
   - master
   - devel
 
+services:
+  - docker
+
+env:
+  global:
+    - IMAGE_REPO=gcr.io/dd-decaf-cfbf6/caffeine-vue
+
 before_install:
   - npm install -g @vue/cli
 
@@ -21,6 +28,16 @@ install:
 script:
   - npx vue-cli-service lint --no-fix
   - npx vue-cli-service test:unit
+
+after_success:
+  - npx vue-cli-service build --dest nginx/dist
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: ./scripts/deploy.sh
+  on:
+    all_branches: true
 
 notifications:
   email: false
