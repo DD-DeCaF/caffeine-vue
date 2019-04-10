@@ -13,7 +13,6 @@ For more information, see [dd-decaf.eu](http://dd-decaf.eu/) or visit the platfo
 * State management: [Vuex](https://vuex.vuejs.org/)
 * Linting: [eslint](https://eslint.org/), [prettier](https://prettier.io/)
 * Unit testing: [mocha](https://mochajs.org/) + [jsdom](https://github.com/jsdom/jsdom), assertion library is [chai](https://www.chaijs.com/) (see [vue-test-utils](https://vue-test-utils.vuejs.org/) for useful testing utilities)
-* E2E testing: [cypress](https://www.cypress.io/)
 
 ## Project setup
 `npm install`
