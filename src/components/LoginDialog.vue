@@ -16,24 +16,28 @@
           v-if="isLoading"
         ></v-progress-circular>
       </div>
-      <v-container grid-list-md fill-height text-md-center v-if="!isLoading">
-        <v-layout wrap fill-height column>
-          <v-flex md6>
+      <v-container grid-list-md text-md-center v-if="!isLoading">
+        <v-layout fill-height row wrap>
+        <v-flex md6>
+        <v-layout fill-height column>
+          <v-flex>
             Log in with your social account
           </v-flex>
-          <v-flex md6>
+          <v-flex>
             <v-btn color="black" block dark>Github</v-btn>
             <v-btn color="red" block dark>Google</v-btn>
             <v-btn color="blue" block dark>Twitter</v-btn>
           </v-flex>
         </v-layout>
-        <v-layout column>
-          <v-flex md6>
+        </v-flex>
+        <v-flex md6>
+        <v-layout fill-height column>
+          <v-flex>
             Or you can
             <a href="mailto:niso@biosustain.dtu.dk">contact us</a> and we
             provide you with credentials
           </v-flex>
-          <v-flex md6>
+          <v-flex>
             <v-form>
               <v-text-field
                 v-model="email.value"
@@ -54,6 +58,8 @@
               ></v-text-field>
             </v-form>
           </v-flex>
+        </v-layout>
+        </v-flex>
         </v-layout>
       </v-container>
 
