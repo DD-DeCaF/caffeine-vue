@@ -22,8 +22,7 @@
 
           <v-list-tile :to="'/interactiveMap'">
             <v-list-tile-action>
-              <!-- TODO: use custom icon -->
-              <v-icon></v-icon>
+              <v-icon v-text="icon">$vuetify.icons.interactive_map</v-icon>
             </v-list-tile-action>
 
             <v-list-tile-content>
@@ -112,3 +111,6 @@ export default Vue.extend({
   })
 });
 </script>
+
+<style lang="scss" scoped>
+</style>

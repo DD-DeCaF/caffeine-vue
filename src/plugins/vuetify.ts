@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuetify from "vuetify/lib";
 import "vuetify/src/stylus/app.styl";
 import colors from "vuetify/es5/util/colors";
+import MapIcon from "../assets/MapIcon.vue";
 
 Vue.use(Vuetify, {
   theme: {
@@ -13,5 +14,13 @@ Vue.use(Vuetify, {
     success: "#4CAF50",
     warning: "#FFC107"
   },
-  iconfont: "md"
+  iconfont: "md",
+  icons: {
+    interactive_map: {
+      component: MapIcon,
+      props: {
+        role: 'icon'
+      }
+    }
+  }
 });
