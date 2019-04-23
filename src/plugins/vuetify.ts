@@ -19,7 +19,7 @@ Vue.use(Vuetify, {
     interactive_map: {
       component: MapIcon,
       props: {
-        role: 'icon'
+        role: "icon"
       }
     }
   }
