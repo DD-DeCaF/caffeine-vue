@@ -32,48 +32,73 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-tooltip bottom :disabled="true">
-                <v-list-tile slot="activator" to="/design" :disabled="false">
-                  <v-list-tile-action>
-                    <v-icon>edit</v-icon>
-                  </v-list-tile-action>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <v-list-tile
+              slot="activator"
+              to="/design"
+              :disabled="!isAuthenticated"
+            >
+              <v-list-tile-action>
+                <v-icon>edit</v-icon>
+              </v-list-tile-action>
 
-                  <v-list-tile-content>
-                    <v-list-tile-title>Design</v-list-tile-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-            <span>Please log in or register to use this functionality!</span>
+              <v-list-tile-content>
+                <v-list-tile-title>Design</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <span> {{ disabledTooltipText }} </span>
           </v-tooltip>
 
-          <v-list-tile to="/jobs">
-            <v-list-tile-action>
-              <v-icon>hourglass_empty</v-icon>
-            </v-list-tile-action>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <v-list-tile
+              to="/jobs"
+              slot="activator"
+              :disabled="!isAuthenticated"
+            >
+              <v-list-tile-action>
+                <v-icon>hourglass_empty</v-icon>
+              </v-list-tile-action>
 
-            <v-list-tile-content>
-              <v-list-tile-title>Jobs</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+              <v-list-tile-content>
+                <v-list-tile-title>Jobs</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <span> {{ disabledTooltipText }} </span>
+          </v-tooltip>
 
-          <v-list-tile to="/designs">
-            <v-list-tile-action>
-              <v-icon>device_hub</v-icon>
-            </v-list-tile-action>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <v-list-tile
+              to="/designs"
+              slot="activator"
+              :disabled="!isAuthenticated"
+            >
+              <v-list-tile-action>
+                <v-icon>device_hub</v-icon>
+              </v-list-tile-action>
 
-            <v-list-tile-content>
-              <v-list-tile-title>Designs</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+              <v-list-tile-content>
+                <v-list-tile-title>Designs</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <span> {{ disabledTooltipText }} </span>
+          </v-tooltip>
 
-          <v-list-tile to="/projects">
-            <v-list-tile-action>
-              <v-icon>subject</v-icon>
-            </v-list-tile-action>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <v-list-tile
+              to="/projects"
+              slot="activator"
+              :disabled="!isAuthenticated"
+            >
+              <v-list-tile-action>
+                <v-icon>subject</v-icon>
+              </v-list-tile-action>
 
-            <v-list-tile-content>
-              <v-list-tile-title>Projects</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+              <v-list-tile-content>
+                <v-list-tile-title>Projects</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <span> {{ disabledTooltipText }} </span>
+          </v-tooltip>
 
           <v-list-tile to="/maps">
             <v-list-tile-action>
@@ -110,13 +135,20 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
+import store from "@/store/session";
 
 export default Vue.extend({
   components: {
     LoginDialog
   },
   data: () => ({
-    drawer: true
-  })
+    drawer: true,
+    disabledTooltipText: "Please log in or register to use this functionality!"
+  }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    }
+  }
 });
 </script>
