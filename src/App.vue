@@ -135,7 +135,6 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
-import store from "@/store/session";
 
 export default Vue.extend({
   components: {
