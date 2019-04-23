@@ -1,7 +1,7 @@
 <template>
 <div>
   <template v-if="isAuthenticated">
-      <v-btn color="secondary" depressed @click="DoStuff">
+      <v-btn color="secondary" depressed @click="logout">
         <v-icon>power_settings_new</v-icon>
         Log Out
       </v-btn>
@@ -141,7 +141,7 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
         .then((response: AxiosResponse<JWT>) => {
-          this.$store.commit("login", response.data);
+          this.$store.commit("session/login", response.data);
           this.isLoginDialogVisible = false;
         })
         .catch(error => {
@@ -154,6 +154,9 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
+    },
+    logout() {
+      this.$store.commit("session/logout");
     }
   }
 });
