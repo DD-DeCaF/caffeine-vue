@@ -22,7 +22,7 @@
 
           <v-list-tile to="/interactiveMap">
             <v-list-tile-action>
-              <v-icon v-text="icon">$vuetify.icons.interactive_map</v-icon>
+              <v-icon>$vuetify.icons.interactive_map</v-icon>
             </v-list-tile-action>
 
             <v-list-tile-content>
