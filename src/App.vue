@@ -140,7 +140,7 @@ export default Vue.extend({
   components: {
     LoginDialog
   },
-  beforeCreate: function () {
+  beforeCreate: function() {
     this.$store.commit("session/recover");
   },
   data: () => ({

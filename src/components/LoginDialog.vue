@@ -1,101 +1,105 @@
 <template>
-<div>
-  <template v-if="isAuthenticated">
+  <div>
+    <template v-if="isAuthenticated">
       <v-btn color="secondary" depressed @click="logout">
         <v-icon>power_settings_new</v-icon>
         Log Out
       </v-btn>
     </template>
     <template v-else>
-      <v-btn depressed color="secondary" @click.native.stop="isLoginDialogVisible = true">
+      <v-btn
+        depressed
+        color="secondary"
+        @click.native.stop="isLoginDialogVisible = true"
+      >
         <v-icon>lock</v-icon>
         Log In
       </v-btn>
-    </template> 
-  <v-dialog v-model="isLoginDialogVisible" width="650">
-    <v-card>
-      <div class="text-xs-center pa-4">
-        <v-progress-circular
-          indeterminate
-          color="primary"
-          size="80"
-          v-if="isLoading"
-        ></v-progress-circular>
-      </div>
-      <v-container grid-list-md text-md-center v-if="!isLoading">
-        <v-layout fill-height row wrap>
-          <v-flex md6>
-            <v-layout fill-height column>
-              <v-flex>
-                Log in with your social account
-              </v-flex>
-              <v-flex>
-                <v-btn color="black" block dark>Github</v-btn>
-                <v-btn color="red" block dark>Google</v-btn>
-                <v-btn color="blue" block dark>Twitter</v-btn>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex md6>
-            <v-layout fill-height column>
-              <v-flex>
-                Or you can
-                <a href="mailto:niso@biosustain.dtu.dk">contact us</a> and we
-                provide you with credentials
-              </v-flex>
-              <v-flex>
-                <v-form>
-                  <v-text-field
-                    v-model="email.value"
-                    :rules="email.rules"
-                    prepend-icon="email"
-                    name="email"
-                    label="Email"
-                    type="text"
-                  ></v-text-field>
-                  <v-text-field
-                    v-model="password.value"
-                    :rules="password.rules"
-                    prepend-icon="lock"
-                    name="password"
-                    label="Password"
-                    id="password"
-                    type="password"
-                  ></v-text-field>
-                </v-form>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-        </v-layout>
-      </v-container>
+    </template>
+    <v-dialog v-model="isLoginDialogVisible" width="650">
+      <v-card>
+        <div class="text-xs-center pa-4">
+          <v-progress-circular
+            indeterminate
+            color="primary"
+            size="80"
+            v-if="isLoading"
+          ></v-progress-circular>
+        </div>
+        <v-container grid-list-md text-md-center v-if="!isLoading">
+          <v-layout fill-height row wrap>
+            <v-flex md6>
+              <v-layout fill-height column>
+                <v-flex>
+                  Log in with your social account
+                </v-flex>
+                <v-flex>
+                  <v-btn color="black" block dark>Github</v-btn>
+                  <v-btn color="red" block dark>Google</v-btn>
+                  <v-btn color="blue" block dark>Twitter</v-btn>
+                </v-flex>
+              </v-layout>
+            </v-flex>
+            <v-flex md6>
+              <v-layout fill-height column>
+                <v-flex>
+                  Or you can
+                  <a href="mailto:niso@biosustain.dtu.dk">contact us</a> and we
+                  provide you with credentials
+                </v-flex>
+                <v-flex>
+                  <v-form>
+                    <v-text-field
+                      v-model="email.value"
+                      :rules="email.rules"
+                      prepend-icon="email"
+                      name="email"
+                      label="Email"
+                      type="text"
+                    ></v-text-field>
+                    <v-text-field
+                      v-model="password.value"
+                      :rules="password.rules"
+                      prepend-icon="lock"
+                      name="password"
+                      label="Password"
+                      id="password"
+                      type="password"
+                    ></v-text-field>
+                  </v-form>
+                </v-flex>
+              </v-layout>
+            </v-flex>
+          </v-layout>
+        </v-container>
 
-      <v-divider></v-divider>
+        <v-divider></v-divider>
 
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="secondary" flat @click="isLoginDialogVisible = false">
-          Cancel
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" flat @click="isLoginDialogVisible = false">
+            Cancel
+          </v-btn>
+          <v-btn color="primary" @click="emailLogin">Login</v-btn>
+        </v-card-actions>
+      </v-card>
+
+      <v-snackbar v-model="isInvalidCredentials" bottom>
+        Invalid credentials, please try again.
+        <v-btn color="error" flat @click="isInvalidCredentials = false">
+          Close
         </v-btn>
-        <v-btn color="primary" @click="emailLogin">Login</v-btn>
-      </v-card-actions>
-    </v-card>
+      </v-snackbar>
 
-    <v-snackbar v-model="isInvalidCredentials" bottom>
-      Invalid credentials, please try again.
-      <v-btn color="error" flat @click="isInvalidCredentials = false">
-        Close
-      </v-btn>
-    </v-snackbar>
-
-    <v-snackbar v-model="isLoginError" bottom>
-      There was a problem contacting the authentication server.<br />
-      Please try again in a few moments.
-      <v-btn color="error" flat @click="isLoginError = false">
-        Close
-      </v-btn>
-    </v-snackbar>
-  </v-dialog>
-</div>
+      <v-snackbar v-model="isLoginError" bottom>
+        There was a problem contacting the authentication server.<br />
+        Please try again in a few moments.
+        <v-btn color="error" flat @click="isLoginError = false">
+          Close
+        </v-btn>
+      </v-snackbar>
+    </v-dialog>
+  </div>
 </template>
 
 <script lang="ts">
