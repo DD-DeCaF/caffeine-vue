@@ -30,15 +30,22 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile to="/design">
-            <v-list-tile-action>
-              <v-icon>edit</v-icon>
-            </v-list-tile-action>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-list-tile to="/design" disabled>
+                  <v-list-tile-action>
+                    <v-icon>edit</v-icon>
+                  </v-list-tile-action>
 
-            <v-list-tile-content>
-              <v-list-tile-title>Design</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+                  <v-list-tile-content>
+                    <v-list-tile-title>Design</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </div>
+            </template>
+            <span>Please log in or register to use this functionality!</span>
+          </v-tooltip>
 
           <v-list-tile to="/jobs">
             <v-list-tile-action>
