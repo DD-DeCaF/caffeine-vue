@@ -10,7 +10,7 @@
 
       <v-navigation-drawer v-model="drawer" app clipped>
         <v-list>
-          <v-list-tile :to="'/'">
+          <v-list-tile to="/">
             <v-list-tile-action>
               <v-icon>home</v-icon>
             </v-list-tile-action>
@@ -20,7 +20,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/interactiveMap'">
+          <v-list-tile to="/interactiveMap">
             <v-list-tile-action>
               <v-icon v-text="icon">$vuetify.icons.interactive_map</v-icon>
             </v-list-tile-action>
@@ -30,7 +30,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/design'">
+          <v-list-tile to="/design">
             <v-list-tile-action>
               <v-icon>edit</v-icon>
             </v-list-tile-action>
@@ -40,7 +40,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/jobs'">
+          <v-list-tile to="/jobs">
             <v-list-tile-action>
               <v-icon>hourglass_empty</v-icon>
             </v-list-tile-action>
@@ -50,7 +50,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/designs'">
+          <v-list-tile to="/designs">
             <v-list-tile-action>
               <v-icon>device_hub</v-icon>
             </v-list-tile-action>
@@ -60,7 +60,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/projects'">
+          <v-list-tile to="/projects">
             <v-list-tile-action>
               <v-icon>subject</v-icon>
             </v-list-tile-action>
@@ -70,7 +70,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/maps'">
+          <v-list-tile to="/maps">
             <v-list-tile-action>
               <v-icon>map</v-icon>
             </v-list-tile-action>
@@ -80,7 +80,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile :to="'/models'">
+          <v-list-tile to="/models">
             <v-list-tile-action>
               <v-icon>rounded_corner</v-icon>
             </v-list-tile-action>
