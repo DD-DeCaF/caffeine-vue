@@ -34,9 +34,26 @@
                   Log in with your social account
                 </v-flex>
                 <v-flex>
-                  <v-btn color="black" block dark>Github</v-btn>
-                  <v-btn color="red" block dark>Google</v-btn>
-                  <v-btn color="blue" block dark>Twitter</v-btn>
+                  <v-btn 
+                    color="black" 
+                    block 
+                    dark
+                  >
+                  <v-icon>$vuetify.icons.github</v-icon>
+                  Github
+                  </v-btn>
+                  <v-btn 
+                  color="red" 
+                  block 
+                  dark
+                  >
+                  <v-icon>$vuetify.icons.google_plus</v-icon>
+                  Google
+                  </v-btn>
+                  <v-btn color="blue" block dark>
+                    <v-icon>$vuetify.icons.twitter</v-icon>
+                    Twitter
+                  </v-btn>
                 </v-flex>
               </v-layout>
             </v-flex>
