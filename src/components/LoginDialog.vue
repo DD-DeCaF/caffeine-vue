@@ -1,0 +1,142 @@
+<template>
+  <v-dialog v-model="isLoginDialogVisible" width="650">
+    <template v-slot:activator="{ on }">
+      <v-btn color="secondary" v-on="on">
+        <v-icon>lock</v-icon>
+        Log In
+      </v-btn>
+    </template>
+
+    <v-card>
+      <div class="text-xs-center pa-4">
+        <v-progress-circular
+          indeterminate
+          color="primary"
+          size="80"
+          v-if="isLoading"
+        ></v-progress-circular>
+      </div>
+      <v-container grid-list-md fill-height text-md-center v-if="!isLoading">
+        <v-layout wrap fill-height column>
+          <v-flex md6>
+            Log in with your social account
+          </v-flex>
+          <v-flex md6>
+            <v-btn color="black" block dark>Github</v-btn>
+            <v-btn color="red" block dark>Google</v-btn>
+            <v-btn color="blue" block dark>Twitter</v-btn>
+          </v-flex>
+        </v-layout>
+        <v-layout column>
+          <v-flex md6>
+            Or you can
+            <a href="mailto:niso@biosustain.dtu.dk">contact us</a> and we
+            provide you with credentials
+          </v-flex>
+          <v-flex md6>
+            <v-form>
+              <v-text-field
+                v-model="email.value"
+                :rules="email.rules"
+                prepend-icon="email"
+                name="email"
+                label="Email"
+                type="text"
+              ></v-text-field>
+              <v-text-field
+                v-model="password.value"
+                :rules="password.rules"
+                prepend-icon="lock"
+                name="password"
+                label="Password"
+                id="password"
+                type="password"
+              ></v-text-field>
+            </v-form>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <v-divider></v-divider>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="secondary" flat @click="isLoginDialogVisible = false">
+          Cancel
+        </v-btn>
+        <v-btn color="primary" @click="emailLogin">Login</v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <v-snackbar v-model="isInvalidCredentials" bottom>
+      Invalid credentials, please try again.
+      <v-btn color="error" flat @click="isInvalidCredentials = false">
+        Close
+      </v-btn>
+    </v-snackbar>
+
+    <v-snackbar v-model="isLoginError" bottom>
+      There was a problem contacting the authentication server.<br />
+      Please try again in a few moments.
+      <v-btn color="error" flat @click="isLoginError = false">
+        Close
+      </v-btn>
+    </v-snackbar>
+  </v-dialog>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import settings from "@/settings";
+import { JWT } from "@/store/session";
+
+export default Vue.extend({
+  name: "LoginDialog",
+  data: () => ({
+    isInvalidCredentials: false,
+    isLoading: false,
+    isLoginDialogVisible: true,
+    isLoginError: false,
+    email: {
+      value: null,
+      rules: [
+        (v: string) => /.+@.+/.test(v) || "E-mail must be a valid address"
+      ]
+    },
+    password: {
+      value: null,
+      rules: [(v: string) => !!v || "Enter your password"]
+    }
+  }),
+  methods: {
+    emailLogin() {
+      this.isInvalidCredentials = false;
+      this.login(
+        { email: this.email.value, password: this.password.value },
+        "local"
+      );
+    },
+    login(params: object, type: string) {
+      this.isLoading = true;
+      axios
+        .post(`${settings.apis.iam}/authenticate/${type}`, params)
+        .then((response: AxiosResponse<JWT>) => {
+          this.$store.commit("login", response.data);
+          this.isLoginDialogVisible = false;
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 401) {
+            this.isInvalidCredentials = true;
+          } else {
+            this.isLoginError = true;
+          }
+        })
+        .then(() => {
+          this.isLoading = false;
+        });
+    }
+  }
+});
+</script>

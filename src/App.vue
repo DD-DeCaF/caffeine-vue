@@ -6,6 +6,8 @@
           @click.stop="drawer = !drawer"
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <LoginDialog />
       </v-toolbar>
 
       <v-navigation-drawer v-model="drawer" app clipped>
@@ -111,8 +113,12 @@
 
 <script lang="ts">
 import Vue from "vue";
+import LoginDialog from "@/components/LoginDialog.vue";
 
 export default Vue.extend({
+  components: {
+    LoginDialog
+  },
   data: () => ({
     drawer: true
   })
