@@ -1,12 +1,18 @@
 <template>
-  <v-dialog v-model="isLoginDialogVisible" width="650">
-    <template v-slot:activator="{ on }">
-      <v-btn color="secondary" v-on="on">
+<div>
+  <template v-if="isAuthenticated">
+      <v-btn color="secondary" depressed @click="DoStuff">
+        <v-icon>power_settings_new</v-icon>
+        Log Out
+      </v-btn>
+    </template>
+    <template v-else>
+      <v-btn depressed color="secondary" @click.native.stop="isLoginDialogVisible = true">
         <v-icon>lock</v-icon>
         Log In
       </v-btn>
-    </template>
-
+    </template> 
+  <v-dialog v-model="isLoginDialogVisible" width="650">
     <v-card>
       <div class="text-xs-center pa-4">
         <v-progress-circular
@@ -89,6 +95,7 @@
       </v-btn>
     </v-snackbar>
   </v-dialog>
+</div>
 </template>
 
 <script lang="ts">
@@ -116,6 +123,11 @@ export default Vue.extend({
       rules: [(v: string) => !!v || "Enter your password"]
     }
   }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    }
+  },
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
