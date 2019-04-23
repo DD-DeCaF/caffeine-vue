@@ -24,6 +24,7 @@ export default {
     logout(state) {
       state.isAuthenticated = false;
       state.jwt = null;
+      localStorage.removeItem("jwt");
     }
   },
   actions: {}
