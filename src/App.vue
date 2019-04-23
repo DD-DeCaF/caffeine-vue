@@ -32,10 +32,8 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-list-tile to="/design" disabled>
+          <v-tooltip bottom :disabled="true">
+                <v-list-tile slot="activator" to="/design" :disabled="false">
                   <v-list-tile-action>
                     <v-icon>edit</v-icon>
                   </v-list-tile-action>
@@ -44,8 +42,6 @@
                     <v-list-tile-title>Design</v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
-              </div>
-            </template>
             <span>Please log in or register to use this functionality!</span>
           </v-tooltip>
 
