@@ -40,7 +40,7 @@ export default {
           commit("setDesigns", response.data);
         })
         .catch(error => {
-          commit("setFetchError", error);
+          commit("setFetchError", error, { root: true });
         });
     }
   }

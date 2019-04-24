@@ -29,7 +29,7 @@ export default {
           commit("setExperiments", response.data);
         })
         .catch(error => {
-          commit("setFetchError", error);
+          commit("setFetchError", error, { root: true });
         });
     }
   }
