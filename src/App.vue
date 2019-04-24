@@ -141,7 +141,12 @@ export default Vue.extend({
     LoginDialog
   },
   beforeCreate: function() {
-    this.$store.commit("session/recover");
+    const token = localStorage.getItem("jwt");
+    let jwt;
+    if (token !== null) {
+      jwt = JSON.parse(token);
+    }
+    this.$store.commit("session/login", jwt);
   },
   data: () => ({
     drawer: false,
