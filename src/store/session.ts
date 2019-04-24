@@ -1,6 +1,3 @@
-import Vue from "vue";
-import Vuex from "vuex";
-
 export interface JWT {
   jwt: string;
   refresh_token: {

@@ -1,13 +1,13 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import session from "./session";
-import designs from './designs';
-import experiments from './experiments';
-import jobs from './jobs';
-import maps from './maps';
-import models from './models';
-import organisms from './organisms';
-import projects from './projects';
+import designs from "./designs";
+import experiments from "./experiments";
+import jobs from "./jobs";
+import maps from "./maps";
+import models from "./models";
+import organisms from "./organisms";
+import projects from "./projects";
 
 Vue.use(Vuex);
 
@@ -20,7 +20,7 @@ export default new Vuex.Store({
     maps,
     models,
     organisms,
-    projects,
+    projects
   },
   state: {},
   mutations: {},
