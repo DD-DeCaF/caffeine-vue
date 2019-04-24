@@ -27,7 +27,7 @@ export default {
       localStorage.removeItem("jwt");
     },
     recover(state) {
-      const token = localStorage.getItem("jwt")
+      const token = localStorage.getItem("jwt");
       if (token !== null) {
         state.isAuthenticated = true;
         state.jwt = JSON.parse(token);

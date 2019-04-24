@@ -33,15 +33,15 @@
                   Log in with your social account
                 </v-flex>
                 <v-flex>
-                  <v-btn color="black" block dark>
+                  <v-btn color="black" block dark @click="socialLogin('github')">
                     <v-icon>$vuetify.icons.github</v-icon>
                     Github
                   </v-btn>
-                  <v-btn color="red" block dark @click="loginGoogle">
+                  <v-btn color="red" block dark @click="socialLogin('google')">
                     <v-icon>$vuetify.icons.google_plus</v-icon>
                     Google
                   </v-btn>
-                  <v-btn color="blue" block dark>
+                  <v-btn color="blue" block dark @click="socialLogin('twitter')">
                     <v-icon>$vuetify.icons.twitter</v-icon>
                     Twitter
                   </v-btn>
@@ -130,7 +130,8 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import settings from "@/settings";
 import { JWT } from "@/store/session";
-import firebase from "firebase";
+import * as firebase from "firebase/app";
+import "firebase/auth";
 
 export default Vue.extend({
   name: "LoginDialog",
@@ -150,12 +151,19 @@ export default Vue.extend({
     password: {
       value: null,
       rules: [(v: string) => !!v || "Enter your password"]
-    }
+    },
+    firebaseProviders: {
+      github: new firebase.auth.GithubAuthProvider(),
+      google: new firebase.auth.GoogleAuthProvider(),
+      twitter: new firebase.auth.TwitterAuthProvider()
+    },
+    // This promise will be set if there is a session token refresh request in progress
+    refreshPromise: null
   }),
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
-      this.login(
+      (this as any).login(
         { email: this.email.value, password: this.password.value },
         "local"
       );
@@ -184,19 +192,28 @@ export default Vue.extend({
       this.$store.commit("session/logout");
       this.isLogoutSuccess = true;
     },
-    loginGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-
-      firebase
+    socialLogin(providerKey) {
+      firebase.auth().signOut();
+      const provider = this.firebaseProviders[providerKey];
+      if (providerKey === "github") {
+        provider.addScope("user:email");
+      } else if (providerKey === "google") {
+        provider.addScope("email");
+      }
+      return firebase
         .auth()
         .signInWithPopup(provider)
-        .then(result => {})
+        .then(result => {
+          return firebase
+            .auth()
+            .currentUser.getIdToken(true)
+            .then(idToken => {
+              const credentials = { uid: result.user.uid, token: idToken };
+              this.login(credentials, "firebase");
+            });
+        })
         .catch(error => {
-          if (error.response && error.response.status === 401) {
-            this.isInvalidCredentials = true;
-          } else {
-            this.isLoginError = true;
-          }
+          this.loginError = true;
         });
     }
   },
@@ -204,6 +221,16 @@ export default Vue.extend({
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     }
+  },
+  beforeCreate() {
+    firebase.initializeApp({
+      apiKey: 'AIzaSyApbLMKp7TprhjH75lpcmJs514uI11fEIo',
+      authDomain: 'dd-decaf-cfbf6.firebaseapp.com',
+      databaseURL: 'https://dd-decaf-cfbf6.firebaseio.com',
+      projectId: 'dd-decaf-cfbf6',
+      storageBucket: 'dd-decaf-cfbf6.appspot.com',
+      messagingSenderId: '972933293195',
+    });
   }
 });
 </script>
