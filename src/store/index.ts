@@ -22,8 +22,14 @@ export default new Vuex.Store({
     organisms,
     projects
   },
-  state: {},
-  mutations: {},
+  state: {
+    fetchDataError: null
+  },
+  mutations: {
+    setFetchError(state, error) {
+      state.fetchDataError = error;
+    }
+  },
   actions: {
     fetchAllData({ dispatch }) {
       dispatch("designs/fetchDesigns");

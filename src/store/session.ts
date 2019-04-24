@@ -14,7 +14,7 @@ export default {
   state: {
     isAuthenticated: false,
     jwt: null,
-    refreshError: false
+    refreshError: null
   },
   mutations: {
     login(state, jwt: JWT) {
@@ -26,7 +26,7 @@ export default {
       state.jwt.jwt = jwt;
       localStorage.setItem("jwt", JSON.stringify(state.jwt));
     },
-    refreshError(state, error) {
+    setRefreshError(state, error) {
       state.refreshError = error;
     },
     logout(state) {
@@ -47,7 +47,7 @@ export default {
             })
             .catch(error => {
               commit("logout");
-              commit("refreshError", error);
+              commit("setRefreshError", error);
             });
         }
         dispatch("refreshToken");

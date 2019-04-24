@@ -128,6 +128,16 @@
         </v-container>
       </v-content>
       <v-footer app></v-footer>
+
+      <v-snackbar color="error" v-model="hasFetchDataError" :timeout="6000">
+        Sorry, we were unable to retrieve some data from the server. Please try
+        again in a few minutes.
+      </v-snackbar>
+
+      <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
+        Your session has expired and you have been logged out. Please log in
+        again.
+      </v-snackbar>
     </v-app>
   </div>
 </template>
@@ -185,6 +195,22 @@ export default Vue.extend({
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
+    },
+    hasRefreshError: {
+      get() {
+        return this.$store.state.session.refreshError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("session/setRefreshError", null);
+      }
+    },
+    hasFetchDataError: {
+      get() {
+        return this.$store.state.fetchDataError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("setFetchError", null);
+      }
     }
   }
 });
