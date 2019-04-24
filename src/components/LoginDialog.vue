@@ -85,10 +85,17 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="secondary" flat @click="isLoginDialogVisible = false">
+          <v-btn
+            color="secondary"
+            flat
+            @click="isLoginDialogVisible = false"
+            :disabled="isLoading"
+          >
             Cancel
           </v-btn>
-          <v-btn color="primary" @click="emailLogin">Login</v-btn>
+          <v-btn color="primary" @click="emailLogin" :disabled="isLoading"
+            >Login</v-btn
+          >
         </v-card-actions>
       </v-card>
 
