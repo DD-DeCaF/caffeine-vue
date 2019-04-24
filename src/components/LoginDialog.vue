@@ -173,7 +173,8 @@ export default Vue.extend({
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
-      (this as any).login(
+      // tslint:disable-next-line
+      this.login(
         { email: this.email.value, password: this.password.value },
         "local"
       );
@@ -219,7 +220,8 @@ export default Vue.extend({
             .currentUser!.getIdToken(true)
             .then(idToken => {
               const credentials = { uid: result.user.uid, token: idToken };
-              (this as any).login(credentials, "firebase");
+              // tslint:disable-next-line
+              this.login(credentials, "firebase");
             });
         })
         .catch(error => {
