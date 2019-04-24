@@ -93,19 +93,18 @@
         </v-card-actions>
       </v-card>
 
-      <v-snackbar v-model="isInvalidCredentials" bottom>
+      <v-snackbar
+        color="error"
+        v-model="isInvalidCredentials"
+        top
+        timeout="3000"
+      >
         Invalid credentials, please try again.
-        <v-btn color="error" flat @click="isInvalidCredentials = false">
-          Close
-        </v-btn>
       </v-snackbar>
 
-      <v-snackbar v-model="isLoginError" bottom>
+      <v-snackbar color="error" v-model="isLoginError" top timeout="3000">
         There was a problem contacting the authentication server.<br />
         Please try again in a few moments.
-        <v-btn color="error" flat @click="isLoginError = false">
-          Close
-        </v-btn>
       </v-snackbar>
     </v-dialog>
   </div>
