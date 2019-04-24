@@ -46,6 +46,7 @@
                   color="red" 
                   block 
                   dark
+                  @click='loginGoogle'
                   >
                   <v-icon>$vuetify.icons.google_plus</v-icon>
                   Google
@@ -125,6 +126,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import settings from "@/settings";
 import { JWT } from "@/store/session";
+import firebase from 'firebase';
 
 export default Vue.extend({
   name: "LoginDialog",
@@ -178,6 +180,20 @@ export default Vue.extend({
     },
     logout() {
       this.$store.commit("session/logout");
+    },
+    loginGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      firebase.auth().signInWithPopup(provider).then((result) => {
+        
+      })
+      .catch(error => {
+            if (error.response && error.response.status === 401) {
+            this.isInvalidCredentials = true;
+          } else {
+            this.isLoginError = true;
+          }
+      });
     }
   }
 });
