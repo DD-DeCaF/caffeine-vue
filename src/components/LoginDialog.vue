@@ -173,6 +173,7 @@ export default Vue.extend({
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
+      // // Vue doesn't fully support typescript => https://github.com/vuejs/vue/issues/8721
       // tslint:disable-next-line
       this.login(
         { email: this.email.value, password: this.password.value },
@@ -220,6 +221,7 @@ export default Vue.extend({
             .currentUser!.getIdToken(true)
             .then(idToken => {
               const credentials = { uid: result.user.uid, token: idToken };
+              // Vue doesn't fully support typescript => https://github.com/vuejs/vue/issues/8721
               // tslint:disable-next-line
               this.login(credentials, "firebase");
             });
