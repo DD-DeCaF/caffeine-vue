@@ -17,7 +17,7 @@ export default {
     maps: []
   },
   mutations: {
-    setMaps (state, maps: MapItem[]) {
+    setMaps(state, maps: MapItem[]) {
       state.maps = maps;
     }
   },

@@ -15,7 +15,7 @@ export default {
     projects: []
   },
   mutations: {
-    setProjects (state, projects: ProjectItem[]) {
+    setProjects(state, projects: ProjectItem[]) {
       state.projects = projects;
     }
   },

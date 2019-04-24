@@ -16,10 +16,10 @@ export interface ExperimentItem {
 export default {
   namespaced: true,
   state: {
-   experiments: []
+    experiments: []
   },
   mutations: {
-    setExperiments (state, experiments: ExperimentItem[]) {
+    setExperiments(state, experiments: ExperimentItem[]) {
       state.experiments = experiments;
     }
   },

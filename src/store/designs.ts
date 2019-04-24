@@ -12,7 +12,7 @@ export interface DesignItem {
         lower_bound: number;
         upper_bound: number;
       }
-      ],
+    ];
     gene_knockouts: string[];
     reaction_knockins: string[];
     reaction_knockouts: string[];
@@ -27,10 +27,10 @@ export interface DesignItem {
 export default {
   namespaced: true,
   state: {
-   designs: []
+    designs: []
   },
   mutations: {
-    setDesigns (state, designs: DesignItem[]) {
+    setDesigns(state, designs: DesignItem[]) {
       state.designs = designs;
     }
   },

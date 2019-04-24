@@ -142,11 +142,9 @@ export default Vue.extend({
   },
   beforeCreate: function() {
     const token = localStorage.getItem("jwt");
-    let jwt;
     if (token !== null) {
-      jwt = JSON.parse(token);
+      this.$store.commit("session/login", JSON.parse(token));
     }
-    this.$store.commit("session/login", jwt);
   },
   data: () => ({
     drawer: false,

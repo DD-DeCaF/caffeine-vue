@@ -22,7 +22,7 @@ export default {
     jobs: []
   },
   mutations: {
-    setJobs (state, jobs: JobItem[]) {
+    setJobs(state, jobs: JobItem[]) {
       state.jobs = jobs;
     }
   },

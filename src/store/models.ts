@@ -20,7 +20,7 @@ export default {
     models: []
   },
   mutations: {
-    setModels (state, models: ModelItem[]) {
+    setModels(state, models: ModelItem[]) {
       state.models = models;
     }
   },
