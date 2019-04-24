@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Home from "./components/Home.vue";
 import Designs from "./components/Designs.vue";
 import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
+import Maps from "./components/Maps.vue";
 
 Vue.use(Router);
 
@@ -24,6 +25,11 @@ export default new Router({
       path: "/interactiveMap",
       name: "interactiveMap",
       component: InteractiveMap
+    },
+    {
+      path: "/maps",
+      name: "maps",
+      component: Maps
     }
   ]
 });
