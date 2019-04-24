@@ -1,0 +1,36 @@
+import Vue from "vue";
+import Vuex from "vuex";
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import settings from "@/settings";
+
+export interface MapItem {
+  id: number;
+  name: string;
+  model_id: number;
+  project_id: number;
+}
+
+export default {
+  namespaced: true,
+  state: {
+    maps: []
+  },
+  mutations: {
+    setMaps (state, maps: MapItem[]) {
+      state.maps = maps;
+    }
+  },
+  actions: {
+    fetchMaps({ commit }) {
+      axios
+        .get(`${settings.apis.maps}/maps`)
+        .then((response: AxiosResponse<MapItem[]>) => {
+          commit("setMaps", response.data);
+        })
+        .catch(error => {
+          commit("setFetchError", error);
+        });
+    }
+  }
+};
