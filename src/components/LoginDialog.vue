@@ -17,16 +17,15 @@
       </v-btn>
     </template>
     <v-dialog v-model="isLoginDialogVisible" width="650">
-      <v-card>
-        <div class="text-xs-center pa-4">
+      <v-card class="pa-2">
+        <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
             indeterminate
             color="primary"
             size="80"
-            v-if="isLoading"
           ></v-progress-circular>
         </div>
-        <v-container grid-list-md text-md-center v-if="!isLoading">
+        <v-container grid-list-lg text-md-center v-if="!isLoading">
           <v-layout fill-height row wrap>
             <v-flex md6>
               <v-layout fill-height column>
@@ -82,7 +81,7 @@
           </v-layout>
         </v-container>
 
-        <v-divider></v-divider>
+        <v-divider class="my-2"></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
