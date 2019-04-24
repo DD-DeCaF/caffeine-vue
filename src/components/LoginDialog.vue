@@ -33,7 +33,12 @@
                   Log in with your social account
                 </v-flex>
                 <v-flex>
-                  <v-btn color="black" block dark @click="socialLogin('github')">
+                  <v-btn
+                    color="black"
+                    block
+                    dark
+                    @click="socialLogin('github')"
+                  >
                     <v-icon>$vuetify.icons.github</v-icon>
                     Github
                   </v-btn>
@@ -41,7 +46,12 @@
                     <v-icon>$vuetify.icons.google_plus</v-icon>
                     Google
                   </v-btn>
-                  <v-btn color="blue" block dark @click="socialLogin('twitter')">
+                  <v-btn
+                    color="blue"
+                    block
+                    dark
+                    @click="socialLogin('twitter')"
+                  >
                     <v-icon>$vuetify.icons.twitter</v-icon>
                     Twitter
                   </v-btn>
@@ -224,12 +234,12 @@ export default Vue.extend({
   },
   beforeCreate() {
     firebase.initializeApp({
-      apiKey: 'AIzaSyApbLMKp7TprhjH75lpcmJs514uI11fEIo',
-      authDomain: 'dd-decaf-cfbf6.firebaseapp.com',
-      databaseURL: 'https://dd-decaf-cfbf6.firebaseio.com',
-      projectId: 'dd-decaf-cfbf6',
-      storageBucket: 'dd-decaf-cfbf6.appspot.com',
-      messagingSenderId: '972933293195',
+      apiKey: "AIzaSyApbLMKp7TprhjH75lpcmJs514uI11fEIo",
+      authDomain: "dd-decaf-cfbf6.firebaseapp.com",
+      databaseURL: "https://dd-decaf-cfbf6.firebaseio.com",
+      projectId: "dd-decaf-cfbf6",
+      storageBucket: "dd-decaf-cfbf6.appspot.com",
+      messagingSenderId: "972933293195"
     });
   }
 });
