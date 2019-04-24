@@ -111,6 +111,10 @@
     <v-snackbar color="success" v-model="isLoginSuccess" top timeout="3000">
       Welcome! You are now logged in.
     </v-snackbar>
+
+    <v-snackbar color="success" v-model="isLogoutSuccess" top timeout="3000">
+      You are now logged out.
+    </v-snackbar>
   </div>
 </template>
 
@@ -126,6 +130,7 @@ export default Vue.extend({
   name: "LoginDialog",
   data: () => ({
     isLoginSuccess: false,
+    isLogoutSuccess: false,
     isInvalidCredentials: false,
     isLoading: false,
     isLoginDialogVisible: false,
@@ -176,6 +181,7 @@ export default Vue.extend({
     },
     logout() {
       this.$store.commit("session/logout");
+      this.isLogoutSuccess = true;
     },
     loginGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
