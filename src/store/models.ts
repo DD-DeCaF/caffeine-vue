@@ -27,7 +27,7 @@ export default {
   actions: {
     fetchModels({ commit }) {
       axios
-        .get(`${settings.apis.model_storage}/models`)
+        .get(`${settings.apis.modelStorage}/models`)
         .then((response: AxiosResponse<ModelItem[]>) => {
           commit("setModels", response.data);
         })

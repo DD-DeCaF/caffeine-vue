@@ -37,7 +37,7 @@ export default {
   actions: {
     fetchDesigns({ commit }) {
       axios
-        .get(`${settings.apis.designs}/designs`)
+        .get(`${settings.apis.designStorage}/designs`)
         .then((response: AxiosResponse<DesignItem[]>) => {
           commit("setDesigns", response.data);
         })
