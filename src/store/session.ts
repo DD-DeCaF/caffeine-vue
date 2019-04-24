@@ -27,9 +27,10 @@ export default {
       localStorage.removeItem("jwt");
     },
     recover(state) {
-      if (localStorage.getItem("jwt") !== null) {
+      const token = localStorage.getItem("jwt")
+      if (token !== null) {
         state.isAuthenticated = true;
-        state.jwt = JSON.parse(localStorage.getItem("jwt"));
+        state.jwt = JSON.parse(token);
       }
     }
   },
