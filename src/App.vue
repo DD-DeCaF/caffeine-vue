@@ -144,7 +144,7 @@ export default Vue.extend({
     this.$store.commit("session/recover");
   },
   data: () => ({
-    drawer: true,
+    drawer: false,
     disabledTooltipText: "Please log in or register to use this functionality!"
   }),
   computed: {
