@@ -18,7 +18,7 @@ For more information, see [dd-decaf.eu](http://dd-decaf.eu/) or visit the platfo
 `npm install`
 
 ### Development server
-`npx vue-cli-service serve`
+`npx vue-cli-service serve --port 4200`
 
 ### Lint and fix files
 `npx vue-cli-service lint`
