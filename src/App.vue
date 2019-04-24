@@ -175,13 +175,7 @@ export default Vue.extend({
       this.$store.commit("session/login", JSON.parse(token));
     }
 
-    this.$store.dispatch("designs/fetchDesigns");
-    this.$store.dispatch("experiments/fetchExperiments");
-    this.$store.dispatch("jobs/fetchJobs");
-    this.$store.dispatch("maps/fetchMaps");
-    this.$store.dispatch("models/fetchModels");
-    this.$store.dispatch("organisms/fetchOrganisms");
-    this.$store.dispatch("projects/fetchProjects");
+    this.$store.dispatch("fetchAllData");
   },
   data: () => ({
     drawer: false,

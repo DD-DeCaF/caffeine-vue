@@ -24,5 +24,15 @@ export default new Vuex.Store({
   },
   state: {},
   mutations: {},
-  actions: {}
+  actions: {
+    fetchAllData({ dispatch }) {
+      dispatch("designs/fetchDesigns");
+      dispatch("experiments/fetchExperiments");
+      dispatch("jobs/fetchJobs");
+      dispatch("maps/fetchMaps");
+      dispatch("models/fetchModels");
+      dispatch("organisms/fetchOrganisms");
+      dispatch("projects/fetchProjects");
+    }
+  }
 });
