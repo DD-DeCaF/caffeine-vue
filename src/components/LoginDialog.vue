@@ -56,7 +56,7 @@
                   provide you with credentials
                 </v-flex>
                 <v-flex>
-                  <v-form>
+                  <v-form @keyup.native.enter="emailLogin">
                     <v-text-field
                       v-model="email.value"
                       :rules="email.rules"
