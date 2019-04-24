@@ -203,17 +203,17 @@ export default Vue.extend({
       return firebase
         .auth()
         .signInWithPopup(provider)
-        .then(result => {
+        .then((result: any) => {
           return firebase
             .auth()
-            .currentUser.getIdToken(true)
+            .currentUser!.getIdToken(true)
             .then(idToken => {
               const credentials = { uid: result.user.uid, token: idToken };
-              this.login(credentials, "firebase");
+              (this as any).login(credentials, "firebase");
             });
         })
         .catch(error => {
-          this.loginError = true;
+          this.isLoginError = true;
         });
     }
   },
