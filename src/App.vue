@@ -135,12 +135,41 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
+import axios from "axios";
+import settings from "@/settings";
 
 export default Vue.extend({
   components: {
     LoginDialog
   },
   beforeCreate: function() {
+    // Add authorization header to requests for trusted urls
+    axios.interceptors.request.use(config => {
+      // If not authenticated, ignore token logic
+      if (!this.$store.state.session.isAuthenticated) {
+        return config;
+      }
+
+      // Request is not going to a trusted url, ignore token logic
+      if (
+        !settings.trustedURLs.some(trustedURL =>
+          config.url.startsWith(trustedURL)
+        )
+      ) {
+        return config;
+      }
+
+      // The intercepted request is actually a token refresh request, ignore it
+      if (config.url === `${settings.apis.iam}/refresh`) {
+        return config;
+      }
+
+      config.headers.Authorization = `Bearer ${
+        this.$store.state.session.jwt.jwt
+      }`;
+      return config;
+    });
+
     const token = localStorage.getItem("jwt");
     if (token !== null) {
       this.$store.commit("session/login", JSON.parse(token));
