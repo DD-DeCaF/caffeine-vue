@@ -3,6 +3,9 @@ import Vuetify from "vuetify/lib";
 import "vuetify/src/stylus/app.styl";
 import colors from "vuetify/es5/util/colors";
 import MapIcon from "../assets/MapIcon.vue";
+import GoogleIcon from "../assets/GoogleIcon.vue";
+import TwitterIcon from "../assets/TwitterIcon.vue";
+import GithubIcon from "../assets/GithubIcon.vue";
 
 Vue.use(Vuetify, {
   theme: {
@@ -18,6 +21,24 @@ Vue.use(Vuetify, {
   icons: {
     interactive_map: {
       component: MapIcon,
+      props: {
+        role: "icon"
+      }
+    },
+    google_plus: {
+      component: GoogleIcon,
+      props: {
+        role: "icon"
+      }
+    },
+    twitter: {
+      component: TwitterIcon,
+      props: {
+        role: "icon"
+      }
+    },
+    github: {
+      component: GithubIcon,
       props: {
         role: "icon"
       }
