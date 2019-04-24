@@ -103,22 +103,22 @@
         color="error"
         v-model="isInvalidCredentials"
         top
-        timeout="3000"
+        :timeout="3000"
       >
         Invalid credentials, please try again.
       </v-snackbar>
 
-      <v-snackbar color="error" v-model="isLoginError" top timeout="3000">
+      <v-snackbar color="error" v-model="isLoginError" top :timeout="3000">
         There was a problem contacting the authentication server.<br />
         Please try again in a few moments.
       </v-snackbar>
     </v-dialog>
 
-    <v-snackbar color="success" v-model="isLoginSuccess" top timeout="3000">
+    <v-snackbar color="success" v-model="isLoginSuccess" top :timeout="3000">
       Welcome! You are now logged in.
     </v-snackbar>
 
-    <v-snackbar color="success" v-model="isLogoutSuccess" top timeout="3000">
+    <v-snackbar color="success" v-model="isLogoutSuccess" top :timeout="3000">
       You are now logged out.
     </v-snackbar>
   </div>
