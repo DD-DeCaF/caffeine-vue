@@ -107,6 +107,10 @@
         Please try again in a few moments.
       </v-snackbar>
     </v-dialog>
+
+    <v-snackbar color="success" v-model="isLoginSuccess" top timeout="3000">
+      Welcome! You are now logged in.
+    </v-snackbar>
   </div>
 </template>
 
@@ -121,6 +125,7 @@ import firebase from "firebase";
 export default Vue.extend({
   name: "LoginDialog",
   data: () => ({
+    isLoginSuccess: false,
     isInvalidCredentials: false,
     isLoading: false,
     isLoginDialogVisible: false,
@@ -156,6 +161,7 @@ export default Vue.extend({
         .then((response: AxiosResponse<JWT>) => {
           this.$store.commit("session/login", response.data);
           this.isLoginDialogVisible = false;
+          this.isLoginSuccess = true;
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
