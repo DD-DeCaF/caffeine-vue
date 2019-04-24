@@ -152,11 +152,6 @@ export default Vue.extend({
       rules: [(v: string) => !!v || "Enter your password"]
     }
   }),
-  computed: {
-    isAuthenticated: function() {
-      return this.$store.state.session.isAuthenticated;
-    }
-  },
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
@@ -203,6 +198,11 @@ export default Vue.extend({
             this.isLoginError = true;
           }
         });
+    }
+  },
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
     }
   }
 });
