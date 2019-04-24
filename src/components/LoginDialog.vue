@@ -142,7 +142,7 @@ export default Vue.extend({
     }
   }),
   computed: {
-    isAuthenticated() {
+    isAuthenticated: function() {
       return this.$store.state.session.isAuthenticated;
     }
   },
