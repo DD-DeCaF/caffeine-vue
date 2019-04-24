@@ -34,22 +34,13 @@
                   Log in with your social account
                 </v-flex>
                 <v-flex>
-                  <v-btn 
-                    color="black" 
-                    block 
-                    dark
-                  >
-                  <v-icon>$vuetify.icons.github</v-icon>
-                  Github
+                  <v-btn color="black" block dark>
+                    <v-icon>$vuetify.icons.github</v-icon>
+                    Github
                   </v-btn>
-                  <v-btn 
-                  color="red" 
-                  block 
-                  dark
-                  @click='loginGoogle'
-                  >
-                  <v-icon>$vuetify.icons.google_plus</v-icon>
-                  Google
+                  <v-btn color="red" block dark @click="loginGoogle">
+                    <v-icon>$vuetify.icons.google_plus</v-icon>
+                    Google
                   </v-btn>
                   <v-btn color="blue" block dark>
                     <v-icon>$vuetify.icons.twitter</v-icon>
@@ -126,7 +117,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import settings from "@/settings";
 import { JWT } from "@/store/session";
-import firebase from 'firebase';
+import firebase from "firebase";
 
 export default Vue.extend({
   name: "LoginDialog",
@@ -184,16 +175,17 @@ export default Vue.extend({
     loginGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
 
-      firebase.auth().signInWithPopup(provider).then((result) => {
-        
-      })
-      .catch(error => {
-            if (error.response && error.response.status === 401) {
+      firebase
+        .auth()
+        .signInWithPopup(provider)
+        .then(result => {})
+        .catch(error => {
+          if (error.response && error.response.status === 401) {
             this.isInvalidCredentials = true;
           } else {
             this.isLoginError = true;
           }
-      });
+        });
     }
   }
 });
