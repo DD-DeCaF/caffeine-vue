@@ -1,3 +1,6 @@
+import axios from "axios";
+import settings from "@/settings";
+
 export interface JWT {
   jwt: string;
   refresh_token: {
@@ -10,13 +13,21 @@ export default {
   namespaced: true,
   state: {
     isAuthenticated: false,
-    jwt: null
+    jwt: null,
+    refreshError: false
   },
   mutations: {
     login(state, jwt: JWT) {
       state.isAuthenticated = true;
       state.jwt = jwt;
-      localStorage.setItem("jwt", JSON.stringify(jwt));
+      localStorage.setItem("jwt", JSON.stringify(state.jwt));
+    },
+    updateToken(state, jwt: string) {
+      state.jwt.jwt = jwt;
+      localStorage.setItem("jwt", JSON.stringify(state.jwt));
+    },
+    refreshError(state, error) {
+      state.refreshError = error;
     },
     logout(state) {
       state.isAuthenticated = false;
@@ -24,5 +35,23 @@ export default {
       localStorage.removeItem("jwt");
     }
   },
-  actions: {}
+  actions: {
+    refreshToken({ commit, dispatch, state }) {
+      setTimeout(() => {
+        if (state.isAuthenticated) {
+          const params = {'refresh_token': state.jwt.refresh_token.val};
+          axios
+            .post(`${settings.apis.iam}/refresh`, params)
+            .then(response => {
+              commit("updateToken", response.data.jwt);
+            })
+            .catch(error => {
+              commit("logout");
+              commit("refreshError", error);
+            });
+        }
+        dispatch("refreshToken");
+      }, 9 * 60 * 1000);
+    }
+  }
 };

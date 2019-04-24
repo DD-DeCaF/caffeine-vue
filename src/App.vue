@@ -175,6 +175,7 @@ export default Vue.extend({
       this.$store.commit("session/login", JSON.parse(token));
     }
 
+    this.$store.dispatch("session/refreshToken");
     this.$store.dispatch("fetchAllData");
   },
   data: () => ({
