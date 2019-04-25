@@ -152,6 +152,31 @@ export default Vue.extend({
   components: {
     LoginDialog
   },
+  data: () => ({
+    drawer: false,
+    disabledTooltipText: "Please log in or register to use this functionality!"
+  }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    hasRefreshError: {
+      get() {
+        return this.$store.state.session.refreshError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("session/setRefreshError", null);
+      }
+    },
+    hasFetchDataError: {
+      get() {
+        return this.$store.state.fetchDataError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("setFetchError", null);
+      }
+    }
+  },
   beforeCreate() {
     // Add authorization header to requests for trusted urls
     axios.interceptors.request.use(config => {
@@ -187,31 +212,6 @@ export default Vue.extend({
 
     this.$store.dispatch("session/refreshToken");
     this.$store.dispatch("fetchAllData");
-  },
-  data: () => ({
-    drawer: false,
-    disabledTooltipText: "Please log in or register to use this functionality!"
-  }),
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
-    hasRefreshError: {
-      get() {
-        return this.$store.state.session.refreshError !== null;
-      },
-      set(newValue) {
-        this.$store.commit("session/setRefreshError", null);
-      }
-    },
-    hasFetchDataError: {
-      get() {
-        return this.$store.state.fetchDataError !== null;
-      },
-      set(newValue) {
-        this.$store.commit("setFetchError", null);
-      }
-    }
   }
 });
 </script>
