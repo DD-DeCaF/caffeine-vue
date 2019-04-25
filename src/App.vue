@@ -136,8 +136,8 @@
       </v-snackbar>
 
       <v-snackbar color="error" v-model="hasPostDataError" :timeout="6000">
-        Sorry, we were unable to complete this operation. Is the server offline or 
-        are you not logged in?
+        Sorry, we were unable to complete this operation. Is the server offline
+        or are you not logged in?
       </v-snackbar>
 
       <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
