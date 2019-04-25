@@ -152,7 +152,7 @@ export default Vue.extend({
   components: {
     LoginDialog
   },
-  beforeCreate: function() {
+  beforeCreate() {
     // Add authorization header to requests for trusted urls
     axios.interceptors.request.use(config => {
       // If not authenticated, ignore token logic
