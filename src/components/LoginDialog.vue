@@ -166,9 +166,7 @@ export default Vue.extend({
       github: new firebase.auth.GithubAuthProvider(),
       google: new firebase.auth.GoogleAuthProvider(),
       twitter: new firebase.auth.TwitterAuthProvider()
-    },
-    // This promise will be set if there is a session token refresh request in progress
-    refreshPromise: null
+    }
   }),
   methods: {
     emailLogin() {

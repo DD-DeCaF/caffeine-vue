@@ -145,8 +145,6 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
-import axios from "axios";
-import settings from "@/settings";
 
 export default Vue.extend({
   components: {
@@ -178,39 +176,21 @@ export default Vue.extend({
     }
   },
   beforeCreate() {
-    // Add authorization header to requests for trusted urls
-    axios.interceptors.request.use(config => {
-      // If not authenticated, ignore token logic
-      if (!this.$store.state.session.isAuthenticated) {
-        return config;
-      }
+    // Configure the HTTP interceptors before anything else, to make sure HTTP
+    // requests behave as expected. (See the interceptors for details)
+    this.$store.dispatch("session/interceptRequests");
 
-      // Request is not going to a trusted url, ignore token logic
-      if (
-        !settings.trustedURLs.some(trustedURL =>
-          config.url!.startsWith(trustedURL)
-        )
-      ) {
-        return config;
-      }
-
-      // The intercepted request is actually a token refresh request, ignore it
-      if (config.url === `${settings.apis.iam}/refresh`) {
-        return config;
-      }
-
-      config.headers.Authorization = `Bearer ${
-        this.$store.state.session.jwt.jwt
-      }`;
-      return config;
-    });
-
+    // Restore potential existing session from local storage.
     const token = localStorage.getItem("jwt");
     if (token !== null) {
       this.$store.commit("session/login", JSON.parse(token));
     }
 
-    this.$store.dispatch("session/refreshToken");
+    // Regularly refresh the authorization token.
+    this.$store.dispatch("session/refreshTokenLoop");
+
+    // Now fetch the user data, as session/token logic is ready and will ensure
+    // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
   }
 });
