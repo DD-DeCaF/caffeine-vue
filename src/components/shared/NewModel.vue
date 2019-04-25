@@ -88,6 +88,17 @@
                   <NewProject />
                 </template>
                 </v-autocomplete>
+                <v-text-field
+                  required
+                  v-model="modelJSON.value"
+                  :rules="modelJSON.rules"
+                  name="name"
+                  label="JSON Model"
+                  type="file"
+                  placeholder="e.g. My Favourite Model"
+                  accept=".json"
+                >
+                </v-text-field>
                 <v-autocomplete
                   return-object
                   required
@@ -177,6 +188,11 @@ export default Vue.extend({
       // Add ID validation here, check if it exists in the list of all projects
       rules: [(v: object) => !!v || "A project is required."]
     },
+    modelJSON: {
+      value: null,
+      // Add ID validation here, check if it exists in the list of all projects
+      rules: [(v: object) => !!v || "A model JSON is required."]
+    },
     mapItem: null
   }),
   methods: {
@@ -200,6 +216,9 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
+    },
+    uploadFile() {
+      console.log('This was uploaded.')
     }
   },
   computed: {
