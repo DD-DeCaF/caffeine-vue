@@ -18,6 +18,9 @@ export default {
   mutations: {
     setOrganisms(state, organisms: OrganismItem[]) {
       state.organisms = organisms;
+    },
+    addOrganism(state, organism: OrganismItem) {
+      state.organisms.push(organism);
     }
   },
   actions: {

@@ -2,10 +2,10 @@
   <div>
     <v-btn
       color="secondary"
-      depressed
       @click.native.stop="isOrganismCreationDialogVisible = true"
     >
-      New Organism
+    <v-icon>add</v-icon>
+    New organism
     </v-btn>
     <v-dialog v-model="isOrganismCreationDialogVisible" width="650">
       <v-card class="pa-2">
@@ -37,17 +37,19 @@
                   placeholder="e.g. My Cool Organism"
                 ></v-text-field>
                 <v-select
+                  return-object
                   required
                   item-text="name"
-                  v-model="projectName.value"
+                  v-model="projectItemValidation.projectItem"
                   :items="availableProjects"
-                  :rules="projectName.rules"
+                  :rules="projectItemValidation.rules"
                   name="project"
                   label="Project"
                   type="text"
                 >
                   <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
+                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <NewProject />
                 </template>
                 </v-select>
@@ -106,22 +108,26 @@ export default Vue.extend({
       value: null,
       rules: [(v: string) => !!v || "A name is required."]
     },
-    projectName: {
-      value: null,
-      rules: [(v: string) => !!v || "A project is required."]
+    projectItemValidation: {
+      projectItem: {
+        name: null,
+        id: null
+      },
+      // Add ID validation here, check if it exists in the list of all projects
+      rules: [(v: object) => !!v || "A project is required."]
     }
   }),
   methods: {
     createOrganism() {
       this.isLoading = true;
+      const payload = { 
+        name: this.organismName.value,
+        project_id: this.projectItemValidation.projectItem.id,
+        }
       axios
-        .post(`${settings.apis.iam}/organisms`, { name: this.organismName.value })
+        .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
-          const organismItem = Object.assign(
-            { name: this.organismName.value },
-            response.data
-          );
-          this.$store.commit("organisms/addOrganism", organismItem);
+          this.$store.commit("organisms/addOrganism", response.data);
           this.isOrganismCreationDialogVisible = false;
           this.isOrganismCreationSuccess = true;
         })
