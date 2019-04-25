@@ -37,7 +37,7 @@
                   type="text"
                   placeholder="e.g. My Favourite Model"
                 ></v-text-field>
-                <v-select
+                <v-autocomplete
                   return-object
                   required
                   item-text="name"
@@ -53,8 +53,8 @@
                   <!-- Work out why clicking on the organism creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <NewOrganism />
                 </template>
-                </v-select>
-                <v-select
+                </v-autocomplete>
+                <v-autocomplete
                   return-object
                   required
                   item-text="name"
@@ -70,8 +70,8 @@
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <NewProject />
                 </template>
-                </v-select>
-                <v-select
+                </v-autocomplete>
+                <v-autocomplete
                   return-object
                   item-text="name"
                   v-model="mapItem"
@@ -87,7 +87,7 @@
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <NewProject />
                 </template>
-                </v-select>
+                </v-autocomplete>
                 <v-autocomplete
                   return-object
                   required

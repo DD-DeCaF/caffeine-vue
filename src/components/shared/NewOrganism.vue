@@ -36,7 +36,7 @@
                   type="text"
                   placeholder="e.g. My Cool Organism"
                 ></v-text-field>
-                <v-select
+                <v-autocomplete
                   return-object
                   required
                   item-text="name"
@@ -52,7 +52,7 @@
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <NewProject />
                 </template>
-                </v-select>
+                </v-autocomplete>
               </v-form>
             </v-flex>
           </v-layout>
