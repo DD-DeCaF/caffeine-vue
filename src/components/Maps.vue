@@ -27,6 +27,16 @@
           </td>
         </template>
         </v-data-table>
+        <v-btn
+          fixed
+          fab
+          bottom
+          right
+          large
+          color='secondary'
+        >
+          <v-icon>add</v-icon>
+        </v-btn> 
       </v-flex>
     </v-layout>
   </v-container>
