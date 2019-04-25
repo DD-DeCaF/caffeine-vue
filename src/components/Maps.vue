@@ -8,6 +8,7 @@
           :headers="headers"
           :items="maps"
           class="elevation-8"
+          :pagination.sync= "pagination"
         >
           <template v-slot:items="props">
           <td>{{ props.item.name }}</td>
@@ -46,6 +47,9 @@ export default Vue.extend({
           { text: 'Model', value: 'model' },
           { text: 'Actions', value: 'name', sortable: false }
         ],
+    pagination: {
+      rowsPerPage: 10
+    },
   }),
   methods: {},
   computed: {
