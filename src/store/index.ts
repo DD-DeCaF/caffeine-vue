@@ -23,11 +23,15 @@ export default new Vuex.Store({
     projects
   },
   state: {
-    fetchDataError: null
+    fetchDataError: null,
+    postDataError: null
   },
   mutations: {
     setFetchError(state, error) {
       state.fetchDataError = error;
+    },
+    setPostError(state, error) {
+      state.postDataError = error;
     }
   },
   actions: {

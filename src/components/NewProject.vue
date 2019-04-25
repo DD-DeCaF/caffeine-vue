@@ -90,7 +90,7 @@ export default Vue.extend({
           this.isProjectCreationSuccess = true;
         })
         .catch(error => {
-          // add global post error here
+          this.$store.commit("setFetchError", error);
         })
         .then(() => {
           this.isLoading = false;
