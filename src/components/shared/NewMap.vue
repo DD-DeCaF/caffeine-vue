@@ -2,12 +2,12 @@
   <div>
     <v-btn
       color="secondary"
-      @click.native.stop="isModelCreationDialogVisible = true"
+      @click.native.stop="isMapCreationDialogVisible = true"
     >
     <v-icon>add</v-icon>
-    New model
+    New map
     </v-btn>
-    <v-dialog v-model="isModelCreationDialogVisible" width="650">
+    <v-dialog v-model="isMapCreationDialogVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -19,41 +19,23 @@
         <v-container grid-list-lg text-md-left v-if="!isLoading">
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Add a new model</h3>
-              <p>We recommend that you visit <a href="https://memote.io" target="_blank">memote.io</a> to validate your model.</p>
+              <h3>Add a new map</h3>
             </v-flex>
             <v-flex>
               <v-form
                 ref="form"
                 v-model="valid"
-                @keyup.native.enter="createModel"
+                @keyup.native.enter="createMap"
               >
                 <v-text-field
                   required
-                  v-model="modelName.value"
-                  :rules="modelName.rules"
+                  v-model="mapName.value"
+                  :rules="mapName.rules"
                   name="name"
                   label="Name"
                   type="text"
-                  placeholder="e.g. My Favourite Model"
+                  placeholder="e.g. My Favourite Map"
                 ></v-text-field>
-                <v-autocomplete
-                  return-object
-                  required
-                  item-text="name"
-                  v-model="organismItemValidation.projectItem"
-                  :items="availableOrganisms"
-                  :rules="organismItemValidation.rules"
-                  name="organism"
-                  label="Organism"
-                  type="text"
-                >
-                  <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the organism creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewOrganism />
-                </template>
-                </v-autocomplete>
                 <v-autocomplete
                   return-object
                   required
@@ -72,46 +54,33 @@
                 </template>
                 </v-autocomplete>
                 <v-autocomplete
+                  required
                   return-object
                   item-text="name"
-                  v-model="mapItem"
-                  :items="availableMaps"
-                  hint="The default map displayed on the Interactive Map, optional"
+                  v-model="modelItem"
+                  :items="availableModels"
                   persistent-hint
                   name="map"
-                  label="Preferred Map"
+                  label="Model"
                   type="text"
                 >
-                <!-- AVOID RECURSION ERROR?! -->
-                  <!-- <template v-slot:append-item>
+                  <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
-                  <NewMap />
-                </template> -->
+                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
+                  <NewModel />
+                </template>
                 </v-autocomplete>
                 <v-text-field
                   required
-                  v-model="modelJSON.value"
-                  :rules="modelJSON.rules"
+                  v-model="mapJSON.value"
+                  :rules="mapJSON.rules"
                   name="name"
-                  label="JSON Model"
+                  label="JSON Map"
                   type="file"
-                  placeholder="e.g. My Favourite Model"
+                  placeholder="e.g. My Favourite Map"
                   accept=".json"
                 >
                 </v-text-field>
-                <v-autocomplete
-                  return-object
-                  required
-                  item-text="name"
-                  v-model="reactionIdentifier"
-                  :items="availableReactions"
-                  hint="The reaction identifier of this model's default biomass reaction"
-                  persistent-hint
-                  name="map"
-                  label="Default Biomass Reaction"
-                  type="text"
-                >
-                </v-autocomplete>
               </v-form>
             </v-flex>
           </v-layout>
@@ -124,14 +93,14 @@
           <v-btn
             color="secondary"
             flat
-            @click="isModelCreationDialogVisible = false"
+            @click="isMapCreationDialogVisible = false"
             :disabled="isLoading"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
-            @click="createModel"
+            @click="createMap"
             :disabled="isLoading || !valid"
           >
             Create
@@ -141,11 +110,11 @@
     </v-dialog>
     <v-snackbar
       color="success"
-      v-model="isModelCreationSuccess"
+      v-model="isMapCreationSuccess"
       bottom
       :timeout="3000"
     >
-      {{ modelName.value }} successfully created.
+      {{ mapName.value }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -157,28 +126,15 @@ import { AxiosResponse } from "axios";
 import settings from "@/settings";
 
 export default Vue.extend({
-  name: "NewModel",
+  name: "NewMap",
   data: () => ({
     valid: true,
     isLoading: false,
-    isModelCreationDialogVisible: false,
-    isModelCreationSuccess: false,
-    reactionIdentifier: {
-      value: null,
-      // Should be checked that it is indeed in the model.
-      rules: [(v: string) => !!v || "A name is required."]
-    },
-    modelName: {
+    isMapCreationDialogVisible: false,
+    isMapCreationSuccess: false,
+    mapName: {
       value: null,
       rules: [(v: string) => !!v || "A name is required."]
-    },
-    organismItemValidation: {
-      organismItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "An organism is required."]
     },
     projectItemValidation: {
       projectItem: {
@@ -188,27 +144,30 @@ export default Vue.extend({
       // Add ID validation here, check if it exists in the list of all projects
       rules: [(v: object) => !!v || "A project is required."]
     },
-    modelJSON: {
+    mapJSON: {
       value: null,
       // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A model JSON is required."]
+      rules: [(v: object) => !!v || "A map JSON is required."]
     },
-    mapItem: null
+    modelItem: {
+      value: null,
+      rules: [(v: string) => !!v || "A model is required."]
+    },
   }),
   methods: {
-    createModel() {
+    createMap() {
       this.isLoading = true;
       const payload = { 
-        name: this.modelName.value,
+        name: this.mapName.value,
         organism_id: this.organismItemValidation.organismItem.id,
         project_id: this.projectItemValidation.projectItem.id,
         }
       axios
-        .post(`${settings.apis.modelStorage}/models`, payload)
+        .post(`${settings.apis.mapStorage}/maps`, payload)
         .then((response: AxiosResponse) => {
-          this.$store.commit("models/addModel", response.data);
-          this.isModelCreationDialogVisible = false;
-          this.isModelCreationSuccess = true;
+          this.$store.commit("maps/addMap", response.data);
+          this.isMapCreationDialogVisible = false;
+          this.isMapCreationSuccess = true;
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
@@ -225,19 +184,13 @@ export default Vue.extend({
     availableProjects() {
       return this.$store.state.projects.projects
     },
-    availableOrganisms() {
-      return this.$store.state.organisms.organisms
-    },
-    availableMaps() {
-      return this.$store.state.maps.maps
-    },
-    availableReactions() {
-      return ["Biomass1", "Biomass2"]
+    availableModels() {
+      return this.$store.state.models.models
     }
   },
   watch: {
-    // Reset the model creation form when the creation dialog is closed.
-    isModelCreationDialogVisible() {
+    // Reset the map creation form when the creation dialog is closed.
+    isMapCreationDialogVisible() {
       this.$refs.form.reset();
     }
   }
