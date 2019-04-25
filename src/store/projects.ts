@@ -15,6 +15,9 @@ export default {
   mutations: {
     setProjects(state, projects: ProjectItem[]) {
       state.projects = projects;
+    },
+    addProject(state, project: ProjectItem) {
+      state.projects.push(project);
     }
   },
   actions: {

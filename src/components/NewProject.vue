@@ -25,8 +25,8 @@
                <v-form @keyup.native.enter="createProject">
                     <v-text-field
                       required
-                      v-model="project_name.value"
-                      :rules="project_name.rules"
+                      v-model="projectName.value"
+                      :rules="projectName.rules"
                       name="name"
                       label="Name"
                       type="text"
@@ -73,7 +73,7 @@ export default Vue.extend({
       isLoading: false,
       isProjectCreationDialogVisible: false,
       isProjectCreationSuccess: false,
-      project_name: {
+      projectName: {
         value: null,
         rules: [(v: string) => !!v || "A name is required."]
     },
@@ -82,14 +82,15 @@ export default Vue.extend({
     createProject() {
       this.isLoading = true;
       axios
-        .post(`${settings.apis.iam}/projects/`, { name: this.project_name.value})
+        .post(`${settings.apis.iam}/projects`, { name: this.projectName.value})
         .then((response: AxiosResponse) => {
-          // this.$store.commit("session/login", response.data);
+          const projectItem = Object.assign({ name: this.projectName.value}, response);
+          this.$store.commit("projects/addProject", projectItem);
           this.isProjectCreationDialogVisible = false;
           this.isProjectCreationSuccess = true;
-          // this.$store.dispatch("fetchAllData");
         })
         .catch(error => {
+          // add global post error here
         })
         .then(() => {
           this.isLoading = false;
