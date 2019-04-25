@@ -163,7 +163,7 @@ export default Vue.extend({
       // Request is not going to a trusted url, ignore token logic
       if (
         !settings.trustedURLs.some(trustedURL =>
-          config.url.startsWith(trustedURL)
+          config.url!.startsWith(trustedURL)
         )
       ) {
         return config;
