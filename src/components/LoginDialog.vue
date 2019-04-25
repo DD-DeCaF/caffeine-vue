@@ -118,7 +118,7 @@
         Invalid credentials, please try again.
       </v-snackbar>
 
-      <v-snackbar color="error" v-model="isLoginError" top :timeout="3000">
+      <v-snackbar color="error" v-model="hasLoginError" top :timeout="3000">
         There was a problem contacting the authentication server.<br />
         Please try again in a few moments.
       </v-snackbar>
@@ -151,7 +151,7 @@ export default Vue.extend({
     isInvalidCredentials: false,
     isLoading: false,
     isLoginDialogVisible: false,
-    isLoginError: false,
+    hasLoginError: false,
     email: {
       value: null,
       rules: [
@@ -192,7 +192,7 @@ export default Vue.extend({
           if (error.response && error.response.status === 401) {
             this.isInvalidCredentials = true;
           } else {
-            this.isLoginError = true;
+            this.hasLoginError = true;
           }
         })
         .then(() => {
@@ -225,7 +225,7 @@ export default Vue.extend({
             });
         })
         .catch(error => {
-          this.isLoginError = true;
+          this.hasLoginError = true;
         });
     }
   },
