@@ -39,7 +39,7 @@ export default {
     refreshToken({ commit, dispatch, state }) {
       setTimeout(() => {
         if (state.isAuthenticated) {
-          const params = {'refresh_token': state.jwt.refresh_token.val};
+          const params = { refresh_token: state.jwt.refresh_token.val };
           axios
             .post(`${settings.apis.iam}/refresh`, params)
             .then(response => {
