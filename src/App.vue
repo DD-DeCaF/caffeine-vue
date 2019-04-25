@@ -7,6 +7,7 @@
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
+        <NewProject />
         <LoginDialog />
       </v-toolbar>
 

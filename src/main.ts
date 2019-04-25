@@ -5,8 +5,11 @@ import router from "./router";
 import store from "./store/index";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
+import NewProject from "@/components/NewProject.vue";
 
 Vue.config.productionTip = false;
+
+Vue.component("NewProject", NewProject);
 
 new Vue({
   router,

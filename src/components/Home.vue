@@ -3,7 +3,6 @@
     <v-layout justify-center>
       <v-flex md6>
         <h1 id="getting-started">Getting started</h1>
-
         <ul>
           <li><a href="#login-optional">Login (optional)</a></li>
           <li>
