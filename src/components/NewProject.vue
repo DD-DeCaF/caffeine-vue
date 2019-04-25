@@ -55,8 +55,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar color="success" v-model="isProjectCreationSuccess" top :timeout="3000">
-      Project XYZ successfully created.
+    <v-snackbar color="success" v-model="isProjectCreationSuccess" bottom :timeout="3000">
+      {{ projectName.value }} successfully created.
     </v-snackbar>
   </div>
 </template>
