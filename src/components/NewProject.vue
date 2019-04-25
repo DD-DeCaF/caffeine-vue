@@ -22,7 +22,10 @@
               <h3> Add new project </h3>
             </v-flex>
             <v-flex>
-               <v-form @keyup.native.enter="createProject">
+               <v-form 
+                ref="form"
+                v-model="valid"
+                @keyup.native.enter="createProject">
                     <v-text-field
                       required
                       v-model="projectName.value"
@@ -32,7 +35,7 @@
                       type="text"
                       placeholder="e.g. My Cool Project"
                     ></v-text-field>
-                  </v-form>
+                </v-form>
             </v-flex>
           </v-layout>
         </v-container>
@@ -49,9 +52,13 @@
           >
             Cancel
           </v-btn>
-          <v-btn color="primary" @click="createProject" :disabled="isLoading"
-            >Create</v-btn
+          <v-btn 
+            color="primary" 
+            @click="createProject" 
+            :disabled="isLoading || !valid"
           >
+          Create
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -70,6 +77,7 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "NewProject",
   data: () => ({
+      valid: true,
       isLoading: false,
       isProjectCreationDialogVisible: false,
       isProjectCreationSuccess: false,
@@ -84,19 +92,25 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.iam}/projects`, { name: this.projectName.value})
         .then((response: AxiosResponse) => {
-          const projectItem = Object.assign({ name: this.projectName.value}, response);
+          const projectItem = Object.assign({ name: this.projectName.value}, response.data);
           this.$store.commit("projects/addProject", projectItem);
           this.isProjectCreationDialogVisible = false;
           this.isProjectCreationSuccess = true;
         })
         .catch(error => {
-          this.$store.commit("setFetchError", error);
+          this.$store.commit("setPostError", error);
         })
         .then(() => {
           this.isLoading = false;
         });
     }
   },
-  computed: {}
+  computed: {},
+  watch: {
+    // Reset the project creation form when the creation dialog is closed.
+    isProjectCreationDialogVisible() {
+      this.$refs.form.reset()
+    }
+  }
 });
 </script>
