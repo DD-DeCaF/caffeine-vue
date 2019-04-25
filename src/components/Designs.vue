@@ -26,7 +26,7 @@
               ></v-checkbox>
             </td>
             <td>{{ props.item.name }}</td>
-            <td>{{ props.item.model_id }}</td>
+            <td>{{ organism(model(props.item.model_id).organism_id).name }}</td>
             <td>{{ model(props.item.model_id).name }}</td>
             <td>{{ props.item.design.reaction_knockins.length }}</td>
             <td>{{ props.item.design.reaction_knockouts.length }}</td>
@@ -66,7 +66,8 @@ export default Vue.extend({
       return this.$store.state.designs.designs;
     },
     ...mapGetters({
-      model: "models/getModelById"
+      model: "models/getModelById",
+      organism: "organisms/getOrganismById"
     })
   }
 });

@@ -17,11 +17,6 @@ export default {
   state: {
     models: []
   },
-  getters: {
-    getModelById: (state) => (id: number) => {
-      return state.models.find(model => model.id === id);
-    }
-  },
   mutations: {
     setModels(state, models: ModelItem[]) {
       state.models = models;
@@ -37,6 +32,11 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+    }
+  },
+  getters: {
+    getModelById: (state) => (id: number) => {
+      return state.models.find(model => model.id === id);
     }
   }
 };
