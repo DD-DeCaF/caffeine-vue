@@ -2,12 +2,12 @@
   <div>
     <v-btn
       color="secondary"
-      @click.native.stop="isProjectCreationDialogVisible = true"
+      depressed
+      @click.native.stop="isOrganismCreationDialogVisible = true"
     >
-    <v-icon>add</v-icon>
-    New project
+      New Organism
     </v-btn>
-    <v-dialog v-model="isProjectCreationDialogVisible" width="650">
+    <v-dialog v-model="isOrganismCreationDialogVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -19,23 +19,38 @@
         <v-container grid-list-lg text-md-left v-if="!isLoading">
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Add a new project</h3>
+              <h3>Add a new organism</h3>
             </v-flex>
             <v-flex>
               <v-form
                 ref="form"
                 v-model="valid"
-                @keyup.native.enter="createProject"
+                @keyup.native.enter="createOrganism"
               >
                 <v-text-field
                   required
-                  v-model="projectName.value"
-                  :rules="projectName.rules"
+                  v-model="organismName.value"
+                  :rules="organismName.rules"
                   name="name"
                   label="Name"
                   type="text"
-                  placeholder="e.g. My Cool Project"
+                  placeholder="e.g. My Cool Organism"
                 ></v-text-field>
+                <v-select
+                  required
+                  item-text="name"
+                  v-model="projectName.value"
+                  :items="availableProjects"
+                  :rules="projectName.rules"
+                  name="project"
+                  label="Project"
+                  type="text"
+                >
+                  <template v-slot:append-item>
+                  <v-divider class="my-2"></v-divider>
+                  <NewProject />
+                </template>
+                </v-select>
               </v-form>
             </v-flex>
           </v-layout>
@@ -48,14 +63,14 @@
           <v-btn
             color="secondary"
             flat
-            @click="isProjectCreationDialogVisible = false"
+            @click="isOrganismCreationDialogVisible = false"
             :disabled="isLoading"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
-            @click="createProject"
+            @click="createOrganism"
             :disabled="isLoading || !valid"
           >
             Create
@@ -65,11 +80,11 @@
     </v-dialog>
     <v-snackbar
       color="success"
-      v-model="isProjectCreationSuccess"
+      v-model="isOrganismCreationSuccess"
       bottom
       :timeout="3000"
     >
-      {{ projectName.value }} successfully created.
+      {{ organismName.value }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -81,30 +96,34 @@ import { AxiosResponse } from "axios";
 import settings from "@/settings";
 
 export default Vue.extend({
-  name: "NewProject",
+  name: "NewOrganism",
   data: () => ({
     valid: true,
     isLoading: false,
-    isProjectCreationDialogVisible: false,
-    isProjectCreationSuccess: false,
-    projectName: {
+    isOrganismCreationDialogVisible: false,
+    isOrganismCreationSuccess: false,
+    organismName: {
       value: null,
       rules: [(v: string) => !!v || "A name is required."]
+    },
+    projectName: {
+      value: null,
+      rules: [(v: string) => !!v || "A project is required."]
     }
   }),
   methods: {
-    createProject() {
+    createOrganism() {
       this.isLoading = true;
       axios
-        .post(`${settings.apis.iam}/projects`, { name: this.projectName.value })
+        .post(`${settings.apis.iam}/organisms`, { name: this.organismName.value })
         .then((response: AxiosResponse) => {
-          const projectItem = Object.assign(
-            { name: this.projectName.value },
+          const organismItem = Object.assign(
+            { name: this.organismName.value },
             response.data
           );
-          this.$store.commit("projects/addProject", projectItem);
-          this.isProjectCreationDialogVisible = false;
-          this.isProjectCreationSuccess = true;
+          this.$store.commit("organisms/addOrganism", organismItem);
+          this.isOrganismCreationDialogVisible = false;
+          this.isOrganismCreationSuccess = true;
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
@@ -114,10 +133,14 @@ export default Vue.extend({
         });
     }
   },
-  computed: {},
+  computed: {
+    availableProjects() {
+      return this.$store.state.projects.projects
+    }
+  },
   watch: {
-    // Reset the project creation form when the creation dialog is closed.
-    isProjectCreationDialogVisible() {
+    // Reset the organism creation form when the creation dialog is closed.
+    isOrganismCreationDialogVisible() {
       this.$refs.form.reset();
     }
   }
