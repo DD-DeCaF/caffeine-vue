@@ -13,16 +13,28 @@
           <td>{{ props.item.name }}</td>
           <td>{{ props.item.model_id }}</td>
           <td>
+            <v-tooltip bottom :disabled="isAuthenticated">
+            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
             <v-icon
+              slot="activator"
               @click="editItem(props.item)"
+              :disabled="!isAuthenticated"
+              v-bind:style="styleObject"
             >
               edit
             </v-icon>
+            </v-tooltip>
+            <v-tooltip bottom :disabled="isAuthenticated">
+            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
             <v-icon
+              slot="activator"
               @click="deleteItem(props.item)"
+              :disabled="!isAuthenticated"
+              v-bind:style="styleObject"
             >
               delete
             </v-icon>
+            </v-tooltip>
           </td>
         </template>
         </v-data-table>
