@@ -97,7 +97,7 @@
                 <v-list-tile-title>Design</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ disabledTooltipText }} </span>
+            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -114,7 +114,7 @@
                 <v-list-tile-title>Jobs</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ disabledTooltipText }} </span>
+            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -131,7 +131,7 @@
                 <v-list-tile-title>Designs</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ disabledTooltipText }} </span>
+            <span> {{ $store.state.commonTooltipMessages.unauthorized }}</span>
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -148,7 +148,7 @@
                 <v-list-tile-title>Projects</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ disabledTooltipText }} </span>
+            <span> {{$store.state.commonTooltipMessages.unauthorized }}</span>
           </v-tooltip>
 
           <v-list-tile to="/maps">
@@ -210,7 +210,6 @@ export default Vue.extend({
   },
   data: () => ({
     drawer: false,
-    disabledTooltipText: "Please log in or register to use this functionality!"
   }),
   computed: {
     isAuthenticated() {
