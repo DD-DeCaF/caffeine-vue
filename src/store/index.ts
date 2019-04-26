@@ -36,6 +36,9 @@ export default new Vuex.Store({
     },
     loadingMessages: {
       default: "Loading. Please wait."
+    },
+    commonTooltipMessages: {
+      unauthorized: "Please log in or register to use this functionality!"
     }
   },
   mutations: {
