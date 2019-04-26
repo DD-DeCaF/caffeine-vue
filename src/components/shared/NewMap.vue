@@ -43,7 +43,13 @@
                   <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewProject />
+                  <v-btn
+                    color="secondary"
+                    @click="$store.dispatch('toggleDialog', 'project');"
+                  >
+                    <v-icon>add</v-icon>
+                    New project
+                  </v-btn>
                 </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -60,7 +66,13 @@
                   <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewModel />
+                  <v-btn
+                    color="secondary"
+                    @click="$store.dispatch('toggleDialog', 'model');"
+                  >
+                    <v-icon>add</v-icon>
+                    New Model
+                  </v-btn>
                 </template>
                 </v-autocomplete>
                 <v-text-field
@@ -121,10 +133,6 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "NewMap",
   props: ['isMapCreationDialogVisible'],
-  model: {
-    prop: 'isMapCreationDialogVisible',
-    event: 'close-dialog'
-  },
   data: () => ({
     valid: true,
     isLoading: false,
@@ -189,8 +197,10 @@ export default Vue.extend({
         return this.isMapCreationDialogVisible;
       },
       set: function(value) {
-        this.$emit('close-dialog', value);
-        this.$refs.form.reset();
+       if (this.$refs.form !== undefined) {
+          this.$refs.form!.reset();
+        }
+        this.$store.dispatch('toggleDialog', 'map');
       }
     }
   },

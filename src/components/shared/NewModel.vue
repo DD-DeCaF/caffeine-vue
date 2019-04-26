@@ -43,8 +43,13 @@
                 >
                   <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the organism creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewOrganism />
+                  <v-btn
+                    color="secondary"
+                    @click="$store.dispatch('toggleDialog', 'organism');"
+                  >
+                    <v-icon>add</v-icon>
+                    New Organism
+                  </v-btn>
                 </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -61,7 +66,13 @@
                   <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewProject />
+                  <v-btn
+                    color="secondary"
+                    @click="$store.dispatch('toggleDialog', 'project');"
+                  >
+                    <v-icon>add</v-icon>
+                    New project
+                  </v-btn>
                 </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -75,11 +86,16 @@
                   label="Preferred Map"
                   type="text"
                 >
-                <!-- AVOID RECURSION ERROR?! -->
-                  <!-- <template v-slot:append-item>
+                  <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
-                  <NewMap />
-                </template> -->
+                                   <v-btn
+                    color="secondary"
+                    @click="$store.dispatch('toggleDialog', 'map');"
+                  >
+                    <v-icon>add</v-icon>
+                    New Map
+                  </v-btn>
+                </template>
                 </v-autocomplete>
                 <!-- <FileUpload v-model="filename" @formData="formData"> This is working?! </FileUpload>
                 <v-btn @click.native="uploadFiles"> emt </v-btn> -->
@@ -154,10 +170,6 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "NewModel",
   props: ['isModelCreationDialogVisible'],
-  model: {
-    prop: 'isModelCreationDialogVisible',
-    event: 'close-dialog'
-  },
   data: () => ({
     valid: true,
     isLoading: false,
@@ -242,8 +254,10 @@ export default Vue.extend({
         return this.isModelCreationDialogVisible;
       },
       set: function(value) {
-        this.$emit('close-dialog', value);
-        this.$refs.form.reset();
+        if (this.$refs.form !== undefined) {
+          this.$refs.form!.reset();
+        }
+        this.$store.dispatch('toggleDialog', 'model');
       }
     }
   },

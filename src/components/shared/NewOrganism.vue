@@ -21,6 +21,7 @@
                 @keyup.native.enter="createOrganism"
               >
                 <v-text-field
+                  autofocus
                   required
                   v-model="organismName.value"
                   :rules="organismName.rules"
@@ -45,14 +46,11 @@
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                   <v-btn
                     color="secondary"
-                    @click="isProjectCreationDialogVisible = true"
+                    @click="$store.dispatch('toggleDialog', 'project');"
                   >
                     <v-icon>add</v-icon>
                     New project
                   </v-btn>
-                  <NewProject 
-                    v-model="isProjectCreationDialogVisible"
-                  />
                 </template>
                 </v-autocomplete>
               </v-form>
@@ -102,10 +100,6 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "NewOrganism",
   props: ['isOrganismCreationDialogVisible'],
-  model: {
-    prop: 'isOrganismCreationDialogVisible',
-    event: 'close-dialog'
-  },
   data: () => ({
     valid: true,
     isLoading: false,
@@ -155,8 +149,10 @@ export default Vue.extend({
         return this.isOrganismCreationDialogVisible;
       },
       set: function(value) {
-        this.$emit('close-dialog', value);
-        this.$refs.form.reset();
+        if (this.$refs.form !== undefined) {
+          this.$refs.form!.reset();
+        }
+        this.$store.dispatch('toggleDialog', 'organism');
       }
     }
   },

@@ -24,14 +24,24 @@ export default new Vuex.Store({
   },
   state: {
     fetchDataError: null,
-    postDataError: null
+    postDataError: null,
+    isDialogVisible: {
+      model: false,
+      map: false,
+      organism: false,
+      project: false
+    }
   },
   mutations: {
     setFetchError(state, error) {
       state.fetchDataError = error;
     },
     setPostError(state, error) {
+      console.log(error)
       state.postDataError = error;
+    },
+    toggleDialog(state, dialog) {
+      state.isDialogVisible[dialog] = !state.isDialogVisible[dialog]
     }
   },
   actions: {
@@ -43,6 +53,9 @@ export default new Vuex.Store({
       dispatch("models/fetchModels");
       dispatch("organisms/fetchOrganisms");
       dispatch("projects/fetchProjects");
-    }
+    },
+    toggleDialog({ commit }, dialog) {
+      commit("toggleDialog", dialog);
+    },
   }
 });

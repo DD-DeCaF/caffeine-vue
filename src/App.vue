@@ -11,37 +11,38 @@
           All of this and the attached logic ought to be moved to the appropiate sections later
         <v-btn
           color="secondary"
-          @click="isMapCreationDialogVisible = true"
+          @click="$store.dispatch('toggleDialog', 'map')"
         >
           <v-icon>add</v-icon>
           New Map
         </v-btn>
-        <NewMap v-model="isMapCreationDialogVisible"/>
+        <NewMap :isMapCreationDialogVisible="$store.state.isDialogVisible.map" />
         <v-btn
           color="secondary"
-          @click="isModelCreationDialogVisible = true"
+          @click="$store.dispatch('toggleDialog', 'model')"
         >
           <v-icon>add</v-icon>
           New Model
         </v-btn>
-        <NewModel v-model="isModelCreationDialogVisible" />
+        <NewModel :isModelCreationDialogVisible="$store.state.isDialogVisible.model" />
         <v-btn
           color="secondary"
-          @click="isOrganismCreationDialogVisible = true"
+          @click="$store.dispatch('toggleDialog', 'organism')"
         >
           <v-icon>add</v-icon>
           New Organism
         </v-btn>
-        <NewOrganism v-model="isOrganismCreationDialogVisible" />
+        <NewOrganism :isOrganismCreationDialogVisible="$store.state.isDialogVisible.organism"
+        />
         <v-btn
           color="secondary"
-          @click="isProjectCreationDialogVisible = true"
+          @click="$store.dispatch('toggleDialog', 'project')"
         >
           <v-icon>add</v-icon>
           New project
         </v-btn>
         <NewProject 
-          v-model="isProjectCreationDialogVisible"
+          :isProjectCreationDialogVisible="$store.state.isDialogVisible.project"
         />
         <LoginDialog />
         </template>
@@ -192,10 +193,6 @@ export default Vue.extend({
     LoginDialog
   },
   data: () => ({
-    isProjectCreationDialogVisible: false,
-    isOrganismCreationDialogVisible: false,
-    isModelCreationDialogVisible: false,
-    isMapCreationDialogVisible: false,
     drawer: false,
     disabledTooltipText: "Please log in or register to use this functionality!"
   }),
@@ -226,7 +223,9 @@ export default Vue.extend({
       set(newValue) {
         this.$store.commit("setPostError", null);
       }
-    }
+    },
+  },
+  methods: {
   },
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
