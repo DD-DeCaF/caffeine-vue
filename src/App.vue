@@ -10,9 +10,13 @@
         <template>
           All of this and the attached logic ought to be moved to the appropiate
           sections later
+          <LoaderDialog 
+            :loadingMessage="$store.state.loadingMessages.default"
+            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
+          />
           <v-btn
             color="secondary"
-            @click="$store.dispatch('toggleDialog', 'map')"
+            @click="$store.commit('toggleDialog', 'map')"
           >
             <v-icon>add</v-icon>
             New Map
@@ -22,7 +26,7 @@
           />
           <v-btn
             color="secondary"
-            @click="$store.dispatch('toggleDialog', 'model')"
+            @click="$store.commit('toggleDialog', 'model')"
           >
             <v-icon>add</v-icon>
             New Model
@@ -32,7 +36,7 @@
           />
           <v-btn
             color="secondary"
-            @click="$store.dispatch('toggleDialog', 'organism')"
+            @click="$store.commit('toggleDialog', 'organism')"
           >
             <v-icon>add</v-icon>
             New Organism
@@ -44,7 +48,7 @@
           />
           <v-btn
             color="secondary"
-            @click="$store.dispatch('toggleDialog', 'project')"
+            @click="$store.commit('toggleDialog', 'project')"
           >
             <v-icon>add</v-icon>
             New project

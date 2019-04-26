@@ -2,14 +2,7 @@
   <div>
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
-        <div class="text-xs-center pa-4" v-if="isLoading">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="80"
-          ></v-progress-circular>
-        </div>
-        <v-container grid-list-lg text-md-left v-if="!isLoading">
+        <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
               <h3>Add a new map</h3>
@@ -45,7 +38,7 @@
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       color="secondary"
-                      @click="$store.dispatch('toggleDialog', 'project')"
+                      @click="$store.commit('toggleDialog', 'project')"
                     >
                       <v-icon>add</v-icon>
                       New project
@@ -68,7 +61,7 @@
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       color="secondary"
-                      @click="$store.dispatch('toggleDialog', 'model')"
+                      @click="$store.commit('toggleDialog', 'model')"
                     >
                       <v-icon>add</v-icon>
                       New Model
@@ -99,14 +92,14 @@
             color="secondary"
             flat
             @click="isVisible = false"
-            :disabled="isLoading"
+            :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             @click="createMap"
-            :disabled="isLoading || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !valid"
           >
             Create
           </v-btn>
@@ -135,7 +128,6 @@ export default Vue.extend({
   props: ["isMapCreationDialogVisible"],
   data: () => ({
     valid: true,
-    isLoading: false,
     isMapCreationSuccess: false,
     mapName: {
       value: null,
@@ -161,7 +153,7 @@ export default Vue.extend({
   }),
   methods: {
     createMap() {
-      this.isLoading = true;
+      this.$store.commit('toggleDialog', 'loader')
       const payload = {
         name: this.mapName.value,
         organism_id: this.organismItemValidation.organismItem.id,
@@ -178,7 +170,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isLoading = false;
+          this.$store.commit('toggleDialog', 'loader')
         });
     },
     uploadFile() {
@@ -200,7 +192,7 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch("toggleDialog", "map");
+        this.$store.commit("toggleDialog", "map");
       }
     }
   },

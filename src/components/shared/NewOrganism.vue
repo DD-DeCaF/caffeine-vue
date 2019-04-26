@@ -2,14 +2,7 @@
   <div>
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
-        <div class="text-xs-center pa-4" v-if="isLoading">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="80"
-          ></v-progress-circular>
-        </div>
-        <v-container grid-list-lg text-md-left v-if="!isLoading">
+        <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
               <h3>Add a new organism</h3>
@@ -46,7 +39,7 @@
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       color="secondary"
-                      @click="$store.dispatch('toggleDialog', 'project')"
+                      @click="$store.commit('toggleDialog', 'project')"
                     >
                       <v-icon>add</v-icon>
                       New project
@@ -66,14 +59,14 @@
             color="secondary"
             flat
             @click="isVisible = false"
-            :disabled="isLoading"
+            :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             @click="createOrganism"
-            :disabled="isLoading || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !valid"
           >
             Create
           </v-btn>
@@ -102,7 +95,6 @@ export default Vue.extend({
   props: ["isOrganismCreationDialogVisible"],
   data: () => ({
     valid: true,
-    isLoading: false,
     isOrganismCreationSuccess: false,
     isProjectCreationDialogVisible: false,
     organismName: {
@@ -120,7 +112,7 @@ export default Vue.extend({
   }),
   methods: {
     createOrganism() {
-      this.isLoading = true;
+      this.$store.commit('toggleDialog', 'loader')
       const payload = {
         name: this.organismName.value,
         project_id: this.projectItemValidation.projectItem.id
@@ -136,7 +128,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isLoading = false;
+          this.$store.commit('toggleDialog', 'loader')
         });
     }
   },
@@ -152,7 +144,7 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch("toggleDialog", "organism");
+        this.$store.commit("toggleDialog", "organism");
       }
     }
   },

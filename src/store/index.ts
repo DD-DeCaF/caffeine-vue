@@ -29,7 +29,11 @@ export default new Vuex.Store({
       model: false,
       map: false,
       organism: false,
-      project: false
+      project: false,
+      loader: false
+    },
+    loadingMessages: {
+      default: "Loading. Please wait."
     }
   },
   mutations: {
@@ -54,8 +58,5 @@ export default new Vuex.Store({
       dispatch("organisms/fetchOrganisms");
       dispatch("projects/fetchProjects");
     },
-    toggleDialog({ commit }, dialog) {
-      commit("toggleDialog", dialog);
-    }
   }
 });

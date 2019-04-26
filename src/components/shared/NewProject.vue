@@ -2,14 +2,7 @@
   <div>
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
-        <div class="text-xs-center pa-4" v-if="isLoading">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="80"
-          ></v-progress-circular>
-        </div>
-        <v-container grid-list-lg text-md-left v-if="!isLoading">
+        <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
               <h3>Add a new project</h3>
@@ -42,14 +35,14 @@
             color="secondary"
             flat
             @click="isVisible = false"
-            :disabled="isLoading"
+            :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             @click="createProject"
-            :disabled="isLoading || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !valid"
           >
             Create
           </v-btn>
@@ -78,7 +71,6 @@ export default Vue.extend({
   props: ["isProjectCreationDialogVisible"],
   data: () => ({
     valid: true,
-    isLoading: false,
     isProjectCreationSuccess: false,
     projectName: {
       value: null,
@@ -87,7 +79,7 @@ export default Vue.extend({
   }),
   methods: {
     createProject() {
-      this.isLoading = true;
+      this.$store.commit('toggleDialog', 'loader')
       axios
         .post(`${settings.apis.iam}/projects`, { name: this.projectName.value })
         .then((response: AxiosResponse) => {
@@ -103,7 +95,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isLoading = false;
+          this.$store.commit('toggleDialog', 'loader')
         });
     }
   },
@@ -116,7 +108,7 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch("toggleDialog", "project");
+        this.$store.commit("toggleDialog", "project");
       }
     }
   },
