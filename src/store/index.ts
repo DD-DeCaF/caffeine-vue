@@ -57,6 +57,6 @@ export default new Vuex.Store({
       dispatch("models/fetchModels");
       dispatch("organisms/fetchOrganisms");
       dispatch("projects/fetchProjects");
-    },
+    }
   }
 });

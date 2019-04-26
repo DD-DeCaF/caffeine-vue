@@ -112,7 +112,7 @@ export default Vue.extend({
   }),
   methods: {
     createOrganism() {
-      this.$store.commit('toggleDialog', 'loader')
+      this.$store.commit("toggleDialog", "loader");
       const payload = {
         name: this.organismName.value,
         project_id: this.projectItemValidation.projectItem.id
@@ -128,7 +128,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.$store.commit('toggleDialog', 'loader')
+          this.$store.commit("toggleDialog", "loader");
         });
     }
   },

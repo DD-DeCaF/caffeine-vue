@@ -79,7 +79,7 @@ export default Vue.extend({
   }),
   methods: {
     createProject() {
-      this.$store.commit('toggleDialog', 'loader')
+      this.$store.commit("toggleDialog", "loader");
       axios
         .post(`${settings.apis.iam}/projects`, { name: this.projectName.value })
         .then((response: AxiosResponse) => {
@@ -95,7 +95,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.$store.commit('toggleDialog', 'loader')
+          this.$store.commit("toggleDialog", "loader");
         });
     }
   },

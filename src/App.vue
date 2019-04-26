@@ -10,7 +10,7 @@
         <template>
           All of this and the attached logic ought to be moved to the appropiate
           sections later
-          <LoaderDialog 
+          <LoaderDialog
             :loadingMessage="$store.state.loadingMessages.default"
             :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
           />

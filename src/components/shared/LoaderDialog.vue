@@ -8,7 +8,7 @@
             color="primary"
             size="150"
           ></v-progress-circular>
-        <v-card-text> {{ loadingMessage }}</v-card-text>
+          <v-card-text> {{ loadingMessage }}</v-card-text>
         </v-container>
       </v-card>
     </v-dialog>
@@ -21,10 +21,8 @@ import Vue from "vue";
 export default Vue.extend({
   name: "LoaderDialog",
   props: ["isLoaderDialogVisible", "loadingMessage"],
-  data: () => ({
-  }),
-  methods: {
-  },
+  data: () => ({}),
+  methods: {},
   computed: {
     isVisible: {
       get: function() {

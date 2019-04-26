@@ -153,7 +153,7 @@ export default Vue.extend({
   }),
   methods: {
     createMap() {
-      this.$store.commit('toggleDialog', 'loader')
+      this.$store.commit("toggleDialog", "loader");
       const payload = {
         name: this.mapName.value,
         organism_id: this.organismItemValidation.organismItem.id,
@@ -170,7 +170,7 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.$store.commit('toggleDialog', 'loader')
+          this.$store.commit("toggleDialog", "loader");
         });
     },
     uploadFile() {
