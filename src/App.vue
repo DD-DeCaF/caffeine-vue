@@ -7,9 +7,60 @@
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
-        <LoginDialog />
+        <template>
+          All of this and the attached logic ought to be moved to the appropiate
+          sections later
+          <LoaderDialog
+            :loadingMessage="$store.state.loadingMessages.default"
+            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
+          />
+          <v-btn
+            color="secondary"
+            @click="$store.commit('toggleDialog', 'map')"
+          >
+            <v-icon>add</v-icon>
+            New Map
+          </v-btn>
+          <NewMap
+            :isMapCreationDialogVisible="$store.state.isDialogVisible.map"
+          />
+          <v-btn
+            color="secondary"
+            @click="$store.commit('toggleDialog', 'model')"
+          >
+            <v-icon>add</v-icon>
+            New Model
+          </v-btn>
+          <NewModel
+            :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
+          />
+          <v-btn
+            color="secondary"
+            @click="$store.commit('toggleDialog', 'organism')"
+          >
+            <v-icon>add</v-icon>
+            New Organism
+          </v-btn>
+          <NewOrganism
+            :isOrganismCreationDialogVisible="
+              $store.state.isDialogVisible.organism
+            "
+          />
+          <v-btn
+            color="secondary"
+            @click="$store.commit('toggleDialog', 'project')"
+          >
+            <v-icon>add</v-icon>
+            New project
+          </v-btn>
+          <NewProject
+            :isProjectCreationDialogVisible="
+              $store.state.isDialogVisible.project
+            "
+          />
+          <LoginDialog />
+        </template>
       </v-toolbar>
-
       <v-navigation-drawer v-model="drawer" app clipped>
         <v-list>
           <v-list-tile to="/">
@@ -134,6 +185,11 @@
         again in a few minutes.
       </v-snackbar>
 
+      <v-snackbar color="error" v-model="hasPostDataError" :timeout="6000">
+        Sorry, we were unable to complete this operation. Is the server offline
+        or are you not logged in?
+      </v-snackbar>
+
       <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
         Your session has expired and you have been logged out. Please log in
         again.
@@ -173,8 +229,17 @@ export default Vue.extend({
       set(newValue) {
         this.$store.commit("setFetchError", null);
       }
+    },
+    hasPostDataError: {
+      get() {
+        return this.$store.state.postDataError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("setPostError", null);
+      }
     }
   },
+  methods: {},
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
     // requests behave as expected. (See the interceptors for details)

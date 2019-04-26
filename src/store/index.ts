@@ -23,11 +23,29 @@ export default new Vuex.Store({
     projects
   },
   state: {
-    fetchDataError: null
+    fetchDataError: null,
+    postDataError: null,
+    isDialogVisible: {
+      model: false,
+      map: false,
+      organism: false,
+      project: false,
+      loader: false
+    },
+    loadingMessages: {
+      default: "Loading. Please wait."
+    }
   },
   mutations: {
     setFetchError(state, error) {
       state.fetchDataError = error;
+    },
+    setPostError(state, error) {
+      console.log(error);
+      state.postDataError = error;
+    },
+    toggleDialog(state, dialog) {
+      state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
     }
   },
   actions: {
