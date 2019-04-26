@@ -189,9 +189,7 @@ export default Vue.extend({
         return this.isMapCreationDialogVisible;
       },
       set: function(value) {
-        if (this.$refs.form !== undefined) {
-          this.$refs.form!.reset();
-        }
+        this.$refs.form!.reset();
         this.$store.commit("toggleDialog", "map");
       }
     }

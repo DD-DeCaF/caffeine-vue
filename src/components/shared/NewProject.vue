@@ -105,9 +105,7 @@ export default Vue.extend({
         return this.isProjectCreationDialogVisible;
       },
       set: function(value) {
-        if (this.$refs.form !== undefined) {
-          this.$refs.form!.reset();
-        }
+        this.$refs.form!.reset();
         this.$store.commit("toggleDialog", "project");
       }
     }

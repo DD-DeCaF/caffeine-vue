@@ -141,9 +141,7 @@ export default Vue.extend({
         return this.isOrganismCreationDialogVisible;
       },
       set: function(value) {
-        if (this.$refs.form !== undefined) {
-          this.$refs.form!.reset();
-        }
+        this.$refs.form!.reset();
         this.$store.commit("toggleDialog", "organism");
       }
     }
