@@ -2,16 +2,15 @@
   <v-container>
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Maps</h1>
+        <h1>Models</h1>
         <v-data-table
           :headers="headers"
-          :items="maps"
+          :items="models"
           class="elevation-8"
           :pagination.sync= "pagination"
         >
           <template v-slot:items="props">
           <td>{{ props.item.name }}</td>
-          <td>{{ props.item.model_id }}</td>
           <td>
             <v-icon
               @click="editItem(props.item)"
@@ -33,7 +32,7 @@
           right
           large
           color='secondary'
-          @click="$store.commit('toggleDialog', 'map')"
+          @click="$store.commit('toggleDialog', 'model')"
         >
           <v-icon>add</v-icon>
         </v-btn> 
@@ -46,7 +45,7 @@
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "Maps",
+  name: "Models",
   data: () => ({
     headers: [
           {
@@ -54,7 +53,6 @@ export default Vue.extend({
             align: 'left',
             value: 'name'
           },
-          { text: 'Model', value: 'model' },
           { text: 'Actions', value: 'name', sortable: false }
         ],
     pagination: {
@@ -66,8 +64,8 @@ export default Vue.extend({
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     },
-    maps() {
-      return this.$store.state.maps.maps
+    models() {
+      return this.$store.state.models.models
     }
 
   }

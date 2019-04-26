@@ -4,6 +4,7 @@ import Home from "./components/Home.vue";
 import Designs from "./components/Designs.vue";
 import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
 import Maps from "./components/Maps.vue";
+import Models from "./components/Models.vue";
 
 Vue.use(Router);
 
@@ -30,6 +31,11 @@ export default new Router({
       path: "/maps",
       name: "maps",
       component: Maps
+    },
+    {
+      path: "/models",
+      name: "models",
+      component: Models
     }
   ]
 });
