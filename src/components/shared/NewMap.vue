@@ -41,16 +41,16 @@
                   type="text"
                 >
                   <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'project');"
-                  >
-                    <v-icon>add</v-icon>
-                    New project
-                  </v-btn>
-                </template>
+                    <v-divider class="my-2"></v-divider>
+                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'project')"
+                    >
+                      <v-icon>add</v-icon>
+                      New project
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
                 <v-autocomplete
                   required
@@ -64,16 +64,16 @@
                   type="text"
                 >
                   <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'model');"
-                  >
-                    <v-icon>add</v-icon>
-                    New Model
-                  </v-btn>
-                </template>
+                    <v-divider class="my-2"></v-divider>
+                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'model')"
+                    >
+                      <v-icon>add</v-icon>
+                      New Model
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
                 <v-text-field
                   required
@@ -132,7 +132,7 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewMap",
-  props: ['isMapCreationDialogVisible'],
+  props: ["isMapCreationDialogVisible"],
   data: () => ({
     valid: true,
     isLoading: false,
@@ -157,16 +157,16 @@ export default Vue.extend({
     modelItem: {
       value: null,
       rules: [(v: string) => !!v || "A model is required."]
-    },
+    }
   }),
   methods: {
     createMap() {
       this.isLoading = true;
-      const payload = { 
+      const payload = {
         name: this.mapName.value,
         organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id,
-        }
+        project_id: this.projectItemValidation.projectItem.id
+      };
       axios
         .post(`${settings.apis.mapStorage}/maps`, payload)
         .then((response: AxiosResponse) => {
@@ -182,29 +182,28 @@ export default Vue.extend({
         });
     },
     uploadFile() {
-      console.log('This was uploaded.')
+      console.log("This was uploaded.");
     }
   },
   computed: {
     availableProjects() {
-      return this.$store.state.projects.projects
+      return this.$store.state.projects.projects;
     },
     availableModels() {
-      return this.$store.state.models.models
+      return this.$store.state.models.models;
     },
     isVisible: {
       get: function() {
         return this.isMapCreationDialogVisible;
       },
       set: function(value) {
-       if (this.$refs.form !== undefined) {
+        if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch('toggleDialog', 'map');
+        this.$store.dispatch("toggleDialog", "map");
       }
     }
   },
-  watch: {
-  }
+  watch: {}
 });
 </script>

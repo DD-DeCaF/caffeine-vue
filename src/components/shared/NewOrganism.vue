@@ -41,17 +41,17 @@
                   label="Project"
                   type="text"
                 >
-                <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'project');"
-                  >
-                    <v-icon>add</v-icon>
-                    New project
-                  </v-btn>
-                </template>
+                  <template v-slot:append-item>
+                    <v-divider class="my-2"></v-divider>
+                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'project')"
+                    >
+                      <v-icon>add</v-icon>
+                      New project
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
               </v-form>
             </v-flex>
@@ -99,7 +99,7 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewOrganism",
-  props: ['isOrganismCreationDialogVisible'],
+  props: ["isOrganismCreationDialogVisible"],
   data: () => ({
     valid: true,
     isLoading: false,
@@ -121,10 +121,10 @@ export default Vue.extend({
   methods: {
     createOrganism() {
       this.isLoading = true;
-      const payload = { 
+      const payload = {
         name: this.organismName.value,
-        project_id: this.projectItemValidation.projectItem.id,
-        }
+        project_id: this.projectItemValidation.projectItem.id
+      };
       axios
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
@@ -142,7 +142,7 @@ export default Vue.extend({
   },
   computed: {
     availableProjects() {
-      return this.$store.state.projects.projects
+      return this.$store.state.projects.projects;
     },
     isVisible: {
       get: function() {
@@ -152,11 +152,10 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch('toggleDialog', 'organism');
+        this.$store.dispatch("toggleDialog", "organism");
       }
     }
   },
-  watch: {
-  }
+  watch: {}
 });
 </script>

@@ -75,7 +75,7 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewProject",
-  props: ['isProjectCreationDialogVisible'],
+  props: ["isProjectCreationDialogVisible"],
   data: () => ({
     valid: true,
     isLoading: false,
@@ -116,11 +116,10 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch('toggleDialog', 'project');
+        this.$store.dispatch("toggleDialog", "project");
       }
     }
   },
-  watch: {
-  },
+  watch: {}
 });
 </script>

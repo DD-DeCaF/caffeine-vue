@@ -37,11 +37,11 @@ export default new Vuex.Store({
       state.fetchDataError = error;
     },
     setPostError(state, error) {
-      console.log(error)
+      console.log(error);
       state.postDataError = error;
     },
     toggleDialog(state, dialog) {
-      state.isDialogVisible[dialog] = !state.isDialogVisible[dialog]
+      state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
     }
   },
   actions: {
@@ -56,6 +56,6 @@ export default new Vuex.Store({
     },
     toggleDialog({ commit }, dialog) {
       commit("toggleDialog", dialog);
-    },
+    }
   }
 });

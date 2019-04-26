@@ -13,7 +13,11 @@
           <v-layout fill-height column wrap>
             <v-flex md6>
               <h3>Add a new model</h3>
-              <p>We recommend that you visit <a href="https://memote.io" target="_blank">memote.io</a> to validate your model.</p>
+              <p>
+                We recommend that you visit
+                <a href="https://memote.io" target="_blank">memote.io</a> to
+                validate your model.
+              </p>
             </v-flex>
             <v-flex>
               <v-form
@@ -42,15 +46,15 @@
                   type="text"
                 >
                   <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'organism');"
-                  >
-                    <v-icon>add</v-icon>
-                    New Organism
-                  </v-btn>
-                </template>
+                    <v-divider class="my-2"></v-divider>
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'organism')"
+                    >
+                      <v-icon>add</v-icon>
+                      New Organism
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
                 <v-autocomplete
                   return-object
@@ -64,16 +68,16 @@
                   type="text"
                 >
                   <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                  <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'project');"
-                  >
-                    <v-icon>add</v-icon>
-                    New project
-                  </v-btn>
-                </template>
+                    <v-divider class="my-2"></v-divider>
+                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'project')"
+                    >
+                      <v-icon>add</v-icon>
+                      New project
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
                 <v-autocomplete
                   return-object
@@ -87,15 +91,15 @@
                   type="text"
                 >
                   <template v-slot:append-item>
-                  <v-divider class="my-2"></v-divider>
-                                   <v-btn
-                    color="secondary"
-                    @click="$store.dispatch('toggleDialog', 'map');"
-                  >
-                    <v-icon>add</v-icon>
-                    New Map
-                  </v-btn>
-                </template>
+                    <v-divider class="my-2"></v-divider>
+                    <v-btn
+                      color="secondary"
+                      @click="$store.dispatch('toggleDialog', 'map')"
+                    >
+                      <v-icon>add</v-icon>
+                      New Map
+                    </v-btn>
+                  </template>
                 </v-autocomplete>
                 <!-- <FileUpload v-model="filename" @formData="formData"> This is working?! </FileUpload>
                 <v-btn @click.native="uploadFiles"> emt </v-btn> -->
@@ -169,7 +173,7 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewModel",
-  props: ['isModelCreationDialogVisible'],
+  props: ["isModelCreationDialogVisible"],
   data: () => ({
     valid: true,
     isLoading: false,
@@ -209,11 +213,11 @@ export default Vue.extend({
   methods: {
     createModel() {
       this.isLoading = true;
-      const payload = { 
+      const payload = {
         name: this.modelName.value,
         organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id,
-        }
+        project_id: this.projectItemValidation.projectItem.id
+      };
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
@@ -228,26 +232,24 @@ export default Vue.extend({
           this.isLoading = false;
         });
     },
-    uploadFiles(){
-      
+    uploadFiles() {
       // your custom upload method
-      const form = this.formData
-      console.log(form)
-      
+      const form = this.formData;
+      console.log(form);
     }
   },
   computed: {
     availableProjects() {
-      return this.$store.state.projects.projects
+      return this.$store.state.projects.projects;
     },
     availableOrganisms() {
-      return this.$store.state.organisms.organisms
+      return this.$store.state.organisms.organisms;
     },
     availableMaps() {
-      return this.$store.state.maps.maps
+      return this.$store.state.maps.maps;
     },
     availableReactions() {
-      return ["Biomass1", "Biomass2"]
+      return ["Biomass1", "Biomass2"];
     },
     isVisible: {
       get: function() {
@@ -257,11 +259,10 @@ export default Vue.extend({
         if (this.$refs.form !== undefined) {
           this.$refs.form!.reset();
         }
-        this.$store.dispatch('toggleDialog', 'model');
+        this.$store.dispatch("toggleDialog", "model");
       }
     }
   },
-  watch: {
-  }
+  watch: {}
 });
 </script>
