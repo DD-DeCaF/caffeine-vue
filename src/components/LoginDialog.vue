@@ -128,7 +128,12 @@
       Welcome! You are now logged in.
     </v-snackbar>
 
-    <v-snackbar color="success" v-model="isLogoutSuccess" bottom :timeout="3000">
+    <v-snackbar
+      color="success"
+      v-model="isLogoutSuccess"
+      bottom
+      :timeout="3000"
+    >
       You are now logged out.
     </v-snackbar>
   </div>
