@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-btn
-      color="secondary"
-      @click.native.stop="isModelCreationDialogVisible = true"
-    >
-    <v-icon>add</v-icon>
-    New model
-    </v-btn>
-    <v-dialog v-model="isModelCreationDialogVisible" width="650">
+    <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -88,6 +81,8 @@
                   <NewMap />
                 </template> -->
                 </v-autocomplete>
+                <!-- <FileUpload v-model="filename" @formData="formData"> This is working?! </FileUpload>
+                <v-btn @click.native="uploadFiles"> emt </v-btn> -->
                 <v-text-field
                   required
                   v-model="modelJSON.value"
@@ -124,7 +119,7 @@
           <v-btn
             color="secondary"
             flat
-            @click="isModelCreationDialogVisible = false"
+            @click="isVisible = false"
             :disabled="isLoading"
           >
             Cancel
@@ -158,10 +153,14 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewModel",
+  props: ['isModelCreationDialogVisible'],
+  model: {
+    prop: 'isModelCreationDialogVisible',
+    event: 'close-dialog'
+  },
   data: () => ({
     valid: true,
     isLoading: false,
-    isModelCreationDialogVisible: false,
     isModelCreationSuccess: false,
     reactionIdentifier: {
       value: null,
@@ -207,7 +206,7 @@ export default Vue.extend({
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("models/addModel", response.data);
-          this.isModelCreationDialogVisible = false;
+          this.isVisible = false;
           this.isModelCreationSuccess = true;
         })
         .catch(error => {
@@ -217,8 +216,12 @@ export default Vue.extend({
           this.isLoading = false;
         });
     },
-    uploadFile() {
-      console.log('This was uploaded.')
+    uploadFiles(){
+      
+      // your custom upload method
+      const form = this.formData
+      console.log(form)
+      
     }
   },
   computed: {
@@ -233,13 +236,18 @@ export default Vue.extend({
     },
     availableReactions() {
       return ["Biomass1", "Biomass2"]
+    },
+    isVisible: {
+      get: function() {
+        return this.isModelCreationDialogVisible;
+      },
+      set: function(value) {
+        this.$emit('close-dialog', value);
+        this.$refs.form.reset();
+      }
     }
   },
   watch: {
-    // Reset the model creation form when the creation dialog is closed.
-    isModelCreationDialogVisible() {
-      this.$refs.form.reset();
-    }
   }
 });
 </script>

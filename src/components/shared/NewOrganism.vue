@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-btn
-      color="secondary"
-      @click.native.stop="isOrganismCreationDialogVisible = true"
-    >
-    <v-icon>add</v-icon>
-    New organism
-    </v-btn>
-    <v-dialog v-model="isOrganismCreationDialogVisible" width="650">
+    <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -47,10 +40,19 @@
                   label="Project"
                   type="text"
                 >
-                  <template v-slot:append-item>
+                <template v-slot:append-item>
                   <v-divider class="my-2"></v-divider>
                   <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                  <NewProject />
+                  <v-btn
+                    color="secondary"
+                    @click="isProjectCreationDialogVisible = true"
+                  >
+                    <v-icon>add</v-icon>
+                    New project
+                  </v-btn>
+                  <NewProject 
+                    v-model="isProjectCreationDialogVisible"
+                  />
                 </template>
                 </v-autocomplete>
               </v-form>
@@ -65,7 +67,7 @@
           <v-btn
             color="secondary"
             flat
-            @click="isOrganismCreationDialogVisible = false"
+            @click="isVisible = false"
             :disabled="isLoading"
           >
             Cancel
@@ -99,11 +101,16 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewOrganism",
+  props: ['isOrganismCreationDialogVisible'],
+  model: {
+    prop: 'isOrganismCreationDialogVisible',
+    event: 'close-dialog'
+  },
   data: () => ({
     valid: true,
     isLoading: false,
-    isOrganismCreationDialogVisible: false,
     isOrganismCreationSuccess: false,
+    isProjectCreationDialogVisible: false,
     organismName: {
       value: null,
       rules: [(v: string) => !!v || "A name is required."]
@@ -128,7 +135,7 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
-          this.isOrganismCreationDialogVisible = false;
+          this.isVisible = false;
           this.isOrganismCreationSuccess = true;
         })
         .catch(error => {
@@ -142,13 +149,18 @@ export default Vue.extend({
   computed: {
     availableProjects() {
       return this.$store.state.projects.projects
+    },
+    isVisible: {
+      get: function() {
+        return this.isOrganismCreationDialogVisible;
+      },
+      set: function(value) {
+        this.$emit('close-dialog', value);
+        this.$refs.form.reset();
+      }
     }
   },
   watch: {
-    // Reset the organism creation form when the creation dialog is closed.
-    isOrganismCreationDialogVisible() {
-      this.$refs.form.reset();
-    }
   }
 });
 </script>

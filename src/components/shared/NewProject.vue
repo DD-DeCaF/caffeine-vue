@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-btn
-      color="secondary"
-      @click.native.stop="isProjectCreationDialogVisible = true"
-    >
-    <v-icon>add</v-icon>
-    New project
-    </v-btn>
-    <v-dialog v-model="isProjectCreationDialogVisible" width="650">
+    <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -48,7 +41,7 @@
           <v-btn
             color="secondary"
             flat
-            @click="isProjectCreationDialogVisible = false"
+            @click="isVisible = false"
             :disabled="isLoading"
           >
             Cancel
@@ -82,10 +75,14 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewProject",
+  props: ['isProjectCreationDialogVisible'],
+  model: {
+    prop: 'isProjectCreationDialogVisible',
+    event: 'close-dialog'
+  },
   data: () => ({
     valid: true,
     isLoading: false,
-    isProjectCreationDialogVisible: false,
     isProjectCreationSuccess: false,
     projectName: {
       value: null,
@@ -103,7 +100,7 @@ export default Vue.extend({
             response.data
           );
           this.$store.commit("projects/addProject", projectItem);
-          this.isProjectCreationDialogVisible = false;
+          this.isVisible = false;
           this.isProjectCreationSuccess = true;
         })
         .catch(error => {
@@ -114,12 +111,18 @@ export default Vue.extend({
         });
     }
   },
-  computed: {},
-  watch: {
-    // Reset the project creation form when the creation dialog is closed.
-    isProjectCreationDialogVisible() {
-      this.$refs.form.reset();
+  computed: {
+    isVisible: {
+      get: function() {
+        return this.isProjectCreationDialogVisible;
+      },
+      set: function(value) {
+        this.$emit('close-dialog', value);
+        this.$refs.form.reset();
+      }
     }
+  },
+  watch: {
   }
 });
 </script>

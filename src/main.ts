@@ -9,6 +9,7 @@ import NewProject from "@/components/shared/NewProject.vue";
 import NewOrganism from "@/components/shared/NewOrganism.vue";
 import NewModel from "@/components/shared/NewModel.vue";
 import NewMap from "@/components/shared/NewMap.vue";
+// import FileUpload from "@/components/shared/FileUpload.vue"
 
 Vue.config.productionTip = false;
 
@@ -16,6 +17,7 @@ Vue.component("NewProject", NewProject);
 Vue.component("NewOrganism", NewOrganism);
 Vue.component("NewModel", NewModel);
 Vue.component("NewMap", NewMap);
+// Vue.component("FileUpload", FileUpload);
 
 new Vue({
   router,

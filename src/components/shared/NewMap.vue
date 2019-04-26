@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-btn
-      color="secondary"
-      @click.native.stop="isMapCreationDialogVisible = true"
-    >
-    <v-icon>add</v-icon>
-    New map
-    </v-btn>
-    <v-dialog v-model="isMapCreationDialogVisible" width="650">
+    <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <div class="text-xs-center pa-4" v-if="isLoading">
           <v-progress-circular
@@ -93,7 +86,7 @@
           <v-btn
             color="secondary"
             flat
-            @click="isMapCreationDialogVisible = false"
+            @click="isVisible = false"
             :disabled="isLoading"
           >
             Cancel
@@ -127,10 +120,14 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewMap",
+  props: ['isMapCreationDialogVisible'],
+  model: {
+    prop: 'isMapCreationDialogVisible',
+    event: 'close-dialog'
+  },
   data: () => ({
     valid: true,
     isLoading: false,
-    isMapCreationDialogVisible: false,
     isMapCreationSuccess: false,
     mapName: {
       value: null,
@@ -166,7 +163,7 @@ export default Vue.extend({
         .post(`${settings.apis.mapStorage}/maps`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("maps/addMap", response.data);
-          this.isMapCreationDialogVisible = false;
+          this.isVisible = false;
           this.isMapCreationSuccess = true;
         })
         .catch(error => {
@@ -186,13 +183,18 @@ export default Vue.extend({
     },
     availableModels() {
       return this.$store.state.models.models
+    },
+    isVisible: {
+      get: function() {
+        return this.isMapCreationDialogVisible;
+      },
+      set: function(value) {
+        this.$emit('close-dialog', value);
+        this.$refs.form.reset();
+      }
     }
   },
   watch: {
-    // Reset the map creation form when the creation dialog is closed.
-    isMapCreationDialogVisible() {
-      this.$refs.form.reset();
-    }
   }
 });
 </script>

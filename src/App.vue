@@ -7,13 +7,45 @@
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
-        <NewMap />
-        <NewModel />
-        <NewOrganism />
-        <NewProject />
+        <template>
+          All of this and the attached logic ought to be moved to the appropiate sections later
+        <v-btn
+          color="secondary"
+          @click="isMapCreationDialogVisible = true"
+        >
+          <v-icon>add</v-icon>
+          New Map
+        </v-btn>
+        <NewMap v-model="isMapCreationDialogVisible"/>
+        <v-btn
+          color="secondary"
+          @click="isModelCreationDialogVisible = true"
+        >
+          <v-icon>add</v-icon>
+          New Model
+        </v-btn>
+        <NewModel v-model="isModelCreationDialogVisible" />
+        <v-btn
+          color="secondary"
+          @click="isOrganismCreationDialogVisible = true"
+        >
+          <v-icon>add</v-icon>
+          New Organism
+        </v-btn>
+        <NewOrganism v-model="isOrganismCreationDialogVisible" />
+        <v-btn
+          color="secondary"
+          @click="isProjectCreationDialogVisible = true"
+        >
+          <v-icon>add</v-icon>
+          New project
+        </v-btn>
+        <NewProject 
+          v-model="isProjectCreationDialogVisible"
+        />
         <LoginDialog />
+        </template>
       </v-toolbar>
-
       <v-navigation-drawer v-model="drawer" app clipped>
         <v-list>
           <v-list-tile to="/">
@@ -160,6 +192,10 @@ export default Vue.extend({
     LoginDialog
   },
   data: () => ({
+    isProjectCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false,
+    isModelCreationDialogVisible: false,
+    isMapCreationDialogVisible: false,
     drawer: false,
     disabledTooltipText: "Please log in or register to use this functionality!"
   }),
