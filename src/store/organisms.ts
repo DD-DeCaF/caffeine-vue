@@ -36,7 +36,7 @@ export default {
     }
   },
   getters: {
-    getOrganismById: (state) => (id: number) => {
+    getOrganismById: state => (id: number) => {
       return state.organisms.find(organism => organism.id === id);
     }
   }

@@ -13,24 +13,33 @@
           v-model="selected"
           :headers="headers"
           :items="designs"
-          select-all
+          :expand="expand"
+          select-all="primary"
           class="elevation-8"
-          :pagination.sync="pagination"
         >
           <template v-slot:items="props">
-            <td>
-              <v-checkbox
-                v-model="props.selected"
-                primary
-                hide-details
-              ></v-checkbox>
-            </td>
-            <td>{{ props.item.name }}</td>
-            <td>{{ organism(model(props.item.model_id).organism_id).name }}</td>
-            <td>{{ model(props.item.model_id).name }}</td>
-            <td>{{ props.item.design.reaction_knockins.length }}</td>
-            <td>{{ props.item.design.reaction_knockouts.length }}</td>
-            <td>{{ props.item.design.gene_knockouts.length }}</td>
+            <tr @click="props.expanded = !props.expanded">
+              <td @click.stop>
+                <v-checkbox
+                  v-model="props.selected"
+                  color="primary"
+                  hide-details
+                ></v-checkbox>
+              </td>
+              <td>{{ props.item.name }}</td>
+              <td>
+                {{ organism(model(props.item.model_id).organism_id).name }}
+              </td>
+              <td>{{ model(props.item.model_id).name }}</td>
+              <td>{{ props.item.design.reaction_knockins.length }}</td>
+              <td>{{ props.item.design.reaction_knockouts.length }}</td>
+              <td>{{ props.item.design.gene_knockouts.length }}</td>
+            </tr>
+          </template>
+          <template v-slot:expand="props">
+            <v-card flat>
+              <v-card-text>Expanded row</v-card-text>
+            </v-card>
           </template>
         </v-data-table>
       </v-flex>
@@ -40,28 +49,26 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
 
 export default Vue.extend({
   name: "Designs",
   data: () => ({
     selected: [],
+    expand: true,
     headers: [
-      { text: "Name", value: "name" },
-      { text: "Organism", value: "" }, // todo: get organism name
-      { text: "Model", value: "model_id" },
-      { text: "Added reactions", value: "reaction_knockins" },
-      { text: "Reaction knockouts", value: "reaction_knockouts" },
-      { text: "Gene knockouts", value: "gene_knockouts" }
+      { text: "Name", value: "name", width: "20%" },
+      { text: "Organism", value: "organism_id", width: "15%" },
+      { text: "Model", value: "model_id", width: "15%" },
+      { text: "Added reactions", value: "reactions_knockins", width: "15%" },
+      { text: "Reaction knockouts", value: "reaction_knockouts", width: "15%" },
+      { text: "Gene knockouts", value: "gene_knockouts", width: "15%" }
     ],
     pagination: {
       rowsPerPage: 10
     }
   }),
   computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
     designs() {
       return this.$store.state.designs.designs;
     },
