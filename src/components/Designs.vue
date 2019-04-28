@@ -14,6 +14,7 @@
           :headers="headers"
           :items="designs"
           :expand="expand"
+          :pagination.sync="pagination"
           select-all="primary"
           class="elevation-8"
         >
@@ -37,9 +38,132 @@
             </tr>
           </template>
           <template v-slot:expand="props">
-            <v-card flat>
-              <v-card-text>Expanded row</v-card-text>
-            </v-card>
+            <tr>
+              <td>
+                <v-checkbox hide-details class="hidden"></v-checkbox>
+              </td>
+              <td align="rigth" width="20%">Name</td>
+              <td align="rigth" width="15%">Organism</td>
+              <td align="rigth" width="15%">Model</td>
+              <td align="rigth" width="15%">
+                <div class="link-list">
+                  <div
+                    v-for="(reactionKnockin, index) in props.item.design
+                      .reaction_knockins"
+                    :key="index"
+                  >
+                    <div v-if="index < 10">
+                      <a
+                        :href="
+                          reactionLink(reactionKnockin, props.item.method, true)
+                        "
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ getReactionId(reactionKnockin, props.item.method) }}
+                      </a>
+                    </div>
+                    <div v-if="index >= 10" :hidden="!showAllReactionKnockins">
+                      <a
+                        :href="
+                          reactionLink(reactionKnockin, props.item.method, true)
+                        "
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ getReactionId(reactionKnockin, props.item.method) }}
+                      </a>
+                    </div>
+                  </div>
+                  <div v-if="props.item.design.reaction_knockins.length > 10">
+                    <a
+                      @click="showAllReactionKnockins = true"
+                      :hidden="showAllReactionKnockins"
+                    >
+                      ...
+                    </a>
+                  </div>
+                </div>
+              </td>
+
+              <td align="rigth" width="15%">
+                <div class="link-list">
+                  <div
+                    v-for="(reactionKnockout, index) in props.item.design
+                    .reaction_knockouts"
+                  :key="index"
+                  >
+                    <div v-if="index < 10">
+                      <a
+                        :href="
+                          reactionLink(reactionKnockout, props.item.method, false)
+                        "
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ reactionKnockout }}
+                      </a>
+                    </div>
+                    <div v-if="index >= 10" :hidden="!showAllReactionKnockouts">
+                      <a
+                        :href="
+                          reactionLink(reactionKnockout, props.item.method, false)
+                        "
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ reactionKnockout }}
+                      </a>
+                    </div>
+                  </div>
+                  <div v-if="props.item.design.reaction_knockouts.length > 10">
+                    <a
+                      @click="showAllReactionKnockouts = true"
+                      :hidden="showAllReactionKnockouts"
+                    >
+                      ...
+                    </a>
+                  </div>
+                </div>
+              </td>
+
+              <td align="rigth" width="15%">
+                <div class="link-list">
+                  <div
+                  v-for="(geneKnockout, index) in props.item.design
+                    .gene_knockouts"
+                  :key="index"
+                  >
+                    <div v-if="index < 10">
+                      <a
+                        :href="geneLink(geneKnockout)"
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ geneKnockout }}
+                      </a>
+                    </div>
+                    <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
+                      <a
+                        :href="geneLink(geneKnockout)"
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ geneKnockout }}
+                      </a>
+                    </div>
+                  </div>
+                  <div v-if="props.item.design.gene_knockouts.length > 10">
+                    <a
+                      @click="showAllGeneKnockouts = true"
+                      :hidden="showAllGeneKnockouts"
+                    >
+                      ...
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>
           </template>
         </v-data-table>
       </v-flex>
@@ -56,6 +180,9 @@ export default Vue.extend({
   data: () => ({
     selected: [],
     expand: true,
+    showAllReactionKnockins: false,
+    showAllReactionKnockouts: false,
+    showAllGeneKnockouts: false,
     headers: [
       { text: "Name", value: "name", width: "20%" },
       { text: "Organism", value: "organism_id", width: "15%" },
@@ -68,6 +195,27 @@ export default Vue.extend({
       rowsPerPage: 10
     }
   }),
+  methods: {
+    getReactionId(reaction, method) {
+      if (method === "Pathway") {
+        return JSON.parse(reaction).bigg_id;
+      }
+      return reaction;
+    },
+    reactionLink(reaction, method, isReactionKnockin) {
+      const reactionId =
+        isReactionKnockin && method === "Pathway"
+          ? JSON.parse(reaction).bigg_id
+          : reaction;
+      if (reactionId.startsWith("MNX")) {
+        return `https://www.metanetx.org/equa_info/${reactionId}`;
+      }
+      return `http://bigg.ucsd.edu/search?query=${reactionId}`;
+    },
+    geneLink(geneId) {
+      return `http://bigg.ucsd.edu/search?query=${geneId}`;
+    }
+  },
   computed: {
     designs() {
       return this.$store.state.designs.designs;
@@ -79,3 +227,16 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style scoped>
+.hidden {
+  visibility: hidden;
+}
+.link {
+  text-decoration: none;
+}
+.link-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+</style>
