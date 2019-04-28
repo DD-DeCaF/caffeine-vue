@@ -39,6 +39,9 @@ chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin
 gcloud --quiet container clusters get-credentials dd-decaf
 
+# Build the static files
+npx vue-cli-service build --dest nginx/dist
+
 # Build the nginx image
 docker build -t ${IMAGE_REPO}:${TRAVIS_COMMIT::12} -t ${IMAGE_REPO}:${TRAVIS_BRANCH} nginx
 docker push ${IMAGE_REPO}:${TRAVIS_COMMIT::12}

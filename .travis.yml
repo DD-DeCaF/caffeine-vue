@@ -29,9 +29,6 @@ script:
   - npx vue-cli-service lint --no-fix
   - npx vue-cli-service test:unit
 
-after_success:
-  - npx vue-cli-service build --dest nginx/dist
-
 deploy:
   skip_cleanup: true
   provider: script
