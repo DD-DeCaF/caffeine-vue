@@ -15,6 +15,7 @@
           :items="designs"
           :expand="expand"
           :pagination.sync="pagination"
+          :custom-sort="customSort"
           select-all="primary"
           class="elevation-8"
         >
@@ -187,7 +188,7 @@ export default Vue.extend({
       { text: "Name", value: "name", width: "20%" },
       { text: "Organism", value: "organism_id", width: "15%" },
       { text: "Model", value: "model_id", width: "15%" },
-      { text: "Added reactions", value: "reactions_knockins", width: "15%" },
+      { text: "Added reactions", value: "reaction_knockins", width: "15%" },
       { text: "Reaction knockouts", value: "reaction_knockouts", width: "15%" },
       { text: "Gene knockouts", value: "gene_knockouts", width: "15%" }
     ],
@@ -196,6 +197,24 @@ export default Vue.extend({
     }
   }),
   methods: {
+    customSort(items, index, isDesc) {
+      items.sort((a, b) => {
+        if (index === "reaction_knockins" || index === "reaction_knockouts" || index === "gene_knockouts") {
+          if (!isDesc) {
+            return a['design'][index].length - b['design'][index].length;
+          } return b['design'][index].length - a['design'][index].length;
+        }
+        if (index === "organism_id") {
+          if (!isDesc) {
+            return this.organism(this.model(a.model_id).organism_id).name < this.organism(this.model(b.model_id).organism_id).name ? -1 : 1;
+          } return this.organism(this.model(b.model_id).organism_id).name < this.organism(this.model(a.model_id).organism_id).name ? -1 : 1;        
+        }
+          if (!isDesc) {
+            return a[index] < b[index] ? -1 : 1;
+          } return b[index] < a[index] ? -1 : 1;
+      });
+      return items;
+    },
     getReactionId(reaction, method) {
       if (method === "Pathway") {
         return JSON.parse(reaction).bigg_id;
