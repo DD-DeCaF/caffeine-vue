@@ -11,7 +11,7 @@
         >
           <template v-slot:items="props">
           <td>{{ props.item.name }}</td>
-          <td>{{ props.item.model_id }}</td>
+          <td>{{ model(props.item.model_id).name }}</td>
           <td>
             <v-tooltip bottom :disabled="isAuthenticated">
             <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
@@ -62,6 +62,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapGetters } from 'vuex';
 
 export default Vue.extend({
   name: "Maps",
@@ -72,7 +73,7 @@ export default Vue.extend({
             align: 'left',
             value: 'name'
           },
-          { text: 'Model', value: 'model' },
+          { text: 'Model', value: 'model_id' },
           { text: 'Actions', value: 'name', sortable: false }
         ],
     pagination: {
@@ -92,8 +93,10 @@ export default Vue.extend({
     },
     maps() {
       return this.$store.state.maps.maps
-    }
-
+    },
+    ...mapGetters({
+      model: "models/getModelById"
+    })
   }
 });
 </script>

@@ -93,7 +93,6 @@ export default Vue.extend({
     models() {
       return this.$store.state.models.models
     }
-
   }
 });
 </script>

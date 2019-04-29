@@ -1,6 +1,16 @@
 <template>
   <div id="app">
     <v-app>
+      <LoaderDialog
+            :loadingMessage="$store.state.loadingMessages.default"
+            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
+      />
+      <NewMap
+            :isMapCreationDialogVisible="$store.state.isDialogVisible.map"
+          />
+      <NewModel
+            :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
+          />
       <v-toolbar app clipped-left color="primary" dark>
         <v-toolbar-side-icon
           @click.stop="drawer = !drawer"
@@ -8,32 +18,6 @@
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
         <template>
-          All of this and the attached logic ought to be moved to the appropiate
-          sections later
-          <LoaderDialog
-            :loadingMessage="$store.state.loadingMessages.default"
-            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'map')"
-          >
-            <v-icon>add</v-icon>
-            New Map
-          </v-btn>
-          <NewMap
-            :isMapCreationDialogVisible="$store.state.isDialogVisible.map"
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'model')"
-          >
-            <v-icon>add</v-icon>
-            New Model
-          </v-btn>
-          <NewModel
-            :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
-          />
           <v-btn
             color="secondary"
             @click="$store.commit('toggleDialog', 'organism')"
