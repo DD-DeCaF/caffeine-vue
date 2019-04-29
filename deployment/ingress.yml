@@ -7,10 +7,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - caffeine-staging.dd-decaf.eu
+    - staging.dd-decaf.eu
     secretName: decaf-tls
   rules:
-  - host: caffeine-staging.dd-decaf.eu
+  - host: staging.dd-decaf.eu
     http:
       paths:
       - path: /
