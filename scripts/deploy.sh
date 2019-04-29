@@ -48,3 +48,4 @@ docker push ${IMAGE_REPO}:${TRAVIS_COMMIT::12}
 docker push ${IMAGE_REPO}:${TRAVIS_BRANCH}
 
 kubectl set image deployment/${DEPLOYMENT} web=${IMAGE_REPO}:${TRAVIS_COMMIT::12}
+curl -X POST --data-urlencode "payload={\"channel\": \"decaf-vue-rewrite\", \"username\": \"DeCaF Giraffe\", \"text\": \"Deployed Caffeine @ <https://staging.dd-decaf.eu|*${TRAVIS_COMMIT::8}*>\", \"icon_emoji\": \":decaf-giraffe:\"}" ${SLACK_WEBHOOK_URL}
