@@ -54,7 +54,7 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <v-card v-for="card in cards">
+        <v-card v-for="card in cards" :key="JSON.stringify(card)">
           <v-toolbar dense color="primary" dark>
             <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
             <v-spacer></v-spacer>
