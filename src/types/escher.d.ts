@@ -52,9 +52,9 @@ declare module "@dd-decaf/escher" {
   }
 
   export function Builder(
-    map_data?: PathwayMap,
-    model_data?: any,
-    embedded_css?: string,
+    map_data: PathwayMap | null,
+    model_data: any,
+    embedded_css: string | null,
     selection?: any,
     options?: any
   ): BuilderObject;
