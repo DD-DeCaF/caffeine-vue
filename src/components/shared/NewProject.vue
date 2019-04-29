@@ -80,6 +80,7 @@ export default Vue.extend({
   methods: {
     createProject() {
       this.$store.commit("toggleDialog", "loader");
+      const a = this.projectName.value;
       axios
         .post(`${settings.apis.iam}/projects`, { name: this.projectName.value })
         .then((response: AxiosResponse) => {

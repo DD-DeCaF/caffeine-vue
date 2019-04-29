@@ -6,8 +6,18 @@
         <v-btn flat color="primary" :disabled="selected.length < 1"
           ><v-icon>share</v-icon>VISUALIZE</v-btn
         >
-        <v-btn flat color="primary" :disabled="selected.length < 1"
-          ><v-icon>delete</v-icon>DELETE</v-btn
+        <v-btn
+          flat
+          color="primary"
+          @click.stop="isDeletionDialogVisible = true"
+          :disabled="selected.length < 1"
+        >
+          <DeletionDialog
+            v-model="isDeletionDialogVisible"
+            :items="selected"
+            itemsType="designs"
+            @toggleLoader="toggleLoader()"
+          /><v-icon>delete</v-icon>DELETE</v-btn
         >
         <v-data-table
           v-model="selected"
@@ -16,9 +26,14 @@
           :expand="expand"
           :pagination.sync="pagination"
           :custom-sort="customSort"
+          :loading="isLoading"
           select-all="primary"
           class="elevation-8"
         >
+          <v-progress-linear
+            v-slot:progress
+            color="primary"
+          ></v-progress-linear>
           <template v-slot:items="props">
             <tr @click="props.expanded = !props.expanded">
               <td @click.stop>
@@ -91,13 +106,17 @@
                 <div class="link-list">
                   <div
                     v-for="(reactionKnockout, index) in props.item.design
-                    .reaction_knockouts"
-                  :key="index"
+                      .reaction_knockouts"
+                    :key="index"
                   >
                     <div v-if="index < 10">
                       <a
                         :href="
-                          reactionLink(reactionKnockout, props.item.method, false)
+                          reactionLink(
+                            reactionKnockout,
+                            props.item.method,
+                            false
+                          )
                         "
                         class="link"
                         target="_blank"
@@ -108,7 +127,11 @@
                     <div v-if="index >= 10" :hidden="!showAllReactionKnockouts">
                       <a
                         :href="
-                          reactionLink(reactionKnockout, props.item.method, false)
+                          reactionLink(
+                            reactionKnockout,
+                            props.item.method,
+                            false
+                          )
                         "
                         class="link"
                         target="_blank"
@@ -131,9 +154,9 @@
               <td align="rigth" width="15%">
                 <div class="link-list">
                   <div
-                  v-for="(geneKnockout, index) in props.item.design
-                    .gene_knockouts"
-                  :key="index"
+                    v-for="(geneKnockout, index) in props.item.design
+                      .gene_knockouts"
+                    :key="index"
                   >
                     <div v-if="index < 10">
                       <a
@@ -184,6 +207,8 @@ export default Vue.extend({
     showAllReactionKnockins: false,
     showAllReactionKnockouts: false,
     showAllGeneKnockouts: false,
+    isDeletionDialogVisible: false,
+    isLoading: false,
     headers: [
       { text: "Name", value: "name", width: "20%" },
       { text: "Organism", value: "organism_id", width: "15%" },
@@ -199,19 +224,32 @@ export default Vue.extend({
   methods: {
     customSort(items, index, isDesc) {
       items.sort((a, b) => {
-        if (index === "reaction_knockins" || index === "reaction_knockouts" || index === "gene_knockouts") {
+        if (
+          index === "reaction_knockins" ||
+          index === "reaction_knockouts" ||
+          index === "gene_knockouts"
+        ) {
           if (!isDesc) {
-            return a['design'][index].length - b['design'][index].length;
-          } return b['design'][index].length - a['design'][index].length;
+            return a["design"][index].length - b["design"][index].length;
+          }
+          return b["design"][index].length - a["design"][index].length;
         }
         if (index === "organism_id") {
           if (!isDesc) {
-            return this.organism(this.model(a.model_id).organism_id).name < this.organism(this.model(b.model_id).organism_id).name ? -1 : 1;
-          } return this.organism(this.model(b.model_id).organism_id).name < this.organism(this.model(a.model_id).organism_id).name ? -1 : 1;        
+            return this.organism(this.model(a.model_id).organism_id).name <
+              this.organism(this.model(b.model_id).organism_id).name
+              ? -1
+              : 1;
+          }
+          return this.organism(this.model(b.model_id).organism_id).name <
+            this.organism(this.model(a.model_id).organism_id).name
+            ? -1
+            : 1;
         }
-          if (!isDesc) {
-            return a[index] < b[index] ? -1 : 1;
-          } return b[index] < a[index] ? -1 : 1;
+        if (!isDesc) {
+          return a[index] < b[index] ? -1 : 1;
+        }
+        return b[index] < a[index] ? -1 : 1;
       });
       return items;
     },
@@ -233,6 +271,9 @@ export default Vue.extend({
     },
     geneLink(geneId) {
       return `http://bigg.ucsd.edu/search?query=${geneId}`;
+    },
+    toggleLoader() {
+      this.isLoading = !this.isLoading;
     }
   },
   computed: {
