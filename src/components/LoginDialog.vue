@@ -145,7 +145,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import settings from "@/settings";
 import { JWT } from "@/store/session";
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import "firebase/auth";
 
 export default Vue.extend({
