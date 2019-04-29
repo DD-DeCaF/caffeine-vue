@@ -30,5 +30,10 @@ export default {
           commit("setFetchError", error, { root: true });
         });
     }
+  },
+  getters: {
+    getMapById: (state) => (id: number) => {
+      return state.maps.find(map => map.id === id);
+    }
   }
 };
