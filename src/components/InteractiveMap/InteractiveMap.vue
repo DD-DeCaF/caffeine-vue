@@ -4,6 +4,7 @@
       v-if="isLoadingMap"
       :indeterminate="true"
       class="my-0"
+      height="12"
     ></v-progress-linear>
     <div class="escher-container fill-height">
       <v-container fluid fill-height v-if="isInitializingEscher">
@@ -58,8 +59,16 @@
           <v-toolbar dense color="primary" dark>
             <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-icon>close</v-icon>
+            <v-btn flat icon>
+              <v-icon>close</v-icon>
+            </v-btn>
           </v-toolbar>
+          <v-progress-linear
+            :indeterminate="true"
+            v-if="card.isSimulating"
+            class="my-0"
+            height="3"
+          ></v-progress-linear>
           <v-card-title primary-title class="py-2">
             <v-layout justify-space-around>
               <v-btn flat icon>
@@ -92,7 +101,16 @@
                 Growth rate:
               </v-flex>
               <v-flex class="xs6 text-xs-right">
-                {{ card.growthRate }} <em>h<sup>-1</sup></em>
+                <div v-if="!card.isSimulating">
+                  {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
+                </div>
+                <div v-else>
+                  <v-progress-circular
+                    indeterminate
+                    size="12"
+                    :width="1"
+                  ></v-progress-circular>
+                </div>
               </v-flex>
             </v-layout>
           </v-card-title>
@@ -116,17 +134,13 @@ export default Vue.extend({
     isInitializingEscher: true,
     currentMapId: null,
     isLoadingMap: false,
-    cards: [
-      {
-        // TODO: Replace test card
-        name: "Design",
-        method: "pFBA",
-        model: { name: "iJO1366" },
-        organism: { name: "E. coli" },
-        growthRate: 0.874
-      }
-    ]
+    cards: []
   }),
+  filters: {
+    round(value) {
+      return value.toFixed(3);
+    }
+  },
   methods: {
     changeMap() {
       this.isLoadingMap = true;
@@ -138,6 +152,42 @@ export default Vue.extend({
           // progress spinners.
           this.escherBuilder.load_map(response.data.map);
           this.isLoadingMap = false;
+        })
+        .catch(error => {
+          // TODO: show snackbar
+        });
+    },
+    addCard(name, organism, model, method) {
+      const card = {
+        name: name,
+        organism: organism,
+        model: model,
+        method: method,
+        isSimulating: false,
+        growthRate: null
+      };
+      this.cards.push(card);
+      this.simulate(card);
+    },
+    simulate(card) {
+      card.isSimulating = true;
+      axios
+        .post(`${settings.apis.model}/simulate`, {
+          model_id: card.model.id,
+          method: card.method
+        })
+        .then(response => {
+          card.growthRate = response.data.growth_rate;
+          this.escherBuilder.set_reaction_data(response.data.flux_distribution);
+          this.escherBuilder._update_data(true, true);
+        })
+        .catch(error => {
+          // TODO: show snackbar
+          this.escherBuilder.set_reaction_data(null);
+          console.error(error);
+        })
+        .then(response => {
+          card.isSimulating = false;
         });
     },
     reactionState(id: string, type?: string) {
@@ -194,6 +244,11 @@ export default Vue.extend({
       zoom_extent_canvas: true,
       first_load_callback: () => {
         this.isInitializingEscher = false;
+        // TODO: Data might not be available at this point - need to latch onto
+        // the fetch action promise
+        const organism = this.$store.state.organisms.organisms[0];
+        const model = this.$store.state.models.models[2];
+        this.addCard("Design", organism, model, "pfba");
       },
       reaction_state: this.reactionState,
       tooltip_callbacks: {
