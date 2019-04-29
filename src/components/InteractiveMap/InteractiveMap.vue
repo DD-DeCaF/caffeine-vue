@@ -22,7 +22,7 @@
       <div ref="escher" class="fill-height"></div>
     </div>
     <v-navigation-drawer permanent right absolute>
-      <v-container fluid>
+      <v-container class="py-1">
         <!-- TODO: Grouped maps -->
         <!-- TODO: Select default map -->
         <v-select
@@ -35,6 +35,24 @@
           @change="changeMap"
         ></v-select>
       </v-container>
+      <v-divider></v-divider>
+      <v-container class="pa-0">
+        <v-layout justify-space-around>
+          <v-btn flat icon>
+            <v-icon>add</v-icon>
+          </v-btn>
+          <v-btn flat icon>
+            <v-icon>chevron_left</v-icon>
+          </v-btn>
+          <v-btn flat icon>
+            <v-icon>play_arrow</v-icon>
+          </v-btn>
+          <v-btn flat icon>
+            <v-icon>chevron_right</v-icon>
+          </v-btn>
+        </v-layout>
+      </v-container>
+      <v-divider></v-divider>
     </v-navigation-drawer>
   </div>
 </template>
