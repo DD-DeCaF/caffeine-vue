@@ -66,6 +66,27 @@ export default Vue.extend({
           this.escherBuilder.load_map(response.data.map);
           this.isLoadingMap = false;
         });
+    },
+    reactionState(id: string, type?: string) {
+      // TODO
+    },
+    handleKnockout(reactionId: string) {
+      // TODO
+    },
+    handleKnockoutGenes(reactionId: string) {
+      // TODO
+    },
+    handleSetAsObjective(reactionId: string) {
+      // TODO
+    },
+    handleChangeBounds(reactionId: string, lower: string, upper: string) {
+      // TODO
+    },
+    handleResetBounds(reactionId: string) {
+      // TODO
+    },
+    handleObjectiveDirection(reactionId: string) {
+      // TODO
     }
   },
   computed: {
@@ -94,13 +115,21 @@ export default Vue.extend({
       reaction_no_data_color: "#CBCBCB",
       reaction_no_data_size: 10,
       tooltip: "custom",
-      tooltip_callbacks: null,
       enable_editing: false,
       enable_fva_opacity: true,
       show_gene_reaction_rules: true,
       zoom_extent_canvas: true,
       first_load_callback: () => {
         this.isInitializingEscher = false;
+      },
+      reaction_state: this.reactionState,
+      tooltip_callbacks: {
+        knockout: this.handleKnockout,
+        knockoutGenes: this.handleKnockoutGenes,
+        setAsObjective: this.handleSetAsObjective,
+        changeBounds: this.handleChangeBounds,
+        resetBounds: this.handleResetBounds,
+        objectiveDirection: this.handleObjectiveDirection
       }
     });
   }
