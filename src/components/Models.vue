@@ -12,23 +12,33 @@
           <template v-slot:items="props">
           <td>{{ props.item.name }}</td>
           <td>
-            <v-tooltip bottom :disabled="isAuthenticated">
-            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
+            <v-tooltip bottom :disabled="isAuthenticated && props.item.project_id !== null">
+            <div v-if="!isAuthenticated">
+              <span> {{ $store.state.commonTooltipMessages.unauthenticated }} </span>
+            </div>
+            <div v-else-if="props.item.project_id === null">
+              <span> {{ $store.state.commonTooltipMessages.publicData }} </span>
+            </div>
             <v-icon
               slot="activator"
               @click="editItem(props.item)"
-              :disabled="!isAuthenticated"
+             :disabled="!isAuthenticated || props.item.project_id === null"
               v-bind:style="styleObject"
             >
               edit
             </v-icon>
             </v-tooltip>
-            <v-tooltip bottom :disabled="isAuthenticated">
-            <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
+            <v-tooltip bottom :disabled="isAuthenticated && props.item.project_id !== null">
+            <div v-if="!isAuthenticated">
+              <span> {{ $store.state.commonTooltipMessages.unauthenticated }} </span>
+            </div>
+            <div v-else-if="props.item.project_id === null">
+              <span> {{ $store.state.commonTooltipMessages.publicData }} </span>
+            </div>
             <v-icon
               slot="activator"
               @click="deleteItem(props.item)"
-              :disabled="!isAuthenticated"
+             :disabled="!isAuthenticated || props.item.project_id === null"
               v-bind:style="styleObject"
             >
               delete
@@ -38,7 +48,7 @@
         </template>
         </v-data-table>
          <v-tooltip bottom :disabled="isAuthenticated">
-          <span> {{ $store.state.commonTooltipMessages.unauthorized }} </span>
+          <span> {{ $store.state.commonTooltipMessages.unauthenticated }} </span>
         <v-btn
           slot="activator"
           fixed
@@ -92,7 +102,7 @@ export default Vue.extend({
     },
     models() {
       return this.$store.state.models.models
-    }
+    },
   }
 });
 </script>

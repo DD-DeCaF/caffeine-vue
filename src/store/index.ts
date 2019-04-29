@@ -37,7 +37,8 @@ export default new Vuex.Store({
       default: "Loading. Please wait."
     },
     commonTooltipMessages: {
-      unauthorized: "Please log in or register to use this functionality!"
+      unauthenticated: "Please log in or register to use this functionality!",
+      publicData: "Public data can not be modified."
     }
   },
   mutations: {
