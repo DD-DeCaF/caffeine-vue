@@ -53,6 +53,51 @@
         </v-layout>
       </v-container>
       <v-divider></v-divider>
+      <v-container>
+        <v-card v-for="card in cards">
+          <v-toolbar dense color="primary" dark>
+            <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-icon>close</v-icon>
+          </v-toolbar>
+          <v-card-title primary-title class="py-2">
+            <v-layout justify-space-around>
+              <v-btn flat icon>
+                <v-icon>info</v-icon>
+              </v-btn>
+              <v-btn flat icon>
+                <v-icon>edit</v-icon>
+              </v-btn>
+            </v-layout>
+            <v-layout wrap>
+              <v-flex class="xs6">
+                Organism:
+              </v-flex>
+              <v-flex class="xs6 text-xs-right">
+                {{ card.organism.name }}
+              </v-flex>
+              <v-flex class="xs6">
+                Model:
+              </v-flex>
+              <v-flex class="xs6 text-xs-right">
+                {{ card.model.name }}
+              </v-flex>
+              <v-flex class="xs6">
+                Method:
+              </v-flex>
+              <v-flex class="xs6 text-xs-right">
+                {{ card.method }}
+              </v-flex>
+              <v-flex class="xs6">
+                Growth rate:
+              </v-flex>
+              <v-flex class="xs6 text-xs-right">
+                {{ card.growthRate }} <em>h<sup>-1</sup></em>
+              </v-flex>
+            </v-layout>
+          </v-card-title>
+        </v-card>
+      </v-container>
     </v-navigation-drawer>
   </div>
 </template>
@@ -70,7 +115,17 @@ export default Vue.extend({
     escherBuilder: null,
     isInitializingEscher: true,
     currentMapId: null,
-    isLoadingMap: false
+    isLoadingMap: false,
+    cards: [
+      {
+        // TODO: Replace test card
+        name: "Design",
+        method: "pFBA",
+        model: { name: "iJO1366" },
+        organism: { name: "E. coli" },
+        growthRate: 0.874
+      }
+    ]
   }),
   methods: {
     changeMap() {
