@@ -35,7 +35,7 @@ export default {
     }
   },
   getters: {
-    getModelById: state => (id: number) => {
+    getModelById: (state) => (id: number) => {
       return state.models.find(model => model.id === id);
     }
   }
