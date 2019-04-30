@@ -83,7 +83,7 @@ export default Vue.extend({
           )
         )
         .then(
-          axios.spread(aaa => {
+          axios.spread(() => {
             this.isItemDeletionSuccess = true;
             this.$store.commit(`${this.itemsType}/delete`, ids);
           })

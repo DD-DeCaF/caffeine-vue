@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-layout justify-center>
-      <v-flex>
+      <v-flex md10>
         <h1 class="mb-2">Designs</h1>
         <div class="elevation-8">
           <v-list class="table-buttons">
@@ -199,7 +199,7 @@
                       </div>
                       <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
                         <a
-                          :href="geneLink(geneKnockout)"
+                          :href="`http://bigg.ucsd.edu/search?query=${geneKnockout}`"
                           class="link"
                           target="_blank"
                         >
@@ -299,9 +299,6 @@ export default Vue.extend({
         return `https://www.metanetx.org/equa_info/${reactionId}`;
       }
       return `http://bigg.ucsd.edu/search?query=${reactionId}`;
-    },
-    geneLink(geneId) {
-      return `http://bigg.ucsd.edu/search?query=${geneId}`;
     },
     toggleLoader() {
       this.isLoading = !this.isLoading;
