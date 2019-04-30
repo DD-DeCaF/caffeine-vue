@@ -190,7 +190,9 @@
                     >
                       <div v-if="index < 10">
                         <a
-                          :href="geneLink(geneKnockout)"
+                          :href="
+                            `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                          "
                           class="link"
                           target="_blank"
                         >
