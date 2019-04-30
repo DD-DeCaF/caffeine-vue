@@ -1,5 +1,9 @@
 <template>
   <v-container>
+    <EditMap
+      v-model="isMapEditDialogVisible"
+      :mapItem="selectedMapItem"
+    />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
@@ -22,17 +26,12 @@
             </div>
             <v-icon
               slot="activator"
-              @click="isMapEditDialogVisible = true"
+              @click="edit(props.item)"
               :disabled="!isAuthenticated || props.item.project_id === null"
               v-bind:style="styleObject"
             >
               edit
             </v-icon>
-            <EditMap
-              :isMapEditDialogVisible="isMapEditDialogVisible"
-              :selectedMapItem="props.item"
-              @toggleDialog="isMapEditDialogVisible = false"
-            />
             </v-tooltip>
             <v-tooltip bottom :disabled="isAuthenticated && props.item.project_id !== null">
             <div v-if="!isAuthenticated">
@@ -85,6 +84,7 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "Maps",
   data: () => ({
+    selectedMapItem: {id: 1, name: 'THIS IS A TEST', model_id: 4, project_id: 2},
     isMapEditDialogVisible: false,
     headers: [
           {
@@ -105,7 +105,12 @@ export default Vue.extend({
       'pointer-events': "auto"
     }
   }),
-  methods: {},
+  methods: {
+    edit(item) {
+      this.selectedMapItem = item;
+      this.isMapEditDialogVisible = true
+    }
+  },
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
