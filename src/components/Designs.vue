@@ -2,194 +2,225 @@
   <v-container>
     <v-layout justify-center>
       <v-flex>
-        <h1 class="mb-1">Designs</h1>
-        <v-btn flat color="primary" :disabled="selected.length < 1"
-          ><v-icon>share</v-icon>VISUALIZE</v-btn
-        >
-        <v-btn
-          flat
-          color="primary"
-          @click.stop="isDeletionDialogVisible = true"
-          :disabled="selected.length < 1"
-        >
-          <DeletionDialog
-            v-model="isDeletionDialogVisible"
-            :items="selected"
-            itemsType="designs"
-            @toggleLoader="toggleLoader()"
-          /><v-icon>delete</v-icon>DELETE</v-btn
-        >
-        <v-data-table
-          v-model="selected"
-          :headers="headers"
-          :items="designs"
-          :expand="expand"
-          :pagination.sync="pagination"
-          :custom-sort="customSort"
-          :loading="isLoading"
-          select-all="primary"
-          class="elevation-8"
-        >
-          <v-progress-linear
-            v-slot:progress
-            color="primary"
-          ></v-progress-linear>
-          <template v-slot:items="props">
-            <tr @click="props.expanded = !props.expanded">
-              <td @click.stop>
-                <v-checkbox
-                  v-model="props.selected"
+        <h1 class="mb-2">Designs</h1>
+        <div class="elevation-8">
+          <v-list class="table-buttons">
+            <v-list-tile>
+              <v-layout justify-end>
+                <v-btn flat color="primary" :disabled="selected.length < 1"
+                  ><v-icon>share</v-icon>VISUALIZE</v-btn
+                >
+                <v-btn
+                  flat
                   color="primary"
-                  hide-details
-                ></v-checkbox>
-              </td>
-              <td>{{ props.item.name }}</td>
-              <td>
-                {{ organism(model(props.item.model_id).organism_id).name }}
-              </td>
-              <td>{{ model(props.item.model_id).name }}</td>
-              <td>{{ props.item.design.reaction_knockins.length }}</td>
-              <td>{{ props.item.design.reaction_knockouts.length }}</td>
-              <td>{{ props.item.design.gene_knockouts.length }}</td>
-            </tr>
-          </template>
-          <template v-slot:expand="props">
-            <tr>
-              <td>
-                <v-checkbox hide-details class="hidden"></v-checkbox>
-              </td>
-              <td align="rigth" width="20%">Name</td>
-              <td align="rigth" width="15%">Organism</td>
-              <td align="rigth" width="15%">Model</td>
-              <td align="rigth" width="15%">
-                <div class="link-list">
-                  <div
-                    v-for="(reactionKnockin, index) in props.item.design
-                      .reaction_knockins"
-                    :key="index"
-                  >
-                    <div v-if="index < 10">
-                      <a
-                        :href="
-                          reactionLink(reactionKnockin, props.item.method, true)
-                        "
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ getReactionId(reactionKnockin, props.item.method) }}
-                      </a>
-                    </div>
-                    <div v-if="index >= 10" :hidden="!showAllReactionKnockins">
-                      <a
-                        :href="
-                          reactionLink(reactionKnockin, props.item.method, true)
-                        "
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ getReactionId(reactionKnockin, props.item.method) }}
-                      </a>
-                    </div>
-                  </div>
-                  <div v-if="props.item.design.reaction_knockins.length > 10">
-                    <a
-                      @click="showAllReactionKnockins = true"
-                      :hidden="showAllReactionKnockins"
+                  @click.stop="isDeletionDialogVisible = true"
+                  :disabled="selected.length < 1"
+                >
+                  <DeletionDialog
+                    v-model="isDeletionDialogVisible"
+                    :items="selected"
+                    itemsType="designs"
+                    @toggleLoader="toggleLoader()"
+                  /><v-icon>delete</v-icon>DELETE</v-btn
+                >
+              </v-layout>
+            </v-list-tile>
+          </v-list>
+          <v-data-table
+            v-model="selected"
+            :headers="headers"
+            :items="designs"
+            :expand="expand"
+            :pagination.sync="pagination"
+            :custom-sort="customSort"
+            :loading="isLoading"
+            select-all="primary"
+          >
+            <v-progress-linear
+              v-slot:progress
+              color="primary"
+            ></v-progress-linear>
+            <template v-slot:items="props">
+              <tr
+                @click="props.expanded = !props.expanded"
+                class="expandable-row"
+                :key="props.item.id"
+              >
+                <td @click.stop>
+                  <v-checkbox
+                    v-model="props.selected"
+                    color="primary"
+                    hide-details
+                  ></v-checkbox>
+                </td>
+                <td>{{ props.item.name }}</td>
+                <td>
+                  {{ organism(model(props.item.model_id).organism_id).name }}
+                </td>
+                <td>{{ model(props.item.model_id).name }}</td>
+                <td>{{ props.item.design.reaction_knockins.length }}</td>
+                <td>{{ props.item.design.reaction_knockouts.length }}</td>
+                <td>{{ props.item.design.gene_knockouts.length }}</td>
+              </tr>
+            </template>
+            <template v-slot:expand="props">
+              <tr>
+                <td>
+                  <v-checkbox hide-details class="hidden"></v-checkbox>
+                </td>
+                <td align="rigth" width="20%">Name</td>
+                <td align="rigth" width="15%">Organism</td>
+                <td align="rigth" width="15%">Model</td>
+                <td align="rigth" width="15%">
+                  <div class="link-list">
+                    <div
+                      v-for="(reactionKnockin, index) in props.item.design
+                        .reaction_knockins"
+                      :key="index"
                     >
-                      ...
-                    </a>
+                      <div v-if="index < 10">
+                        <a
+                          :href="
+                            reactionLink(
+                              reactionKnockin,
+                              props.item.method,
+                              true
+                            )
+                          "
+                          class="link"
+                          target="_blank"
+                        >
+                          {{
+                            getReactionId(reactionKnockin, props.item.method)
+                          }}
+                        </a>
+                      </div>
+                      <div
+                        v-if="index >= 10"
+                        :hidden="!showAllReactionKnockins"
+                      >
+                        <a
+                          :href="
+                            reactionLink(
+                              reactionKnockin,
+                              props.item.method,
+                              true
+                            )
+                          "
+                          class="link"
+                          target="_blank"
+                        >
+                          {{
+                            getReactionId(reactionKnockin, props.item.method)
+                          }}
+                        </a>
+                      </div>
+                    </div>
+                    <div v-if="props.item.design.reaction_knockins.length > 10">
+                      <a
+                        @click="showAllReactionKnockins = true"
+                        :hidden="showAllReactionKnockins"
+                      >
+                        ...
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </td>
+                </td>
 
-              <td align="rigth" width="15%">
-                <div class="link-list">
-                  <div
-                    v-for="(reactionKnockout, index) in props.item.design
-                      .reaction_knockouts"
-                    :key="index"
-                  >
-                    <div v-if="index < 10">
-                      <a
-                        :href="
-                          reactionLink(
-                            reactionKnockout,
-                            props.item.method,
-                            false
-                          )
-                        "
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ reactionKnockout }}
-                      </a>
-                    </div>
-                    <div v-if="index >= 10" :hidden="!showAllReactionKnockouts">
-                      <a
-                        :href="
-                          reactionLink(
-                            reactionKnockout,
-                            props.item.method,
-                            false
-                          )
-                        "
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ reactionKnockout }}
-                      </a>
-                    </div>
-                  </div>
-                  <div v-if="props.item.design.reaction_knockouts.length > 10">
-                    <a
-                      @click="showAllReactionKnockouts = true"
-                      :hidden="showAllReactionKnockouts"
+                <td align="rigth" width="15%">
+                  <div class="link-list">
+                    <div
+                      v-for="(reactionKnockout, index) in props.item.design
+                        .reaction_knockouts"
+                      :key="index"
                     >
-                      ...
-                    </a>
+                      <div v-if="index < 10">
+                        <a
+                          :href="
+                            reactionLink(
+                              reactionKnockout,
+                              props.item.method,
+                              false
+                            )
+                          "
+                          class="link"
+                          target="_blank"
+                        >
+                          {{ reactionKnockout }}
+                        </a>
+                      </div>
+                      <div
+                        v-if="index >= 10"
+                        :hidden="!showAllReactionKnockouts"
+                      >
+                        <a
+                          :href="
+                            reactionLink(
+                              reactionKnockout,
+                              props.item.method,
+                              false
+                            )
+                          "
+                          class="link"
+                          target="_blank"
+                        >
+                          {{ reactionKnockout }}
+                        </a>
+                      </div>
+                    </div>
+                    <div
+                      v-if="props.item.design.reaction_knockouts.length > 10"
+                    >
+                      <a
+                        @click="showAllReactionKnockouts = true"
+                        :hidden="showAllReactionKnockouts"
+                      >
+                        ...
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </td>
+                </td>
 
-              <td align="rigth" width="15%">
-                <div class="link-list">
-                  <div
-                    v-for="(geneKnockout, index) in props.item.design
-                      .gene_knockouts"
-                    :key="index"
-                  >
-                    <div v-if="index < 10">
-                      <a
-                        :href="geneLink(geneKnockout)"
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ geneKnockout }}
-                      </a>
-                    </div>
-                    <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
-                      <a
-                        :href="geneLink(geneKnockout)"
-                        class="link"
-                        target="_blank"
-                      >
-                        {{ geneKnockout }}
-                      </a>
-                    </div>
-                  </div>
-                  <div v-if="props.item.design.gene_knockouts.length > 10">
-                    <a
-                      @click="showAllGeneKnockouts = true"
-                      :hidden="showAllGeneKnockouts"
+                <td align="rigth" width="15%">
+                  <div class="link-list">
+                    <div
+                      v-for="(geneKnockout, index) in props.item.design
+                        .gene_knockouts"
+                      :key="index"
                     >
-                      ...
-                    </a>
+                      <div v-if="index < 10">
+                        <a
+                          :href="geneLink(geneKnockout)"
+                          class="link"
+                          target="_blank"
+                        >
+                          {{ geneKnockout }}
+                        </a>
+                      </div>
+                      <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
+                        <a
+                          :href="geneLink(geneKnockout)"
+                          class="link"
+                          target="_blank"
+                        >
+                          {{ geneKnockout }}
+                        </a>
+                      </div>
+                    </div>
+                    <div v-if="props.item.design.gene_knockouts.length > 10">
+                      <a
+                        @click="showAllGeneKnockouts = true"
+                        :hidden="showAllGeneKnockouts"
+                      >
+                        ...
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </div>
       </v-flex>
     </v-layout>
   </v-container>
@@ -298,5 +329,11 @@ export default Vue.extend({
 .link-list {
   max-height: 200px;
   overflow-y: auto;
+}
+.table-buttons {
+  width: 100%;
+}
+.expandable-row {
+  cursor: pointer;
 }
 </style>
