@@ -5,7 +5,7 @@
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Edit {{ selectedMapItem }}</h3>
+              <h3>Edit {{ editedMapItem.name }}</h3>
             </v-flex>
             <v-flex>
               <v-form
@@ -15,20 +15,19 @@
               >
                 <v-text-field
                   required
-                  v-model="mapName.value"
-                  :rules="mapName.rules"
+                  v-model="editedMapItem.name"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Favourite Map"
                 ></v-text-field>
                 <v-autocomplete
-                  return-object
                   required
-                  item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-text="selectedProject"
+                  v-model="editedMapItem.project_id"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
@@ -47,12 +46,12 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  return-object
-                  item-text="name"
-                  v-model="modelItem"
+                  item-text="selectedModel"
+                  v-model="editedMapItem.map_id"
                   :items="availableModels"
+                  :rules="[rules.required]"
                   persistent-hint
-                  name="map"
+                  name="model"
                   label="Model"
                   type="text"
                 >
@@ -100,7 +99,7 @@
       bottom
       :timeout="3000"
     >
-      {{ mapName.value }} successfully edited.
+      {{ mapItem.name }} successfully edited.
     </v-snackbar>
   </div>
 </template>
@@ -110,50 +109,37 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import settings from "@/settings";
+import { mapGetters } from 'vuex';
 
 export default Vue.extend({
   name: "EditMap",
-  props: ["isMapEditDialogVisible", "selectedMapItem"],
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    },
+    mapItem: {
+      required: true
+    }
+  },
   data: () => ({
-    valid: true,
+    valid: false,
     isMapEditSuccess: false,
     isInvalidCredentials: false,
     isUnauthorized: false,
     isNotFound: false,
     hasOtherError: false,
-    mapName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
-    },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    },
-    mapJSON: {
-      value: null,
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A map JSON is required."]
-    },
-    modelItem: {
-      value: null,
-      rules: [(v: string) => !!v || "A model is required."]
+    rules: {
+      required: value => !!value || "Required."
     }
   }),
   methods: {
-    editMap(map_id) {
-      const payload = {
-        name: 'XXX',
-        project_id: 'XXX'      
-      };
+    editMap() {
       axios
-      .put(`${settings.apis.maps}/maps`, payload)
+      .put(`${settings.apis.maps}/maps`, this.editedMapItem)
       .then((response: AxiosResponse) => {
         this.$store.commit("toggleDialog", "loader");
-        this.$store.commit("editMap", map_id);
+        this.$store.commit("editMap", this.editedMapItem.id);
       })
       .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -180,13 +166,31 @@ export default Vue.extend({
     },
     isVisible: {
       get: function() {
-        return this.isMapEditDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$emit('toggleDialog')
+        return value;
       }
-    }
+    },
+    editedMapItem: {
+      get: function() {
+        return this.mapItem
+      },
+      set: function(value: any) {
+        return value;
+      }
+    },
+    selectedProject() {
+      return this.project(this.editedMapItem.project_id);
+    },
+    selectedModel() {
+      return this.model(this.editedMapItem.model_id);
+    },
+    ...mapGetters({
+      project: "projects/getProjectById",
+      model: "models/getModelById"
+    })
   },
   watch: {}
 });
