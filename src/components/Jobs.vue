@@ -3,23 +3,23 @@
     <v-layout justify-center>
       <v-flex md8>
         <h1 class="mb-2">Jobs</h1>
-          <v-data-table
-            :headers="headers"
-            :items="jobs"
-            :pagination.sync="pagination"
-            must-sort
-            class="elevation-8"
-          >
-            <template v-slot:items="props">
-                <td>{{ props.item.product_name }}</td>
-                <td>
-                  {{ organism(model(props.item.model_id).organism_id).name }}
-                </td>
-                <td>{{ model(props.item.model_id).name }}</td>
-                <td>{{ props.item.status }}</td>
-                <td>{{ props.item.created | moment('D MMM YYYY, HH:mm') }}</td>
-            </template>
-          </v-data-table>
+        <v-data-table
+          :headers="headers"
+          :items="jobs"
+          :pagination.sync="pagination"
+          must-sort
+          class="elevation-8"
+        >
+          <template v-slot:items="props">
+            <td>{{ props.item.product_name }}</td>
+            <td>
+              {{ organism(model(props.item.model_id).organism_id).name }}
+            </td>
+            <td>{{ model(props.item.model_id).name }}</td>
+            <td>{{ props.item.status }}</td>
+            <td>{{ props.item.created | moment('D MMM YYYY, HH:mm') }}</td>
+          </template>
+        </v-data-table>
       </v-flex>
     </v-layout>
   </v-container>
@@ -42,7 +42,9 @@ export default Vue.extend({
       { text: "Started", value: "created" }
     ],
     pagination: {
-      rowsPerPage: 10
+      rowsPerPage: 10,
+      sortBy: "created",
+      descending: true
     }
   }),
   methods: {},
