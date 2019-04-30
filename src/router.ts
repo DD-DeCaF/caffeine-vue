@@ -4,6 +4,7 @@ import Home from "./components/Home.vue";
 import Designs from "./components/Designs.vue";
 import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
 import Jobs from "./components/Jobs.vue";
+import JobDetails from "./components/JobDetails.vue";
 
 Vue.use(Router);
 
@@ -30,6 +31,11 @@ export default new Router({
       path: "/jobs",
       name: "jobs",
       component: Jobs
+    },
+    {
+      path: "/jobs/:id",
+      name: "jobDetails",
+      component: JobDetails
     }
   ]
 });

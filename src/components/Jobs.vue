@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-layout justify-center>
-      <v-flex md8>
+      <v-flex md10>
         <h1 class="mb-2">Jobs</h1>
         <v-data-table
           :headers="headers"
@@ -18,6 +18,13 @@
             <td>{{ model(props.item.model_id).name }}</td>
             <td>{{ props.item.status }}</td>
             <td>{{ props.item.created | moment("D MMM YYYY, HH:mm") }}</td>
+            <td>
+              <router-link
+                :to="{ name: 'jobDetails', params: { id: props.item.id } }"
+                class="link"
+                ><v-btn color="primary" flat>Details</v-btn></router-link
+              >
+            </td>
           </template>
         </v-data-table>
       </v-flex>
@@ -35,11 +42,12 @@ export default Vue.extend({
   name: "Jobs",
   data: () => ({
     headers: [
-      { text: "Product", value: "product_name" },
-      { text: "Organism", value: "organism_id" },
-      { text: "Model", value: "model_id" },
-      { text: "State", value: "state" },
-      { text: "Started", value: "created" }
+      { text: "Product", value: "product_name", width: "20%" },
+      { text: "Organism", value: "organism_id", width: "20%" },
+      { text: "Model", value: "model_id", width: "15%" },
+      { text: "State", value: "state", width: "15%" },
+      { text: "Started", value: "created", width: "20%" },
+      { value: "details", width: "10%" }
     ],
     pagination: {
       rowsPerPage: 10,
@@ -59,3 +67,9 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style scoped>
+.link {
+  text-decoration: none;
+}
+</style>
