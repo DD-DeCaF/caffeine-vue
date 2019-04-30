@@ -17,7 +17,7 @@
                 </td>
                 <td>{{ model(props.item.model_id).name }}</td>
                 <td>{{ props.item.status }}</td>
-                <td>{{ props.item.created }}</td>
+                <td>{{ props.item.created | moment('D MMM YYYY, HH:mm') }}</td>
             </template>
           </v-data-table>
       </v-flex>
@@ -28,6 +28,8 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
+
+Vue.use(require("vue-moment"))
 
 export default Vue.extend({
   name: "Jobs",
