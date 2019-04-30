@@ -22,12 +22,17 @@
             </div>
             <v-icon
               slot="activator"
-              @click="editItem(props.item)"
+              @click="isMapEditDialogVisible = true"
               :disabled="!isAuthenticated || props.item.project_id === null"
               v-bind:style="styleObject"
             >
               edit
             </v-icon>
+            <EditMap
+              :isMapEditDialogVisible="isMapEditDialogVisible"
+              :selectedMapItem="props.item"
+              @toggleDialog="isMapEditDialogVisible = false"
+            />
             </v-tooltip>
             <v-tooltip bottom :disabled="isAuthenticated && props.item.project_id !== null">
             <div v-if="!isAuthenticated">
@@ -73,10 +78,14 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from 'vuex';
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import settings from "@/settings";
 
 export default Vue.extend({
   name: "Maps",
   data: () => ({
+    isMapEditDialogVisible: false,
     headers: [
           {
             text: 'Name',
