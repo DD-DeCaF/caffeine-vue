@@ -82,12 +82,10 @@ export default Vue.extend({
             )
           )
         )
-        .then(
-          axios.spread(() => {
-            this.isItemDeletionSuccess = true;
-            this.$store.commit(`${this.itemsType}/delete`, ids);
-          })
-        )
+        .then(response => {
+          this.isItemDeletionSuccess = true;
+          this.$store.commit(`${this.itemsType}/delete`, ids);
+        })
         .catch(error => {
           this.$store.commit("setDeleteError", error);
         })

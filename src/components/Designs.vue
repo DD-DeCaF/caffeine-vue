@@ -199,7 +199,9 @@
                       </div>
                       <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
                         <a
-                          :href="`http://bigg.ucsd.edu/search?query=${geneKnockout}`"
+                          :href="
+                            `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                          "
                           class="link"
                           target="_blank"
                         >
