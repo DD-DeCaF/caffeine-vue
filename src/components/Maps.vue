@@ -3,6 +3,13 @@
     <EditMap
       v-model="isMapEditDialogVisible"
       :mapItem="selectedMapItem"
+      :mapItemIndex="maps.indexOf(selectedMapItem)"
+    />
+    <DeletionDialog
+      v-model="isDeletionDialogVisible"
+      :items="[selectedMapItem]"
+      itemsType="maps"
+      @toggleLoader="toggleLoader()"
     />
     <v-layout justify-center>
       <v-flex md6>
@@ -15,7 +22,7 @@
         >
           <template v-slot:items="props">
           <td>{{ props.item.name }}</td>
-          <td>{{ model(props.item.model_id).name }}</td>
+          <td>{{ model(props.item.model_id).name }} </td>
           <td>
             <v-tooltip bottom :disabled="isAuthenticated && props.item.project_id !== null">
             <div v-if="!isAuthenticated">
@@ -26,7 +33,7 @@
             </div>
             <v-icon
               slot="activator"
-              @click="edit(props.item)"
+              @click="editItem(props.item)"
               :disabled="!isAuthenticated || props.item.project_id === null"
               v-bind:style="styleObject"
             >
@@ -84,8 +91,9 @@ import settings from "@/settings";
 export default Vue.extend({
   name: "Maps",
   data: () => ({
-    selectedMapItem: {id: 1, name: 'THIS IS A TEST', model_id: 4, project_id: 2},
+    selectedMapItem: {id: null, name: null, model_id: null, project_id: null},
     isMapEditDialogVisible: false,
+    isDeletionDialogVisible: false,
     headers: [
           {
             text: 'Name',
@@ -106,9 +114,13 @@ export default Vue.extend({
     }
   }),
   methods: {
-    edit(item) {
+    editItem(item) {
       this.selectedMapItem = item;
       this.isMapEditDialogVisible = true
+    },
+     deleteItem(item) {
+      this.selectedMapItem = item;
+      this.isDeletionDialogVisible = true
     }
   },
   computed: {
