@@ -36,7 +36,11 @@ export default {
   },
   getters: {
     getModelById: (state) => (id: number) => {
-      return state.models.find(model => model.id === id);
+      let model = state.models.find(model => model.id === id);
+      if (model === undefined) {
+        model = {name: "???"};
+      }
+      return model;
     }
   }
 };

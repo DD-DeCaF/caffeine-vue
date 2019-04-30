@@ -5,7 +5,7 @@
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Edit {{ editedMapItem.name }}</h3>
+              <h3>Edit {{ mapItem.name }}</h3>
             </v-flex>
             <v-flex>
               <v-form
@@ -15,7 +15,7 @@
               >
                 <v-text-field
                   required
-                  v-model="editedMapItem.name"
+                  v-model="mapItem.name"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -24,8 +24,9 @@
                 ></v-text-field>
                 <v-autocomplete
                   required
-                  item-text="selectedProject"
-                  v-model="editedMapItem.project_id"
+                  item-text="name"
+                  item-value="id"
+                  v-model="mapItem.project_id"
                   :items="availableProjects"
                   :rules="[rules.required]"
                   name="project"
@@ -46,8 +47,9 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  item-text="selectedModel"
-                  v-model="editedMapItem.map_id"
+                  item-text="name"
+                  item-value="id"
+                  v-model="mapItem.model_id"
                   :items="availableModels"
                   :rules="[rules.required]"
                   persistent-hint
@@ -78,7 +80,7 @@
           <v-btn
             color="secondary"
             flat
-            @click="isVisible = false"
+            @click.stop="isVisible = false"
             :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
@@ -119,6 +121,10 @@ export default Vue.extend({
       required: true
     },
     mapItem: {
+      required: true,
+      default: {id: null, name: null, model_id: null, project_id: null}
+    },
+    mapItemIndex: {
       required: true
     }
   },
@@ -136,10 +142,12 @@ export default Vue.extend({
   methods: {
     editMap() {
       axios
-      .put(`${settings.apis.maps}/maps`, this.editedMapItem)
+      .put(`${settings.apis.maps}/maps/${this.mapItem.id}`, this.mapItem)
       .then((response: AxiosResponse) => {
         this.$store.commit("toggleDialog", "loader");
-        this.$store.commit("editMap", this.editedMapItem.id);
+        this.$store.commit("maps/editMap", this.mapItem, this.mapItemIndex);
+        this.isMapEditSuccess = true;
+        this.isVisible = false;
       })
       .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -170,22 +178,8 @@ export default Vue.extend({
       },
       set: function(value) {
         this.$refs.form!.reset();
-        return value;
+        this.$emit("input", value);
       }
-    },
-    editedMapItem: {
-      get: function() {
-        return this.mapItem
-      },
-      set: function(value: any) {
-        return value;
-      }
-    },
-    selectedProject() {
-      return this.project(this.editedMapItem.project_id);
-    },
-    selectedModel() {
-      return this.model(this.editedMapItem.model_id);
     },
     ...mapGetters({
       project: "projects/getProjectById",

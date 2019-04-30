@@ -17,6 +17,9 @@ export default {
   mutations: {
     setMaps(state, maps: MapItem[]) {
       state.maps = maps;
+    },
+    editMap(state, editedMap: MapItem, editedIndex: number) {
+      Object.assign(this.state.maps[editedIndex], editedMap)
     }
   },
   actions: {
