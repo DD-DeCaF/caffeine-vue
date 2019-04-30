@@ -188,6 +188,10 @@
         or are you not logged in?
       </v-snackbar>
 
+      <v-snackbar color="error" v-model="hasDeleteDataError" :timeout="6000">
+        Sorry, we were unable to delete data. Please check if you are logged in.
+      </v-snackbar>
+
       <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
         Your session has expired and you have been logged out. Please log in
         again.
@@ -234,6 +238,14 @@ export default Vue.extend({
       },
       set(newValue) {
         this.$store.commit("setPostError", null);
+      }
+    },
+    hasDeleteDataError: {
+      get() {
+        return this.$store.state.deleteDataError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("setDeleteError", null);
       }
     }
   },

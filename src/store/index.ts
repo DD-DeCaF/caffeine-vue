@@ -25,6 +25,7 @@ export default new Vuex.Store({
   state: {
     fetchDataError: null,
     postDataError: null,
+    deleteDataError: null,
     isDialogVisible: {
       model: false,
       map: false,
@@ -43,6 +44,9 @@ export default new Vuex.Store({
     setPostError(state, error) {
       console.log(error);
       state.postDataError = error;
+    },
+    setDeleteError(state, error) {
+      state.deleteDataError = error;
     },
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];

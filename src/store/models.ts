@@ -33,5 +33,10 @@ export default {
           commit("setFetchError", error, { root: true });
         });
     }
+  },
+  getters: {
+    getModelById: state => (id: number) => {
+      return state.models.find(model => model.id === id);
+    }
   }
 };

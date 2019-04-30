@@ -30,6 +30,9 @@ export default {
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
       state.designs = designs;
+    },
+    delete(state, ids) {
+      state.designs = state.designs.filter(design => !ids.includes(design.id));
     }
   },
   actions: {

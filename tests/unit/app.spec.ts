@@ -10,6 +10,7 @@ const store = new Vuex.Store({
   state: {
     fetchDataError: null,
     postDataError: null,
+    deleteDataError: null,
     isDialogVisible: {
       loader: false
     },

@@ -34,5 +34,10 @@ export default {
           commit("setFetchError", error, { root: true });
         });
     }
+  },
+  getters: {
+    getOrganismById: state => (id: number) => {
+      return state.organisms.find(organism => organism.id === id);
+    }
   }
 };
