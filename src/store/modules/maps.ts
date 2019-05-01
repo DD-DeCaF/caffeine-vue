@@ -20,6 +20,9 @@ export default {
     },
     editMap(state, payload: any) {
       state.maps[payload.index] = payload.item;
+    },
+    addMap(state, map: MapItem) {
+      state.maps.push(map);
     }
   },
   actions: {

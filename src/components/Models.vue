@@ -316,7 +316,22 @@ export default Vue.extend({
       return this.$store.state.organisms.organisms;
     },
     availableReactions() {
-      return ["Biomass1", "Biomass2"];
+      // Fetch the serialized selected model and return its reactions
+      axios
+        .get(`${settings.apis.models}/models/${this.modelItem.id}`)
+        .then((response: AxiosResponse) => {
+          this.$store.commit("toggleDialog", "loader");
+          return response.data.model_serialized.reactions
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 404) {
+            this.isNotFound = true;
+            return null;
+          } else {
+            this.hasOtherError = true;
+            return null;
+          }
+        });
     }
   }
 });
