@@ -143,7 +143,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 import { JWT } from "@/store/session";
 import firebase from "firebase/app";
 import "firebase/auth";

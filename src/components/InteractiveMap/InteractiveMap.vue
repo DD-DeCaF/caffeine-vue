@@ -107,7 +107,7 @@ import Vue from "vue";
 import axios from "axios";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "InteractiveMap",
