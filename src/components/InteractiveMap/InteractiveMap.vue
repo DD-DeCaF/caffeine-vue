@@ -15,7 +15,6 @@
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
         <!-- TODO: Grouped maps -->
-        <!-- TODO: Select default map -->
         <v-select
           label="Selected Map"
           :items="maps"
@@ -136,6 +135,18 @@ export default Vue.extend({
     maps() {
       return this.$store.state.maps.maps;
     }
+  },
+  mounted() {
+    // Set the chosen map to the preferred default. Wait for a potential fetch
+    // request (important if the user navigates directly to this view).
+    this.$store.getters["maps/onData"](() => {
+      this.$store.state.maps.maps.forEach(map => {
+        if (map.model_id === 10 && map.name === "Central metabolism") {
+          this.currentMapId = map.id;
+          this.changeMap();
+        }
+      });
+    });
   }
 });
 </script>
