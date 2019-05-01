@@ -20,6 +20,11 @@ export default {
   mutations: {
     setModels(state, models: ModelItem[]) {
       state.models = models;
+    },
+    editModel(state, editedModel: ModelItem, editedIndex: number) {
+      let modelsCopy = state.models.copy();
+      modelsCopy[editedIndex] = editedModel;
+      state.models = modelsCopy;
     }
   },
   actions: {

@@ -19,7 +19,9 @@ export default {
       state.maps = maps;
     },
     editMap(state, editedMap: MapItem, editedIndex: number) {
-      Object.assign(this.state.maps[editedIndex], editedMap)
+      let mapsCopy = state.maps.copy();
+      mapsCopy[editedIndex] = editedMap;
+      state.maps = mapsCopy;
     }
   },
   actions: {
