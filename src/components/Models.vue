@@ -271,13 +271,12 @@ export default Vue.extend({
         )
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
-          this.$store.commit(
-            "models/editModel",
-            this.modelItem,
-            this.modelItemIndex
-          );
+          const payload = {
+            item: this.modelItem,
+            index: this.modelItemIndex
+          }
+          this.$store.commit("models/editModel", payload);
           this.isModelEditSuccess = true;
-          this.isModelEditDialogVisible = false;
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -292,6 +291,7 @@ export default Vue.extend({
         })
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
+          this.isModelEditDialogVisible = false;
         });
     }
   },

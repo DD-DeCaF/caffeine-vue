@@ -18,8 +18,8 @@ export default {
     setMaps(state, maps: MapItem[]) {
       state.maps = maps;
     },
-    editMap(state, editedMap: MapItem, editedIndex: number) {
-      state.maps[editedIndex] = editedMap;
+    editMap(state, payload: any) {
+      state.maps[payload.index] = payload.item;
     }
   },
   actions: {

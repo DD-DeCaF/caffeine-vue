@@ -249,9 +249,12 @@ export default Vue.extend({
         .put(`${settings.apis.maps}/maps/${this.mapItem.id}`, this.mapItem)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
-          this.$store.commit("maps/editMap", this.mapItem, this.mapItemIndex);
+          const payload = {
+            item: this.mapItem, 
+            index: this.mapItemIndex
+          }
+          this.$store.commit("maps/editMap", payload);
           this.isMapEditSuccess = true;
-          this.isMapEditDialogVisible = false;
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -266,6 +269,7 @@ export default Vue.extend({
         })
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
+          this.isMapEditDialogVisible = false;
         });
     }
   },
