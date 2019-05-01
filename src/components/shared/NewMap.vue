@@ -15,7 +15,7 @@
               >
                 <v-text-field
                   required
-                  v-model="mapItem.name"
+                  v-model="mapName"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -24,9 +24,10 @@
                 ></v-text-field>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-value="id"
-                  v-model="mapItem.project_id"
+                  v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
                   name="project"
@@ -47,9 +48,10 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-value="id"
-                  v-model="mapItem.model_id"
+                  v-model="model"
                   :items="availableModels"
                   :rules="[rules.required]"
                   persistent-hint
@@ -104,7 +106,7 @@
       </v-card>
     </v-dialog>
     <v-snackbar color="success" v-model="isMapCreationSuccess" :timeout="3000">
-      {{ mapItem.name }} successfully created.
+      {{ mapName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -125,13 +127,23 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    mapItem: { name: null, model_id: null, project_id: null, map: null }
+    mapName: null, 
+    model: {id: null}, 
+    project: {id: null}, 
+    map: null
   }),
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
+      const payload = {
+         name: this.mapName, 
+         model_id: this.model.id, 
+         project_id: this.project.id, 
+         map: this.map
+      }
+      console.log("Creating a map", payload)
       axios
-        .post(`${settings.apis.maps}/maps`, this.mapItem)
+        .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("maps/addMap", response.data);
           this.isVisible = false;
@@ -155,7 +167,7 @@ export default Vue.extend({
       const fileReader = new FileReader();
       // Is called when the readAsText operation below successfully completes
       fileReader.onload = () => {
-        this.mapItem.map = JSON.parse(fileReader.result as string);
+        this.map = JSON.parse(fileReader.result as string);
       };
       if (file) {
         // Read the file asynchroniously.
