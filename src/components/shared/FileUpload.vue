@@ -57,11 +57,11 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    rules:{
+    rules: {
       type: Array
     },
-    errorMessages:{
-      type: Array | String
+    errorMessages: {
+      type: [Array, String]
     }
   },
   data() {

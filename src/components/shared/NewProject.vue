@@ -71,10 +71,10 @@ export default Vue.extend({
   data: () => ({
     valid: true,
     isProjectCreationSuccess: false,
-    projectItem: {name: null},
+    projectItem: { name: null },
     rules: {
       required: value => !!value || "Required."
-    },
+    }
   }),
   methods: {
     createProject() {

@@ -11,7 +11,7 @@ import NewModel from "@/components/shared/NewModel.vue";
 import NewMap from "@/components/shared/NewMap.vue";
 import LoaderDialog from "@/components/shared/LoaderDialog.vue";
 import DeletionDialog from "@/components/shared/DeletionDialog.vue";
-import FileUpload from "@/components/shared/FileUpload.vue"
+import FileUpload from "@/components/shared/FileUpload.vue";
 
 Vue.config.productionTip = false;
 

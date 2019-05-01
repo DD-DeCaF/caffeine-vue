@@ -101,7 +101,8 @@ export default Vue.extend({
     },
     organismItem: {
       name: null,
-      project_id: null }
+      project_id: null
+    }
   }),
   methods: {
     createOrganism() {

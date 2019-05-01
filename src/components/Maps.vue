@@ -249,9 +249,9 @@ export default Vue.extend({
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const payload = {
-            item: this.mapItem, 
+            item: this.mapItem,
             index: this.mapItemIndex
-          }
+          };
           this.$store.commit("maps/editMap", payload);
           this.isMapEditSuccess = true;
         })
