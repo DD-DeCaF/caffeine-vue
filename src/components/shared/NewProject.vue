@@ -15,8 +15,8 @@
               >
                 <v-text-field
                   required
-                  v-model="projectName.value"
-                  :rules="projectName.rules"
+                  v-model="projectItem.name"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
@@ -52,10 +52,9 @@
     <v-snackbar
       color="success"
       v-model="isProjectCreationSuccess"
-      bottom
       :timeout="3000"
     >
-      {{ projectName.value }} successfully created.
+      {{ projectItem.name }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -72,19 +71,19 @@ export default Vue.extend({
   data: () => ({
     valid: true,
     isProjectCreationSuccess: false,
-    projectName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
+    projectItem: { name: null },
+    rules: {
+      required: value => !!value || "Required."
     }
   }),
   methods: {
     createProject() {
       this.$store.commit("toggleDialog", "loader");
       axios
-        .post(`${settings.apis.iam}/projects`, { name: this.projectName.value })
+        .post(`${settings.apis.iam}/projects`, this.projectItem)
         .then((response: AxiosResponse) => {
           const projectItem = Object.assign(
-            { name: this.projectName.value },
+            { name: this.projectItem.name },
             response.data
           );
           this.$store.commit("projects/addProject", projectItem);

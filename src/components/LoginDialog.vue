@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="isAuthenticated">
-      <v-btn color="secondary" depressed @click="logout">
+      <v-btn color="primary" depressed @click="logout">
         <v-icon>power_settings_new</v-icon>
         Log Out
       </v-btn>

@@ -77,10 +77,9 @@
             fab
             bottom
             right
-            large
             :disabled="!isAuthenticated"
             @click="$store.commit('toggleDialog', 'model')"
-            color="secondary"
+            color="primary"
             v-bind:style="styleObject"
           >
             <v-icon>add</v-icon>
@@ -274,7 +273,7 @@ export default Vue.extend({
           const payload = {
             item: this.modelItem,
             index: this.modelItemIndex
-          }
+          };
           this.$store.commit("models/editModel", payload);
           this.isModelEditSuccess = true;
         })

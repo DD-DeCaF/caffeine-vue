@@ -78,10 +78,9 @@
             fab
             bottom
             right
-            large
             :disabled="!isAuthenticated"
             @click="$store.commit('toggleDialog', 'map')"
-            color="secondary"
+            color="primary"
             v-bind:style="styleObject"
           >
             <v-icon>add</v-icon>
@@ -250,9 +249,9 @@ export default Vue.extend({
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const payload = {
-            item: this.mapItem, 
+            item: this.mapItem,
             index: this.mapItemIndex
-          }
+          };
           this.$store.commit("maps/editMap", payload);
           this.isMapEditSuccess = true;
         })
