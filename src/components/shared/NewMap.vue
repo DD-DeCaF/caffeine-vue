@@ -15,20 +15,20 @@
               >
                 <v-text-field
                   required
-                  v-model="mapName.value"
-                  :rules="mapName.rules"
+                  v-model="mapItem.name"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Favourite Map"
                 ></v-text-field>
                 <v-autocomplete
-                  return-object
                   required
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-value="id"
+                  v-model="mapItem.project_id"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
@@ -47,10 +47,11 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  return-object
                   item-text="name"
-                  v-model="modelItem"
+                  item-value="id"
+                  v-model="mapItem.model_id"
                   :items="availableModels"
+                  :rules="[rules.required]"
                   persistent-hint
                   name="map"
                   label="Model"
@@ -58,7 +59,6 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       color="secondary"
                       @click="$store.commit('toggleDialog', 'model')"
@@ -68,17 +68,13 @@
                     </v-btn>
                   </template>
                 </v-autocomplete>
-                <v-text-field
-                  required
-                  v-model="mapJSON.value"
-                  :rules="mapJSON.rules"
-                  name="name"
-                  label="JSON Map"
-                  type="file"
-                  placeholder="e.g. My Favourite Map"
-                  accept=".json"
-                >
-                </v-text-field>
+                <FileUpload 
+                v-model="filename" 
+                @formData="loadFile"
+                :label="'Upload JSON map'"
+                :required="true" 
+                :rules="[rules.required]"/>
+                <!-- <input type="file" accept=".json" @change="changeFile"> -->
               </v-form>
             </v-flex>
           </v-layout>
@@ -112,7 +108,7 @@
       bottom
       :timeout="3000"
     >
-      {{ mapName.value }} successfully created.
+      {{ mapItem.name }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -127,38 +123,19 @@ export default Vue.extend({
   name: "NewMap",
   props: ["isMapCreationDialogVisible"],
   data: () => ({
+    formData: null,
+    filename: null,
     valid: true,
     isMapCreationSuccess: false,
-    mapName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
+    rules: {
+      required: value => !!value || "Required."
     },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    },
-    mapJSON: {
-      value: null,
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A map JSON is required."]
-    },
-    modelItem: {
-      value: null,
-      rules: [(v: string) => !!v || "A model is required."]
-    }
+    mapItem: { id: null, name: null, model_id: null, project_id: null, map: null },
   }),
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = {
-        name: this.mapName.value,
-        organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id
-      };
+      console.log(this.mapItem)
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
@@ -173,9 +150,25 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     },
-    uploadFile() {
-      console.log("This was uploaded.");
+  // A great tutorial for the inner workings of the following function can be found at
+  // https://alligator.io/vuejs/file-reader-component/  
+  loadFile($event): void {
+    // FileUpload emits an event which contains a FormData object, which itself contains
+    // a list of Files. Since FileUpload is limited to accepting only a single
+    // file we only concern ourselves with the first element of that list.
+    const file = $event[0].get("data");
+    // Create a new instance of FileReader
+    const fileReader = new FileReader();
+    // Is called when the readAsText operation below successfully completes
+    fileReader.onload = () => {
+        this.mapItem.map = JSON.parse(fileReader.result as string);
+    };
+    if (file) {
+       // Read the file asynchroniously. 
+       // When it completes sucessfully the onload event defined above can access the data.
+      fileReader.readAsText(file);
     }
+  }
   },
   computed: {
     availableProjects() {
