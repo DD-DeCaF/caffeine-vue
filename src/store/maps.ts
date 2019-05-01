@@ -37,7 +37,7 @@ export default {
     }
   },
   getters: {
-    getMapById: (state) => (id: number) => {
+    getMapById: state => (id: number) => {
       return state.maps.find(map => map.id === id);
     }
   }

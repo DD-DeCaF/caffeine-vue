@@ -33,7 +33,7 @@ export default {
     }
   },
   getters: {
-    getProjectById: (state) => (id: number) => {
+    getProjectById: state => (id: number) => {
       return state.projects.find(project => project.id === id);
     }
   }

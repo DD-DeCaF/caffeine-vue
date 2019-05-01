@@ -2,15 +2,13 @@
   <div id="app">
     <v-app>
       <LoaderDialog
-            :loadingMessage="$store.state.loadingMessages.default"
-            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
+        :loadingMessage="$store.state.loadingMessages.default"
+        :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
       />
-      <NewMap
-            :isMapCreationDialogVisible="$store.state.isDialogVisible.map"
-          />
+      <NewMap :isMapCreationDialogVisible="$store.state.isDialogVisible.map" />
       <NewModel
-            :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
-          />
+        :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
+      />
       <v-toolbar app clipped-left color="primary" dark>
         <v-toolbar-side-icon
           @click.stop="drawer = !drawer"
@@ -81,7 +79,9 @@
                 <v-list-tile-title>Design</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ $store.state.commonTooltipMessages.unauthenticated }} </span>
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}
+            </span>
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -98,7 +98,9 @@
                 <v-list-tile-title>Jobs</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ $store.state.commonTooltipMessages.unauthenticated }} </span>
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}
+            </span>
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -115,7 +117,9 @@
                 <v-list-tile-title>Designs</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{ $store.state.commonTooltipMessages.unauthenticated }}</span>
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}</span
+            >
           </v-tooltip>
 
           <v-tooltip bottom :disabled="isAuthenticated">
@@ -132,7 +136,9 @@
                 <v-list-tile-title>Projects</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <span> {{$store.state.commonTooltipMessages.unauthenticated }}</span>
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}</span
+            >
           </v-tooltip>
 
           <v-list-tile to="/maps">
@@ -193,7 +199,7 @@ export default Vue.extend({
     LoginDialog
   },
   data: () => ({
-    drawer: false,
+    drawer: false
   }),
   computed: {
     isAuthenticated() {
