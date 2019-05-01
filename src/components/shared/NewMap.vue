@@ -104,7 +104,6 @@
     <v-snackbar
       color="success"
       v-model="isMapCreationSuccess"
-      bottom
       :timeout="3000"
     >
       {{ mapItem.name }} successfully created.
@@ -128,12 +127,11 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    mapItem: { id: null, name: null, model_id: null, project_id: null, map: null },
+    mapItem: { name: null, model_id: null, project_id: null, map: null },
   }),
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
-      console.log(this.mapItem)
       axios
         .post(`${settings.apis.maps}/maps`, this.mapItem)
         .then((response: AxiosResponse) => {

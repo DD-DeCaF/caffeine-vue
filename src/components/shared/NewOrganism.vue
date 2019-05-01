@@ -16,8 +16,8 @@
                 <v-text-field
                   autofocus
                   required
-                  v-model="organismName.value"
-                  :rules="organismName.rules"
+                  v-model="organismItem.name"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
@@ -27,9 +27,10 @@
                   return-object
                   required
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-id="id"
+                  v-model="organismItem.project_id"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
@@ -76,10 +77,9 @@
     <v-snackbar
       color="success"
       v-model="isOrganismCreationSuccess"
-      bottom
       :timeout="3000"
     >
-      {{ organismName.value }} successfully created.
+      {{ organismItem.name }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -96,29 +96,18 @@ export default Vue.extend({
   data: () => ({
     valid: true,
     isOrganismCreationSuccess: false,
-    isProjectCreationDialogVisible: false,
-    organismName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
+    rules: {
+      required: value => !!value || "Required."
     },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    }
+    organismItem: {
+      name: null,
+      project_id: null }
   }),
   methods: {
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = {
-        name: this.organismName.value,
-        project_id: this.projectItemValidation.projectItem.id
-      };
       axios
-        .post(`${settings.apis.warehouse}/organisms`, payload)
+        .post(`${settings.apis.warehouse}/organisms`, this.organismItem)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
           this.isVisible = false;

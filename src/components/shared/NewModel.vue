@@ -143,7 +143,6 @@
     <v-snackbar
       color="success"
       v-model="isModelCreationSuccess"
-      bottom
       :timeout="3000"
     >
       {{ modelItem.name }} successfully created.
@@ -168,24 +167,18 @@ export default Vue.extend({
       required: value => !!value || "Required."
     },
     modelItem: { 
-      id: null, 
       name: null,
       model: null, 
       map_id: null, 
       project_id: null, 
       organism_id: null,
-      default_biomass_reaction: null },
+      default_biomass_reaction: null }
   }),
   methods: {
     createModel() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = {
-        name: this.modelItem.value,
-        organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id
-      };
       axios
-        .post(`${settings.apis.modelStorage}/models`, payload)
+        .post(`${settings.apis.modelStorage}/models`, this.modelItem)
         .then((response: AxiosResponse) => {
           this.$store.commit("models/addModel", response.data);
           this.isVisible = false;
