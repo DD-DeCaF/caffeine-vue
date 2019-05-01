@@ -1,15 +1,27 @@
 <template>
   <div class="escher-container fill-height">
-    <v-container fluid fill-height v-if="initializingEscher !== null">
+    <v-container
+      fluid
+      fill-height
+      class="overlay"
+      v-if="initializingEscher !== null || isLoadingMap"
+    >
       <v-layout align-center justify-center>
-        <p class="display-1">
-          <v-progress-circular
-            indeterminate
-            size="60"
-            :width="2"
-            class="mr-2"
-          ></v-progress-circular>
-          Initializing Escher, please wait...
+        <v-progress-circular
+          indeterminate
+          size="40"
+          :width="2"
+          class="mr-2"
+          color="white"
+        ></v-progress-circular>
+        <p
+          class="display-1 white--text mb-0"
+          v-if="initializingEscher !== null"
+        >
+          Initializing Escher...
+        </p>
+        <p class="display-1 white--text mb-0" v-if="isLoadingMap">
+          Loading map...
         </p>
       </v-layout>
     </v-container>
@@ -27,15 +39,21 @@ export default Vue.extend({
   props: ["mapData", "fluxDistribution"],
   data: () => ({
     escherBuilder: null,
-    initializingEscher: null
+    initializingEscher: null,
+    isLoadingMap: false
   }),
   watch: {
     mapData(value) {
       const loadMap = () => {
-        // Note that this will freeze the entire application, including
-        // progress spinners.
-        this.escherBuilder.load_map(value);
-        this.$emit("map-loaded");
+        this.isLoadingMap = true;
+        // Delay the actual loading of the map to give Vue time to update the
+        // interface (after setting isLoadingMap to true). Otherwise, Escher
+        // would freeze execution until it's complete and the user would never
+        // actually see the loading message.
+        setTimeout(() => {
+          this.escherBuilder.load_map(value);
+          this.isLoadingMap = false;
+        }, 10);
       };
 
       // Wait for escher to initialize before loading the map.
@@ -118,3 +136,13 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.15);
+}
+</style>

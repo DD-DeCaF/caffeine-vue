@@ -1,14 +1,7 @@
 <template>
   <div class="interactive-map fill-height">
-    <v-progress-linear
-      v-if="isLoadingMap"
-      :indeterminate="true"
-      class="my-0"
-      height="12"
-    ></v-progress-linear>
     <Escher
       @escher-loaded="escherLoaded"
-      @map-loaded="mapLoaded"
       :fluxDistribution="fluxDistribution"
       :mapData="mapData"
     />
@@ -21,7 +14,6 @@
           item-text="name"
           item-value="id"
           v-model="currentMapId"
-          :disabled="isLoadingMap"
           @change="changeMap"
         ></v-select>
       </v-container>
@@ -66,7 +58,6 @@ export default Vue.extend({
   data: () => ({
     escherBuilder: null,
     currentMapId: null,
-    isLoadingMap: false,
     fluxDistribution: null,
     mapData: null,
     cards: []
@@ -80,7 +71,6 @@ export default Vue.extend({
       this.addCard("Design", organism, model, "pfba");
     },
     changeMap() {
-      this.isLoadingMap = true;
       // TODO: Get map from maps state lazy loader
       axios
         .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
@@ -89,11 +79,7 @@ export default Vue.extend({
         })
         .catch(error => {
           // TODO: show snackbar
-          this.isLoadingMap = false;
         });
-    },
-    mapLoaded() {
-      this.isLoadingMap = false;
     },
     addCard(name, organism, model, method) {
       const card = {
