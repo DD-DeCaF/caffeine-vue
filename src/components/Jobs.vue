@@ -16,7 +16,20 @@
               {{ organism(model(props.item.model_id).organism_id).name }}
             </td>
             <td>{{ model(props.item.model_id).name }}</td>
-            <td>{{ props.item.status }}</td>
+            <td>
+              {{ props.item.status }}
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                class="ml-2"
+                :width="3"
+                :size="25"
+                v-if="
+                  props.item.status === 'STARTED' ||
+                    props.item.status === 'PENDING'
+                "
+              ></v-progress-circular>
+            </td>
             <td>{{ props.item.created | moment("D MMM YYYY, HH:mm") }}</td>
             <td>
               <router-link
@@ -42,10 +55,10 @@ export default Vue.extend({
   name: "Jobs",
   data: () => ({
     headers: [
-      { text: "Product", value: "product_name", width: "20%" },
+      { text: "Product", value: "product_name", width: "15%" },
       { text: "Organism", value: "organism_id", width: "20%" },
       { text: "Model", value: "model_id", width: "15%" },
-      { text: "State", value: "state", width: "15%" },
+      { text: "State", value: "state", width: "20%" },
       { text: "Started", value: "created", width: "25%" },
       { value: "details", width: "5%" }
     ],
