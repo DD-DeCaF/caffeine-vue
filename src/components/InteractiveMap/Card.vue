@@ -1,9 +1,15 @@
 <template>
-  <v-card>
-    <v-toolbar dense color="primary" dark>
+  <v-card class="mb-2">
+    <v-toolbar
+      dense
+      :color="color"
+      dark
+      :class="{ clickable: !card.isSelected }"
+      @click="selectCard"
+    >
       <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn flat icon>
+      <v-btn flat icon v-if="!isLastCard" @click="removeCard">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>
@@ -13,7 +19,7 @@
       class="my-0"
       height="3"
     ></v-progress-linear>
-    <v-card-title primary-title class="py-2">
+    <v-card-title primary-title class="py-2" v-if="card.isSelected">
       <v-layout justify-space-around>
         <v-btn flat icon>
           <v-icon>info</v-icon>
@@ -68,11 +74,34 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "Card",
-  props: ["card"],
+  props: ["card", "isLastCard"],
   filters: {
     round(value) {
       return value.toFixed(3);
     }
+  },
+  computed: {
+    color() {
+      if (this.card.isSelected) {
+        return "primary";
+      } else {
+        return "grey";
+      }
+    }
+  },
+  methods: {
+    selectCard() {
+      this.$emit("select-card", this.card);
+    },
+    removeCard() {
+      this.$emit("remove-card", this.card);
+    }
   }
 });
 </script>
+
+<style>
+.clickable {
+  cursor: pointer;
+}
+</style>

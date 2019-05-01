@@ -21,7 +21,7 @@
       <v-container class="pa-0">
         <v-layout justify-space-around>
           <v-btn flat icon>
-            <v-icon>add</v-icon>
+            <v-icon @click="addDefaultCard">add</v-icon>
           </v-btn>
           <v-btn flat icon>
             <v-icon>chevron_left</v-icon>
@@ -36,7 +36,14 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <Card v-for="card in cards" :key="JSON.stringify(card)" :card="card" />
+        <Card
+          v-for="card in cards"
+          :key="cards.indexOf(card)"
+          :card="card"
+          :isLastCard="cards.length === 1"
+          @select-card="selectCard"
+          @remove-card="removeCard"
+        />
       </v-container>
     </v-navigation-drawer>
   </div>
@@ -66,9 +73,7 @@ export default Vue.extend({
     escherLoaded() {
       // TODO: Data might not be available at this point - need to latch onto
       // the fetch action promise
-      const organism = this.$store.state.organisms.organisms[0];
-      const model = this.$store.state.models.models[2];
-      this.addCard("Design", organism, model, "pfba");
+      this.addDefaultCard();
     },
     changeMap() {
       // TODO: Get map from maps state lazy loader
@@ -81,6 +86,12 @@ export default Vue.extend({
           // TODO: show snackbar
         });
     },
+    addDefaultCard() {
+      // TODO: Don't hardcode indices
+      const organism = this.$store.state.organisms.organisms[0];
+      const model = this.$store.state.models.models[2];
+      this.addCard("Design", organism, model, "pfba");
+    },
     addCard(name, organism, model, method) {
       const card = {
         name: name,
@@ -88,10 +99,21 @@ export default Vue.extend({
         model: model,
         method: method,
         isSimulating: false,
-        growthRate: null
+        growthRate: null,
+        isSelected: false
       };
       this.cards.push(card);
+      this.selectCard(card);
       this.simulate(card);
+    },
+    removeCard(card) {
+      this.cards.splice(this.cards.indexOf(card), 1);
+    },
+    selectCard(card) {
+      this.cards.forEach(card => {
+        card.isSelected = false;
+      });
+      card.isSelected = true;
     },
     simulate(card) {
       card.isSimulating = true;
@@ -120,6 +142,11 @@ export default Vue.extend({
   computed: {
     maps() {
       return this.$store.state.maps.maps;
+    },
+    selectedCard() {
+      return this.cards.find(card => {
+        return card.isSelected;
+      });
     }
   },
   mounted() {
