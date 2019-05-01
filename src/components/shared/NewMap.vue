@@ -74,7 +74,6 @@
                 :label="'Upload JSON map'"
                 :required="true" 
                 :rules="[rules.required]"/>
-                <!-- <input type="file" accept=".json" @change="changeFile"> -->
               </v-form>
             </v-flex>
           </v-layout>
@@ -123,7 +122,6 @@ export default Vue.extend({
   name: "NewMap",
   props: ["isMapCreationDialogVisible"],
   data: () => ({
-    formData: null,
     filename: null,
     valid: true,
     isMapCreationSuccess: false,
