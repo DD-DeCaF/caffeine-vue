@@ -55,66 +55,7 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <v-card v-for="card in cards" :key="JSON.stringify(card)">
-          <v-toolbar dense color="primary" dark>
-            <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn flat icon>
-              <v-icon>close</v-icon>
-            </v-btn>
-          </v-toolbar>
-          <v-progress-linear
-            :indeterminate="true"
-            v-if="card.isSimulating"
-            class="my-0"
-            height="3"
-          ></v-progress-linear>
-          <v-card-title primary-title class="py-2">
-            <v-layout justify-space-around>
-              <v-btn flat icon>
-                <v-icon>info</v-icon>
-              </v-btn>
-              <v-btn flat icon>
-                <v-icon>edit</v-icon>
-              </v-btn>
-            </v-layout>
-            <v-layout wrap>
-              <v-flex class="xs6">
-                Organism:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.organism.name }}
-              </v-flex>
-              <v-flex class="xs6">
-                Model:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.model.name }}
-              </v-flex>
-              <v-flex class="xs6">
-                Method:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.method }}
-              </v-flex>
-              <v-flex class="xs6">
-                Growth rate:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                <div v-if="!card.isSimulating">
-                  {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
-                </div>
-                <div v-else>
-                  <v-progress-circular
-                    indeterminate
-                    size="12"
-                    :width="1"
-                  ></v-progress-circular>
-                </div>
-              </v-flex>
-            </v-layout>
-          </v-card-title>
-        </v-card>
+        <Card v-for="card in cards" :key="JSON.stringify(card)" :card="card" />
       </v-container>
     </v-navigation-drawer>
   </div>
@@ -126,9 +67,13 @@ import axios from "axios";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
 import * as settings from "@/settings";
+import Card from "@/components/InteractiveMap/Card.vue";
 
 export default Vue.extend({
   name: "InteractiveMap",
+  components: {
+    Card
+  },
   data: () => ({
     escherBuilder: null,
     isInitializingEscher: true,
@@ -136,11 +81,6 @@ export default Vue.extend({
     isLoadingMap: false,
     cards: []
   }),
-  filters: {
-    round(value) {
-      return value.toFixed(3);
-    }
-  },
   methods: {
     changeMap() {
       this.isLoadingMap = true;
