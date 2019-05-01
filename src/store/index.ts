@@ -1,13 +1,13 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import session from "./session";
-import designs from "./designs";
-import experiments from "./experiments";
-import jobs from "./jobs";
-import maps from "./maps";
-import models from "./models";
-import organisms from "./organisms";
-import projects from "./projects";
+import session from "./modules/session";
+import designs from "./modules/designs";
+import experiments from "./modules/experiments";
+import jobs from "./modules/jobs";
+import maps from "./modules/maps";
+import models from "./modules/models";
+import organisms from "./modules/organisms";
+import projects from "./modules/projects";
 
 Vue.use(Vuex);
 
