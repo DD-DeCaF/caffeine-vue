@@ -71,6 +71,7 @@
                 <FileUpload 
                 v-model="filename" 
                 @formData="loadFile"
+                :accept="'.json'"
                 :label="'Upload JSON map'"
                 :required="true" 
                 :rules="[rules.required]"/>

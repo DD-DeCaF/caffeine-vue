@@ -3,7 +3,7 @@
 This is a temporary workaround suggested by @Dohomi on this vuetify issue:
 https://github.com/vuetifyjs/vuetify/issues/238 or more specifically this gist:
 https://gist.github.com/dohomi/2bba9e2905d00cd1cec9c09cfd87bd10
-I've modified it to accept 
+I've modified it to accept additional props relevant for Caffeine.
 -->
   <div>
     <v-text-field
@@ -14,6 +14,7 @@ I've modified it to accept
       :rules="rules"
       @click.native="onFocus"
       :disabled="disabled"
+      :error-messages="errorMessages"
       ref="fileTextField"
     ></v-text-field>
     <input
@@ -58,6 +59,9 @@ export default Vue.extend({
     },
     rules:{
       type: Array
+    },
+    errorMessages:{
+      type: Array | String
     }
   },
   data() {
