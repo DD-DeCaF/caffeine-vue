@@ -20,20 +20,20 @@
               >
                 <v-text-field
                   required
-                  v-model="modelName.value"
-                  :rules="modelName.rules"
+                  v-model="modelItem.name"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Favourite Model"
                 ></v-text-field>
                 <v-autocomplete
-                  return-object
                   required
                   item-text="name"
-                  v-model="organismItemValidation.projectItem"
+                  item-id="id"
+                  v-model="modelItem.organism_id"
                   :items="availableOrganisms"
-                  :rules="organismItemValidation.rules"
+                  :rules="[rules.required]"
                   name="organism"
                   label="Organism"
                   type="text"
@@ -50,12 +50,12 @@
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
-                  return-object
                   required
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-id="id"
+                  v-model="modelItem.project_id"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
@@ -73,9 +73,9 @@
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
-                  return-object
                   item-text="name"
-                  v-model="mapItem"
+                  item-id="id"
+                  v-model="modelItem.map_id"
                   :items="availableMaps"
                   hint="The default map displayed on the Interactive Map, optional"
                   persistent-hint
@@ -94,25 +94,18 @@
                     </v-btn>
                   </template>
                 </v-autocomplete>
-                <!-- <FileUpload v-model="filename" @formData="formData"> This is working?! </FileUpload>
-                <v-btn @click.native="uploadFiles"> emt </v-btn> -->
-                <v-text-field
-                  required
-                  v-model="modelJSON.value"
-                  :rules="modelJSON.rules"
-                  name="name"
-                  label="JSON Model"
-                  type="file"
-                  placeholder="e.g. My Favourite Model"
-                  accept=".json"
-                >
-                </v-text-field>
+                <FileUpload 
+                v-model="filename" 
+                @formData="loadFile"
+                :label="'Upload JSON model'"
+                :required="true" 
+                :rules="[rules.required]"/>
                 <v-autocomplete
-                  return-object
                   required
-                  item-text="name"
-                  v-model="reactionIdentifier"
+                  item-text="id"
+                  v-model="modelItem.default_biomass_reaction"
                   :items="availableReactions"
+                  :rules=[rules.required]
                   hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
                   name="map"
@@ -153,7 +146,7 @@
       bottom
       :timeout="3000"
     >
-      {{ modelName.value }} successfully created.
+      {{ modelItem.name }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -168,45 +161,26 @@ export default Vue.extend({
   name: "NewModel",
   props: ["isModelCreationDialogVisible"],
   data: () => ({
+    filename: null,
     valid: true,
     isModelCreationSuccess: false,
-    reactionIdentifier: {
-      value: null,
-      // Should be checked that it is indeed in the model.
-      rules: [(v: string) => !!v || "A name is required."]
+    rules: {
+      required: value => !!value || "Required."
     },
-    modelName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
-    },
-    organismItemValidation: {
-      organismItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "An organism is required."]
-    },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    },
-    modelJSON: {
-      value: null,
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A model JSON is required."]
-    },
-    mapItem: null
+    modelItem: { 
+      id: null, 
+      name: null,
+      model: null, 
+      map_id: null, 
+      project_id: null, 
+      organism_id: null,
+      default_biomass_reaction: null },
   }),
   methods: {
     createModel() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
-        name: this.modelName.value,
+        name: this.modelItem.value,
         organism_id: this.organismItemValidation.organismItem.id,
         project_id: this.projectItemValidation.projectItem.id
       };
@@ -224,11 +198,25 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     },
-    uploadFiles() {
-      // your custom upload method
-      const form = this.formData;
-      console.log(form);
+    // A great tutorial for the inner workings of the following function can be found at
+  // https://alligator.io/vuejs/file-reader-component/  
+  loadFile($event): void {
+    // FileUpload emits an event which contains a FormData object, which itself contains
+    // a list of Files. Since FileUpload is limited to accepting only a single
+    // file we only concern ourselves with the first element of that list.
+    const file = $event[0].get("data");
+    // Create a new instance of FileReader
+    const fileReader = new FileReader();
+    // Is called when the readAsText operation below successfully completes
+    fileReader.onload = () => {
+        this.modelItem.model = JSON.parse(fileReader.result as string);
+    };
+    if (file) {
+       // Read the file asynchroniously. 
+       // When it completes sucessfully the onload event defined above can access the data.
+      fileReader.readAsText(file);
     }
+  }
   },
   computed: {
     availableProjects() {
@@ -241,7 +229,7 @@ export default Vue.extend({
       return this.$store.state.maps.maps;
     },
     availableReactions() {
-      return ["Biomass1", "Biomass2"];
+      return [{id: "Biomass1"}, {id: "Biomass2"}];
     },
     isVisible: {
       get: function() {
