@@ -78,10 +78,9 @@
             fab
             bottom
             right
-            large
             :disabled="!isAuthenticated"
             @click="$store.commit('toggleDialog', 'map')"
-            color="secondary"
+            color="primary"
             v-bind:style="styleObject"
           >
             <v-icon>add</v-icon>
