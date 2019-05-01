@@ -13,6 +13,8 @@ import LoaderDialog from "@/components/shared/LoaderDialog.vue";
 import DeletionDialog from "@/components/shared/DeletionDialog.vue";
 // import FileUpload from "@/components/shared/FileUpload.vue"
 
+Vue.use(require("vue-moment"));
+
 Vue.config.productionTip = false;
 
 Vue.component("NewProject", NewProject);

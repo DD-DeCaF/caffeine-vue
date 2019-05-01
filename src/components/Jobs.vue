@@ -49,8 +49,6 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 
-Vue.use(require("vue-moment"));
-
 export default Vue.extend({
   name: "Jobs",
   data: () => ({
