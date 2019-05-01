@@ -94,21 +94,21 @@
                     </v-btn>
                   </template>
                 </v-autocomplete>
-                <FileUpload 
-                v-model="filename" 
-                @formData="loadFile"
-                :accept="'.json'"
-                :label="'Upload JSON model'"
-                :required="true" 
-                :rules="[rules.required]"
-                :error-messages="errorMessage"
+                <FileUpload
+                  v-model="filename"
+                  @formData="loadFile"
+                  :accept="'.json'"
+                  :label="'Upload JSON model'"
+                  :required="true"
+                  :rules="[rules.required]"
+                  :error-messages="errorMessage"
                 />
                 <v-autocomplete
                   required
                   item-text="id"
                   v-model="modelItem.default_biomass_reaction"
                   :items="reactions"
-                  :rules=[rules.required]
+                  :rules="[rules.required]"
                   hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
                   name="map"
@@ -169,15 +169,16 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    modelItem: { 
+    modelItem: {
       name: null,
-      model: null, 
-      map_id: null, 
-      project_id: null, 
+      model: null,
+      map_id: null,
+      project_id: null,
       organism_id: null,
-      default_biomass_reaction: null },
+      default_biomass_reaction: null
+    },
     modelError: false,
-    reactions: [],
+    reactions: []
   }),
   methods: {
     createModel() {
@@ -197,37 +198,39 @@ export default Vue.extend({
         });
     },
     // A great tutorial for the inner workings of the following function can be found at
-  // https://alligator.io/vuejs/file-reader-component/  
-  loadFile($event): void {
-    // FileUpload emits an event which contains a FormData object, which itself contains
-    // a list of Files. Since FileUpload is limited to accepting only a single
-    // file we only concern ourselves with the first element of that list.
-    const file = $event[0].get("data");
-    // Create a new instance of FileReader
-    const fileReader = new FileReader();
-    // Is called when the readAsText operation below successfully completes
-    fileReader.onload = () => {
+    // https://alligator.io/vuejs/file-reader-component/
+    loadFile($event): void {
+      // FileUpload emits an event which contains a FormData object, which itself contains
+      // a list of Files. Since FileUpload is limited to accepting only a single
+      // file we only concern ourselves with the first element of that list.
+      const file = $event[0].get("data");
+      // Create a new instance of FileReader
+      const fileReader = new FileReader();
+      // Is called when the readAsText operation below successfully completes
+      fileReader.onload = () => {
         this.modelItem.model = JSON.parse(fileReader.result as string);
         if (this.modelItem.model.reactions) {
           this.modelError = false;
-          this.reactions = this.modelItem.model.reactions.map((reaction) => reaction.id);
+          this.reactions = this.modelItem.model.reactions.map(
+            reaction => reaction.id
+          );
         } else {
           this.modelError = true;
+        }
+      };
+      if (file) {
+        // Read the file asynchroniously.
+        // When it completes sucessfully the onload event defined above can access the data.
+        fileReader.readAsText(file);
+      }
     }
-    };
-    if (file) {
-       // Read the file asynchroniously. 
-       // When it completes sucessfully the onload event defined above can access the data.
-      fileReader.readAsText(file);
-    }
-  }
   },
   computed: {
     errorMessage() {
       if (this.modelError) {
-        return "The file is not valid."
+        return "The file is not valid.";
       } else {
-        return []
+        return [];
       }
     },
     availableProjects() {
@@ -240,7 +243,7 @@ export default Vue.extend({
       return this.$store.state.maps.maps;
     },
     availableReactions() {
-      return [{id: "Biomass1"}, {id: "Biomass2"}];
+      return [{ id: "Biomass1" }, { id: "Biomass2" }];
     },
     isVisible: {
       get: function() {

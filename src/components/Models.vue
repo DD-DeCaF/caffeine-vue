@@ -273,7 +273,7 @@ export default Vue.extend({
           const payload = {
             item: this.modelItem,
             index: this.modelItemIndex
-          }
+          };
           this.$store.commit("models/editModel", payload);
           this.isModelEditSuccess = true;
         })

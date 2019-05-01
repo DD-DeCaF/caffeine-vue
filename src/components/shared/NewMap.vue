@@ -63,18 +63,19 @@
                       depressed
                       @click="$store.commit('toggleDialog', 'model')"
                     >
-                        <v-icon class="mr-4">add_circle</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New Model
                     </v-btn>
                   </template>
                 </v-autocomplete>
-                <FileUpload 
-                v-model="filename" 
-                @formData="loadFile"
-                :accept="'.json'"
-                :label="'Upload JSON map'"
-                :required="true" 
-                :rules="[rules.required]"/>
+                <FileUpload
+                  v-model="filename"
+                  @formData="loadFile"
+                  :accept="'.json'"
+                  :label="'Upload JSON map'"
+                  :required="true"
+                  :rules="[rules.required]"
+                />
               </v-form>
             </v-flex>
           </v-layout>
@@ -102,11 +103,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar
-      color="success"
-      v-model="isMapCreationSuccess"
-      :timeout="3000"
-    >
+    <v-snackbar color="success" v-model="isMapCreationSuccess" :timeout="3000">
       {{ mapItem.name }} successfully created.
     </v-snackbar>
   </div>
@@ -128,7 +125,7 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    mapItem: { name: null, model_id: null, project_id: null, map: null },
+    mapItem: { name: null, model_id: null, project_id: null, map: null }
   }),
   methods: {
     createMap() {
@@ -147,25 +144,25 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     },
-  // A great tutorial for the inner workings of the following function can be found at
-  // https://alligator.io/vuejs/file-reader-component/  
-  loadFile($event): void {
-    // FileUpload emits an event which contains a FormData object, which itself contains
-    // a list of Files. Since FileUpload is limited to accepting only a single
-    // file we only concern ourselves with the first element of that list.
-    const file = $event[0].get("data");
-    // Create a new instance of FileReader
-    const fileReader = new FileReader();
-    // Is called when the readAsText operation below successfully completes
-    fileReader.onload = () => {
+    // A great tutorial for the inner workings of the following function can be found at
+    // https://alligator.io/vuejs/file-reader-component/
+    loadFile($event): void {
+      // FileUpload emits an event which contains a FormData object, which itself contains
+      // a list of Files. Since FileUpload is limited to accepting only a single
+      // file we only concern ourselves with the first element of that list.
+      const file = $event[0].get("data");
+      // Create a new instance of FileReader
+      const fileReader = new FileReader();
+      // Is called when the readAsText operation below successfully completes
+      fileReader.onload = () => {
         this.mapItem.map = JSON.parse(fileReader.result as string);
-    };
-    if (file) {
-       // Read the file asynchroniously. 
-       // When it completes sucessfully the onload event defined above can access the data.
-      fileReader.readAsText(file);
+      };
+      if (file) {
+        // Read the file asynchroniously.
+        // When it completes sucessfully the onload event defined above can access the data.
+        fileReader.readAsText(file);
+      }
     }
-  }
   },
   computed: {
     availableProjects() {
