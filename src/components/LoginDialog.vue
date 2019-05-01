@@ -144,7 +144,7 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
-import { JWT } from "@/store/session";
+import { JWT } from "@/store/modules/session";
 import firebase from "firebase/app";
 import "firebase/auth";
 
