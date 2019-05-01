@@ -37,10 +37,10 @@
                     <v-divider class="my-2"></v-divider>
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
-                      color="secondary"
+                      depressed
                       @click="$store.commit('toggleDialog', 'project')"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -60,10 +60,10 @@
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
                     <v-btn
-                      color="secondary"
+                      depressed
                       @click="$store.commit('toggleDialog', 'model')"
                     >
-                      <v-icon>add</v-icon>
+                        <v-icon class="mr-4">add_circle</v-icon>
                       New Model
                     </v-btn>
                   </template>
