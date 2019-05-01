@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-layout justify-center>
-      <v-flex md10>
+      <v-flex md9>
         <h1 class="mb-2">Jobs</h1>
         <v-data-table
           :headers="headers"
@@ -46,16 +46,35 @@ export default Vue.extend({
       { text: "Organism", value: "organism_id", width: "20%" },
       { text: "Model", value: "model_id", width: "15%" },
       { text: "State", value: "state", width: "15%" },
-      { text: "Started", value: "created", width: "20%" },
-      { value: "details", width: "10%" }
+      { text: "Started", value: "created", width: "25%" },
+      { value: "details", width: "5%" }
     ],
     pagination: {
       rowsPerPage: 10,
       sortBy: "created",
       descending: true
-    }
+    },
+    areAllJobsFinished: true,
+    timerId: 0
   }),
-  methods: {},
+  methods: {
+    fetchJobs() {
+      this.areAllJobsFinished = true;
+      this.$store.dispatch("jobs/fetchJobs");
+      for (let i = 0; i < this.jobs.length; i++) {
+        if (
+          this.jobs[i].status === "STARTED" ||
+          this.jobs[i].status === "PENDING"
+        ) {
+          this.areAllJobsFinished = false;
+          break;
+        }
+      }
+      if (this.areAllJobsFinished) {
+        clearInterval(this.timerId);
+      }
+    }
+  },
   computed: {
     jobs() {
       return this.$store.state.jobs.jobs;
@@ -64,6 +83,9 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
+  },
+  mounted() {
+    this.timerId = setInterval(this.fetchJobs, 5000);
   }
 });
 </script>
