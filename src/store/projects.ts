@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export interface ProjectItem {
   id: number;
