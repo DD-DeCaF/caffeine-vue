@@ -160,7 +160,7 @@ export default Vue.extend({
         project_id: this.projectItemValidation.projectItem.id
       };
       axios
-        .post(`${settings.apis.mapStorage}/maps`, payload)
+        .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("maps/addMap", response.data);
           this.isVisible = false;
