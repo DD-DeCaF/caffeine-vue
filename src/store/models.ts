@@ -22,9 +22,7 @@ export default {
       state.models = models;
     },
     editModel(state, editedModel: ModelItem, editedIndex: number) {
-      let modelsCopy = state.models.copy();
-      modelsCopy[editedIndex] = editedModel;
-      state.models = modelsCopy;
+      state.model[editedIndex] = editedModel;
     }
   },
   actions: {

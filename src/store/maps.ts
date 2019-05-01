@@ -19,9 +19,7 @@ export default {
       state.maps = maps;
     },
     editMap(state, editedMap: MapItem, editedIndex: number) {
-      let mapsCopy = state.maps.copy();
-      mapsCopy[editedIndex] = editedMap;
-      state.maps = mapsCopy;
+      state.maps[editedIndex] = editedMap;
     }
   },
   actions: {
