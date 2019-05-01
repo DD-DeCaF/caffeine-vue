@@ -97,14 +97,17 @@
                 <FileUpload 
                 v-model="filename" 
                 @formData="loadFile"
+                :accept="'.json'"
                 :label="'Upload JSON model'"
                 :required="true" 
-                :rules="[rules.required]"/>
+                :rules="[rules.required]"
+                :error-messages="errorMessage"
+                />
                 <v-autocomplete
                   required
                   item-text="id"
                   v-model="modelItem.default_biomass_reaction"
-                  :items="availableReactions"
+                  :items="reactions"
                   :rules=[rules.required]
                   hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
@@ -172,7 +175,9 @@ export default Vue.extend({
       map_id: null, 
       project_id: null, 
       organism_id: null,
-      default_biomass_reaction: null }
+      default_biomass_reaction: null },
+    modelError: false,
+    reactions: [],
   }),
   methods: {
     createModel() {
@@ -203,6 +208,12 @@ export default Vue.extend({
     // Is called when the readAsText operation below successfully completes
     fileReader.onload = () => {
         this.modelItem.model = JSON.parse(fileReader.result as string);
+        if (this.modelItem.model.reactions) {
+          this.modelError = false;
+          this.reactions = this.modelItem.model.reactions.map((reaction) => reaction.id);
+        } else {
+          this.modelError = true;
+    }
     };
     if (file) {
        // Read the file asynchroniously. 
@@ -212,6 +223,13 @@ export default Vue.extend({
   }
   },
   computed: {
+    errorMessage() {
+      if (this.modelError) {
+        return "The file is not valid."
+      } else {
+        return []
+      }
+    },
     availableProjects() {
       return this.$store.state.projects.projects;
     },
