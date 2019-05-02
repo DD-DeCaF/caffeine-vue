@@ -5,13 +5,16 @@
       :items="[mapItem]"
       itemsType="maps"
     />
-       <NewProject 
+    <NewProject 
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
      <NewModel
       v-model="isModelCreationDialogVisible"
       @returnObject="passModel"
+    />
+    <NewMap
+      v-model="isMapCreationDialogVisible"
     />
     <v-layout justify-center>
       <v-flex md6>
@@ -86,7 +89,7 @@
             bottom
             right
             :disabled="!isAuthenticated"
-            @click="$store.commit('toggleDialog', 'map')"
+            @click="isMapCreationDialogVisible = true"
             color="primary"
             v-bind:style="styleObject"
           >
