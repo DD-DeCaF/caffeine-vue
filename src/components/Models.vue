@@ -4,14 +4,13 @@
       v-model="isDeletionDialogVisible"
       :items="[modelItem]"
       itemsType="models"
-      @toggleLoader="toggleLoader()"
     />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Models</h1>
         <v-data-table
           :headers="headers"
-          :items="models"
+          :items="availableModels"
           class="elevation-8"
           :pagination.sync="pagination"
         >
@@ -34,7 +33,7 @@
                 </div>
                 <v-icon
                   slot="activator"
-                  @click="editItem(props.item)"
+                  @click="handler(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
                   v-bind:style="styleObject"
                 >
@@ -93,7 +92,7 @@
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Edit {{ modelItem.name }}</h3>
+              <h3>Edit {{ name }}</h3>
             </v-flex>
             <v-flex>
               <v-form
@@ -103,7 +102,7 @@
               >
                 <v-text-field
                   required
-                  v-model="modelItem.name"
+                  v-model="name"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -111,10 +110,11 @@
                   placeholder="e.g. My Favourite Model"
                 ></v-text-field>
                 <v-autocomplete
+                  return-object
                   required
                   item-text="name"
                   item-value="id"
-                  v-model="modelItem.organism_id"
+                  v-model="organism"
                   :items="availableOrganisms"
                   :rules="[rules.required]"
                   name="organism"
@@ -133,9 +133,10 @@
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
+                  return-object
                   item-text="name"
                   item-value="id"
-                  v-model="modelItem.map_id"
+                  v-model="preferredMap"
                   :items="availableMaps"
                   persistent-hint
                   name="map"
@@ -155,10 +156,9 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  item-text="name"
-                  item-value="id"
-                  v-model="modelItem.default_biomass_reaction"
-                  :items="availableReactions"
+                  item-text="id"
+                  v-model="default_biomass_reaction"
+                  :items="reactions"
                   hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
                   name="biomass"
@@ -200,7 +200,7 @@
       bottom
       :timeout="3000"
     >
-      {{ modelItem.name }} successfully edited.
+      {{ name }} successfully edited.
     </v-snackbar>
   </v-container>
 </template>
@@ -215,6 +215,7 @@ import { mapGetters } from "vuex";
 export default Vue.extend({
   name: "Models",
   data: () => ({
+    modelItem: { name: null },
     modelItemIndex: null,
     isModelEditDialogVisible: false,
     isDeletionDialogVisible: false,
@@ -224,23 +225,19 @@ export default Vue.extend({
     isUnauthorized: false,
     isNotFound: false,
     hasOtherError: false,
+    reactions: [],
     rules: {
       required: value => !!value || "Required."
     },
-    modelItem: {
-      id: null,
-      name: null,
-      map_id: null,
-      project_id: null,
-      organism_id: null
-    },
+    id: null,
+    name: null,
+    preferredMap: null,
+    project: null,
+    organism: null,
+    default_biomass_reaction: null,
     headers: [
-      {
-        text: "Name",
-        align: "left",
-        value: "name"
-      },
-      { text: "Actions", value: "name", sortable: false }
+      { text: "Name", align: "left", value: "name", width: "85%" },
+      { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
       rowsPerPage: 10
@@ -254,8 +251,24 @@ export default Vue.extend({
     }
   }),
   methods: {
+    handler(item) {
+      this.editItem(item);
+      this.getReactions();
+    },
     editItem(item) {
-      this.modelItem = item;
+      this.id = item.id;
+      this.name = item.name;
+      this.preferredMap = this.availableMaps.find(
+        obj => obj.id == item.preferred_map_id
+      );
+      this.organism = this.availableOrganisms.find(
+        obj => obj.id == item.organism_id
+      );
+      this.project = this.availableProjects.find(
+        obj => obj.id == item.project_id
+      );
+      this.default_biomass_reaction = item.default_biomass_reaction;
+      this.modelItemIndex = this.availableModels.indexOf(item);
       this.isModelEditDialogVisible = true;
     },
     deleteItem(item) {
@@ -263,18 +276,23 @@ export default Vue.extend({
       this.isDeletionDialogVisible = true;
     },
     editModel() {
+      const payload = {
+        id: this.id,
+        name: this.name,
+        preferred_map_id: this.preferredMap.id,
+        organism_id: this.organism.id,
+        project_id: this.project.id,
+        default_biomass_reaction: this.default_biomass_reaction
+      };
       axios
-        .put(
-          `${settings.apis.models}/models/${this.modelItem.id}`,
-          this.modelItem
-        )
+        .put(`${settings.apis.models}/models/${this.id}`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
-          const payload = {
-            item: this.modelItem,
+          const commitPayload = {
+            item: payload,
             index: this.modelItemIndex
           };
-          this.$store.commit("models/editModel", payload);
+          this.$store.commit("models/editModel", commitPayload);
           this.isModelEditSuccess = true;
         })
         .catch(error => {
@@ -292,20 +310,32 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
           this.isModelEditDialogVisible = false;
         });
+    },
+    getReactions() {
+      // Fetch the serialized selected model and return its reactions
+      axios
+        .get(`${settings.apis.modelStorage}/models/${this.id}`)
+        .then((response: AxiosResponse) => {
+          this.reactions = response.data.model_serialized.reactions;
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 404) {
+            this.isNotFound = true;
+            return null;
+          } else {
+            this.hasOtherError = true;
+            return null;
+          }
+        });
     }
   },
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     },
-    models() {
+    availableModels() {
       return this.$store.state.models.models;
     },
-    ...mapGetters({
-      map: "maps/getMapById",
-      project: "projects/getProjectById",
-      organism: "organisms/getOrganismsById"
-    }),
     availableProjects() {
       return this.$store.state.projects.projects;
     },
@@ -314,9 +344,6 @@ export default Vue.extend({
     },
     availableOrganisms() {
       return this.$store.state.organisms.organisms;
-    },
-    availableReactions() {
-      return ["Biomass1", "Biomass2"];
     }
   }
 });

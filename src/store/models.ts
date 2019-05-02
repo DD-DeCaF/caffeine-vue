@@ -23,6 +23,12 @@ export default {
     },
     editModel(state, editedModel: ModelItem, editedIndex: number) {
       state.model[editedIndex] = editedModel;
+    },
+    addModel(state, model: ModelItem) {
+      state.models.push(model);
+    },
+    delete(state, ids) {
+      state.models = state.models.filter(model => !ids.includes(model.id));
     }
   },
   actions: {

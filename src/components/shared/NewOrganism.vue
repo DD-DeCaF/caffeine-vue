@@ -16,7 +16,7 @@
                 <v-text-field
                   autofocus
                   required
-                  v-model="organismItem.name"
+                  v-model="organismName"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -27,8 +27,7 @@
                   return-object
                   required
                   item-text="name"
-                  item-id="id"
-                  v-model="organismItem.project_id"
+                  v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
                   name="project"
@@ -79,7 +78,7 @@
       v-model="isOrganismCreationSuccess"
       :timeout="3000"
     >
-      {{ organismItem.name }} successfully created.
+      {{ organismName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -99,16 +98,16 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    organismItem: {
-      name: null,
-      project_id: null
-    }
+    organismName: null,
+    project: { name: null, id: null }
   }),
   methods: {
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
+      const payload = { name: this.organismName, project_id: this.project.id };
+      console.log("The current organismItem:", payload);
       axios
-        .post(`${settings.apis.warehouse}/organisms`, this.organismItem)
+        .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
           this.isVisible = false;

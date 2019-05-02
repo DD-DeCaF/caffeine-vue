@@ -20,7 +20,7 @@
               >
                 <v-text-field
                   required
-                  v-model="modelItem.name"
+                  v-model="modelName"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -29,9 +29,10 @@
                 ></v-text-field>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-id="id"
-                  v-model="modelItem.organism_id"
+                  v-model="organism"
                   :items="availableOrganisms"
                   :rules="[rules.required]"
                   name="organism"
@@ -51,9 +52,10 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-id="id"
-                  v-model="modelItem.project_id"
+                  v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
                   name="project"
@@ -62,7 +64,6 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       depressed
                       @click="$store.commit('toggleDialog', 'project')"
@@ -73,9 +74,10 @@
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
+                  return-object
                   item-text="name"
                   item-id="id"
-                  v-model="modelItem.map_id"
+                  v-model="map"
                   :items="availableMaps"
                   hint="The default map displayed on the Interactive Map, optional"
                   persistent-hint
@@ -106,7 +108,7 @@
                 <v-autocomplete
                   required
                   item-text="id"
-                  v-model="modelItem.default_biomass_reaction"
+                  v-model="default_biomass_reaction"
                   :items="reactions"
                   :rules="[rules.required]"
                   hint="The reaction identifier of this model's default biomass reaction"
@@ -148,7 +150,7 @@
       v-model="isModelCreationSuccess"
       :timeout="3000"
     >
-      {{ modelItem.name }} successfully created.
+      {{ modelName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -169,22 +171,28 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    modelItem: {
-      name: null,
-      model: null,
-      map_id: null,
-      project_id: null,
-      organism_id: null,
-      default_biomass_reaction: null
-    },
+    modelName: null,
+    model_serialized: null,
+    map: { id: null },
+    project: { id: null },
+    organism: { id: null },
+    default_biomass_reaction: null,
     modelError: false,
     reactions: []
   }),
   methods: {
     createModel() {
       this.$store.commit("toggleDialog", "loader");
+      const payload = {
+        name: this.modelName,
+        model_serialized: this.model_serialized,
+        preferred_map_id: this.map.id,
+        project_id: this.project.id,
+        organism_id: this.organism.id,
+        default_biomass_reaction: this.default_biomass_reaction
+      };
       axios
-        .post(`${settings.apis.modelStorage}/models`, this.modelItem)
+        .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("models/addModel", response.data);
           this.isVisible = false;
@@ -208,10 +216,10 @@ export default Vue.extend({
       const fileReader = new FileReader();
       // Is called when the readAsText operation below successfully completes
       fileReader.onload = () => {
-        this.modelItem.model = JSON.parse(fileReader.result as string);
-        if (this.modelItem.model.reactions) {
+        this.model_serialized = JSON.parse(fileReader.result as string);
+        if (this.model_serialized.reactions) {
           this.modelError = false;
-          this.reactions = this.modelItem.model.reactions.map(
+          this.reactions = this.model_serialized.reactions.map(
             reaction => reaction.id
           );
         } else {
