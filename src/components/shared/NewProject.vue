@@ -22,13 +22,6 @@
                   type="text"
                   placeholder="e.g. My Cool Project"
                 ></v-text-field>
-                <v-text-field
-                  v-model="test"
-                  name="test"
-                  label="Test"
-                  type="text"
-                ></v-text-field>
-                <p> {{ test }} </p>
               </v-form>
             </v-flex>
           </v-layout>

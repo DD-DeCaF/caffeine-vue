@@ -94,7 +94,7 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewOrganism",
-  props: ["isOrganismCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
     valid: true,
     isProjectCreationDialogVisible: false,
@@ -114,6 +114,7 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isOrganismCreationSuccess = true;
         })
@@ -133,12 +134,12 @@ export default Vue.extend({
       return this.$store.state.projects.projects;
     },
     isVisible: {
-      get: function() {
-        return this.isOrganismCreationDialogVisible;
+     get: function() {
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "organism");
+        this.$emit("input", value);
       }
     }
   },

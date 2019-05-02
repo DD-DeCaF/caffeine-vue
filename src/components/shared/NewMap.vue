@@ -1,5 +1,13 @@
 <template>
   <div>
+      <NewProject 
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
+    <NewModel
+      v-model="isModelCreationDialogVisible"
+      @returnObject="passModel"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -36,10 +44,9 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       depressed
-                      @click="$store.commit('toggleDialog', 'project')"
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
@@ -63,7 +70,7 @@
                     <v-divider class="my-2"></v-divider>
                     <v-btn
                       depressed
-                      @click="$store.commit('toggleDialog', 'model')"
+                       @click.stop="isModelCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Model
@@ -119,8 +126,10 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewMap",
-  props: ["isMapCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
+    isProjectCreationDialogVisible: false,
+    isModelCreationDialogVisible: false,
     filename: null,
     valid: true,
     isMapCreationSuccess: false,
@@ -146,6 +155,7 @@ export default Vue.extend({
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("maps/addMap", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isMapCreationSuccess = true;
         })
@@ -174,6 +184,12 @@ export default Vue.extend({
         // When it completes sucessfully the onload event defined above can access the data.
         fileReader.readAsText(file);
       }
+    },
+     passProject(project) {
+        this.project = project
+    },
+     passModel(model) {
+        this.model = model
     }
   },
   computed: {
@@ -183,13 +199,13 @@ export default Vue.extend({
     availableModels() {
       return this.$store.state.models.models;
     },
-    isVisible: {
+     isVisible: {
       get: function() {
-        return this.isMapCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "map");
+        this.$emit("input", value);
       }
     }
   },

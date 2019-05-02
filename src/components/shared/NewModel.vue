@@ -1,5 +1,18 @@
 <template>
   <div>
+     <NewProject 
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
+     <!-- Disabled because of possible recursion errors. Need to investigate more -->
+    <!-- <NewMap
+      v-model="isMapCreationDialogVisible"
+      @returnObject="passMap"
+    /> -->
+    <NewOrganism
+      v-model="isOrganismCreationDialogVisible"
+      @returnObject="passOrganism"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -43,7 +56,7 @@
                     <v-divider class="my-2"></v-divider>
                     <v-btn
                       depressed
-                      @click="$store.commit('toggleDialog', 'organism')"
+                      @click.stop="isOrganismCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Organism
@@ -66,7 +79,7 @@
                     <v-divider class="my-2"></v-divider>
                     <v-btn
                       depressed
-                      @click="$store.commit('toggleDialog', 'project')"
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
@@ -89,7 +102,7 @@
                     <v-divider class="my-2"></v-divider>
                     <v-btn
                       depressed
-                      @click="$store.commit('toggleDialog', 'map')"
+                        @click.stop="isMapCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Map
@@ -163,10 +176,13 @@ import settings from "@/settings";
 
 export default Vue.extend({
   name: "NewModel",
-  props: ["isModelCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
     filename: null,
     valid: true,
+    isProjectCreationDialogVisible: false,
+    isMapCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false,
     isModelCreationSuccess: false,
     rules: {
       required: value => !!value || "Required."
@@ -195,6 +211,7 @@ export default Vue.extend({
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("models/addModel", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isModelCreationSuccess = true;
         })
@@ -231,6 +248,15 @@ export default Vue.extend({
         // When it completes sucessfully the onload event defined above can access the data.
         fileReader.readAsText(file);
       }
+    },
+     passProject(project) {
+        this.project = project
+    },
+     passMap(map) {
+        this.map = map
+    },
+    passOrganism(organism) {
+        this.organism = organism
     }
   },
   computed: {
@@ -253,13 +279,13 @@ export default Vue.extend({
     availableReactions() {
       return [{ id: "Biomass1" }, { id: "Biomass2" }];
     },
-    isVisible: {
+     isVisible: {
       get: function() {
-        return this.isModelCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "model");
+        this.$emit("input", value);
       }
     }
   },

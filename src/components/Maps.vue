@@ -5,6 +5,14 @@
       :items="[mapItem]"
       itemsType="maps"
     />
+       <NewProject 
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
+     <NewModel
+      v-model="isModelCreationDialogVisible"
+      @returnObject="passModel"
+    />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
@@ -122,10 +130,10 @@
                     <v-divider class="my-2"></v-divider>
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'project')"
+                      depressed
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -145,11 +153,11 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'model')"
+                     <v-btn
+                      depressed
+                      @click.stop="isModelCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New Model
                     </v-btn>
                   </template>
@@ -204,6 +212,9 @@ export default Vue.extend({
   name: "Maps",
   data: () => ({
     valid: false,
+    isMapCreationDialogVisible: false,
+    isModelCreationDialogVisible: false,
+    isProjectCreationDialogVisible: false,
     isMapEditSuccess: false,
     isInvalidCredentials: false,
     isUnauthorized: false,
@@ -284,7 +295,13 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
           this.isMapEditDialogVisible = false;
         });
-    }
+    },
+        passProject(project) {
+        this.project = project
+    },
+     passModel(model) {
+        this.selectedModel = model
+    },
   },
   computed: {
     isAuthenticated() {
