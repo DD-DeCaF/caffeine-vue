@@ -176,7 +176,14 @@
       <v-content>
         <router-view />
       </v-content>
-      <v-footer app></v-footer>
+      <v-footer app justify-center dark color="primary" height="auto">
+        <v-spacer></v-spacer>
+        <div>
+          <v-btn primary flat small to="/terms-of-service">Terms of Service</v-btn>
+          <v-btn primary flat small to="/privacy-policy">Privacy Policy</v-btn>
+        </div>
+        <v-spacer></v-spacer>
+      </v-footer>
 
       <v-snackbar color="error" v-model="hasFetchDataError" :timeout="6000">
         Sorry, we were unable to retrieve some data from the server. Please try
