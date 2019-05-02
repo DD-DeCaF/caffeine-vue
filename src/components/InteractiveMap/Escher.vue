@@ -14,14 +14,9 @@
           class="mr-2"
           color="white"
         ></v-progress-circular>
-        <p
-          class="display-1 white--text mb-0"
-          v-if="initializingEscher !== null"
-        >
-          Initializing Escher...
-        </p>
-        <p class="display-1 white--text mb-0" v-if="isLoadingMap">
-          Loading map...
+        <p class="display-1 white--text mb-0">
+          <span v-if="initializingEscher !== null">Initializing Escher...</span>
+          <span v-else-if="isLoadingMap">Loading map...</span>
         </p>
       </v-layout>
     </v-container>
