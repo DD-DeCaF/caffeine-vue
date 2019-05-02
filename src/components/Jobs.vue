@@ -68,24 +68,6 @@ export default Vue.extend({
     areAllJobsFinished: true,
     timerId: 0
   }),
-  methods: {
-    fetchJobs() {
-      this.areAllJobsFinished = true;
-      this.$store.dispatch("jobs/fetchJobs");
-      for (let i = 0; i < this.jobs.length; i++) {
-        if (
-          this.jobs[i].status === "STARTED" ||
-          this.jobs[i].status === "PENDING"
-        ) {
-          this.areAllJobsFinished = false;
-          break;
-        }
-      }
-      if (this.areAllJobsFinished) {
-        clearInterval(this.timerId);
-      }
-    }
-  },
   computed: {
     jobs() {
       return this.$store.state.jobs.jobs;
@@ -94,9 +76,6 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
-  },
-  mounted() {
-    this.timerId = setInterval(this.fetchJobs, 5000);
   }
 });
 </script>
