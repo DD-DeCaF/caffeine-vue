@@ -236,12 +236,8 @@ export default Vue.extend({
     organism: null,
     default_biomass_reaction: null,
     headers: [
-      {
-        text: "Name",
-        align: "left",
-        value: "name"
-      },
-      { text: "Actions", value: "name", sortable: false }
+      { text: "Name", align: "left", value: "name", width: "85%"},
+      { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
       rowsPerPage: 10
