@@ -3,8 +3,8 @@ import Router from "vue-router";
 import Home from "./components/Home.vue";
 import Designs from "./components/Designs.vue";
 import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
-import Jobs from "./components/Jobs.vue";
-import JobDetails from "./components/JobDetails.vue";
+import Jobs from "./components/Jobs/Jobs.vue";
+import JobDetails from "./components/Jobs/JobDetails.vue";
 
 Vue.use(Router);
 
