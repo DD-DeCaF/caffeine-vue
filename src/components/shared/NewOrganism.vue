@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NewProject 
+    <NewProject
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
@@ -126,7 +126,7 @@ export default Vue.extend({
         });
     },
     passProject(project) {
-        this.project = project
+      this.project = project;
     }
   },
   computed: {
@@ -134,7 +134,7 @@ export default Vue.extend({
       return this.$store.state.projects.projects;
     },
     isVisible: {
-     get: function() {
+      get: function() {
         return this.value;
       },
       set: function(value) {

@@ -1,13 +1,10 @@
 <template>
   <div>
-     <NewProject 
+    <NewProject
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
-    <NewMap
-      v-model="isMapCreationDialogVisible"
-      @returnObject="passMap"
-    />
+    <NewMap v-model="isMapCreationDialogVisible" @returnObject="passMap" />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
       @returnObject="passOrganism"
@@ -101,7 +98,7 @@
                     <v-divider class="my-2"></v-divider>
                     <v-btn
                       depressed
-                        @click.stop="isMapCreationDialogVisible = true"
+                      @click.stop="isMapCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Map
@@ -248,14 +245,14 @@ export default Vue.extend({
         fileReader.readAsText(file);
       }
     },
-     passProject(project) {
-        this.project = project
+    passProject(project) {
+      this.project = project;
     },
-     passMap(map) {
-        this.map = map
+    passMap(map) {
+      this.map = map;
     },
     passOrganism(organism) {
-        this.organism = organism
+      this.organism = organism;
     }
   },
   computed: {
@@ -278,7 +275,7 @@ export default Vue.extend({
     availableReactions() {
       return [{ id: "Biomass1" }, { id: "Biomass2" }];
     },
-     isVisible: {
+    isVisible: {
       get: function() {
         return this.value;
       },

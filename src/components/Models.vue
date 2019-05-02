@@ -5,18 +5,13 @@
       :items="[modelItem]"
       itemsType="models"
     />
-    <NewModel
-      v-model="isModelCreationDialogVisible"
-    />
+    <NewModel v-model="isModelCreationDialogVisible" />
     <!-- Disabled because its not on the old platform -->
-     <!-- <NewProject 
+    <!-- <NewProject 
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     /> -->
-    <NewMap
-      v-model="isMapCreationDialogVisible"
-      @returnObject="passMap"
-    />
+    <NewMap v-model="isMapCreationDialogVisible" @returnObject="passMap" />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
       @returnObject="passOrganism"
@@ -139,7 +134,7 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                     <v-btn
+                    <v-btn
                       depressed
                       @click.stop="isOrganismCreationDialogVisible = true"
                     >
@@ -349,14 +344,14 @@ export default Vue.extend({
           }
         });
     },
-     passProject(project) {
-        this.project = project
+    passProject(project) {
+      this.project = project;
     },
-     passMap(map) {
-        this.preferredMap = map
+    passMap(map) {
+      this.preferredMap = map;
     },
     passOrganism(organism) {
-        this.organism = organism
+      this.organism = organism;
     }
   },
   computed: {
