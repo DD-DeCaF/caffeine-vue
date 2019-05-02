@@ -26,6 +26,9 @@ export default {
     },
     addModel(state, model: ModelItem) {
       state.models.push(model);
+    },
+    delete(state, ids) {
+      state.models = state.models.filter(model => !ids.includes(model.id));
     }
   },
   actions: {

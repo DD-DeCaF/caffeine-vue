@@ -4,7 +4,6 @@
       v-model="isDeletionDialogVisible"
       :items="[mapItem]"
       itemsType="maps"
-      @toggleLoader="toggleLoader()"
     />
     <v-layout justify-center>
       <v-flex md6>
@@ -189,7 +188,7 @@
       bottom
       :timeout="3000"
     >
-      {{ mapItem.name }} successfully edited.
+      {{ name }} successfully edited.
     </v-snackbar>
   </v-container>
 </template>
@@ -216,7 +215,7 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    mapItem: { id: null, name: null, model_id: null, project_id: null },
+    mapItem: { name: null },
     mapItemIndex: null,
     isMapEditDialogVisible: false,
     isDeletionDialogVisible: false,
@@ -242,7 +241,6 @@ export default Vue.extend({
       this.project = this.availableProjects.find(obj => obj.id == item.project_id);
       this.selectedModel = this.availableModels.find(obj => obj.id == item.model_id);
       this.mapItemIndex = this.availableMaps.indexOf(item)
-      this.mapItem = item;
       this.isMapEditDialogVisible = true;
     },
     deleteItem(item) {
@@ -254,8 +252,7 @@ export default Vue.extend({
         id: this.id,
         name: this.name,
         project_id: this.project.id,
-        model_id: this.model.id,
-
+        model_id: this.selectedModel.id,
       }
       axios
         .put(`${settings.apis.maps}/maps/${this.id}`, payload)
