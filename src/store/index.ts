@@ -27,10 +27,6 @@ export default new Vuex.Store({
     postDataError: null,
     deleteDataError: null,
     isDialogVisible: {
-      model: false,
-      map: false,
-      organism: false,
-      project: false,
       loader: false
     },
     loadingMessages: {
