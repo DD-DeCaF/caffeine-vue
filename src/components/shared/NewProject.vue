@@ -80,16 +80,13 @@ export default Vue.extend({
   methods: {
     createProject() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = { name: this.projectName}
+      const payload = { name: this.projectName };
       axios
         .post(`${settings.apis.iam}/projects`, payload)
         .then((response: AxiosResponse) => {
-          const commitPayload = Object.assign(
-            payload,
-            response.data
-          );
-          console.log("the Project name:")
-          console.log(this.projectName)
+          const commitPayload = Object.assign(payload, response.data);
+          console.log("the Project name:");
+          console.log(this.projectName);
           this.$store.commit("projects/addProject", commitPayload);
           this.$emit("returnObject", commitPayload);
           this.isVisible = false;

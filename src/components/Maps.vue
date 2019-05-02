@@ -5,17 +5,15 @@
       :items="[mapItem]"
       itemsType="maps"
     />
-    <NewProject 
+    <NewProject
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
-     <NewModel
+    <NewModel
       v-model="isModelCreationDialogVisible"
       @returnObject="passModel"
     />
-    <NewMap
-      v-model="isMapCreationDialogVisible"
-    />
+    <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
@@ -156,7 +154,7 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                     <v-btn
+                    <v-btn
                       depressed
                       @click.stop="isModelCreationDialogVisible = true"
                     >
@@ -299,12 +297,12 @@ export default Vue.extend({
           this.isMapEditDialogVisible = false;
         });
     },
-        passProject(project) {
-        this.project = project
+    passProject(project) {
+      this.project = project;
     },
-     passModel(model) {
-        this.selectedModel = model
-    },
+    passModel(model) {
+      this.selectedModel = model;
+    }
   },
   computed: {
     isAuthenticated() {
