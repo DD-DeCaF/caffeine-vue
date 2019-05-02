@@ -156,7 +156,7 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  item-text="name"
+                  item-text="id"
                   v-model="default_biomass_reaction"
                   :items="reactions"
                   hint="The reaction identifier of this model's default biomass reaction"
@@ -261,21 +261,11 @@ export default Vue.extend({
     },
     editItem(item) {
       this.id = item.id
-      console.log("This is item")
-      console.log(item)
       this.name = item.name
       this.preferredMap = this.availableMaps.find(obj => obj.id == item.preferred_map_id);
       this.organism = this.availableOrganisms.find(obj => obj.id == item.organism_id);
       this.project = this.availableProjects.find(obj => obj.id == item.project_id);
       this.default_biomass_reaction = item.default_biomass_reaction;
-      console.log("Trying to identify what's wrong here")
-      console.log("Org")
-      console.log(this.organism) 
-      console.log("Project")
-      console.log(this.project) 
-      console.log("def_biom")
-      console.log(this.default_biomass_reaction)
-      
       this.modelItemIndex = this.availableModels.indexOf(item)
       this.isModelEditDialogVisible = true;
     },
@@ -326,11 +316,9 @@ export default Vue.extend({
       // Fetch the serialized selected model and return its reactions
       console.log("Fetching the model")
       axios
-        .get(`${settings.apis.models}/models/${this.id}`)
+        .get(`${settings.apis.modelStorage}/models/${this.id}`)
         .then((response: AxiosResponse) => {
           this.reactions = response.data.model_serialized.reactions
-          console.log("API response");
-          console.log(this.reactions);
         })
         .catch(error => {
           if (error.response && error.response.status === 404) {
