@@ -185,9 +185,9 @@ export default Vue.extend({
     },
     modelName: null,
     model_serialized: null,
-    map: { id: null },
-    project: { id: null },
-    organism: { id: null },
+    map: null,
+    project: null,
+    organism: null,
     default_biomass_reaction: null,
     modelError: false,
     reactions: []
