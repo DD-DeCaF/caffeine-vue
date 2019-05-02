@@ -17,15 +17,25 @@ export interface JobItem {
 export default {
   namespaced: true,
   state: {
-    jobs: []
+    jobs: [],
+    isPolling: false
   },
   mutations: {
     setJobs(state, jobs: JobItem[]) {
       state.jobs = jobs;
+    },
+    togglePollingStatus(state) {
+      state.isPolling = !state.isPolling;
     }
   },
   actions: {
-    fetchJobs({ commit }) {
+    fetchJobs({ state, commit, dispatch }) {
+      if (!state.isPolling) {
+        commit("togglePollingStatus");
+        dispatch("fetchJobsPolling");
+      }
+    },
+    fetchJobsPolling({ state, commit, dispatch }) {
       axios
         .get(`${settings.apis.metabolicNinja}/predictions`)
         .then((response: AxiosResponse<JobItem[]>) => {
@@ -33,6 +43,19 @@ export default {
         })
         .catch(error => {
           commit("setFetchError", error, { root: true });
+        })
+        .then(() => {
+          if (
+            state.jobs.some(job => {
+              return job.status === "STARTED" || job.status === "PENDING";
+            })
+          ) {
+            setTimeout(() => {
+              dispatch("fetchJobsPolling");
+            }, 5000);
+          } else {
+            commit("togglePollingStatus");
+          }
         });
     }
   }
