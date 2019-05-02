@@ -1,5 +1,9 @@
 <template>
   <div>
+    <NewProject 
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -36,10 +40,9 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       depressed=""
-                      @click="$store.commit('toggleDialog', 'project')"
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
@@ -94,6 +97,7 @@ export default Vue.extend({
   props: ["isOrganismCreationDialogVisible"],
   data: () => ({
     valid: true,
+    isProjectCreationDialogVisible: false,
     isOrganismCreationSuccess: false,
     rules: {
       required: value => !!value || "Required."
@@ -119,6 +123,9 @@ export default Vue.extend({
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
         });
+    },
+    passProject(project) {
+        this.project = project
     }
   },
   computed: {
