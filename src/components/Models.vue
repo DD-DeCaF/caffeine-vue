@@ -310,7 +310,6 @@ export default Vue.extend({
     },
     getReactions() {
       // Fetch the serialized selected model and return its reactions
-      console.log("Fetching the model")
       axios
         .get(`${settings.apis.modelStorage}/models/${this.id}`)
         .then((response: AxiosResponse) => {
@@ -332,7 +331,6 @@ export default Vue.extend({
       return this.$store.state.session.isAuthenticated;
     },
     availableModels() {
-      console.log(this.$store.state.models.models)
       return this.$store.state.models.models;
     },
     availableProjects() {

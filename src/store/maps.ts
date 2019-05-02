@@ -23,6 +23,9 @@ export default {
     },
     addMap(state, map: MapItem) {
       state.maps.push(map);
+    },
+    delete(state, ids) {
+      state.maps = state.maps.filter(map => !ids.includes(map.id));
     }
   },
   actions: {
