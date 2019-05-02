@@ -16,28 +16,6 @@
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
         <template>
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'organism')"
-          >
-            <v-icon>add</v-icon>
-            New Organism
-          </v-btn>
-          <NewOrganism
-            :isOrganismCreationDialogVisible="
-              $store.state.isDialogVisible.organism
-            "
-          />
-          <v-btn
-            color="secondary"
-            @click.stop="isProjectCreationDialogVisible = true"
-          >
-            <v-icon>add</v-icon>
-            New project
-          </v-btn>
-          <NewProject
-            v-model="isProjectCreationDialogVisible"
-          />
           <LoginDialog />
         </template>
       </v-toolbar>
@@ -202,7 +180,8 @@ export default Vue.extend({
   },
   data: () => ({
     drawer: false,
-    isProjectCreationDialogVisible: false
+    isProjectCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false
   }),
   computed: {
     isAuthenticated() {

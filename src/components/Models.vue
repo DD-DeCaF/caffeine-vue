@@ -5,6 +5,23 @@
       :items="[modelItem]"
       itemsType="models"
     />
+    <NewModel
+      v-model="isModelCreationDialogVisible"
+    />
+    <!-- Disabled because its not on the old platform -->
+     <!-- <NewProject 
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    /> -->
+    <!-- Disabled because of possible recursion errors. Need to investigate more -->
+    <!-- <NewMap
+      v-model="isMapCreationDialogVisible"
+      @returnObject="passMap"
+    /> -->
+    <NewOrganism
+      v-model="isOrganismCreationDialogVisible"
+      @returnObject="passOrganism"
+    />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Models</h1>
@@ -77,7 +94,7 @@
             bottom
             right
             :disabled="!isAuthenticated"
-            @click="$store.commit('toggleDialog', 'model')"
+            @click.stop="isModelCreationDialogVisible = true"
             color="primary"
             v-bind:style="styleObject"
           >
@@ -123,11 +140,11 @@
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'organism')"
+                     <v-btn
+                      depressed
+                      @click.stop="isOrganismCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New organism
                     </v-btn>
                   </template>
@@ -146,10 +163,10 @@
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'map')"
+                      depressed
+                      @click.stop="isMapCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New Map
                     </v-btn>
                   </template>
@@ -217,6 +234,10 @@ export default Vue.extend({
   data: () => ({
     modelItem: { name: null },
     modelItemIndex: null,
+    isModelCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false,
+    // Disabled because its not on the old platform
+    // isProjectCreationDialogVisible: false,
     isModelEditDialogVisible: false,
     isDeletionDialogVisible: false,
     valid: true,
@@ -327,6 +348,15 @@ export default Vue.extend({
             return null;
           }
         });
+    },
+     passProject(project) {
+        this.project = project
+    },
+     passMap(map) {
+        this.preferredMap = map
+    },
+    passOrganism(organism) {
+        this.organism = organism
     }
   },
   computed: {
