@@ -77,7 +77,6 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import settings from "@/settings";
 
 export default Vue.extend({
   name: "Card",
