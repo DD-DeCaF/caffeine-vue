@@ -196,6 +196,10 @@
         Your session has expired and you have been logged out. Please log in
         again.
       </v-snackbar>
+
+      <v-snackbar color="error" v-model="unauthorizedError" :timeout="6000">
+        Sorry, you need to be logged in to access {{ unauthorizedError }}.
+      </v-snackbar>
     </v-app>
   </div>
 </template>
@@ -246,6 +250,15 @@ export default Vue.extend({
       },
       set(newValue) {
         this.$store.commit("setDeleteError", null);
+      }
+    },
+    unauthorizedError: {
+      get() {
+        return this.$store.state.unauthorizedError;
+      },
+      set() {
+        // Ignore passed value argument.
+        this.$store.commit("setUnauthorizedError", null);
       }
     }
   },
