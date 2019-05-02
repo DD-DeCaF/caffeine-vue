@@ -11,13 +11,13 @@
         <h1>Maps</h1>
         <v-data-table
           :headers="headers"
-          :items="maps"
+          :items="availableMaps"
           class="elevation-8"
           :pagination.sync="pagination"
         >
           <template v-slot:items="props">
             <td>{{ props.item.name }}</td>
-            <td>{{ model(props.item.model_id).name }}</td>
+            <td>{{ getModel(props.item.model_id).name }}</td>
             <td>
               <v-tooltip
                 bottom
@@ -94,13 +94,13 @@
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Edit {{ mapItem.name }}</h3>
+              <h3>Edit {{ name }}</h3>
             </v-flex>
             <v-flex>
               <v-form ref="form" v-model="valid" @keyup.native.enter="editMap">
                 <v-text-field
                   required
-                  v-model="mapItem.name"
+                  v-model="name"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
@@ -109,9 +109,10 @@
                 ></v-text-field>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-value="id"
-                  v-model="mapItem.project_id"
+                  v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
                   name="project"
@@ -132,9 +133,10 @@
                 </v-autocomplete>
                 <v-autocomplete
                   required
+                  return-object
                   item-text="name"
                   item-value="id"
-                  v-model="mapItem.model_id"
+                  v-model="selectedModel"
                   :items="availableModels"
                   :rules="[rules.required]"
                   persistent-hint
@@ -208,6 +210,9 @@ export default Vue.extend({
     isUnauthorized: false,
     isNotFound: false,
     hasOtherError: false,
+    selectedModel: null,
+    name: null,
+    project: null,
     rules: {
       required: value => !!value || "Required."
     },
@@ -216,13 +221,9 @@ export default Vue.extend({
     isMapEditDialogVisible: false,
     isDeletionDialogVisible: false,
     headers: [
-      {
-        text: "Name",
-        align: "left",
-        value: "name"
-      },
-      { text: "Model", value: "model_id" },
-      { text: "Actions", value: "name", sortable: false }
+      { text: "Name", align: "left", value: "name", width: "45%" },
+      { text: "Model", value: "model_id", width: "40%" },
+      { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
       rowsPerPage: 10
@@ -236,6 +237,11 @@ export default Vue.extend({
   }),
   methods: {
     editItem(item) {
+      this.id = item.id
+      this.name = item.name
+      this.project = this.availableProjects.find(obj => obj.id == item.project_id);
+      this.selectedModel = this.availableModels.find(obj => obj.id == item.model_id);
+      this.mapItemIndex = this.availableMaps.indexOf(item)
       this.mapItem = item;
       this.isMapEditDialogVisible = true;
     },
@@ -244,15 +250,22 @@ export default Vue.extend({
       this.isDeletionDialogVisible = true;
     },
     editMap() {
+      const payload = {
+        id: this.id,
+        name: this.name,
+        project_id: this.project.id,
+        model_id: this.model.id,
+
+      }
       axios
-        .put(`${settings.apis.maps}/maps/${this.mapItem.id}`, this.mapItem)
+        .put(`${settings.apis.maps}/maps/${this.id}`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
-          const payload = {
-            item: this.mapItem,
+          const commitPayload = {
+            item: payload,
             index: this.mapItemIndex
           };
-          this.$store.commit("maps/editMap", payload);
+          this.$store.commit("maps/editMap", commitPayload);
           this.isMapEditSuccess = true;
         })
         .catch(error => {
@@ -276,11 +289,11 @@ export default Vue.extend({
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     },
-    maps() {
+    availableMaps() {
       return this.$store.state.maps.maps;
     },
     ...mapGetters({
-      model: "models/getModelById"
+      getModel: "models/getModelById"
     }),
     availableProjects() {
       return this.$store.state.projects.projects;
