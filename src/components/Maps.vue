@@ -45,7 +45,7 @@
                   slot="activator"
                   @click="editItem(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  v-bind:style="styleObject"
+                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
                 >
                   edit
                 </v-icon>
@@ -68,7 +68,7 @@
                   slot="activator"
                   @click="deleteItem(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  v-bind:style="styleObject"
+                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
                 >
                   delete
                 </v-icon>
@@ -244,6 +244,9 @@ export default Vue.extend({
     // This style object is what we use to re-enable them so that the tooltip can be triggered on a disabled button.
     styleObject: {
       "pointer-events": "auto"
+    },
+    pointerDisabled: {
+      "pointer-events": "none"
     }
   }),
   methods: {
