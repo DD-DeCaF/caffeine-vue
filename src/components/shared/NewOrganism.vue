@@ -109,7 +109,6 @@ export default Vue.extend({
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
       const payload = { name: this.organismName, project_id: this.project.id };
-      console.log("The current organismItem:", payload);
       axios
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {

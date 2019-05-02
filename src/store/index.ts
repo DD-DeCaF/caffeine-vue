@@ -43,7 +43,6 @@ export default new Vuex.Store({
       state.fetchDataError = error;
     },
     setPostError(state, error) {
-      console.log(error);
       state.postDataError = error;
     },
     setDeleteError(state, error) {

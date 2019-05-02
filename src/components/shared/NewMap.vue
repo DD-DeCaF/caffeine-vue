@@ -135,7 +135,6 @@ export default Vue.extend({
         project_id: this.project.id,
         map: this.map
       };
-      console.log("Creating a map", payload);
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {

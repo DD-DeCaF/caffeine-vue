@@ -85,8 +85,6 @@ export default Vue.extend({
         .post(`${settings.apis.iam}/projects`, payload)
         .then((response: AxiosResponse) => {
           const commitPayload = Object.assign(payload, response.data);
-          console.log("the Project name:");
-          console.log(this.projectName);
           this.$store.commit("projects/addProject", commitPayload);
           this.$emit("returnObject", commitPayload);
           this.isVisible = false;
