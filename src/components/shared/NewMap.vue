@@ -4,10 +4,6 @@
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
-    <NewModel
-      v-model="isModelCreationDialogVisible"
-      @returnObject="passModel"
-    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -66,16 +62,6 @@
                   label="Model"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      depressed
-                       @click.stop="isModelCreationDialogVisible = true"
-                    >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New Model
-                    </v-btn>
-                  </template>
                 </v-autocomplete>
                 <FileUpload
                   v-model="filename"
@@ -129,7 +115,6 @@ export default Vue.extend({
   props: ["value"],
   data: () => ({
     isProjectCreationDialogVisible: false,
-    isModelCreationDialogVisible: false,
     filename: null,
     valid: true,
     isMapCreationSuccess: false,
@@ -187,9 +172,6 @@ export default Vue.extend({
     },
      passProject(project) {
         this.project = project
-    },
-     passModel(model) {
-        this.model = model
     }
   },
   computed: {
