@@ -26,6 +26,7 @@ export default new Vuex.Store({
     fetchDataError: null,
     postDataError: null,
     deleteDataError: null,
+    unauthorizedError: null,
     isDialogVisible: {
       model: false,
       map: false,
@@ -47,6 +48,9 @@ export default new Vuex.Store({
     },
     setDeleteError(state, error) {
       state.deleteDataError = error;
+    },
+    setUnauthorizedError(state, error) {
+      state.unauthorizedError = error;
     },
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];

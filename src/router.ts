@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
+import store from "@/store";
+import sessionStore from "@/store/modules/session";
 import Home from "./components/Home.vue";
 import Designs from "./components/Designs.vue";
 import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
@@ -7,6 +9,15 @@ import Jobs from "./components/Jobs.vue";
 import JobDetails from "./components/JobDetails.vue";
 
 Vue.use(Router);
+
+const authGuard = (to, from, next) => {
+  if (sessionStore.state.isAuthenticated) {
+    next();
+  } else {
+    store.commit("setUnauthorizedError", to.path);
+    next({ name: "home" });
+  }
+};
 
 export default new Router({
   mode: "history",
@@ -20,7 +31,8 @@ export default new Router({
     {
       path: "/designs",
       name: "designs",
-      component: Designs
+      component: Designs,
+      beforeEnter: authGuard
     },
     {
       path: "/interactiveMap",
