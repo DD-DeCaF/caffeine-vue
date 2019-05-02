@@ -15,13 +15,20 @@
               >
                 <v-text-field
                   required
-                  v-model="projectItem.name"
+                  v-model="projectName"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Cool Project"
                 ></v-text-field>
+                <v-text-field
+                  v-model="test"
+                  name="test"
+                  label="Test"
+                  type="text"
+                ></v-text-field>
+                <p> {{ test }} </p>
               </v-form>
             </v-flex>
           </v-layout>
@@ -54,7 +61,7 @@
       v-model="isProjectCreationSuccess"
       :timeout="3000"
     >
-      {{ projectItem.name }} successfully created.
+      {{ projectName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -67,11 +74,12 @@ import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "NewProject",
-  props: ["isProjectCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
     valid: true,
     isProjectCreationSuccess: false,
-    projectItem: { name: null },
+    projectName: null,
+    test: null,
     rules: {
       required: value => !!value || "Required."
     }
@@ -79,14 +87,18 @@ export default Vue.extend({
   methods: {
     createProject() {
       this.$store.commit("toggleDialog", "loader");
+      const payload = { name: this.projectName}
       axios
-        .post(`${settings.apis.iam}/projects`, this.projectItem)
+        .post(`${settings.apis.iam}/projects`, payload)
         .then((response: AxiosResponse) => {
-          const projectItem = Object.assign(
-            { name: this.projectItem.name },
+          const commitPayload = Object.assign(
+            payload,
             response.data
           );
-          this.$store.commit("projects/addProject", projectItem);
+          console.log("the Project name:")
+          console.log(this.projectName)
+          this.$store.commit("projects/addProject", commitPayload);
+          this.$emit("returnObject", commitPayload);
           this.isVisible = false;
           this.isProjectCreationSuccess = true;
         })
@@ -101,11 +113,11 @@ export default Vue.extend({
   computed: {
     isVisible: {
       get: function() {
-        return this.isProjectCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "project");
+        this.$emit("input", value);
       }
     }
   },

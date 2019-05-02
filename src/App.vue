@@ -30,15 +30,13 @@
           />
           <v-btn
             color="secondary"
-            @click="$store.commit('toggleDialog', 'project')"
+            @click.stop="isProjectCreationDialogVisible = true"
           >
             <v-icon>add</v-icon>
             New project
           </v-btn>
           <NewProject
-            :isProjectCreationDialogVisible="
-              $store.state.isDialogVisible.project
-            "
+            v-model="isProjectCreationDialogVisible"
           />
           <LoginDialog />
         </template>
@@ -203,7 +201,8 @@ export default Vue.extend({
     LoginDialog
   },
   data: () => ({
-    drawer: false
+    drawer: false,
+    isProjectCreationDialogVisible: false
   }),
   computed: {
     isAuthenticated() {
