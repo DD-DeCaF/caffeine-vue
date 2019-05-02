@@ -127,21 +127,21 @@ export default Vue.extend({
     rules: {
       required: value => !!value || "Required."
     },
-    mapName: null, 
-    model: {id: null}, 
-    project: {id: null}, 
+    mapName: null,
+    model: { id: null },
+    project: { id: null },
     map: null
   }),
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
-         name: this.mapName, 
-         model_id: this.model.id, 
-         project_id: this.project.id, 
-         map: this.map
-      }
-      console.log("Creating a map", payload)
+        name: this.mapName,
+        model_id: this.model.id,
+        project_id: this.project.id,
+        map: this.map
+      };
+      console.log("Creating a map", payload);
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {

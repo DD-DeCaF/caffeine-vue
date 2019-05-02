@@ -236,11 +236,15 @@ export default Vue.extend({
   }),
   methods: {
     editItem(item) {
-      this.id = item.id
-      this.name = item.name
-      this.project = this.availableProjects.find(obj => obj.id == item.project_id);
-      this.selectedModel = this.availableModels.find(obj => obj.id == item.model_id);
-      this.mapItemIndex = this.availableMaps.indexOf(item)
+      this.id = item.id;
+      this.name = item.name;
+      this.project = this.availableProjects.find(
+        obj => obj.id == item.project_id
+      );
+      this.selectedModel = this.availableModels.find(
+        obj => obj.id == item.model_id
+      );
+      this.mapItemIndex = this.availableMaps.indexOf(item);
       this.isMapEditDialogVisible = true;
     },
     deleteItem(item) {
@@ -252,8 +256,8 @@ export default Vue.extend({
         id: this.id,
         name: this.name,
         project_id: this.project.id,
-        model_id: this.selectedModel.id,
-      }
+        model_id: this.selectedModel.id
+      };
       axios
         .put(`${settings.apis.maps}/maps/${this.id}`, payload)
         .then((response: AxiosResponse) => {

@@ -99,13 +99,13 @@ export default Vue.extend({
       required: value => !!value || "Required."
     },
     organismName: null,
-    project: {name: null, id: null}
+    project: { name: null, id: null }
   }),
   methods: {
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = {name: this.organismName, project_id: this.project.id}
-      console.log("The current organismItem:", payload)
+      const payload = { name: this.organismName, project_id: this.project.id };
+      console.log("The current organismItem:", payload);
       axios
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
