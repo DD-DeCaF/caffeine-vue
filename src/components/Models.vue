@@ -220,7 +220,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 import { mapGetters } from "vuex";
 
 export default Vue.extend({
@@ -301,7 +301,7 @@ export default Vue.extend({
         default_biomass_reaction: this.default_biomass_reaction
       };
       axios
-        .put(`${settings.apis.models}/models/${this.id}`, payload)
+        .put(`${settings.apis.modelStorage}/models/${this.id}`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const commitPayload = {
