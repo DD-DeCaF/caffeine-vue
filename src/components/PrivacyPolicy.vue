@@ -50,7 +50,7 @@
         <h2></h2>
         <p></p>
 
-        <h2>Credit & Contact Information</h2>
+        <h2>Credit &amp; Contact Information</h2>
         <p>
           This privacy policy was created at
           <a
