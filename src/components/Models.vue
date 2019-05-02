@@ -215,7 +215,7 @@ import { mapGetters } from "vuex";
 export default Vue.extend({
   name: "Models",
   data: () => ({
-    modelItem: {name: null},
+    modelItem: { name: null },
     modelItemIndex: null,
     isModelEditDialogVisible: false,
     isDeletionDialogVisible: false,
@@ -236,7 +236,7 @@ export default Vue.extend({
     organism: null,
     default_biomass_reaction: null,
     headers: [
-      { text: "Name", align: "left", value: "name", width: "85%"},
+      { text: "Name", align: "left", value: "name", width: "85%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
@@ -256,13 +256,19 @@ export default Vue.extend({
       this.getReactions();
     },
     editItem(item) {
-      this.id = item.id
-      this.name = item.name
-      this.preferredMap = this.availableMaps.find(obj => obj.id == item.preferred_map_id);
-      this.organism = this.availableOrganisms.find(obj => obj.id == item.organism_id);
-      this.project = this.availableProjects.find(obj => obj.id == item.project_id);
+      this.id = item.id;
+      this.name = item.name;
+      this.preferredMap = this.availableMaps.find(
+        obj => obj.id == item.preferred_map_id
+      );
+      this.organism = this.availableOrganisms.find(
+        obj => obj.id == item.organism_id
+      );
+      this.project = this.availableProjects.find(
+        obj => obj.id == item.project_id
+      );
       this.default_biomass_reaction = item.default_biomass_reaction;
-      this.modelItemIndex = this.availableModels.indexOf(item)
+      this.modelItemIndex = this.availableModels.indexOf(item);
       this.isModelEditDialogVisible = true;
     },
     deleteItem(item) {
@@ -277,12 +283,9 @@ export default Vue.extend({
         organism_id: this.organism.id,
         project_id: this.project.id,
         default_biomass_reaction: this.default_biomass_reaction
-      }
+      };
       axios
-        .put(
-          `${settings.apis.models}/models/${this.id}`,
-          payload
-        )
+        .put(`${settings.apis.models}/models/${this.id}`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const commitPayload = {
@@ -313,7 +316,7 @@ export default Vue.extend({
       axios
         .get(`${settings.apis.modelStorage}/models/${this.id}`)
         .then((response: AxiosResponse) => {
-          this.reactions = response.data.model_serialized.reactions
+          this.reactions = response.data.model_serialized.reactions;
         })
         .catch(error => {
           if (error.response && error.response.status === 404) {

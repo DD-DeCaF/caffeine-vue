@@ -68,7 +68,7 @@
                       depressed
                       @click="$store.commit('toggleDialog', 'project')"
                     >
-                       <v-icon class="mr-4">add_circle</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -173,9 +173,9 @@ export default Vue.extend({
     },
     modelName: null,
     model_serialized: null,
-    map: {id: null},
-    project: {id: null},
-    organism: {id: null},
+    map: { id: null },
+    project: { id: null },
+    organism: { id: null },
     default_biomass_reaction: null,
     modelError: false,
     reactions: []
@@ -189,8 +189,8 @@ export default Vue.extend({
         preferred_map_id: this.map.id,
         project_id: this.project.id,
         organism_id: this.organism.id,
-        default_biomass_reaction: this.default_biomass_reaction,
-      }
+        default_biomass_reaction: this.default_biomass_reaction
+      };
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
