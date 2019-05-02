@@ -4,11 +4,10 @@
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     />
-     <!-- Disabled because of possible recursion errors. Need to investigate more -->
-    <!-- <NewMap
+    <NewMap
       v-model="isMapCreationDialogVisible"
       @returnObject="passMap"
-    /> -->
+    />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
       @returnObject="passOrganism"

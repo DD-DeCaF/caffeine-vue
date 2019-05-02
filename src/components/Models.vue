@@ -13,11 +13,10 @@
       v-model="isProjectCreationDialogVisible"
       @returnObject="passProject"
     /> -->
-    <!-- Disabled because of possible recursion errors. Need to investigate more -->
-    <!-- <NewMap
+    <NewMap
       v-model="isMapCreationDialogVisible"
       @returnObject="passMap"
-    /> -->
+    />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
       @returnObject="passOrganism"
@@ -236,6 +235,7 @@ export default Vue.extend({
     modelItemIndex: null,
     isModelCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
+    isMapCreationDialogVisible: false,
     // Disabled because its not on the old platform
     // isProjectCreationDialogVisible: false,
     isModelEditDialogVisible: false,
