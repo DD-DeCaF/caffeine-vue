@@ -71,9 +71,7 @@ export default Vue.extend({
   }),
   methods: {
     escherLoaded() {
-      // TODO: Data might not be available at this point - need to latch onto
-      // the fetch action promise
-      this.addDefaultCard();
+      this.$store.getters["models/onData"](this.addDefaultCard);
     },
     changeMap() {
       // TODO: Get map from maps state lazy loader
@@ -87,10 +85,17 @@ export default Vue.extend({
         });
     },
     addDefaultCard() {
-      // TODO: Don't hardcode indices
-      const organism = this.$store.state.organisms.organisms[0];
-      const model = this.$store.state.models.models[2];
-      this.addCard("Design", organism, model, "pfba");
+      const model = this.$store.state.models.models.find(
+        model => model.name === "e_coli_core"
+      );
+      if (model) {
+        const organism = this.$store.getters["organisms/getOrganismById"](
+          model.organism_id
+        );
+        this.addCard("Design", organism, model, "pfba");
+      } else {
+        this.addCard("Design", null, null, "pfba");
+      }
     },
     addCard(name, organism, model, method) {
       const card = {
@@ -116,6 +121,13 @@ export default Vue.extend({
       card.isSelected = true;
     },
     simulate(card) {
+      if (card.model === null) {
+        // Cards are not guaranteed to have the model set (e.g. if the preferred
+        // default model doesn't exist - that could be the case for local
+        // installations of the platform).
+        return;
+      }
+
       card.isSimulating = true;
       axios
         .post(`${settings.apis.model}/simulate`, {

@@ -33,13 +33,15 @@
           Organism:
         </v-flex>
         <v-flex class="xs6 text-xs-right">
-          {{ card.organism.name }}
+          <span v-if="card.organism">{{ card.organism.name }}</span>
+          <span v-else><em>Unknown</em></span>
         </v-flex>
         <v-flex class="xs6">
           Model:
         </v-flex>
         <v-flex class="xs6 text-xs-right">
-          {{ card.model.name }}
+          <span v-if="card.model">{{ card.model.name }}</span>
+          <span v-else><em>Not selected</em></span>
         </v-flex>
         <v-flex class="xs6">
           Method:
@@ -52,7 +54,12 @@
         </v-flex>
         <v-flex class="xs6 text-xs-right">
           <div v-if="!card.isSimulating">
-            {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
+            <span v-if="card.growthRate">
+              {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
+            </span>
+            <span v-else>
+              N/A
+            </span>
           </div>
           <div v-else>
             <v-progress-circular
