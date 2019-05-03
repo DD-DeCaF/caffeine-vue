@@ -10,7 +10,7 @@
       <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn flat icon v-if="!isOnlyCard" @click="removeCard">
-        <v-icon>close</v-icon>
+        <v-icon color="white">close</v-icon>
       </v-btn>
     </v-toolbar>
     <v-progress-linear
