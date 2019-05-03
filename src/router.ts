@@ -14,11 +14,30 @@ import NotFound from "./components/NotFound.vue";
 Vue.use(Router);
 
 const authGuard = (to, from, next) => {
-  if (sessionStore.state.isAuthenticated) {
-    next();
+  // Check if role was loaded from local storage. This happens before App
+  // creation.
+  if (sessionStore.state.userRole === null) {
+    // Watch the role value for changes so we know when loading has happened.
+    const unwatch = store.watch(
+      () => sessionStore.state.userRole,
+      role => {
+        unwatch();
+        if (sessionStore.state.isAuthenticated) {
+          next();
+        } else {
+          store.commit("setUnauthorizedError", to.path);
+          next({ name: "home" });
+        }
+      }
+    );
   } else {
-    store.commit("setUnauthorizedError", to.path);
-    next({ name: "home" });
+    // Loading has happened, we proceed normally.
+    if (sessionStore.state.isAuthenticated) {
+      next();
+    } else {
+      store.commit("setUnauthorizedError", to.path);
+      next({ name: "home" });
+    }
   }
 };
 
@@ -45,12 +64,14 @@ export default new Router({
     {
       path: "/jobs",
       name: "jobs",
-      component: Jobs
+      component: Jobs,
+      beforeEnter: authGuard
     },
     {
       path: "/jobs/:id",
       name: "jobDetails",
-      component: JobDetails
+      component: JobDetails,
+      beforeEnter: authGuard
     },
     {
       path: "/maps",
