@@ -22,7 +22,13 @@ export default {
     setModels(state, models: ModelItem[]) {
       state.models = models;
     },
-    editModel(state, { editedModel , editedIndex }: {editedModel: ModelItem, editedIndex: number}) {
+    editModel(
+      state,
+      {
+        editedModel,
+        editedIndex
+      }: { editedModel: ModelItem; editedIndex: number }
+    ) {
       state.model[editedIndex] = editedModel;
     },
     addModel(state, model: ModelItem) {
