@@ -73,7 +73,7 @@
             </v-list-tile-content>
           </v-list-tile>
 
-          <v-list-tile to="/interactiveMap">
+          <v-list-tile to="/interactive-map">
             <v-list-tile-action>
               <v-icon>$vuetify.icons.interactive_map</v-icon>
             </v-list-tile-action>

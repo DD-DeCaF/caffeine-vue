@@ -21,7 +21,7 @@ export default new Router({
       component: Designs
     },
     {
-      path: "/interactiveMap",
+      path: "/interactive-map",
       name: "interactiveMap",
       component: InteractiveMap
     }
