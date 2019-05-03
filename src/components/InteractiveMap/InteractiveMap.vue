@@ -160,7 +160,7 @@ export default Vue.extend({
     // request (important if the user navigates directly to this view).
     this.$store.getters["maps/onData"](() => {
       this.$store.state.maps.maps.forEach(map => {
-        if (map.model_id === 10 && map.name === "Central metabolism") {
+        if (map.model_id === 15 && map.name === "Core metabolism") {
           this.currentMapId = map.id;
           this.changeMap();
         }
