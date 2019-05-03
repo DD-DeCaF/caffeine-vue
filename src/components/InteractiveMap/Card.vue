@@ -4,7 +4,7 @@
       dense
       :color="color"
       class="white--text"
-      :class="{ clickable: !card.isSelected }"
+      :class="{ clickable: !isSelected }"
       @click="selectCard"
     >
       <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
@@ -19,7 +19,7 @@
       class="my-0"
       height="3"
     ></v-progress-linear>
-    <v-card-title primary-title class="py-2" v-if="card.isSelected">
+    <v-card-title primary-title class="py-2" v-if="isSelected">
       <v-layout justify-space-around>
         <v-btn flat icon>
           <v-icon>info</v-icon>
@@ -80,7 +80,7 @@ import axios from "axios";
 
 export default Vue.extend({
   name: "Card",
-  props: ["card", "isOnlyCard"],
+  props: ["card", "isOnlyCard", "isSelected"],
   filters: {
     round(value) {
       return value.toFixed(3);
@@ -88,7 +88,7 @@ export default Vue.extend({
   },
   computed: {
     color() {
-      if (this.card.isSelected) {
+      if (this.isSelected) {
         return "primary";
       } else {
         return "grey";

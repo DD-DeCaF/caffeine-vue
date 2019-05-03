@@ -41,6 +41,7 @@
           v-for="card in cards"
           :key="cards.indexOf(card)"
           :card="card"
+          :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
           @select-card="selectCard"
           @remove-card="removeCard"
@@ -68,7 +69,8 @@ export default Vue.extend({
     currentMapId: null,
     fluxDistribution: null,
     mapData: null,
-    cards: []
+    cards: [],
+    selectedCard: null
   }),
   methods: {
     escherLoaded() {
@@ -105,21 +107,17 @@ export default Vue.extend({
         model: model,
         method: method,
         isSimulating: false,
-        growthRate: null,
-        isSelected: false
+        growthRate: null
       };
       this.cards.push(card);
-      this.selectCard(card);
+      this.selectedCard = card;
       this.simulate(card);
     },
     removeCard(card) {
       this.cards.splice(this.cards.indexOf(card), 1);
     },
     selectCard(card) {
-      this.cards.forEach(card => {
-        card.isSelected = false;
-      });
-      card.isSelected = true;
+      this.selectedCard = card;
     },
     simulate(card) {
       if (card.model === null) {
@@ -155,11 +153,6 @@ export default Vue.extend({
   computed: {
     maps() {
       return this.$store.state.maps.maps;
-    },
-    selectedCard() {
-      return this.cards.find(card => {
-        return card.isSelected;
-      });
     }
   },
   mounted() {
