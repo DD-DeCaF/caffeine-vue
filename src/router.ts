@@ -37,7 +37,7 @@ export default new Router({
       beforeEnter: authGuard
     },
     {
-      path: "/interactiveMap",
+      path: "/interactive-map",
       name: "interactiveMap",
       component: InteractiveMap
     },
