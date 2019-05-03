@@ -44,6 +44,7 @@
           :isOnlyCard="cards.length === 1"
           @select-card="selectCard"
           @remove-card="removeCard"
+          @simulate-card="simulate"
         />
       </v-container>
     </v-navigation-drawer>
