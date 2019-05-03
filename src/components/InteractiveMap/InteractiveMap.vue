@@ -25,8 +25,9 @@
           <v-btn flat icon @click="selectPreviousCard">
             <v-icon>chevron_left</v-icon>
           </v-btn>
-          <v-btn flat icon>
-            <v-icon>play_arrow</v-icon>
+          <v-btn flat icon @click="togglePlay">
+            <v-icon v-if="!playing">play_arrow</v-icon>
+            <v-icon v-else>pause</v-icon>
           </v-btn>
           <v-btn flat icon @click="selectNextCard">
             <v-icon>chevron_right</v-icon>
@@ -69,7 +70,8 @@ export default Vue.extend({
     currentMapId: null,
     mapData: null,
     cards: [],
-    selectedCard: null
+    selectedCard: null,
+    playingInterval: null
   }),
   methods: {
     escherLoaded() {
@@ -133,6 +135,16 @@ export default Vue.extend({
         this.selectCard(this.cards[0]);
       } else {
         this.selectCard(this.cards[index + 1]);
+      }
+    },
+    togglePlay() {
+      if (this.playing) {
+        clearInterval(this.playingInterval);
+        this.playingInterval = null;
+      } else {
+        // Trigger an instant call in addition to starting the interval timer.
+        this.selectNextCard();
+        this.playingInterval = setInterval(this.selectNextCard, 1000);
       }
     },
     simulate(card) {
@@ -223,6 +235,9 @@ export default Vue.extend({
         return null;
       }
       return this.selectedCard.fluxDistribution;
+    },
+    playing() {
+      return this.playingInterval !== null;
     }
   },
   mounted() {
