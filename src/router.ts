@@ -63,7 +63,7 @@ export default new Router({
       component: Models
     },
     {
-      path: '*',
+      path: "*",
       component: NotFound
     }
   ]
