@@ -44,7 +44,7 @@ export default new Router({
       name: "interactiveMap",
       component: InteractiveMap
     },
-    { 
+    {
       path: "/jobs",
       name: "jobs",
       component: Jobs
