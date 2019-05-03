@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export interface OrganismItem {
   id: number;
@@ -33,6 +33,11 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+    }
+  },
+  getters: {
+    getOrganismById: state => (id: number) => {
+      return state.organisms.find(organism => organism.id === id);
     }
   }
 };

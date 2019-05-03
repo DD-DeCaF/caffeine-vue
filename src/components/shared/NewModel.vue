@@ -1,5 +1,14 @@
 <template>
   <div>
+    <NewProject
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
+    <NewMap v-model="isMapCreationDialogVisible" @returnObject="passMap" />
+    <NewOrganism
+      v-model="isOrganismCreationDialogVisible"
+      @returnObject="passOrganism"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -20,20 +29,21 @@
               >
                 <v-text-field
                   required
-                  v-model="modelName.value"
-                  :rules="modelName.rules"
+                  v-model="modelName"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Favourite Model"
                 ></v-text-field>
                 <v-autocomplete
-                  return-object
                   required
+                  return-object
                   item-text="name"
-                  v-model="organismItemValidation.projectItem"
+                  item-id="id"
+                  v-model="organism"
                   :items="availableOrganisms"
-                  :rules="organismItemValidation.rules"
+                  :rules="[rules.required]"
                   name="organism"
                   label="Organism"
                   type="text"
@@ -41,33 +51,33 @@
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'organism')"
+                      depressed
+                      @click.stop="isOrganismCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New Organism
                     </v-btn>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
-                  return-object
                   required
+                  return-object
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-id="id"
+                  v-model="project"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'project')"
+                      depressed
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -75,7 +85,8 @@
                 <v-autocomplete
                   return-object
                   item-text="name"
-                  v-model="mapItem"
+                  item-id="id"
+                  v-model="map"
                   :items="availableMaps"
                   hint="The default map displayed on the Interactive Map, optional"
                   persistent-hint
@@ -86,33 +97,29 @@
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'map')"
+                      depressed
+                      @click.stop="isMapCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New Map
                     </v-btn>
                   </template>
                 </v-autocomplete>
-                <!-- <FileUpload v-model="filename" @formData="formData"> This is working?! </FileUpload>
-                <v-btn @click.native="uploadFiles"> emt </v-btn> -->
-                <v-text-field
-                  required
-                  v-model="modelJSON.value"
-                  :rules="modelJSON.rules"
-                  name="name"
-                  label="JSON Model"
-                  type="file"
-                  placeholder="e.g. My Favourite Model"
-                  accept=".json"
-                >
-                </v-text-field>
+                <FileUpload
+                  v-model="filename"
+                  @formData="loadFile"
+                  :accept="'.json'"
+                  :label="'Upload JSON model'"
+                  :required="true"
+                  :rules="[rules.required]"
+                  :error-messages="errorMessage"
+                />
                 <v-autocomplete
-                  return-object
                   required
-                  item-text="name"
-                  v-model="reactionIdentifier"
-                  :items="availableReactions"
+                  item-text="id"
+                  v-model="default_biomass_reaction"
+                  :items="reactions"
+                  :rules="[rules.required]"
                   hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
                   name="map"
@@ -150,10 +157,9 @@
     <v-snackbar
       color="success"
       v-model="isModelCreationSuccess"
-      bottom
       :timeout="3000"
     >
-      {{ modelName.value }} successfully created.
+      {{ modelName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -162,58 +168,46 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "NewModel",
-  props: ["isModelCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
+    filename: null,
     valid: true,
+    isProjectCreationDialogVisible: false,
+    isMapCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false,
     isModelCreationSuccess: false,
-    reactionIdentifier: {
-      value: null,
-      // Should be checked that it is indeed in the model.
-      rules: [(v: string) => !!v || "A name is required."]
+    rules: {
+      required: value => !!value || "Required."
     },
-    modelName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
-    },
-    organismItemValidation: {
-      organismItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "An organism is required."]
-    },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    },
-    modelJSON: {
-      value: null,
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A model JSON is required."]
-    },
-    mapItem: null
+    modelName: null,
+    model_serialized: null,
+    map: null,
+    project: null,
+    organism: null,
+    default_biomass_reaction: null,
+    modelError: false,
+    reactions: []
   }),
   methods: {
     createModel() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
-        name: this.modelName.value,
-        organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id
+        name: this.modelName,
+        model_serialized: this.model_serialized,
+        preferred_map_id: this.map.id,
+        project_id: this.project.id,
+        organism_id: this.organism.id,
+        default_biomass_reaction: this.default_biomass_reaction
       };
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("models/addModel", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isModelCreationSuccess = true;
         })
@@ -224,13 +218,51 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     },
-    uploadFiles() {
-      // your custom upload method
-      const form = this.formData;
-      console.log(form);
+    // A great tutorial for the inner workings of the following function can be found at
+    // https://alligator.io/vuejs/file-reader-component/
+    loadFile($event): void {
+      // FileUpload emits an event which contains a FormData object, which itself contains
+      // a list of Files. Since FileUpload is limited to accepting only a single
+      // file we only concern ourselves with the first element of that list.
+      const file = $event[0].get("data");
+      // Create a new instance of FileReader
+      const fileReader = new FileReader();
+      // Is called when the readAsText operation below successfully completes
+      fileReader.onload = () => {
+        this.model_serialized = JSON.parse(fileReader.result as string);
+        if (this.model_serialized.reactions) {
+          this.modelError = false;
+          this.reactions = this.model_serialized.reactions.map(
+            reaction => reaction.id
+          );
+        } else {
+          this.modelError = true;
+        }
+      };
+      if (file) {
+        // Read the file asynchroniously.
+        // When it completes sucessfully the onload event defined above can access the data.
+        fileReader.readAsText(file);
+      }
+    },
+    passProject(project) {
+      this.project = project;
+    },
+    passMap(map) {
+      this.map = map;
+    },
+    passOrganism(organism) {
+      this.organism = organism;
     }
   },
   computed: {
+    errorMessage() {
+      if (this.modelError) {
+        return "The file is not valid.";
+      } else {
+        return [];
+      }
+    },
     availableProjects() {
       return this.$store.state.projects.projects;
     },
@@ -241,15 +273,15 @@ export default Vue.extend({
       return this.$store.state.maps.maps;
     },
     availableReactions() {
-      return ["Biomass1", "Biomass2"];
+      return [{ id: "Biomass1" }, { id: "Biomass2" }];
     },
     isVisible: {
       get: function() {
-        return this.isModelCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "model");
+        this.$emit("input", value);
       }
     }
   },

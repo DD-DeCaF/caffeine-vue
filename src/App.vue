@@ -1,6 +1,14 @@
 <template>
   <div id="app">
     <v-app>
+      <LoaderDialog
+        :loadingMessage="$store.state.loadingMessages.default"
+        :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
+      />
+      <NewMap :isMapCreationDialogVisible="$store.state.isDialogVisible.map" />
+      <NewModel
+        :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
+      />
       <v-toolbar app clipped-left color="primary" dark>
         <v-toolbar-side-icon
           @click.stop="drawer = !drawer"
@@ -8,56 +16,6 @@
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
         <template>
-          All of this and the attached logic ought to be moved to the appropiate
-          sections later
-          <LoaderDialog
-            :loadingMessage="$store.state.loadingMessages.default"
-            :isLoaderDialogVisible="$store.state.isDialogVisible.loader"
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'map')"
-          >
-            <v-icon>add</v-icon>
-            New Map
-          </v-btn>
-          <NewMap
-            :isMapCreationDialogVisible="$store.state.isDialogVisible.map"
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'model')"
-          >
-            <v-icon>add</v-icon>
-            New Model
-          </v-btn>
-          <NewModel
-            :isModelCreationDialogVisible="$store.state.isDialogVisible.model"
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'organism')"
-          >
-            <v-icon>add</v-icon>
-            New Organism
-          </v-btn>
-          <NewOrganism
-            :isOrganismCreationDialogVisible="
-              $store.state.isDialogVisible.organism
-            "
-          />
-          <v-btn
-            color="secondary"
-            @click="$store.commit('toggleDialog', 'project')"
-          >
-            <v-icon>add</v-icon>
-            New project
-          </v-btn>
-          <NewProject
-            :isProjectCreationDialogVisible="
-              $store.state.isDialogVisible.project
-            "
-          />
           <LoginDialog />
         </template>
       </v-toolbar>
@@ -198,9 +156,17 @@
         or are you not logged in?
       </v-snackbar>
 
+      <v-snackbar color="error" v-model="hasDeleteDataError" :timeout="6000">
+        Sorry, we were unable to delete data. Please check if you are logged in.
+      </v-snackbar>
+
       <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
         Your session has expired and you have been logged out. Please log in
         again.
+      </v-snackbar>
+
+      <v-snackbar color="error" v-model="unauthorizedError" :timeout="6000">
+        Sorry, you need to be logged in to access {{ unauthorizedError }}.
       </v-snackbar>
     </v-app>
   </div>
@@ -216,7 +182,8 @@ export default Vue.extend({
   },
   data: () => ({
     drawer: false,
-    disabledTooltipText: "Please log in or register to use this functionality!"
+    isProjectCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false
   }),
   computed: {
     isAuthenticated() {
@@ -244,6 +211,23 @@ export default Vue.extend({
       },
       set(newValue) {
         this.$store.commit("setPostError", null);
+      }
+    },
+    hasDeleteDataError: {
+      get() {
+        return this.$store.state.deleteDataError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("setDeleteError", null);
+      }
+    },
+    unauthorizedError: {
+      get() {
+        return this.$store.state.unauthorizedError;
+      },
+      set() {
+        // Ignore passed value argument.
+        this.$store.commit("setUnauthorizedError", null);
       }
     }
   },

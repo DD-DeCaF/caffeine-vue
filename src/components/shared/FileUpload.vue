@@ -2,16 +2,19 @@
   <!-- There is no native file upload component for vuetify yet. 
 This is a temporary workaround suggested by @Dohomi on this vuetify issue:
 https://github.com/vuetifyjs/vuetify/issues/238 or more specifically this gist:
-https://gist.github.com/dohomi/2bba9e2905d00cd1cec9c09cfd87bd10-->
+https://gist.github.com/dohomi/2bba9e2905d00cd1cec9c09cfd87bd10
+I've modified it to accept additional props relevant for Caffeine.
+-->
   <div>
     <v-text-field
       prepend-icon="attach_file"
-      single-line
       v-model="filename"
-      :label="$t(label).toUpperCase()"
+      :label="label"
       :required="required"
+      :rules="rules"
       @click.native="onFocus"
       :disabled="disabled"
+      :error-messages="errorMessages"
       ref="fileTextField"
     ></v-text-field>
     <input
@@ -29,7 +32,7 @@ https://gist.github.com/dohomi/2bba9e2905d00cd1cec9c09cfd87bd10-->
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "NewMap",
+  name: "FileUpload",
   props: {
     value: {
       type: [Array, String]
@@ -53,6 +56,12 @@ export default Vue.extend({
     multiple: {
       type: Boolean,
       default: false
+    },
+    rules: {
+      type: Array
+    },
+    errorMessages: {
+      type: [Array, String]
     }
   },
   data() {
@@ -85,7 +94,7 @@ export default Vue.extend({
     },
     onFileChange($event) {
       const files = $event.target.files || $event.dataTransfer.files;
-      const form = this.getFormData(files);
+      const forms = this.getFormData(files);
       if (files) {
         if (files.length > 0) {
           this.filename = [...files].map(file => file.name).join(", ");
@@ -96,7 +105,7 @@ export default Vue.extend({
         this.filename = $event.target.value.split("\\").pop();
       }
       this.$emit("input", this.filename);
-      this.$emit("formData", form);
+      this.$emit("formData", forms);
     }
   }
 });
@@ -105,6 +114,6 @@ export default Vue.extend({
 <style scoped>
 input[type="file"] {
   position: absolute;
-  left: -99999px;
+  display: none;
 }
 </style>

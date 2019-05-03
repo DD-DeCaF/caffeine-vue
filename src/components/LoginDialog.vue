@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="isAuthenticated">
-      <v-btn color="secondary" depressed @click="logout">
+      <v-btn color="primary" depressed @click="logout">
         <v-icon>power_settings_new</v-icon>
         Log Out
       </v-btn>
@@ -143,8 +143,8 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
-import { JWT } from "@/store/session";
+import * as settings from "@/settings";
+import { JWT } from "@/store/modules/session";
 import firebase from "firebase/app";
 import "firebase/auth";
 
@@ -206,6 +206,7 @@ export default Vue.extend({
       this.$store.commit("session/logout");
       this.isLogoutSuccess = true;
       this.$store.dispatch("fetchAllData");
+      this.$router.replace({ name: "home" });
     },
     socialLogin(providerKey) {
       firebase.auth().signOut();

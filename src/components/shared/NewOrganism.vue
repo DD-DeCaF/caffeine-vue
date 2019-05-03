@@ -1,5 +1,9 @@
 <template>
   <div>
+    <NewProject
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -16,8 +20,8 @@
                 <v-text-field
                   autofocus
                   required
-                  v-model="organismName.value"
-                  :rules="organismName.rules"
+                  v-model="organismName"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
@@ -27,21 +31,20 @@
                   return-object
                   required
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  v-model="project"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'project')"
+                      depressed=""
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -76,10 +79,9 @@
     <v-snackbar
       color="success"
       v-model="isOrganismCreationSuccess"
-      bottom
       :timeout="3000"
     >
-      {{ organismName.value }} successfully created.
+      {{ organismName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -88,39 +90,30 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "NewOrganism",
-  props: ["isOrganismCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
     valid: true,
-    isOrganismCreationSuccess: false,
     isProjectCreationDialogVisible: false,
-    organismName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
+    isOrganismCreationSuccess: false,
+    rules: {
+      required: value => !!value || "Required."
     },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    }
+    organismName: null,
+    project: { name: null, id: null }
   }),
   methods: {
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
-      const payload = {
-        name: this.organismName.value,
-        project_id: this.projectItemValidation.projectItem.id
-      };
+      const payload = { name: this.organismName, project_id: this.project.id };
       axios
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isOrganismCreationSuccess = true;
         })
@@ -130,6 +123,9 @@ export default Vue.extend({
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
         });
+    },
+    passProject(project) {
+      this.project = project;
     }
   },
   computed: {
@@ -138,11 +134,11 @@ export default Vue.extend({
     },
     isVisible: {
       get: function() {
-        return this.isOrganismCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "organism");
+        this.$emit("input", value);
       }
     }
   },

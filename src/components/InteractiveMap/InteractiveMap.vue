@@ -1,37 +1,18 @@
 <template>
   <div class="interactive-map fill-height">
-    <v-progress-linear
-      v-if="isLoadingMap"
-      :indeterminate="true"
-      class="my-0"
-    ></v-progress-linear>
-    <div class="escher-container fill-height">
-      <v-container fluid fill-height v-if="isInitializingEscher">
-        <v-layout align-center justify-center>
-          <p class="display-1">
-            <v-progress-circular
-              indeterminate
-              size="60"
-              :width="2"
-              class="mr-2"
-            ></v-progress-circular>
-            Initializing Escher, please wait...
-          </p>
-        </v-layout>
-      </v-container>
-      <div ref="escher" class="fill-height"></div>
-    </div>
+    <Escher
+      @escher-loaded="escherLoaded"
+      :fluxDistribution="fluxDistribution"
+      :mapData="mapData"
+    />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
-        <!-- TODO: Grouped maps -->
-        <!-- TODO: Select default map -->
         <v-select
           label="Selected Map"
           :items="maps"
           item-text="name"
           item-value="id"
           v-model="currentMapId"
-          :disabled="isLoadingMap"
           @change="changeMap"
         ></v-select>
       </v-container>
@@ -39,7 +20,7 @@
       <v-container class="pa-0">
         <v-layout justify-space-around>
           <v-btn flat icon>
-            <v-icon>add</v-icon>
+            <v-icon @click="addDefaultCard">add</v-icon>
           </v-btn>
           <v-btn flat icon>
             <v-icon>chevron_left</v-icon>
@@ -54,49 +35,16 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <v-card v-for="card in cards" :key="JSON.stringify(card)">
-          <v-toolbar dense color="primary" dark>
-            <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-icon>close</v-icon>
-          </v-toolbar>
-          <v-card-title primary-title class="py-2">
-            <v-layout justify-space-around>
-              <v-btn flat icon>
-                <v-icon>info</v-icon>
-              </v-btn>
-              <v-btn flat icon>
-                <v-icon>edit</v-icon>
-              </v-btn>
-            </v-layout>
-            <v-layout wrap>
-              <v-flex class="xs6">
-                Organism:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.organism.name }}
-              </v-flex>
-              <v-flex class="xs6">
-                Model:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.model.name }}
-              </v-flex>
-              <v-flex class="xs6">
-                Method:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.method }}
-              </v-flex>
-              <v-flex class="xs6">
-                Growth rate:
-              </v-flex>
-              <v-flex class="xs6 text-xs-right">
-                {{ card.growthRate }} <em>h<sup>-1</sup></em>
-              </v-flex>
-            </v-layout>
-          </v-card-title>
-        </v-card>
+        <!-- TODO proper unique key -->
+        <Card
+          v-for="card in cards"
+          :key="cards.indexOf(card)"
+          :card="card"
+          :isSelected="card === selectedCard"
+          :isOnlyCard="cards.length === 1"
+          @select-card="selectCard"
+          @remove-card="removeCard"
+        />
       </v-container>
     </v-navigation-drawer>
   </div>
@@ -105,105 +53,167 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-/// <reference path="@/types/escher.d.ts" />
-import * as escher from "@dd-decaf/escher";
-import settings from "@/settings";
+import * as settings from "@/settings";
+import Escher from "@/components/InteractiveMap/Escher.vue";
+import Card from "@/components/InteractiveMap/Card.vue";
 
 export default Vue.extend({
   name: "InteractiveMap",
+  components: {
+    Escher,
+    Card
+  },
   data: () => ({
     escherBuilder: null,
-    isInitializingEscher: true,
     currentMapId: null,
-    isLoadingMap: false,
-    cards: [
-      {
-        // TODO: Replace test card
-        name: "Design",
-        method: "pFBA",
-        model: { name: "iJO1366" },
-        organism: { name: "E. coli" },
-        growthRate: 0.874
-      }
-    ]
+    fluxDistribution: null,
+    mapData: null,
+    cards: [],
+    selectedCard: null
   }),
   methods: {
+    escherLoaded() {
+      this.$store.getters["models/onData"](this.addDefaultCard);
+    },
     changeMap() {
-      this.isLoadingMap = true;
       // TODO: Get map from maps state lazy loader
       axios
         .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
         .then(response => {
-          // Note that this will freeze the entire application, including
-          // progress spinners.
-          this.escherBuilder.load_map(response.data.map);
-          this.isLoadingMap = false;
+          this.mapData = response.data.map;
+        })
+        .catch(error => {
+          // TODO: show snackbar
         });
     },
-    reactionState(id: string, type?: string) {
-      // TODO
+    addDefaultCard() {
+      const model = this.$store.state.models.models.find(
+        model => model.name === "e_coli_core"
+      );
+      if (model) {
+        const organism = this.$store.getters["organisms/getOrganismById"](
+          model.organism_id
+        );
+        this.addCard("Design", organism, model, "pfba");
+      } else {
+        this.addCard("Design", null, null, "pfba");
+      }
     },
-    handleKnockout(reactionId: string) {
-      // TODO
+    addCard(name, organism, model, method) {
+      const card = {
+        name: name,
+        organism: organism,
+        model: model,
+        method: method,
+        isSimulating: false,
+        growthRate: null
+      };
+      this.cards.push(card);
+      this.selectedCard = card;
+      this.simulate(card);
     },
-    handleKnockoutGenes(reactionId: string) {
-      // TODO
+    removeCard(card) {
+      this.cards.splice(this.cards.indexOf(card), 1);
     },
-    handleSetAsObjective(reactionId: string) {
-      // TODO
+    selectCard(card) {
+      this.selectedCard = card;
     },
-    handleChangeBounds(reactionId: string, lower: string, upper: string) {
-      // TODO
-    },
-    handleResetBounds(reactionId: string) {
-      // TODO
-    },
-    handleObjectiveDirection(reactionId: string) {
-      // TODO
+    simulate(card) {
+      if (card.model === null) {
+        // Cards are not guaranteed to have the model set (e.g. if the preferred
+        // default model doesn't exist - that could be the case for local
+        // installations of the platform).
+        return;
+      }
+
+      card.isSimulating = true;
+      axios
+        .post(`${settings.apis.model}/simulate`, {
+          model_id: card.model.id,
+          method: card.method
+        })
+        .then(response => {
+          card.growthRate = response.data.growth_rate;
+          // TODO: Flux distribution should belong to the card
+          this.fluxDistribution = response.data.flux_distribution;
+        })
+        .catch(error => {
+          // TODO: show snackbar
+          card.growthRate = null;
+          // TODO: Flux distribution should belong to the card
+          this.fluxDistribution = null;
+          console.error(error);
+        })
+        .then(response => {
+          card.isSimulating = false;
+        });
     }
   },
   computed: {
     maps() {
-      return this.$store.state.maps.maps;
+      // Sort maps by model name, then map name
+      const maps = this.$store.state.maps.maps;
+      maps.sort((map1, map2) => {
+        if (map1.model_id !== map2.model_id) {
+          const model1 = this.$store.getters["models/getModelById"](
+            map1.model_id
+          );
+          let model1Name;
+          if (model1) {
+            model1Name = model1.name;
+          } else {
+            model1Name = "Unknown model";
+          }
+
+          const model2 = this.$store.getters["models/getModelById"](
+            map2.model_id
+          );
+          let model2Name;
+          if (model2) {
+            model2Name = model2.name;
+          } else {
+            model2Name = "Unknown model";
+          }
+          return model1Name > model2Name;
+        } else {
+          return map1.name > map2.name;
+        }
+      });
+
+      // Build a data structure for the v-select, grouping maps by model with
+      // dividers and headers.
+      const mapsWithHeaders: object[] = [];
+      let previousModelId = null;
+      maps.forEach(map => {
+        if (map.model_id !== previousModelId) {
+          if (mapsWithHeaders.length !== 0) {
+            mapsWithHeaders.push({ divider: true });
+          }
+          let modelName;
+          try {
+            modelName = this.$store.getters["models/getModelById"](map.model_id)
+              .name;
+          } catch {
+            modelName = "Unknown model";
+          }
+          mapsWithHeaders.push({ header: modelName });
+        }
+        mapsWithHeaders.push(map);
+        previousModelId = map.model_id;
+      });
+      return mapsWithHeaders;
     }
   },
   mounted() {
-    this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
-      menu: "zoom",
-      scroll_behavior: "zoom",
-      fill_screen: false,
-      ignore_bootstrap: true,
-      never_ask_before_quit: true,
-      reaction_styles: ["color", "size", "text", "abs"],
-      identifiers_on_map: "bigg_id",
-      hide_all_labels: false,
-      hide_secondary_metabolites: false,
-      highlight_missing: true,
-      reaction_scale: [
-        { type: "min", color: "#A841D0", size: 20 },
-        { type: "Q1", color: "#868BB2", size: 20 },
-        { type: "Q3", color: "#6DBFB0", size: 20 },
-        { type: "max", color: "#54B151", size: 20 }
-      ],
-      reaction_no_data_color: "#CBCBCB",
-      reaction_no_data_size: 10,
-      tooltip: "custom",
-      enable_editing: false,
-      enable_fva_opacity: true,
-      show_gene_reaction_rules: true,
-      zoom_extent_canvas: true,
-      first_load_callback: () => {
-        this.isInitializingEscher = false;
-      },
-      reaction_state: this.reactionState,
-      tooltip_callbacks: {
-        knockout: this.handleKnockout,
-        knockoutGenes: this.handleKnockoutGenes,
-        setAsObjective: this.handleSetAsObjective,
-        changeBounds: this.handleChangeBounds,
-        resetBounds: this.handleResetBounds,
-        objectiveDirection: this.handleObjectiveDirection
-      }
+    // Set the chosen map to the preferred default. Wait for a potential fetch
+    // request (important if the user navigates directly to this view).
+    this.$store.getters["maps/onData"](() => {
+      this.$store.state.maps.maps.forEach(map => {
+        if (map.model_id === 15 && map.name === "Core metabolism") {
+          this.currentMapId = map.id;
+          this.changeMap();
+        }
+      });
     });
   }
 });

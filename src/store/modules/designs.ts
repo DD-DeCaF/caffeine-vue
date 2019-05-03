@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export interface DesignItem {
   design: {
@@ -30,6 +30,9 @@ export default {
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
       state.designs = designs;
+    },
+    delete(state, ids) {
+      state.designs = state.designs.filter(design => !ids.includes(design.id));
     }
   },
   actions: {

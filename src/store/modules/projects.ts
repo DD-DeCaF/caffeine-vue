@@ -1,6 +1,6 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export interface ProjectItem {
   id: number;
@@ -30,6 +30,11 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+    }
+  },
+  getters: {
+    getProjectById: state => (id: number) => {
+      return state.projects.find(project => project.id === id);
     }
   }
 };

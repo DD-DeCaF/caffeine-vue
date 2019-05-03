@@ -1,5 +1,5 @@
 import axios from "axios";
-import settings from "@/settings";
+import * as settings from "@/settings";
 
 export interface JWT {
   jwt: string;
@@ -91,7 +91,13 @@ export default {
           })
       );
     },
-    refreshTokenLoop({ dispatch, commit, state }) {
+    refreshTokenLoop({ dispatch }) {
+      dispatch("refreshToken");
+      setTimeout(() => {
+        dispatch("refreshTokenLoop");
+      }, 9 * 60 * 1000);
+    },
+    refreshToken({ dispatch, commit, state }) {
       if (state.isAuthenticated) {
         const params = { refresh_token: state.jwt.refresh_token.val };
         const refreshRequest = axios
@@ -109,10 +115,6 @@ export default {
           });
         commit("setRefreshRequest", refreshRequest);
       }
-
-      setTimeout(() => {
-        dispatch("refreshTokenLoop");
-      }, 9 * 60 * 1000);
     }
   }
 };
