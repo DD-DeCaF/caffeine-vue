@@ -3,7 +3,7 @@
     <v-toolbar
       dense
       :color="color"
-      dark
+      class="white--text"
       :class="{ clickable: !card.isSelected }"
       @click="selectCard"
     >
