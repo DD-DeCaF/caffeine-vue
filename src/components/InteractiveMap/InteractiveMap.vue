@@ -19,16 +19,16 @@
       <v-divider></v-divider>
       <v-container class="pa-0">
         <v-layout justify-space-around>
-          <v-btn flat icon>
-            <v-icon @click="addDefaultCard">add</v-icon>
+          <v-btn flat icon @click="addDefaultCard">
+            <v-icon>add</v-icon>
           </v-btn>
-          <v-btn flat icon>
+          <v-btn flat icon @click="selectPreviousCard">
             <v-icon>chevron_left</v-icon>
           </v-btn>
           <v-btn flat icon>
             <v-icon>play_arrow</v-icon>
           </v-btn>
-          <v-btn flat icon>
+          <v-btn flat icon @click="selectNextCard">
             <v-icon>chevron_right</v-icon>
           </v-btn>
         </v-layout>
@@ -118,6 +118,22 @@ export default Vue.extend({
     },
     selectCard(card) {
       this.selectedCard = card;
+    },
+    selectPreviousCard() {
+      const index = this.cards.indexOf(this.selectedCard);
+      if (index === 0) {
+        this.selectCard(this.cards[this.cards.length - 1]);
+      } else {
+        this.selectCard(this.cards[index - 1]);
+      }
+    },
+    selectNextCard() {
+      const index = this.cards.indexOf(this.selectedCard);
+      if (index === this.cards.length - 1) {
+        this.selectCard(this.cards[0]);
+      } else {
+        this.selectCard(this.cards[index + 1]);
+      }
     },
     simulate(card) {
       if (card.model === null) {
