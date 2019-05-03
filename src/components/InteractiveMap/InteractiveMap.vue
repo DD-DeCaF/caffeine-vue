@@ -41,7 +41,7 @@
           v-for="card in cards"
           :key="cards.indexOf(card)"
           :card="card"
-          :isLastCard="cards.length === 1"
+          :isOnlyCard="cards.length === 1"
           @select-card="selectCard"
           @remove-card="removeCard"
         />

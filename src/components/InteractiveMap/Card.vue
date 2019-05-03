@@ -9,7 +9,7 @@
     >
       <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn flat icon v-if="!isLastCard" @click="removeCard">
+      <v-btn flat icon v-if="!isOnlyCard" @click="removeCard">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>
@@ -80,7 +80,7 @@ import axios from "axios";
 
 export default Vue.extend({
   name: "Card",
-  props: ["card", "isLastCard"],
+  props: ["card", "isOnlyCard"],
   filters: {
     round(value) {
       return value.toFixed(3);
