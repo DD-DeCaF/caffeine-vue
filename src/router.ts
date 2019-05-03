@@ -9,6 +9,7 @@ import Jobs from "./components/Jobs.vue";
 import JobDetails from "./components/JobDetails.vue";
 import Maps from "./components/Maps.vue";
 import Models from "./components/Models.vue";
+import NotFound from "./components/NotFound.vue";
 
 Vue.use(Router);
 
@@ -60,6 +61,10 @@ export default new Router({
       path: "/models",
       name: "models",
       component: Models
+    },
+    {
+      path: '*',
+      component: NotFound
     }
   ]
 });
