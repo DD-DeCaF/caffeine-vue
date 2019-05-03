@@ -41,8 +41,11 @@
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">timelapse</v-icon>
                   <div class="header-item">
-                    Completed:<br /><strong
-                      v-if="
+                    Completed:<br /><strong v-if="job.status === 'FAILURE'"
+                      >Failed</strong
+                    >
+                    <strong
+                      v-else-if="
                         job.status !== 'STARTED' && job.status !== 'PENDING'
                       "
                       >{{ job.updated | moment("D MMM YYYY, HH:mm") }}</strong
@@ -52,10 +55,29 @@
                 </v-list-tile>
               </v-layout>
             </v-card>
+
+            <v-card class="mt-1 pa-3">
+              <div v-if="job.status === 'STARTED' || job.status === 'PENDING'">
+                <span>The job is still running</span>
+                <v-progress-circular
+                  indeterminate
+                  color="primary"
+                  class="ml-2"
+                  :width="3"
+                  :size="25"
+                ></v-progress-circular>
+              </div>
+              <div v-if="job.status === 'FAILURE'">
+                <span class="red--text"
+                  >The job was unable to complete successfully.</span
+                >
+              </div>
+            </v-card>
           </v-flex>
         </v-layout>
       </v-container>
     </template>
+
     <template v-else>
       <v-progress-linear :indeterminate="true" class="my-0"></v-progress-linear>
     </template>
