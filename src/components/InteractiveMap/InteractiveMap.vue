@@ -66,7 +66,6 @@ export default Vue.extend({
   data: () => ({
     escherBuilder: null,
     currentMapId: null,
-    fluxDistribution: null,
     mapData: null,
     cards: [],
     selectedCard: null
@@ -106,7 +105,8 @@ export default Vue.extend({
         model: model,
         method: method,
         isSimulating: false,
-        growthRate: null
+        growthRate: null,
+        fluxDistribution: null
       };
       this.cards.push(card);
       this.selectedCard = card;
@@ -134,14 +134,12 @@ export default Vue.extend({
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;
-          // TODO: Flux distribution should belong to the card
-          this.fluxDistribution = response.data.flux_distribution;
+          card.fluxDistribution = response.data.flux_distribution;
         })
         .catch(error => {
           // TODO: show snackbar
           card.growthRate = null;
-          // TODO: Flux distribution should belong to the card
-          this.fluxDistribution = null;
+          card.fluxDistribution = null;
           console.error(error);
         })
         .then(response => {
@@ -202,6 +200,12 @@ export default Vue.extend({
         previousModelId = map.model_id;
       });
       return mapsWithHeaders;
+    },
+    fluxDistribution() {
+      if (this.selectedCard === null) {
+        return null;
+      }
+      return this.selectedCard.fluxDistribution;
     }
   },
   mounted() {
