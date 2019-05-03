@@ -36,6 +36,7 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
+        <!-- TODO proper unique key -->
         <Card
           v-for="card in cards"
           :key="cards.indexOf(card)"
