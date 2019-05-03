@@ -7,7 +7,6 @@
     />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
-        <!-- TODO: Grouped maps -->
         <v-select
           label="Selected Map"
           :items="maps"
@@ -152,7 +151,57 @@ export default Vue.extend({
   },
   computed: {
     maps() {
-      return this.$store.state.maps.maps;
+      // Sort maps by model name, then map name
+      const maps = this.$store.state.maps.maps;
+      maps.sort((map1, map2) => {
+        if (map1.model_id !== map2.model_id) {
+          const model1 = this.$store.getters["models/getModelById"](
+            map1.model_id
+          );
+          let model1Name;
+          if (model1) {
+            model1Name = model1.name;
+          } else {
+            model1Name = "Unknown model";
+          }
+
+          const model2 = this.$store.getters["models/getModelById"](
+            map2.model_id
+          );
+          let model2Name;
+          if (model2) {
+            model2Name = model2.name;
+          } else {
+            model2Name = "Unknown model";
+          }
+          return model1Name > model2Name;
+        } else {
+          return map1.name > map2.name;
+        }
+      });
+
+      // Build a data structure for the v-select, grouping maps by model with
+      // dividers and headers.
+      const mapsWithHeaders: object[] = [];
+      let previousModelId = null;
+      maps.forEach(map => {
+        if (map.model_id !== previousModelId) {
+          if (mapsWithHeaders.length !== 0) {
+            mapsWithHeaders.push({ divider: true });
+          }
+          let modelName;
+          try {
+            modelName = this.$store.getters["models/getModelById"](map.model_id)
+              .name;
+          } catch {
+            modelName = "Unknown model";
+          }
+          mapsWithHeaders.push({ header: modelName });
+        }
+        mapsWithHeaders.push(map);
+        previousModelId = map.model_id;
+      });
+      return mapsWithHeaders;
     }
   },
   mounted() {
