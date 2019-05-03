@@ -31,5 +31,10 @@ export default {
           commit("setFetchError", error, { root: true });
         });
     }
+  },
+  getters: {
+    getProjectById: state => (id: number) => {
+      return state.projects.find(project => project.id === id);
+    }
   }
 };

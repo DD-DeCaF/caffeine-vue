@@ -1,5 +1,9 @@
 <template>
   <div>
+    <NewProject
+      v-model="isProjectCreationDialogVisible"
+      @returnObject="passProject"
+    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -15,32 +19,32 @@
               >
                 <v-text-field
                   required
-                  v-model="mapName.value"
-                  :rules="mapName.rules"
+                  v-model="mapName"
+                  :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
                   placeholder="e.g. My Favourite Map"
                 ></v-text-field>
                 <v-autocomplete
-                  return-object
                   required
+                  return-object
                   item-text="name"
-                  v-model="projectItemValidation.projectItem"
+                  item-value="id"
+                  v-model="project"
                   :items="availableProjects"
-                  :rules="projectItemValidation.rules"
+                  :rules="[rules.required]"
                   name="project"
                   label="Project"
                   type="text"
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'project')"
+                      depressed
+                      @click.stop="isProjectCreationDialogVisible = true"
                     >
-                      <v-icon>add</v-icon>
+                      <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
                   </template>
@@ -49,36 +53,24 @@
                   required
                   return-object
                   item-text="name"
-                  v-model="modelItem"
+                  item-value="id"
+                  v-model="model"
                   :items="availableModels"
+                  :rules="[rules.required]"
                   persistent-hint
                   name="map"
                   label="Model"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                    <v-btn
-                      color="secondary"
-                      @click="$store.commit('toggleDialog', 'model')"
-                    >
-                      <v-icon>add</v-icon>
-                      New Model
-                    </v-btn>
-                  </template>
                 </v-autocomplete>
-                <v-text-field
-                  required
-                  v-model="mapJSON.value"
-                  :rules="mapJSON.rules"
-                  name="name"
-                  label="JSON Map"
-                  type="file"
-                  placeholder="e.g. My Favourite Map"
-                  accept=".json"
-                >
-                </v-text-field>
+                <FileUpload
+                  v-model="filename"
+                  @formData="loadFile"
+                  :accept="'.json'"
+                  :label="'Upload JSON map'"
+                  :required="true"
+                  :rules="[rules.required]"
+                />
               </v-form>
             </v-flex>
           </v-layout>
@@ -106,13 +98,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar
-      color="success"
-      v-model="isMapCreationSuccess"
-      bottom
-      :timeout="3000"
-    >
-      {{ mapName.value }} successfully created.
+    <v-snackbar color="success" v-model="isMapCreationSuccess" :timeout="3000">
+      {{ mapName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -125,44 +112,34 @@ import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "NewMap",
-  props: ["isMapCreationDialogVisible"],
+  props: ["value"],
   data: () => ({
+    isProjectCreationDialogVisible: false,
+    filename: null,
     valid: true,
     isMapCreationSuccess: false,
-    mapName: {
-      value: null,
-      rules: [(v: string) => !!v || "A name is required."]
+    rules: {
+      required: value => !!value || "Required."
     },
-    projectItemValidation: {
-      projectItem: {
-        name: null,
-        id: null
-      },
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A project is required."]
-    },
-    mapJSON: {
-      value: null,
-      // Add ID validation here, check if it exists in the list of all projects
-      rules: [(v: object) => !!v || "A map JSON is required."]
-    },
-    modelItem: {
-      value: null,
-      rules: [(v: string) => !!v || "A model is required."]
-    }
+    mapName: null,
+    model: { id: null },
+    project: { id: null },
+    map: null
   }),
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
-        name: this.mapName.value,
-        organism_id: this.organismItemValidation.organismItem.id,
-        project_id: this.projectItemValidation.projectItem.id
+        name: this.mapName,
+        model_id: this.model.id,
+        project_id: this.project.id,
+        map: this.map
       };
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("maps/addMap", response.data);
+          this.$emit("returnObject", response.data);
           this.isVisible = false;
           this.isMapCreationSuccess = true;
         })
@@ -173,8 +150,27 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     },
-    uploadFile() {
-      console.log("This was uploaded.");
+    // A great tutorial for the inner workings of the following function can be found at
+    // https://alligator.io/vuejs/file-reader-component/
+    loadFile($event): void {
+      // FileUpload emits an event which contains a FormData object, which itself contains
+      // a list of Files. Since FileUpload is limited to accepting only a single
+      // file we only concern ourselves with the first element of that list.
+      const file = $event[0].get("data");
+      // Create a new instance of FileReader
+      const fileReader = new FileReader();
+      // Is called when the readAsText operation below successfully completes
+      fileReader.onload = () => {
+        this.map = JSON.parse(fileReader.result as string);
+      };
+      if (file) {
+        // Read the file asynchroniously.
+        // When it completes sucessfully the onload event defined above can access the data.
+        fileReader.readAsText(file);
+      }
+    },
+    passProject(project) {
+      this.project = project;
     }
   },
   computed: {
@@ -186,11 +182,11 @@ export default Vue.extend({
     },
     isVisible: {
       get: function() {
-        return this.isMapCreationDialogVisible;
+        return this.value;
       },
       set: function(value) {
         this.$refs.form!.reset();
-        this.$store.commit("toggleDialog", "map");
+        this.$emit("input", value);
       }
     }
   },

@@ -26,15 +26,16 @@ export default new Vuex.Store({
     fetchDataError: null,
     postDataError: null,
     deleteDataError: null,
+    unauthorizedError: null,
     isDialogVisible: {
-      model: false,
-      map: false,
-      organism: false,
-      project: false,
       loader: false
     },
     loadingMessages: {
       default: "Loading. Please wait."
+    },
+    commonTooltipMessages: {
+      unauthenticated: "Please log in or register to use this functionality!",
+      publicData: "Public data can not be modified."
     }
   },
   mutations: {
@@ -42,11 +43,13 @@ export default new Vuex.Store({
       state.fetchDataError = error;
     },
     setPostError(state, error) {
-      console.log(error);
       state.postDataError = error;
     },
     setDeleteError(state, error) {
       state.deleteDataError = error;
+    },
+    setUnauthorizedError(state, error) {
+      state.unauthorizedError = error;
     },
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
