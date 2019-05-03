@@ -18,21 +18,33 @@
       </v-container>
       <v-divider></v-divider>
       <v-container class="pa-0">
-        <v-layout justify-space-around>
-          <v-btn flat icon @click="addDefaultCard">
-            <v-icon>add</v-icon>
-          </v-btn>
-          <v-btn flat icon @click="selectPreviousCard">
-            <v-icon>chevron_left</v-icon>
-          </v-btn>
-          <v-btn flat icon @click="togglePlay">
-            <v-icon v-if="!playing">play_arrow</v-icon>
-            <v-icon v-else>pause</v-icon>
-          </v-btn>
-          <v-btn flat icon @click="selectNextCard">
-            <v-icon>chevron_right</v-icon>
-          </v-btn>
-        </v-layout>
+        <v-menu offset-y>
+          <template v-slot:activator="{ on }">
+            <v-layout justify-space-around>
+              <v-btn flat icon v-on="on">
+                <v-icon>add</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="selectPreviousCard">
+                <v-icon>chevron_left</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="togglePlay">
+                <v-icon v-if="!playing">play_arrow</v-icon>
+                <v-icon v-else>pause</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="selectNextCard">
+                <v-icon>chevron_right</v-icon>
+              </v-btn>
+            </v-layout>
+          </template>
+          <v-list>
+            <v-list-tile @click="addDefaultCard">
+              <v-list-tile-title>Design</v-list-tile-title>
+            </v-list-tile>
+            <v-list-tile @click="addDataDrivenCard">
+              <v-list-tile-title>Data driven</v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+        </v-menu>
       </v-container>
       <v-divider></v-divider>
       <v-container>
@@ -100,6 +112,10 @@ export default Vue.extend({
       } else {
         this.addCard("Design", null, null, "pfba");
       }
+    },
+    addDataDrivenCard() {
+      // TODO
+      alert("Not implemented");
     },
     addCard(name, organism, model, method) {
       const card = {
