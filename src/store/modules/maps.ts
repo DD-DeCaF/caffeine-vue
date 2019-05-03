@@ -17,6 +17,15 @@ export default {
   mutations: {
     setMaps(state, maps: MapItem[]) {
       state.maps = maps;
+    },
+    editMap(state, payload: any) {
+      state.maps[payload.index] = payload.item;
+    },
+    addMap(state, map: MapItem) {
+      state.maps.push(map);
+    },
+    delete(state, ids) {
+      state.maps = state.maps.filter(map => !ids.includes(map.id));
     }
   },
   actions: {
@@ -29,6 +38,11 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+    }
+  },
+  getters: {
+    getMapById: state => (id: number) => {
+      return state.maps.find(map => map.id === id);
     }
   }
 };

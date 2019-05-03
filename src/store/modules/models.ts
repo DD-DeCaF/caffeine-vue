@@ -20,6 +20,15 @@ export default {
   mutations: {
     setModels(state, models: ModelItem[]) {
       state.models = models;
+    },
+    editModel(state, { editedModel , editedIndex }: {editedModel: ModelItem, editedIndex: number}) {
+      state.model[editedIndex] = editedModel;
+    },
+    addModel(state, model: ModelItem) {
+      state.models.push(model);
+    },
+    delete(state, ids) {
+      state.models = state.models.filter(model => !ids.includes(model.id));
     }
   },
   actions: {
@@ -36,7 +45,11 @@ export default {
   },
   getters: {
     getModelById: state => (id: number) => {
-      return state.models.find(model => model.id === id);
+      let model = state.models.find(model => model.id === id);
+      if (model === undefined) {
+        model = { name: "???" };
+      }
+      return model;
     }
   }
 };
