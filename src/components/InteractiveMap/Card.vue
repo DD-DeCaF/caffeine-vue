@@ -39,6 +39,8 @@
                     v-model="card.organism"
                     item-text="name"
                     item-value="id"
+                    :hint="modificationsHint"
+                    persistent-hint
                     return-object
                     @change="onOrganismChange"
                   ></v-select>
@@ -50,6 +52,8 @@
                     v-model="card.model"
                     item-text="name"
                     item-value="id"
+                    :hint="modificationsHint"
+                    persistent-hint
                     return-object
                   ></v-select>
                 </v-flex>
@@ -184,6 +188,15 @@ export default Vue.extend({
       return value.toFixed(3);
     }
   },
+  watch: {
+    "card.model"() {
+      // Reset all modifications when the selected model changes.
+      this.card.reactionAdditions = [];
+      this.card.reactionKnockouts = [];
+      this.card.geneKnockouts = [];
+      this.card.editedBounds = [];
+    }
+  },
   computed: {
     titleColor() {
       if (this.card.hasSimulationError) {
@@ -227,6 +240,15 @@ export default Vue.extend({
         ...geneKnockouts,
         ...editedBounds
       ];
+    },
+    modificationsHint() {
+      if (this.modifications.length > 0) {
+        return `Changing this will reset ${
+          this.modifications.length
+        } modifications`;
+      } else {
+        return null;
+      }
     }
   },
   methods: {
