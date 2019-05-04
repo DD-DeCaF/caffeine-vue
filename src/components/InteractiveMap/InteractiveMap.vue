@@ -1,10 +1,6 @@
 <template>
   <div class="interactive-map fill-height">
-    <Escher
-      @escher-loaded="escherLoaded"
-      :fluxDistribution="fluxDistribution"
-      :mapData="mapData"
-    />
+    <Escher @escher-loaded="escherLoaded" :fluxes="fluxes" :mapData="mapData" />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
         <v-select
@@ -125,7 +121,7 @@ export default Vue.extend({
         method: method,
         isSimulating: false,
         growthRate: null,
-        fluxDistribution: null
+        fluxes: null
       };
       this.cards.push(card);
       this.selectedCard = card;
@@ -168,7 +164,7 @@ export default Vue.extend({
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).
-        card.fluxDistribution = null;
+        card.fluxes = null;
         card.growthRate = null;
         return;
       }
@@ -181,12 +177,15 @@ export default Vue.extend({
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;
-          card.fluxDistribution = response.data.flux_distribution;
+          card.fluxes = {
+            method: card.method,
+            distribution: response.data.flux_distribution
+          };
         })
         .catch(error => {
           // TODO: show snackbar
           card.growthRate = null;
-          card.fluxDistribution = null;
+          card.fluxes = null;
           console.error(error);
         })
         .then(response => {
@@ -248,11 +247,11 @@ export default Vue.extend({
       });
       return mapsWithHeaders;
     },
-    fluxDistribution() {
+    fluxes() {
       if (this.selectedCard === null) {
         return null;
       }
-      return this.selectedCard.fluxDistribution;
+      return this.selectedCard.fluxes;
     },
     playing() {
       return this.playingInterval !== null;

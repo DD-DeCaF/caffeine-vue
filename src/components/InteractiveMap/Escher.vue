@@ -31,7 +31,7 @@ import * as escher from "@dd-decaf/escher";
 
 export default Vue.extend({
   name: "Escher",
-  props: ["mapData", "fluxDistribution"],
+  props: ["mapData", "fluxes"],
   data: () => ({
     escherBuilder: null,
     initializingEscher: null,
@@ -58,20 +58,39 @@ export default Vue.extend({
         loadMap();
       }
     },
-    fluxDistribution(fluxDistribution) {
-      if (fluxDistribution === null) {
+    fluxes(fluxes) {
+      if (fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
-        // Exclude fluxes with very low non-zero values, in order to not shift
-        // the escher color scale.
-        fluxDistribution = this.fluxFilter(fluxDistribution);
-        this.escherBuilder.set_reaction_data(fluxDistribution);
+        if (fluxes.method === "fba" || fluxes.method == "pfba") {
+          const fluxesFiltered = this.fluxFilter(fluxes.distribution);
+          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          // Set FVA data with the current fluxes. This resets opacity in case a
+          // previous FVA simulation has been set on the map.
+          // TODO: We should improve the escher API here.
+          this.escherBuilder.set_reaction_fva_data(fluxes.distribution);
+        } else if (fluxes.method === "fva" || fluxes.method == "pfba-fva") {
+          // Render a flux distribution using the average values from the FVA
+          // data.
+          const fluxesAverage = {};
+          Object.keys(fluxes.distribution).map(reaction => {
+            const rxn = fluxes.distribution[reaction];
+            const average = (rxn.upper_bound + rxn.lower_bound) / 2;
+            fluxesAverage[reaction] = average;
+          });
+          const fluxesFiltered = this.fluxFilter(fluxesAverage);
+          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          // Set the FVA data for transparency visualization.
+          this.escherBuilder.set_reaction_fva_data(fluxes.distribution);
+        }
       }
       this.escherBuilder._update_data(true, true);
     }
   },
   methods: {
     fluxFilter(fluxes) {
+      // Exclude fluxes with very low non-zero values, in order to not shift
+      // the escher color scale.
       const fluxesFiltered = {};
       Object.keys(fluxes).forEach(rxn => {
         if (Math.abs(fluxes[rxn]) > 1e-7) {
