@@ -1,6 +1,10 @@
 <template>
   <div class="interactive-map fill-height">
-    <Escher @escher-loaded="escherLoaded" :fluxes="fluxes" :mapData="mapData" />
+    <Escher
+      @escher-loaded="escherLoaded"
+      :card="selectedCard"
+      :mapData="mapData"
+    />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
         <v-select
@@ -246,12 +250,6 @@ export default Vue.extend({
         previousModelId = map.model_id;
       });
       return mapsWithHeaders;
-    },
-    fluxes() {
-      if (this.selectedCard === null) {
-        return null;
-      }
-      return this.selectedCard.fluxes;
     },
     playing() {
       return this.playingInterval !== null;
