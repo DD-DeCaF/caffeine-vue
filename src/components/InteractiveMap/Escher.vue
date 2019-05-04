@@ -61,18 +61,26 @@ export default Vue.extend({
     // TODO: Watch added reactions
     // TODO: Watch highlight reactions (for data-driven simulations)
     "card.reactionKnockouts"(reactionKnockouts) {
-      // TODO: Bug: Knockout X does not disappear when undoing knockout
-      this.escherBuilder.set_knockout_reactions(reactionKnockouts);
+      if (this.card === null) {
+        this.escherBuilder.set_knockout_reactions([]);
+      } else {
+        // TODO: Bug: Knockout X does not disappear when undoing knockout
+        this.escherBuilder.set_knockout_reactions(reactionKnockouts);
+      }
       this.escherBuilder._update_data(true, true);
     },
     "card.geneKnockouts"(geneKnockouts) {
-      // TODO: Bug: Knockout X does not disappear when undoing knockout
-      this.escherBuilder.set_knockout_genes(geneKnockouts);
+      if (this.card === null) {
+        this.escherBuilder.set_knockout_genes([]);
+      } else {
+        // TODO: Bug: Knockout X does not disappear when undoing knockout
+        this.escherBuilder.set_knockout_genes(geneKnockouts);
+      }
       this.escherBuilder._update_data(true, true);
     },
     "card.fluxes"(fluxes) {
       // Update the flux distribution
-      if (fluxes === null) {
+      if (this.card === null || fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (this.card.method === "fba" || this.card.method == "pfba") {
@@ -116,6 +124,13 @@ export default Vue.extend({
       return fluxesFiltered;
     },
     getReactionState(id: string, type: string) {
+      if (this.card === null) {
+        return {
+          includedInModel: false,
+          bounds: {}
+        };
+      }
+
       let existsInModel;
       // Note: Escher never seems to actually set type to "gene".
       if (type === "gene") {

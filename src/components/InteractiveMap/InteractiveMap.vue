@@ -152,6 +152,10 @@ export default Vue.extend({
       this.simulate(card);
     },
     removeCard(card) {
+      if (card === this.selectedCard) {
+        // Removing the current card - be sure to unset the reference.
+        this.selectedCard = null;
+      }
       this.cards.splice(this.cards.indexOf(card), 1);
     },
     selectCard(card) {
