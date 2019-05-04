@@ -2,7 +2,7 @@
   <v-card class="mb-2">
     <v-toolbar
       dense
-      :color="color"
+      :color="titleColor"
       class="white--text"
       :class="{ clickable: !isSelected }"
       @click="selectCard"
@@ -185,8 +185,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    color() {
-      if (this.isSelected) {
+    titleColor() {
+      if (this.card.hasSimulationError) {
+        return "error";
+      } else if (this.isSelected) {
         return "primary";
       } else {
         return "grey";

@@ -71,6 +71,10 @@
         />
       </v-container>
     </v-navigation-drawer>
+    <v-snackbar color="error" v-model="hasSimulationError" :timeout="8000">
+      Sorry, we were not able to complete the simulation successfully. Please
+      try again in a few seconds, or contact us if the problem persists.
+    </v-snackbar>
   </div>
 </template>
 
@@ -94,7 +98,8 @@ export default Vue.extend({
     mapData: null,
     cards: [],
     selectedCard: null,
-    playingInterval: null
+    playingInterval: null,
+    hasSimulationError: false
   }),
   methods: {
     escherLoaded() {
@@ -144,6 +149,7 @@ export default Vue.extend({
         geneKnockouts: [],
         editedBounds: [],
         isSimulating: false,
+        hasSimulationError: false,
         growthRate: null,
         fluxes: null
       };
@@ -225,6 +231,7 @@ export default Vue.extend({
       ];
 
       card.isSimulating = true;
+      card.hasSimulationError = false;
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: card.model.id,
@@ -238,10 +245,10 @@ export default Vue.extend({
           card.fluxes = response.data.flux_distribution;
         })
         .catch(error => {
-          // TODO: show snackbar
           card.growthRate = null;
           card.fluxes = null;
-          console.error(error);
+          card.hasSimulationError = true;
+          this.hasSimulationError = true;
         })
         .then(response => {
           card.isSimulating = false;
