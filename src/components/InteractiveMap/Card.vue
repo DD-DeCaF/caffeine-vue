@@ -40,6 +40,7 @@
                     item-text="name"
                     item-value="id"
                     return-object
+                    @change="onOrganismChange"
                   ></v-select>
                 </v-flex>
                 <v-flex xs12 md3>
@@ -182,6 +183,12 @@ export default Vue.extend({
     simulateCard() {
       this.$emit("simulate-card", this.card);
       this.dialog = false;
+    },
+    onOrganismChange() {
+      // When selected organism is updated, update the selected model
+      // correspondingly.
+      // TODO: Choose a default preferred model.
+      this.card.model = null;
     }
   }
 });
