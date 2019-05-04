@@ -168,6 +168,8 @@ export default Vue.extend({
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).
+        card.fluxDistribution = null;
+        card.growthRate = null;
         return;
       }
 
