@@ -141,6 +141,7 @@ export default Vue.extend({
         reactionAdditions: [],
         reactionKnockouts: [],
         geneKnockouts: [],
+        editedBounds: [],
         isSimulating: false,
         growthRate: null,
         fluxes: null
@@ -203,7 +204,20 @@ export default Vue.extend({
         type: "gene",
         id: geneId
       }));
-      const operations = [...reactionKnockouts, ...geneKnockouts];
+      const editedBounds = card.editedBounds.map(bounds => ({
+        operation: "modify",
+        type: "reaction",
+        id: bounds.reactionId,
+        data: {
+          lower_bound: bounds.lowerBound,
+          upper_bound: bounds.upperBound
+        }
+      }));
+      const operations = [
+        ...reactionKnockouts,
+        ...geneKnockouts,
+        ...editedBounds
+      ];
 
       card.isSimulating = true;
       axios

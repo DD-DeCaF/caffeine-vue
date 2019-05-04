@@ -177,10 +177,41 @@ export default Vue.extend({
       this.$emit("simulate-card", this.card);
     },
     editBounds(reactionId: string, lower: string, upper: string) {
-      // TODO
+      const lowerBound = parseFloat(lower);
+      const upperBound = parseFloat(upper);
+
+      if (lowerBound > upperBound) {
+        // TODO: display error message
+        return;
+      }
+
+      const bounds = this.card.editedBounds.find(
+        b => b.reactionId === reactionId
+      );
+      if (bounds === undefined) {
+        // Add new modification
+        this.card.editedBounds.push({
+          reactionId,
+          lowerBound,
+          upperBound
+        });
+      } else {
+        // Update existing modification
+        bounds.lowerBound = lowerBound;
+        bounds.upperBound = upperBound;
+      }
+
+      this.$emit("simulate-card", this.card);
     },
     resetBounds(reactionId: string) {
-      // TODO
+      const index = this.card.editedBounds.findIndex(
+        b => b.reactionId === reactionId
+      );
+      if (index === -1) {
+        return;
+      }
+      this.card.editedBounds.splice(index, 1);
+      this.$emit("simulate-card", this.card);
     }
   },
   mounted() {
