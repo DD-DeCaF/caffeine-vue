@@ -79,12 +79,6 @@
         <v-icon color="white">close</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-progress-linear
-      :indeterminate="true"
-      v-if="card.isSimulating"
-      class="my-0"
-      height="3"
-    ></v-progress-linear>
     <v-card-title primary-title class="py-2" v-if="isSelected">
       <v-layout wrap>
         <v-flex class="xs6">
