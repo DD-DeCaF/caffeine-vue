@@ -37,12 +37,22 @@
             </v-layout>
           </template>
           <v-list>
-            <v-list-tile @click="addDefaultCard">
-              <v-list-tile-title>Design</v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile @click="addDataDrivenCard">
-              <v-list-tile-title>Data driven</v-list-tile-title>
-            </v-list-tile>
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-list-tile @click="addDefaultCard">
+                  <v-list-tile-title v-on="on">Design</v-list-tile-title>
+                </v-list-tile>
+              </template>
+              <span>Manipulate and simulate models.</span>
+            </v-tooltip>
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-list-tile @click="addDataDrivenCard">
+                  <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
+                </v-list-tile>
+              </template>
+              <span>Integrate experimental data with models.</span>
+            </v-tooltip>
           </v-list>
         </v-menu>
       </v-container>
