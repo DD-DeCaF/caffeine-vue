@@ -210,7 +210,9 @@ export default Vue.extend({
         .post(`${settings.apis.model}/simulate`, {
           model_id: card.model.id,
           method: card.method,
-          operations: operations
+          operations: operations,
+          objective_id: card.objective.reactionId,
+          objective_direction: card.objective.direction
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;

@@ -159,10 +159,22 @@ export default Vue.extend({
       this.$emit("simulate-card", this.card);
     },
     setObjective(reactionId: string) {
-      // TODO
+      if (this.card.objective.reactionId === reactionId) {
+        // This is already the objective; undo it and reset to growth
+        this.card.objective.reactionId = null;
+        this.card.objective.direction = "max";
+      } else {
+        this.card.objective.reactionId = reactionId;
+      }
+      this.$emit("simulate-card", this.card);
     },
     setObjectiveDirection(reactionId: string) {
-      // TODO
+      if (this.card.objective.direction === "max") {
+        this.card.objective.direction = "min";
+      } else {
+        this.card.objective.direction = "max";
+      }
+      this.$emit("simulate-card", this.card);
     },
     editBounds(reactionId: string, lower: string, upper: string) {
       // TODO
