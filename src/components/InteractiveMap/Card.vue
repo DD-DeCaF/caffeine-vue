@@ -111,7 +111,10 @@
         </v-flex>
         <v-flex class="xs6 text-xs-right">
           <div v-if="!card.isSimulating">
-            <span v-if="card.growthRate">
+            <span
+              v-if="card.growthRate !== null"
+              :class="{ dead: card.growthRate === 0 }"
+            >
               {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
             </span>
             <span v-else>
@@ -184,8 +187,12 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style scoped>
 .clickable {
   cursor: pointer;
+}
+
+.dead {
+  color: red;
 }
 </style>
