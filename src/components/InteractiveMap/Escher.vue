@@ -58,12 +58,28 @@ export default Vue.extend({
         loadMap();
       }
     },
-    fluxDistribution(value) {
-      this.escherBuilder.set_reaction_data(value);
+    fluxDistribution(fluxDistribution) {
+      if (fluxDistribution === null) {
+        this.escherBuilder.set_reaction_data(null);
+      } else {
+        // Exclude fluxes with very low non-zero values, in order to not shift
+        // the escher color scale.
+        fluxDistribution = this.fluxFilter(fluxDistribution);
+        this.escherBuilder.set_reaction_data(fluxDistribution);
+      }
       this.escherBuilder._update_data(true, true);
     }
   },
   methods: {
+    fluxFilter(fluxes) {
+      const fluxesFiltered = {};
+      Object.keys(fluxes).forEach(rxn => {
+        if (Math.abs(fluxes[rxn]) > 1e-7) {
+          fluxesFiltered[rxn] = fluxes[rxn];
+        }
+      });
+      return fluxesFiltered;
+    },
     reactionState(id: string, type?: string) {
       // TODO
     },
