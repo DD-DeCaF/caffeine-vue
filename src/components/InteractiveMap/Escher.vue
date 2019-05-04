@@ -148,8 +148,15 @@ export default Vue.extend({
       }
       this.$emit("simulate-card", this.card);
     },
-    knockoutGene(reactionId: string) {
-      // TODO
+    knockoutGene(geneId: string) {
+      if (this.card.geneKnockouts.includes(geneId)) {
+        // This gene is already knocked out; undo it
+        const index = this.card.geneKnockouts.indexOf(geneId);
+        this.card.geneKnockouts.splice(index, 1);
+      } else {
+        this.card.geneKnockouts.push(geneId);
+      }
+      this.$emit("simulate-card", this.card);
     },
     setObjective(reactionId: string) {
       // TODO
