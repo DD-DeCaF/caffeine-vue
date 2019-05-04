@@ -181,10 +181,7 @@ export default Vue.extend({
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;
-          card.fluxes = {
-            method: card.method,
-            distribution: response.data.flux_distribution
-          };
+          card.fluxes = response.data.flux_distribution;
         })
         .catch(error => {
           // TODO: show snackbar
