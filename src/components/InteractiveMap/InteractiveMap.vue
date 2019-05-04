@@ -2,6 +2,7 @@
   <div class="interactive-map fill-height">
     <Escher
       @escher-loaded="escherLoaded"
+      @simulate-card="simulate"
       :card="selectedCard"
       :mapData="mapData"
     />
@@ -133,6 +134,13 @@ export default Vue.extend({
         organism: organism,
         model: model,
         method: method,
+        objective: {
+          reactionId: null,
+          direction: "max"
+        },
+        reactionAdditions: [],
+        reactionKnockouts: [],
+        geneKnockouts: [],
         isSimulating: false,
         growthRate: null,
         fluxes: null
@@ -183,11 +191,26 @@ export default Vue.extend({
         return;
       }
 
+      // Add card operations
+      // TODO: Reaction additions
+      const reactionKnockouts = card.reactionKnockouts.map(reactionId => ({
+        operation: "knockout",
+        type: "reaction",
+        id: reactionId
+      }));
+      const geneKnockouts = card.geneKnockouts.map(geneId => ({
+        operation: "knockout",
+        type: "gene",
+        id: geneId
+      }));
+      const operations = [...reactionKnockouts, ...geneKnockouts];
+
       card.isSimulating = true;
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: card.model.id,
-          method: card.method
+          method: card.method,
+          operations: operations
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;

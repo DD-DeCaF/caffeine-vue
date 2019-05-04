@@ -66,6 +66,13 @@ export default Vue.extend({
           return;
         }
 
+        // Update the model operations
+        // TODO: Set added reactions
+        // TODO: Set highlight reactions (for data-driven simulations)
+        this.escherBuilder.set_knockout_reactions(card.reactionKnockouts);
+        this.escherBuilder.set_knockout_genes(card.geneKnockouts);
+
+        // Update the flux distribution
         if (card.fluxes === null) {
           this.escherBuilder.set_reaction_data(null);
         } else {
@@ -107,25 +114,57 @@ export default Vue.extend({
       });
       return fluxesFiltered;
     },
-    reactionState(id: string, type?: string) {
+    getReactionState(id: string, type?: string) {
+      let reactionKnockout;
+      let geneKnockout;
+      let existsInModel;
+      if (type === "gene") {
+        reactionKnockout = false;
+        geneKnockout = this.card.geneKnockouts.includes(id);
+        // TODO: Check model
+        existsInModel = true;
+      } else {
+        reactionKnockout = this.card.reactionKnockouts.includes(id);
+        geneKnockout = false;
+        // TODO: Check model
+        existsInModel = true;
+      }
+
+      return {
+        includedInModel: existsInModel,
+        knockout: reactionKnockout,
+        knockoutGene: geneKnockout,
+        objective: this.card.objective,
+        bounds: {
+          // TODO: Check model
+          lowerbound: -1,
+          upperbound: -1
+        }
+      };
+    },
+    knockoutReaction(reactionId: string) {
+      if (this.card.reactionKnockouts.includes(reactionId)) {
+        // This reaction is already knocked out; undo it
+        const index = this.card.reactionKnockouts.indexOf(reactionId);
+        this.card.reactionKnockouts.splice(index, 1);
+      } else {
+        this.card.reactionKnockouts.push(reactionId);
+      }
+      this.$emit("simulate-card", this.card);
+    },
+    knockoutGene(reactionId: string) {
       // TODO
     },
-    handleKnockout(reactionId: string) {
+    setObjective(reactionId: string) {
       // TODO
     },
-    handleKnockoutGenes(reactionId: string) {
+    setObjectiveDirection(reactionId: string) {
       // TODO
     },
-    handleSetAsObjective(reactionId: string) {
+    editBounds(reactionId: string, lower: string, upper: string) {
       // TODO
     },
-    handleChangeBounds(reactionId: string, lower: string, upper: string) {
-      // TODO
-    },
-    handleResetBounds(reactionId: string) {
-      // TODO
-    },
-    handleObjectiveDirection(reactionId: string) {
+    resetBounds(reactionId: string) {
       // TODO
     }
   },
@@ -160,14 +199,14 @@ export default Vue.extend({
           this.initializingEscher = null;
           this.$emit("escher-loaded");
         },
-        reaction_state: this.reactionState,
+        reaction_state: this.getReactionState,
         tooltip_callbacks: {
-          knockout: this.handleKnockout,
-          knockoutGenes: this.handleKnockoutGenes,
-          setAsObjective: this.handleSetAsObjective,
-          changeBounds: this.handleChangeBounds,
-          resetBounds: this.handleResetBounds,
-          objectiveDirection: this.handleObjectiveDirection
+          knockout: this.knockoutReaction,
+          knockoutGenes: this.knockoutGene,
+          setAsObjective: this.setObjective,
+          objectiveDirection: this.setObjectiveDirection,
+          changeBounds: this.editBounds,
+          resetBounds: this.resetBounds
         }
       });
     });
