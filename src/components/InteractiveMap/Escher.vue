@@ -21,6 +21,10 @@
       </v-layout>
     </v-container>
     <div ref="escher" class="fill-height"></div>
+    <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
+      Invalid bounds. Please make sure that the upper bound is larger than or
+      equal to the lower bound.
+    </v-snackbar>
   </div>
 </template>
 
@@ -35,7 +39,8 @@ export default Vue.extend({
   data: () => ({
     escherBuilder: null,
     initializingEscher: null,
-    isLoadingMap: false
+    isLoadingMap: false,
+    hasBoundsError: false
   }),
   watch: {
     mapData(value) {
@@ -196,7 +201,7 @@ export default Vue.extend({
       const upperBound = parseFloat(upper);
 
       if (lowerBound > upperBound) {
-        // TODO: display error message
+        this.hasBoundsError = true;
         return;
       }
 
