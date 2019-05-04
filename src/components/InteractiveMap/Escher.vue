@@ -115,26 +115,21 @@ export default Vue.extend({
       });
       return fluxesFiltered;
     },
-    getReactionState(id: string, type?: string) {
-      let reactionKnockout;
-      let geneKnockout;
+    getReactionState(id: string, type: string) {
       let existsInModel;
+      // Note: Escher never seems to actually set type to "gene".
       if (type === "gene") {
-        reactionKnockout = false;
-        geneKnockout = this.card.geneKnockouts.includes(id);
-        // TODO: Check model
+        // TODO: Check model genes
         existsInModel = true;
       } else {
-        reactionKnockout = this.card.reactionKnockouts.includes(id);
-        geneKnockout = false;
-        // TODO: Check model
+        // TODO: Check model reactions
         existsInModel = true;
       }
 
       return {
         includedInModel: existsInModel,
-        knockout: reactionKnockout,
-        knockoutGene: geneKnockout,
+        knockout: this.card.reactionKnockouts.includes(id),
+        knockoutGenes: this.card.geneKnockouts.includes(id),
         objective: this.card.objective,
         bounds: {
           // TODO: Check model
