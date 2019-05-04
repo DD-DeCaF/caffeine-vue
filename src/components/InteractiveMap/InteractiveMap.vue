@@ -59,10 +59,9 @@
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <!-- TODO proper unique key -->
         <Card
           v-for="card in cards"
-          :key="cards.indexOf(card)"
+          :key="card.uuid"
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
@@ -78,6 +77,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/settings";
 import Escher from "@/components/InteractiveMap/Escher.vue";
 import Card from "@/components/InteractiveMap/Card.vue";
@@ -130,6 +130,7 @@ export default Vue.extend({
     },
     addCard(name, organism, model, method) {
       const card = {
+        uuid: uuidv4(),
         name: name,
         organism: organism,
         model: model,
