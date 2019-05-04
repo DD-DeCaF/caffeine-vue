@@ -58,48 +58,49 @@ export default Vue.extend({
         loadMap();
       }
     },
-    card: {
-      // Use a deep watcher to ensure flux distribution is updated on change.
-      deep: true,
-      handler(card) {
-        if (card === null) {
-          return;
+    // TODO: Watch added reactions
+    // TODO: Watch highlight reactions (for data-driven simulations)
+    "card.reactionKnockouts"(reactionKnockouts) {
+      // TODO: Bug: Knockout X does not disappear when undoing knockout
+      this.escherBuilder.set_knockout_reactions(reactionKnockouts);
+      this.escherBuilder._update_data(true, true);
+    },
+    "card.geneKnockouts"(geneKnockouts) {
+      // TODO: Bug: Knockout X does not disappear when undoing knockout
+      this.escherBuilder.set_knockout_genes(geneKnockouts);
+      this.escherBuilder._update_data(true, true);
+    },
+    "card.fluxes"(fluxes) {
+      // Update the flux distribution
+      if (fluxes === null) {
+        this.escherBuilder.set_reaction_data(null);
+      } else {
+        if (this.card.method === "fba" || this.card.method == "pfba") {
+          const fluxesFiltered = this.fluxFilter(fluxes);
+          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          // Set FVA data with the current fluxes. This resets opacity in case a
+          // previous FVA simulation has been set on the map.
+          // TODO: We should improve the escher API here.
+          this.escherBuilder.set_reaction_fva_data(fluxes);
+        } else if (
+          this.card.method === "fva" ||
+          this.card.method == "pfba-fva"
+        ) {
+          // Render a flux distribution using the average values from the FVA
+          // data.
+          const fluxesAverage = {};
+          Object.keys(fluxes).map(reaction => {
+            const rxn = fluxes[reaction];
+            const average = (rxn.upper_bound + rxn.lower_bound) / 2;
+            fluxesAverage[reaction] = average;
+          });
+          const fluxesFiltered = this.fluxFilter(fluxesAverage);
+          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          // Set the FVA data for transparency visualization.
+          this.escherBuilder.set_reaction_fva_data(fluxes);
         }
-
-        // Update the model operations
-        // TODO: Set added reactions
-        // TODO: Set highlight reactions (for data-driven simulations)
-        this.escherBuilder.set_knockout_reactions(card.reactionKnockouts);
-        this.escherBuilder.set_knockout_genes(card.geneKnockouts);
-
-        // Update the flux distribution
-        if (card.fluxes === null) {
-          this.escherBuilder.set_reaction_data(null);
-        } else {
-          if (card.method === "fba" || card.method == "pfba") {
-            const fluxesFiltered = this.fluxFilter(card.fluxes);
-            this.escherBuilder.set_reaction_data(fluxesFiltered);
-            // Set FVA data with the current fluxes. This resets opacity in case a
-            // previous FVA simulation has been set on the map.
-            // TODO: We should improve the escher API here.
-            this.escherBuilder.set_reaction_fva_data(card.fluxes);
-          } else if (card.method === "fva" || card.method == "pfba-fva") {
-            // Render a flux distribution using the average values from the FVA
-            // data.
-            const fluxesAverage = {};
-            Object.keys(card.fluxes).map(reaction => {
-              const rxn = card.fluxes[reaction];
-              const average = (rxn.upper_bound + rxn.lower_bound) / 2;
-              fluxesAverage[reaction] = average;
-            });
-            const fluxesFiltered = this.fluxFilter(fluxesAverage);
-            this.escherBuilder.set_reaction_data(fluxesFiltered);
-            // Set the FVA data for transparency visualization.
-            this.escherBuilder.set_reaction_fva_data(card.fluxes);
-          }
-        }
-        this.escherBuilder._update_data(true, true);
       }
+      this.escherBuilder._update_data(true, true);
     }
   },
   methods: {
