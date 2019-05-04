@@ -63,6 +63,18 @@
                   ></v-select>
                 </v-flex>
               </v-layout>
+
+              <v-data-table
+                hide-actions
+                :headers="modificationsHeaders"
+                :items="modifications"
+              >
+                <template v-slot:items="props">
+                  <td>{{ props.item.type }}</td>
+                  <td>{{ props.item.name }}</td>
+                  <td>{{ props.item.details }}</td>
+                </template>
+              </v-data-table>
             </v-container>
           </v-form>
 
@@ -100,6 +112,23 @@
         </v-flex>
         <v-flex class="xs6 text-xs-right">
           {{ card.method }}
+        </v-flex>
+        <v-flex class="xs6">
+          Objective:
+        </v-flex>
+        <v-flex class="xs6 text-xs-right">
+          <span v-if="card.objective.reactionId === null">Growth</span>
+          <span v-else>{{ card.objective.reactionId }}</span>
+          <v-icon v-if="card.objective.direction === 'max'" size="16"
+            >arrow_upward</v-icon
+          >
+          <v-icon v-else size="16">arrow_downward</v-icon>
+        </v-flex>
+        <v-flex class="xs6">
+          Modifications:
+        </v-flex>
+        <v-flex class="xs6 text-xs-right">
+          {{ modifications.length }}
         </v-flex>
         <v-flex class="xs6">
           Growth rate:
@@ -142,6 +171,11 @@ export default Vue.extend({
       { id: "pfba", name: "Parsimonious FBA" },
       { id: "fva", name: "Flux Variability Analysis (FVA)" },
       { id: "pfba-fva", name: "Parsimonious FVA" }
+    ],
+    modificationsHeaders: [
+      { text: "Modifications", value: "type", sortable: false },
+      { text: "Name or ID", value: "id", sortable: false },
+      { text: "Details", value: "details", sortable: false }
     ]
   }),
   props: ["card", "isOnlyCard", "isSelected"],
@@ -165,6 +199,32 @@ export default Vue.extend({
       return this.$store.state.models.models.filter(model => {
         return model.organism_id === this.card.organism.id;
       });
+    },
+    modifications() {
+      // Concatenate all modifications for a single table display.
+      // TODO: Added reactions
+      const addedReactions = [];
+      const reactionKnockouts = this.card.reactionKnockouts.map(reactionId => ({
+        type: "Reaction knockout",
+        name: `Name TBD (${reactionId})`, // TODO: Reaction name
+        details: ""
+      }));
+      const geneKnockouts = this.card.geneKnockouts.map(geneId => ({
+        type: "Gene knockout",
+        name: geneId,
+        details: "" // Would be nice to show related reactions here.
+      }));
+      const editedBounds = this.card.editedBounds.map(bounds => ({
+        type: "Modified bounds",
+        name: `Name TBD (${bounds.reactionId})`, // TODO: Reaction name
+        details: `Bounds set from ${bounds.lowerBound} to ${bounds.upperBound}`
+      }));
+      return [
+        ...addedReactions,
+        ...reactionKnockouts,
+        ...geneKnockouts,
+        ...editedBounds
+      ];
     }
   },
   methods: {
