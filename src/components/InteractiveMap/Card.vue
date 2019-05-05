@@ -22,29 +22,23 @@
     </v-toolbar>
     <v-card-title primary-title class="py-2" v-if="isSelected">
       <v-layout wrap>
-        <v-flex class="xs6">
-          Organism:
-        </v-flex>
+        <v-flex class="xs6">Organism:</v-flex>
         <v-flex class="xs6 text-xs-right">
           <span v-if="card.organism">{{ card.organism.name }}</span>
-          <span v-else><em>Unknown</em></span>
+          <span v-else>
+            <em>Unknown</em>
+          </span>
         </v-flex>
-        <v-flex class="xs6">
-          Model:
-        </v-flex>
+        <v-flex class="xs6">Model:</v-flex>
         <v-flex class="xs6 text-xs-right">
           <span v-if="card.model">{{ card.model.name }}</span>
-          <span v-else><em>Not selected</em></span>
+          <span v-else>
+            <em>Not selected</em>
+          </span>
         </v-flex>
-        <v-flex class="xs6">
-          Method:
-        </v-flex>
-        <v-flex class="xs6 text-xs-right">
-          {{ card.method }}
-        </v-flex>
-        <v-flex class="xs6">
-          Objective:
-        </v-flex>
+        <v-flex class="xs6">Method:</v-flex>
+        <v-flex class="xs6 text-xs-right">{{ card.method }}</v-flex>
+        <v-flex class="xs6">Objective:</v-flex>
         <v-flex class="xs6 text-xs-right">
           <span v-if="card.objective.reactionId === null">Growth</span>
           <span v-else>{{ card.objective.reactionId }}</span>
@@ -53,26 +47,22 @@
           >
           <v-icon v-else size="16">arrow_downward</v-icon>
         </v-flex>
-        <v-flex class="xs6">
-          Modifications:
-        </v-flex>
-        <v-flex class="xs6 text-xs-right">
-          {{ modifications.length }}
-        </v-flex>
-        <v-flex class="xs6">
-          Growth rate:
-        </v-flex>
+        <v-flex class="xs6">Modifications:</v-flex>
+        <v-flex class="xs6 text-xs-right">{{ modifications.length }}</v-flex>
+        <v-flex class="xs6">Growth rate:</v-flex>
         <v-flex class="xs6 text-xs-right">
           <div v-if="!card.isSimulating">
             <span
               v-if="card.growthRate !== null"
               :class="{ dead: card.growthRate === 0 }"
             >
-              {{ card.growthRate | round }} <em>h<sup>-1</sup></em>
+              {{ card.growthRate | round }}
+              <em>
+                h
+                <sup>-1</sup>
+              </em>
             </span>
-            <span v-else>
-              N/A
-            </span>
+            <span v-else>N/A</span>
           </div>
           <div v-else>
             <v-progress-circular

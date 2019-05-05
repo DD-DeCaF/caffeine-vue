@@ -9,9 +9,7 @@
     <v-card class="pa-2">
       <v-form>
         <v-container>
-          <p class="headline">
-            Modify simulation card
-          </p>
+          <p class="headline">Modify simulation card</p>
 
           <v-layout wrap>
             <v-flex xs12 md3>
@@ -73,9 +71,7 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="simulate">
-          Simulate
-        </v-btn>
+        <v-btn color="primary" @click="simulate">Simulate</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
