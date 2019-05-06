@@ -87,9 +87,50 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import { JobItem } from "@/store/modules/jobs";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
+
+export interface JobPredictions extends JobItem {
+  result: {
+    diff_fva: PathwayPredictionMethod[];
+    cofactor_swap: PathwayPredictionMethod[];
+    opt_gene: PathwayPredictionMethod[];
+    reactions: { [id: string]: Reaction };
+    metabolites: { [id: string]: Object };
+  };
+}
+
+export interface PathwayPredictionMethod {
+  biomass: number;
+  exotic_cofactors: string[];
+  fitness: number;
+  heterologous_reactions: string[];
+  knockouts: string[];
+  manipulations: {
+    from: string;
+    id: string;
+    to: string;
+  }[];
+  method: string;
+  product: number;
+  synthetic_reactions: string[];
+  yield: number;
+}
+
+export interface Reaction {
+  annotation: {
+    Description: string;
+    EC: string;
+  };
+  gene_reaction_rule: string;
+  id: string;
+  lower_bound: number;
+  metabolites: { [id: string]: number };
+  name: string;
+  upper_bound: number;
+}
 
 export default Vue.extend({
   name: "JobDetails",
@@ -117,17 +158,17 @@ export default Vue.extend({
     "job.status": {
       handler: function(newValue, oldValue) {
         if (newValue === "SUCCESS") {
-          this.getPathwayPredictions();
+          this.getJobPredictions();
         }
       },
       immediate: true
     }
   },
   methods: {
-    getPathwayPredictions() {
+    getJobPredictions() {
       axios
         .get(`${settings.apis.metabolicNinja}/predictions/${this.jobId}`)
-        .then((response: AxiosResponse<any>) => {
+        .then((response: AxiosResponse<JobPredictions>) => {
           this.pathwayPredictions = response.data.result;
         })
         .catch(error => {
