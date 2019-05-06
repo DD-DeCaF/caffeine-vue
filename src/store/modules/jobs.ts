@@ -58,5 +58,10 @@ export default {
           }
         });
     }
+  },
+  getters: {
+    getJobById: state => (id: number) => {
+      return state.jobs.find(job => job.id === id);
+    }
   }
 };

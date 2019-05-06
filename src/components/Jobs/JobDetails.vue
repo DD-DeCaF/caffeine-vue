@@ -1,0 +1,119 @@
+<template>
+  <div>
+    <template v-if="job">
+      <v-container>
+        <v-layout column>
+          <v-flex>
+            <v-card>
+              <v-layout align-center justify-end row>
+                <h2 class="ma-3">
+                  <router-link to="/jobs" class="link">Jobs</router-link> / #{{
+                    jobId
+                  }}
+                </h2>
+                <v-spacer></v-spacer>
+                <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">bug_report</v-icon>
+                  <div class="header-item">
+                    Organism:<br /><strong>{{ organism.name }}</strong>
+                  </div>
+                </v-list-tile>
+                <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">rounded_corner</v-icon>
+                  <div class="header-item">
+                    Model:<br /><strong>{{ model.name }}</strong>
+                  </div>
+                </v-list-tile>
+                <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">attach_money</v-icon>
+                  <div class="header-item">
+                    Product:<br /><strong>{{ job.product_name }}</strong>
+                  </div>
+                </v-list-tile>
+                <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">timelapse</v-icon>
+                  <div class="header-item">
+                    Started:<br /><strong>{{
+                      job.created | moment("D MMM YYYY, HH:mm")
+                    }}</strong>
+                  </div>
+                </v-list-tile>
+                <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">timelapse</v-icon>
+                  <div class="header-item">
+                    Completed:<br /><strong v-if="job.status === 'FAILURE'"
+                      >Failed</strong
+                    >
+                    <strong
+                      v-else-if="
+                        job.status !== 'STARTED' && job.status !== 'PENDING'
+                      "
+                      >{{ job.updated | moment("D MMM YYYY, HH:mm") }}</strong
+                    >
+                    <strong v-else>Still running</strong>
+                  </div>
+                </v-list-tile>
+              </v-layout>
+            </v-card>
+
+            <v-card class="mt-1 pa-3">
+              <div v-if="job.status === 'STARTED' || job.status === 'PENDING'">
+                <span>The job is still running</span>
+                <v-progress-circular
+                  indeterminate
+                  color="primary"
+                  class="ml-2"
+                  :width="3"
+                  :size="25"
+                ></v-progress-circular>
+              </div>
+              <div v-if="job.status === 'FAILURE'">
+                <span class="red--text"
+                  >The job was unable to complete successfully.</span
+                >
+              </div>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </template>
+
+    <template v-else>
+      <v-progress-linear :indeterminate="true" class="my-0"></v-progress-linear>
+    </template>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+import { mapGetters } from "vuex";
+
+export default Vue.extend({
+  name: "JobDetails",
+  computed: {
+    job() {
+      return this.$store.getters["jobs/getJobById"](this.jobId);
+    },
+    model() {
+      return this.$store.getters["models/getModelById"](this.job.model_id);
+    },
+    organism() {
+      return this.$store.getters["organisms/getOrganismById"](
+        this.job.organism_id
+      );
+    }
+  },
+  created() {
+    this.jobId = parseInt(this.$route.params.id);
+  }
+});
+</script>
+
+<style scoped>
+.link {
+  text-decoration: none;
+}
+.header-item {
+  font-size: 14px;
+}
+</style>
