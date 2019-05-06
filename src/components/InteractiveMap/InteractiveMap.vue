@@ -6,6 +6,7 @@
       :card="selectedCard"
       :mapData="mapData"
     />
+    <Legend />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
         <v-select
@@ -85,12 +86,14 @@ import uuidv4 from "uuid/v4";
 import * as settings from "@/settings";
 import Escher from "@/components/InteractiveMap/Escher.vue";
 import Card from "@/components/InteractiveMap/Card.vue";
+import Legend from "@/components/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
   name: "InteractiveMap",
   components: {
     Escher,
-    Card
+    Card,
+    Legend
   },
   data: () => ({
     escherBuilder: null,
