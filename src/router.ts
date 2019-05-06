@@ -14,30 +14,15 @@ import NotFound from "./components/NotFound.vue";
 Vue.use(Router);
 
 const authGuard = (to, from, next) => {
-  // Check if role was loaded from local storage. This happens before App
-  // creation.
-  if (sessionStore.state.userRole === null) {
-    // Watch the role value for changes so we know when loading has happened.
-    const unwatch = store.watch(
-      () => sessionStore.state.userRole,
-      role => {
-        unwatch();
-        if (sessionStore.state.isAuthenticated) {
-          next();
-        } else {
-          store.commit("setUnauthorizedError", to.path);
-          next({ name: "home" });
-        }
-      }
-    );
+  // We rely on the authentication having been handled from local storage
+  // before the entire `App` was initialized. Thus we avoid having to watch
+  // the session store and users can directly proceed to guarded routes when
+  // they have a valid token in local storage.
+  if (sessionStore.state.isAuthenticated) {
+    next();
   } else {
-    // Loading has happened, we proceed normally.
-    if (sessionStore.state.isAuthenticated) {
-      next();
-    } else {
-      store.commit("setUnauthorizedError", to.path);
-      next({ name: "home" });
-    }
+    store.commit("setUnauthorizedError", to.path);
+    next({ name: "home" });
   }
 };
 

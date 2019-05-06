@@ -17,8 +17,7 @@ export default {
     refreshError: null,
     // While a token refresh request is in progress, the following variable will
     // be set to its promise.
-    refreshRequest: null,
-    userRole: null
+    refreshRequest: null
   },
   mutations: {
     login(state, jwt: JWT) {
@@ -40,9 +39,6 @@ export default {
       state.isAuthenticated = false;
       state.jwt = null;
       localStorage.removeItem("jwt");
-    },
-    setUserRole(state, role: string) {
-      state.userRole = role;
     }
   },
   actions: {

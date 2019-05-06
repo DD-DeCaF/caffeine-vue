@@ -235,16 +235,6 @@ export default Vue.extend({
     // requests behave as expected. (See the interceptors for details)
     this.$store.dispatch("session/interceptRequests");
 
-    // Restore potential existing session from local storage.
-    const token = localStorage.getItem("jwt");
-    if (token !== null) {
-      this.$store.commit("session/login", JSON.parse(token));
-    }
-    // Initialize user role. In future there might be admin roles etc.
-    // This signals not only the role but also that local storage has been
-    // checked for a token (affects authGuard).
-    this.$store.commit("session/setUserRole", "user");
-
     // Regularly refresh the authorization token.
     this.$store.dispatch("session/refreshTokenLoop");
 

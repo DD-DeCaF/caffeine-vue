@@ -12,6 +12,7 @@ import NewMap from "@/components/shared/NewMap.vue";
 import LoaderDialog from "@/components/shared/LoaderDialog.vue";
 import DeletionDialog from "@/components/shared/DeletionDialog.vue";
 import FileUpload from "@/components/shared/FileUpload.vue";
+import { initFromStorage } from "@/startup";
 
 Vue.use(require("vue-moment"));
 
@@ -24,6 +25,10 @@ Vue.component("NewMap", NewMap);
 Vue.component("LoaderDialog", LoaderDialog);
 Vue.component("DeletionDialog", DeletionDialog);
 Vue.component("FileUpload", FileUpload);
+
+// Synchronously initialize values from local storage before the main Vue
+// instance is created.
+initFromStorage();
 
 new Vue({
   router,
