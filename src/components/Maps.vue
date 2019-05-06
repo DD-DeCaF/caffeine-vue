@@ -7,11 +7,11 @@
     />
     <NewProject
       v-model="isProjectCreationDialogVisible"
-      @returnObject="passProject"
+      @return-object="passProject"
     />
     <NewModel
       v-model="isModelCreationDialogVisible"
-      @returnObject="passModel"
+      @return-object="passModel"
     />
     <NewMap v-model="isMapCreationDialogVisible"/>
     <v-layout justify-center>

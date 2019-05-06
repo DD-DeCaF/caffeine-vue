@@ -9,12 +9,12 @@
     <!-- Disabled because its not on the old platform -->
     <!-- <NewProject 
       v-model="isProjectCreationDialogVisible"
-      @returnObject="passProject"
+      @return-object="passProject"
     /> -->
-    <NewMap v-model="isMapCreationDialogVisible" @returnObject="passMap" />
+    <NewMap v-model="isMapCreationDialogVisible" @return-object="passMap" />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
-      @returnObject="passOrganism"
+      @return-object="passOrganism"
     />
     <v-layout justify-center>
       <v-flex md6>

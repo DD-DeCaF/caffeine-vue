@@ -86,7 +86,7 @@ export default Vue.extend({
         .then((response: AxiosResponse) => {
           const commitPayload = Object.assign(payload, response.data);
           this.$store.commit("projects/addProject", commitPayload);
-          this.$emit("returnObject", commitPayload);
+          this.$emit("return-object", commitPayload);
           this.isVisible = false;
           this.isProjectCreationSuccess = true;
         })

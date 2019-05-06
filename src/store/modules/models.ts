@@ -22,14 +22,8 @@ export default {
     setModels(state, models: ModelItem[]) {
       state.models = models;
     },
-    editModel(
-      state,
-      {
-        editedModel,
-        editedIndex
-      }: { editedModel: ModelItem; editedIndex: number }
-    ) {
-      Vue.set(state.maps, editedIndex, editedModel);
+    editModel(state, payload: any) {
+      Vue.set(state.models, payload.index, payload.item);
     },
     addModel(state, model: ModelItem) {
       state.models.push(model);
