@@ -206,8 +206,9 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
-          this.$store.commit("models/addModel", response.data);
-          this.$emit("returnObject", response.data);
+          const modelWithID = {...payload, ...response.data}
+          this.$store.commit("models/addModel", modelWithID);
+          this.$emit("returnObject", modelWithID);
           this.isVisible = false;
           this.isModelCreationSuccess = true;
         })

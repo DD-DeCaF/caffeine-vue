@@ -13,7 +13,10 @@
       v-model="isModelCreationDialogVisible"
       @returnObject="passModel"
     />
-    <NewMap v-model="isMapCreationDialogVisible" />
+    <NewMap 
+      v-model="isMapCreationDialogVisible" 
+      @returnObject="passMap"
+    />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
@@ -305,6 +308,9 @@ export default Vue.extend({
     },
     passModel(model) {
       this.selectedModel = model;
+    },
+    passMap(model) {
+      console.log(model);
     }
   },
   computed: {
@@ -312,10 +318,10 @@ export default Vue.extend({
       return this.$store.state.session.isAuthenticated;
     },
     availableMaps() {
-      return this.$store.state.maps.maps;
+          return this.$store.state.maps.maps;
     },
     ...mapGetters({
-      getModel: "models/getModelById"
+      getModel: "models/getModelById",
     }),
     availableProjects() {
       return this.$store.state.projects.projects;

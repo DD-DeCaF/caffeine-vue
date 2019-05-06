@@ -1,3 +1,4 @@
+import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
@@ -19,7 +20,7 @@ export default {
       state.maps = maps;
     },
     editMap(state, payload: any) {
-      state.maps[payload.index] = payload.item;
+      Vue.set(state.maps, payload.index, payload.item)
     },
     addMap(state, map: MapItem) {
       state.maps.push(map);
