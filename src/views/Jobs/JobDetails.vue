@@ -87,9 +87,16 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "JobDetails",
+  data: () => ({
+    jobId: null,
+    pathwayPredictions: null
+  }),
   computed: {
     job() {
       return this.$store.getters["jobs/getJobById"](this.jobId);
@@ -105,6 +112,28 @@ export default Vue.extend({
   },
   created() {
     this.jobId = parseInt(this.$route.params.id);
+  },
+  watch: {
+    "job.status": {
+      handler: function(newValue, oldValue) {
+        if (newValue === "SUCCESS") {
+          this.getPathwayPredictions();
+        }
+      },
+      immediate: true
+    }
+  },
+  methods: {
+    getPathwayPredictions() {
+      axios
+        .get(`${settings.apis.metabolicNinja}/predictions/${this.jobId}`)
+        .then((response: AxiosResponse<any>) => {
+          this.pathwayPredictions = response.data.result;
+        })
+        .catch(error => {
+          this.$store.commit("setFetchError", error);
+        });
+    }
   }
 });
 </script>
