@@ -87,8 +87,12 @@ export default Vue.extend({
           const commitPayload = Object.assign(payload, response.data);
           this.$store.commit("projects/addProject", commitPayload);
           this.$emit("return-object", commitPayload);
-          this.isVisible = false;
-          this.isProjectCreationSuccess = true;
+          this.$store.dispatch("session/refreshTokenLoop");
+          this.$store.state.session.refreshRequest
+            .then(() => {
+              this.isVisible = false
+              this.isProjectCreationSuccess = true
+            })
         })
         .catch(error => {
           this.$store.commit("setPostError", error);

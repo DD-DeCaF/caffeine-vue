@@ -13,7 +13,8 @@ export interface MapItem {
 export default {
   namespaced: true,
   state: {
-    maps: []
+    maps: [],
+    fetchRequest: null
   },
   mutations: {
     setMaps(state, maps: MapItem[]) {
@@ -27,21 +28,35 @@ export default {
     },
     delete(state, ids) {
       state.maps = state.maps.filter(map => !ids.includes(map.id));
+    },
+    setFetchRequest(state, fetchRequest) {
+      state.fetchRequest = fetchRequest;
     }
   },
   actions: {
     fetchMaps({ commit }) {
-      axios
+      const fetchRequest = axios
         .get(`${settings.apis.maps}/maps`)
         .then((response: AxiosResponse<MapItem[]>) => {
           commit("setMaps", response.data);
         })
         .catch(error => {
           commit("setFetchError", error, { root: true });
+        })
+        .then(() => {
+          commit("setFetchRequest", null);
         });
+      commit("setFetchRequest", fetchRequest);
     }
   },
   getters: {
+    onData: state => callback => {
+      if (state.fetchRequest !== null) {
+        state.fetchRequest.then(callback);
+      } else {
+        callback();
+      }
+    },
     getMapById: state => (id: number) => {
       return state.maps.find(map => map.id === id);
     }
