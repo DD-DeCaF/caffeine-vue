@@ -13,7 +13,7 @@
       v-model="isModelCreationDialogVisible"
       @return-object="passModel"
     />
-    <NewMap v-model="isMapCreationDialogVisible"/>
+    <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
