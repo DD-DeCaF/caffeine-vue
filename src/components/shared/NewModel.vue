@@ -206,7 +206,7 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
-          const modelWithID = {...payload, ...response.data}
+          const modelWithID = { ...payload, ...response.data };
           this.$store.commit("models/addModel", modelWithID);
           this.$emit("returnObject", modelWithID);
           this.isVisible = false;

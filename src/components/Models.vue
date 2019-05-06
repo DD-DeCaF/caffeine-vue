@@ -46,7 +46,10 @@
                   slot="activator"
                   @click="handler(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
+                  :class="{
+                    pointerDisabled:
+                      !isAuthenticated || props.item.project_id === null
+                  }"
                 >
                   edit
                 </v-icon>
@@ -69,7 +72,10 @@
                   slot="activator"
                   @click="deleteItem(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
+                  :class="{
+                    pointerDisabled:
+                      !isAuthenticated || props.item.project_id === null
+                  }"
                 >
                   delete
                 </v-icon>

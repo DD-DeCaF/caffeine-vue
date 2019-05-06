@@ -13,10 +13,7 @@
       v-model="isModelCreationDialogVisible"
       @returnObject="passModel"
     />
-    <NewMap 
-      v-model="isMapCreationDialogVisible" 
-      @returnObject="passMap"
-    />
+    <NewMap v-model="isMapCreationDialogVisible"/>
     <v-layout justify-center>
       <v-flex md6>
         <h1>Maps</h1>
@@ -48,7 +45,10 @@
                   slot="activator"
                   @click="editItem(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
+                  :class="{
+                    pointerDisabled:
+                      !isAuthenticated || props.item.project_id === null
+                  }"
                 >
                   edit
                 </v-icon>
@@ -71,7 +71,10 @@
                   slot="activator"
                   @click="deleteItem(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
-                  :class="{ pointerDisabled: !isAuthenticated || props.item.project_id === null }"
+                  :class="{
+                    pointerDisabled:
+                      !isAuthenticated || props.item.project_id === null
+                  }"
                 >
                   delete
                 </v-icon>
@@ -308,9 +311,6 @@ export default Vue.extend({
     },
     passModel(model) {
       this.selectedModel = model;
-    },
-    passMap(model) {
-      console.log(model);
     }
   },
   computed: {
@@ -318,10 +318,10 @@ export default Vue.extend({
       return this.$store.state.session.isAuthenticated;
     },
     availableMaps() {
-          return this.$store.state.maps.maps;
+      return this.$store.state.maps.maps;
     },
     ...mapGetters({
-      getModel: "models/getModelById",
+      getModel: "models/getModelById"
     }),
     availableProjects() {
       return this.$store.state.projects.projects;

@@ -20,7 +20,7 @@ export default {
       state.maps = maps;
     },
     editMap(state, payload: any) {
-      Vue.set(state.maps, payload.index, payload.item)
+      Vue.set(state.maps, payload.index, payload.item);
     },
     addMap(state, map: MapItem) {
       state.maps.push(map);

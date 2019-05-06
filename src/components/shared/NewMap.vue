@@ -138,7 +138,7 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
-          const mapWithID = {...payload, ...response.data}
+          const mapWithID = { ...payload, ...response.data };
           this.$store.commit("maps/addMap", mapWithID);
           this.$emit("returnObject", mapWithID);
           this.isVisible = false;
