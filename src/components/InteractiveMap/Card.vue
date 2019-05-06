@@ -72,6 +72,34 @@
             ></v-progress-circular>
           </div>
         </v-flex>
+        <v-flex class="xs6" v-if="card.objective.reactionId !== null"
+          >{{ card.objective.reactionId }} flux:</v-flex
+        >
+        <v-flex
+          class="xs6 text-xs-right"
+          v-if="card.objective.reactionId !== null"
+        >
+          <div v-if="!card.isSimulating">
+            <span
+              v-if="card.growthRate !== null"
+              :class="{ dead: production === 0 }"
+            >
+              {{ production | round }}
+              <em>
+                mmol/gDW/h
+                <sup>-1</sup>
+              </em>
+            </span>
+            <span v-else>N/A</span>
+          </div>
+          <div v-else>
+            <v-progress-circular
+              indeterminate
+              size="12"
+              :width="1"
+            ></v-progress-circular>
+          </div>
+        </v-flex>
       </v-layout>
     </v-card-title>
   </v-card>
@@ -124,6 +152,13 @@ export default Vue.extend({
       } else {
         return "grey";
       }
+    },
+    production() {
+      // If the objective is growth, ignore production.
+      if (this.card.objective.reactionId === null) {
+        return null;
+      }
+      return this.card.fluxes[this.card.objective.reactionId];
     },
     modifications() {
       // Concatenate all modifications for a single table display.
