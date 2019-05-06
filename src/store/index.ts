@@ -65,5 +65,8 @@ export default new Vuex.Store({
       dispatch("organisms/fetchOrganisms");
       dispatch("projects/fetchProjects");
     }
-  }
+  },
+  strict: process.env.NODE_ENV !== "production"
+  // Depends on https://github.com/vuejs/vuex/pull/1478 being released.
+  // devtools: process.env.NODE_ENV !== "production"
 });

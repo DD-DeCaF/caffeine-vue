@@ -1,5 +1,5 @@
 import Vue from "vue";
-import Router from "vue-router";
+import Router, { NavigationGuard } from "vue-router";
 import store from "@/store";
 import sessionStore from "@/store/modules/session";
 import Home from "./components/Home.vue";
@@ -13,7 +13,11 @@ import NotFound from "./components/NotFound.vue";
 
 Vue.use(Router);
 
-const authGuard = (to, from, next) => {
+const authGuard: NavigationGuard = (to, from, next) => {
+  // We rely on the authentication having been handled from local storage
+  // before the entire `App` was initialized. Thus we avoid having to watch
+  // the session store and users can directly proceed to guarded routes when
+  // they have a valid token in local storage.
   if (sessionStore.state.isAuthenticated) {
     next();
   } else {
@@ -45,12 +49,14 @@ export default new Router({
     {
       path: "/jobs",
       name: "jobs",
-      component: Jobs
+      component: Jobs,
+      beforeEnter: authGuard
     },
     {
       path: "/jobs/:id",
       name: "jobDetails",
-      component: JobDetails
+      component: JobDetails,
+      beforeEnter: authGuard
     },
     {
       path: "/maps",

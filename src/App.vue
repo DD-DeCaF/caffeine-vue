@@ -235,12 +235,6 @@ export default Vue.extend({
     // requests behave as expected. (See the interceptors for details)
     this.$store.dispatch("session/interceptRequests");
 
-    // Restore potential existing session from local storage.
-    const token = localStorage.getItem("jwt");
-    if (token !== null) {
-      this.$store.commit("session/login", JSON.parse(token));
-    }
-
     // Regularly refresh the authorization token.
     this.$store.dispatch("session/refreshTokenLoop");
 
