@@ -1,3 +1,4 @@
+import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
@@ -22,14 +23,8 @@ export default {
     setModels(state, models: ModelItem[]) {
       state.models = models;
     },
-    editModel(
-      state,
-      {
-        editedModel,
-        editedIndex
-      }: { editedModel: ModelItem; editedIndex: number }
-    ) {
-      state.model[editedIndex] = editedModel;
+    editModel(state, payload: any) {
+      Vue.set(state.models, payload.index, payload.item);
     },
     addModel(state, model: ModelItem) {
       state.models.push(model);

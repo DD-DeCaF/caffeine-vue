@@ -2,12 +2,12 @@
   <div>
     <NewProject
       v-model="isProjectCreationDialogVisible"
-      @returnObject="passProject"
+      @return-object="passProject"
     />
-    <NewMap v-model="isMapCreationDialogVisible" @returnObject="passMap" />
+    <NewMap v-model="isMapCreationDialogVisible" @return-object="passMap" />
     <NewOrganism
       v-model="isOrganismCreationDialogVisible"
-      @returnObject="passOrganism"
+      @return-object="passOrganism"
     />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
@@ -206,8 +206,9 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
         .then((response: AxiosResponse) => {
-          this.$store.commit("models/addModel", response.data);
-          this.$emit("returnObject", response.data);
+          const modelWithID = { ...payload, ...response.data };
+          this.$store.commit("models/addModel", modelWithID);
+          this.$emit("return-object", modelWithID);
           this.isVisible = false;
           this.isModelCreationSuccess = true;
         })

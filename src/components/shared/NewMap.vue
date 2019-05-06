@@ -2,7 +2,7 @@
   <div>
     <NewProject
       v-model="isProjectCreationDialogVisible"
-      @returnObject="passProject"
+      @return-object="passProject"
     />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
@@ -138,8 +138,9 @@ export default Vue.extend({
       axios
         .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
-          this.$store.commit("maps/addMap", response.data);
-          this.$emit("returnObject", response.data);
+          const mapWithID = { ...payload, ...response.data };
+          this.$store.commit("maps/addMap", mapWithID);
+          this.$emit("return-object", mapWithID);
           this.isVisible = false;
           this.isMapCreationSuccess = true;
         })

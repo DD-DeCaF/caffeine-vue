@@ -2,7 +2,7 @@
   <div>
     <NewProject
       v-model="isProjectCreationDialogVisible"
-      @returnObject="passProject"
+      @return-object="passProject"
     />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
@@ -113,7 +113,7 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/organisms`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("organisms/addOrganism", response.data);
-          this.$emit("returnObject", response.data);
+          this.$emit("return-object", response.data);
           this.isVisible = false;
           this.isOrganismCreationSuccess = true;
         })
