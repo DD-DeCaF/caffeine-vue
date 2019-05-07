@@ -219,6 +219,38 @@
     >
       {{ name }} successfully edited.
     </v-snackbar>
+    <v-snackbar
+      color="error"
+      v-model="isInvalidCredentials"
+      bottom
+      :timeout="3000"
+    >
+     401: The server could not authenticate you. You have to be logged in to perform this action.
+    </v-snackbar>
+    <v-snackbar
+      color="error"
+      v-model="isUnauthorized"
+      bottom
+      :timeout="3000"
+    >
+     403: You lack permission to perform this action.
+    </v-snackbar>
+    <v-snackbar
+      color="error"
+      v-model="isNotFound"
+      bottom
+      :timeout="3000"
+    >
+     404: The server could not find the requested data.
+     </v-snackbar>
+    <v-snackbar
+      color="error"
+      v-model="hasOtherError"
+      bottom
+      :timeout="5000"
+    >
+     An unknown error occured. Please contact us about this.
+     </v-snackbar>
   </v-container>
 </template>
 
