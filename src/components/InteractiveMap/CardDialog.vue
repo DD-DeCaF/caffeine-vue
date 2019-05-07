@@ -102,33 +102,34 @@
             :item-text="reactionDisplay"
             item-value="id"
             label="Add a reaction from BiGG..."
-            prepend-icon="get_app"
+            prepend-icon="add"
             return-object
             @change="addReaction"
           ></v-autocomplete>
 
           <v-autocomplete
             v-model="knockoutReactionItem"
-            :items="knockoutReactionSearchResults"
+            :items="reactions"
             :loading="isLoadingKnockoutReactions"
             hide-no-data
             :item-text="reactionDisplay"
             item-value="id"
             label="Knock out a reaction from the model..."
-            prepend-icon="clear"
+            prepend-icon="remove"
+            clearable
             return-object
             @change="knockoutReaction"
           ></v-autocomplete>
 
           <v-autocomplete
             v-model="knockoutGeneItem"
-            :items="knockoutGeneSearchResults"
+            :items="genes"
             :loading="isLoadingKnockoutGenes"
             hide-no-data
             item-text="id"
             item-value="id"
             label="Knock out a gene from the model..."
-            prepend-icon="clear"
+            prepend-icon="remove"
             return-object
             @change="knockoutGene"
           ></v-autocomplete>
@@ -232,12 +233,10 @@ export default Vue.extend({
     addedReactionExists: false,
     // Knockout reaction
     knockoutReactionItem: null,
-    knockoutReactionSearchResults: [], // TODO: Get reactions from the model
     isLoadingKnockoutReactions: false,
     knockoutReactionExists: false,
     // Knockout gene
     knockoutGeneItem: null,
-    knockoutGeneSearchResults: [], // TODO: Get genes from the model
     isLoadingKnockoutGenes: false,
     knockoutGeneExists: false,
     // Edit bounds
@@ -322,8 +321,6 @@ export default Vue.extend({
       return `${item.name} (${item.id})`;
     },
     addReaction(addedReaction) {
-      this.addReactionItem = null;
-      this.addReactionSearchQuery = null;
       const existingReaction = this.card.reactionAdditions.find(
         reaction => addedReaction.id === reaction.id
       );
@@ -332,30 +329,36 @@ export default Vue.extend({
       } else {
         this.card.reactionAdditions.push(addedReaction);
       }
+      this.$nextTick(() => {
+        this.addReactionItem = null;
+        this.addReactionSearchQuery = null;
+      });
     },
-    knockoutReaction(knockoutReaction) {
-      this.knockoutReactionItem = null;
-      this.knockoutReactionSearchQuery = null;
+    knockoutReaction() {
       const existingReaction = this.card.reactionKnockouts.find(
-        reaction => reaction.id === knockoutReaction.id
+        reaction => reaction === this.knockoutReactionItem
       );
       if (existingReaction !== undefined) {
         this.knockoutReactionExists = true;
       } else {
-        this.card.reactionAdditions.push(knockoutReaction);
+        this.card.reactionKnockouts.push(this.knockoutReactionItem);
       }
+      this.$nextTick(() => {
+        this.knockoutReactionItem = null;
+      });
     },
     knockoutGene(knockoutGene) {
-      this.knockoutGeneItem = null;
-      this.knockoutGeneSearchQuery = null;
       const existingGene = this.card.geneKnockouts.find(
-        gene => gene.id === knockoutGene.id
+        gene => gene === knockoutGene
       );
       if (existingGene !== undefined) {
         this.knockoutGeneExists = true;
       } else {
         this.card.geneKnockouts.push(knockoutGene);
       }
+      this.$nextTick(() => {
+        this.knockoutGeneItem = null;
+      });
     },
     editBounds() {
       if (this.editBoundsLowerBound > this.editBoundsUpperBound) {
