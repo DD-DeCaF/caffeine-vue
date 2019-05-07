@@ -14,7 +14,7 @@ export default {
   namespaced: true,
   state: {
     maps: [],
-    fetchRequest: null
+    mapsPromise: null
   },
   mutations: {
     setMaps(state, maps: MapItem[]) {
@@ -29,34 +29,24 @@ export default {
     delete(state, ids) {
       state.maps = state.maps.filter(map => !ids.includes(map.id));
     },
-    setFetchRequest(state, fetchRequest) {
-      state.fetchRequest = fetchRequest;
+    setMapsPromise(state, mapsPromise) {
+      state.mapsPromise = mapsPromise;
     }
   },
   actions: {
     fetchMaps({ commit }) {
-      const fetchRequest = axios
+      const mapsPromise = axios
         .get(`${settings.apis.maps}/maps`)
         .then((response: AxiosResponse<MapItem[]>) => {
           commit("setMaps", response.data);
         })
         .catch(error => {
           commit("setFetchError", error, { root: true });
-        })
-        .then(() => {
-          commit("setFetchRequest", null);
         });
-      commit("setFetchRequest", fetchRequest);
+      commit("setMapsPromise", mapsPromise);
     }
   },
   getters: {
-    onData: state => callback => {
-      if (state.fetchRequest !== null) {
-        state.fetchRequest.then(callback);
-      } else {
-        callback();
-      }
-    },
     getMapById: state => (id: number) => {
       return state.maps.find(map => map.id === id);
     }

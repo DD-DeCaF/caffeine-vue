@@ -13,7 +13,8 @@ export interface OrganismItem {
 export default {
   namespaced: true,
   state: {
-    organisms: []
+    organisms: [],
+    organismsPromise: null
   },
   mutations: {
     setOrganisms(state, organisms: OrganismItem[]) {
@@ -21,11 +22,14 @@ export default {
     },
     addOrganism(state, organism: OrganismItem) {
       state.organisms.push(organism);
+    },
+    setOrganismsPromise(state, organismsPromise) {
+      state.organismsPromise = organismsPromise;
     }
   },
   actions: {
     fetchOrganisms({ commit }) {
-      axios
+      const organismsPromise = axios
         .get(`${settings.apis.warehouse}/organisms`)
         .then((response: AxiosResponse<OrganismItem[]>) => {
           commit("setOrganisms", response.data);
@@ -33,6 +37,7 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+      commit("setOrganismsPromise", organismsPromise);
     }
   },
   getters: {

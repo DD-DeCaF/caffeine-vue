@@ -17,7 +17,7 @@ export default {
   namespaced: true,
   state: {
     models: [],
-    fetchRequest: null
+    modelsPromise: null
   },
   mutations: {
     setModels(state, models: ModelItem[]) {
@@ -32,24 +32,21 @@ export default {
     delete(state, ids) {
       state.models = state.models.filter(model => !ids.includes(model.id));
     },
-    setFetchRequest(state, fetchRequest) {
-      state.fetchRequest = fetchRequest;
+    setModelsPromise(state, modelsPromise) {
+      state.modelsPromise = modelsPromise;
     }
   },
   actions: {
     fetchModels({ commit }) {
-      const fetchRequest = axios
+      const modelsPromise = axios
         .get(`${settings.apis.modelStorage}/models`)
         .then((response: AxiosResponse<ModelItem[]>) => {
           commit("setModels", response.data);
         })
         .catch(error => {
           commit("setFetchError", error, { root: true });
-        })
-        .then(() => {
-          commit("setFetchRequest", null);
         });
-      commit("setFetchRequest", fetchRequest);
+      commit("setModelsPromise", modelsPromise);
     }
   },
   getters: {
@@ -59,13 +56,6 @@ export default {
         model = { name: "???" };
       }
       return model;
-    },
-    onData: state => callback => {
-      if (state.fetchRequest !== null) {
-        state.fetchRequest.then(callback);
-      } else {
-        callback();
-      }
     }
   }
 };
