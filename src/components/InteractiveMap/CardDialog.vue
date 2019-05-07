@@ -94,6 +94,20 @@
             return-object
             @change="knockoutReaction"
           ></v-autocomplete>
+
+          <v-autocomplete
+            v-model="knockoutGeneItem"
+            :items="knockoutGeneSearchResults"
+            :loading="isLoadingKnockoutGenes"
+            :search-input.sync="knockoutGeneSearchQuery"
+            hide-no-data
+            item-text="id"
+            item-value="id"
+            label="Knock out a gene from the model..."
+            prepend-icon="clear"
+            return-object
+            @change="knockoutGene"
+          ></v-autocomplete>
         </v-container>
       </v-form>
 
@@ -112,6 +126,9 @@
     </v-snackbar>
     <v-snackbar color="error" v-model="knockoutReactionExists" :timeout="6000">
       This reaction is already knocked out.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="knockoutGeneExists" :timeout="6000">
+      This gene is already knocked out.
     </v-snackbar>
   </v-dialog>
 </template>
@@ -148,7 +165,13 @@ export default Vue.extend({
     knockoutReactionSearchQuery: null,
     knockoutReactionSearchResults: [], // TODO: Get reactions from the model
     isLoadingKnockoutReactions: false,
-    knockoutReactionExists: false
+    knockoutReactionExists: false,
+    // Knockout gene
+    knockoutGeneItem: null,
+    knockoutGeneSearchQuery: null,
+    knockoutGeneSearchResults: [], // TODO: Get genes from the model
+    isLoadingKnockoutGenes: false,
+    knockoutGeneExists: false
   }),
   props: ["card", "modifications"],
   watch: {
@@ -234,6 +257,18 @@ export default Vue.extend({
         this.knockoutReactionExists = true;
       } else {
         this.card.reactionAdditions.push(knockoutReaction);
+      }
+    },
+    knockoutGene(knockoutGene) {
+      this.knockoutGeneItem = null;
+      this.knockoutGeneSearchQuery = null;
+      const existingGene = this.card.geneKnockouts.find(
+        gene => gene.id === knockoutGene.id
+      );
+      if (existingGene !== undefined) {
+        this.knockoutGeneExists = true;
+      } else {
+        this.card.geneKnockouts.push(knockoutGene);
       }
     }
   }
