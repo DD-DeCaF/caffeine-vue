@@ -24,8 +24,10 @@ export default {
       Vue.set(state.projects, payload.index, payload.item);
     },
     delete(state, ids) {
-      state.projects = state.projects.filter(project => !ids.includes(project.id));
-    },
+      state.projects = state.projects.filter(
+        project => !ids.includes(project.id)
+      );
+    }
   },
   actions: {
     fetchProjects({ commit }) {

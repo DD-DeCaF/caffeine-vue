@@ -5,9 +5,7 @@
       :items="[projectItem]"
       itemsType="projects"
     />
-     <NewProject
-      v-model="isProjectCreationDialogVisible"
-    />
+    <NewProject v-model="isProjectCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
         <h1>Projects</h1>
@@ -20,18 +18,12 @@
           <template v-slot:items="props">
             <td>{{ props.item.name }}</td>
             <td>
-                <v-icon
-                  slot="activator"
-                  @click="editItem(props.item)"
-                >
-                  edit
-                </v-icon>
-                <v-icon
-                  slot="activator"
-                  @click="deleteItem(props.item)"
-                >
-                  delete
-                </v-icon>
+              <v-icon slot="activator" @click="editItem(props.item)">
+                edit
+              </v-icon>
+              <v-icon slot="activator" @click="deleteItem(props.item)">
+                delete
+              </v-icon>
             </td>
           </template>
         </v-data-table>
@@ -221,7 +213,7 @@ export default Vue.extend({
     },
     passProject(project) {
       this.project = project;
-    },
+    }
   },
   computed: {
     isAuthenticated() {

@@ -78,6 +78,6 @@ export default new Router({
       name: "projects",
       component: Projects,
       beforeEnter: authGuard
-    },
+    }
   ]
 });
