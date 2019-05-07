@@ -164,7 +164,12 @@ export default Vue.extend({
   },
   methods: {
     escherLoaded() {
-      this.$store.getters["models/onData"](this.addDefaultCard);
+      // Add a default card. Chain promises to ensure that data is available.
+      this.$store.state.models.modelsPromise.then(() => {
+        this.$store.state.organisms.organismsPromise.then(() => {
+          this.addDefaultCard();
+        });
+      });
     },
     changeMap() {
       // TODO: Get map from maps state lazy loader
@@ -178,16 +183,20 @@ export default Vue.extend({
         });
     },
     addDefaultCard() {
-      const model = this.$store.state.models.models.find(
-        model => model.name === "e_coli_core"
-      );
-      if (model) {
-        const organism = this.$store.getters["organisms/getOrganismById"](
-          model.organism_id
-        );
-        this.addCard("Design", organism, model, "pfba");
-      } else {
+      // Select the default preferred organism and related model.
+      // Note: Expecting organisms and models to be already loaded into state.
+      // TODO: Use hardcoded list of preferred models for organisms
+      const organism = this.$store.state.organisms.organisms.find(organism => {
+        return organism.id === 2 && organism.name === "Escherichia coli";
+      });
+      const model = this.$store.state.models.models.find(model => {
+        return model.id === 15 && model.name === "e_coli_core";
+      });
+
+      if (!organism || !model) {
         this.addCard("Design", null, null, "pfba");
+      } else {
+        this.addCard("Design", organism, model, "pfba");
       }
     },
     addDataDrivenCard() {
@@ -319,7 +328,7 @@ export default Vue.extend({
   mounted() {
     // Set the chosen map to the preferred default. Wait for a potential fetch
     // request (important if the user navigates directly to this view).
-    this.$store.getters["maps/onData"](() => {
+    this.$store.state.maps.mapsPromise.then(() => {
       this.$store.state.maps.maps.forEach(map => {
         if (map.model_id === 15 && map.name === "Core metabolism") {
           this.currentMapId = map.id;
