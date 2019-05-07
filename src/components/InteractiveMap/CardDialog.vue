@@ -329,9 +329,9 @@ export default Vue.extend({
       } else {
         this.card.reactionAdditions.push(addedReaction);
       }
+      this.addReactionSearchQuery = null;
       this.$nextTick(() => {
         this.addReactionItem = null;
-        this.addReactionSearchQuery = null;
       });
     },
     knockoutReaction() {
