@@ -55,7 +55,9 @@
           <v-flex class="text-xs-right">
             <span v-if="card.objective.reactionId === null">Growth</span>
             <span v-else>{{ card.objective.reactionId }}</span>
-            <v-icon v-if="card.objective.maximize" size="16">arrow_upward</v-icon>
+            <v-icon v-if="card.objective.maximize" size="16"
+              >arrow_upward</v-icon
+            >
             <v-icon v-else size="16">arrow_downward</v-icon>
           </v-flex>
         </v-layout>

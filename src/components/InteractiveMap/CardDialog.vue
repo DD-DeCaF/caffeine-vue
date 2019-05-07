@@ -132,6 +132,39 @@
             return-object
             @change="knockoutGene"
           ></v-autocomplete>
+
+          <v-layout wrap>
+            <v-flex grow>
+              <v-autocomplete
+                v-model="editBoundsReaction"
+                :items="reactions"
+                :loading="isLoadingEditableBounds"
+                hide-no-data
+                item-text="id"
+                item-value="id"
+                label="Edit the bounds of a reaction..."
+                prepend-icon="vertical_align_center"
+                return-object
+              ></v-autocomplete>
+            </v-flex>
+            <v-flex shrink>
+              <v-text-field
+                v-model="lowerBound"
+                type="number"
+                label="Number"
+              ></v-text-field>
+            </v-flex>
+            <v-flex shrink>
+              <v-text-field
+                v-model="upperBound"
+                type="number"
+                label="Number"
+              ></v-text-field>
+            </v-flex>
+            <v-flex shrink>
+              <v-btn color="primary" @click="editBounds">Update</v-btn>
+            </v-flex>
+          </v-layout>
         </v-container>
       </v-form>
 
@@ -193,7 +226,12 @@ export default Vue.extend({
     knockoutGeneItem: null,
     knockoutGeneSearchResults: [], // TODO: Get genes from the model
     isLoadingKnockoutGenes: false,
-    knockoutGeneExists: false
+    knockoutGeneExists: false,
+    // Edit bounds
+    editBoundsReaction: null,
+    editBoundsLowerBound: null,
+    editBoundsUpperBound: null,
+    isLoadingEditableBounds: false
   }),
   props: ["card", "modifications"],
   watch: {
@@ -292,6 +330,25 @@ export default Vue.extend({
       } else {
         this.card.geneKnockouts.push(knockoutGene);
       }
+    },
+    editBounds() {
+      const existingModification = this.card.editedBounds.find(bounds => {
+        return bounds.reactionId === this.editBoundsReaction;
+      });
+      if (existingModification !== undefined) {
+        // Update the existing modification
+        existingModification.lowerBound = this.lowerBound;
+        existingModification.upperBound = this.upperBound;
+      } else {
+        this.card.editedBounds.push({
+          reactionId: this.editBoundsReaction,
+          lowerBound: this.lowerBound,
+          upperBound: this.upperBound
+        });
+      }
+      this.editBoundsReaction = null;
+      this.lowerBound = null;
+      this.upperBound = null;
     }
   }
 });
