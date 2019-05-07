@@ -72,6 +72,9 @@
                   >The job was unable to complete successfully.</span
                 >
               </div>
+              <div v-if="job.status === 'SUCCESS' && prediction">
+                <JobResultsTable :prediction="prediction" />
+              </div>
             </v-card>
           </v-flex>
         </v-layout>
@@ -91,8 +94,9 @@ import { JobItem } from "@/store/modules/jobs";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
+import JobResultsTable from "@/components/Jobs/JobResultsTable.vue";
 
-export interface JobPredictions extends JobItem {
+export interface PathwayPredictionResponse extends JobItem {
   result: {
     diff_fva: PathwayPredictionMethod[];
     cofactor_swap: PathwayPredictionMethod[];
@@ -134,9 +138,12 @@ export interface Reaction {
 
 export default Vue.extend({
   name: "JobDetails",
+  components: {
+    JobResultsTable
+  },
   data: () => ({
     jobId: null,
-    pathwayPredictions: null
+    prediction: null
   }),
   computed: {
     job() {
@@ -158,18 +165,18 @@ export default Vue.extend({
     "job.status": {
       handler: function(newValue, oldValue) {
         if (newValue === "SUCCESS") {
-          this.getJobPredictions();
+          this.getPathwayPredictions();
         }
       },
       immediate: true
     }
   },
   methods: {
-    getJobPredictions() {
+    getPathwayPredictions() {
       axios
         .get(`${settings.apis.metabolicNinja}/predictions/${this.jobId}`)
-        .then((response: AxiosResponse<JobPredictions>) => {
-          this.pathwayPredictions = response.data.result;
+        .then((response: AxiosResponse<PathwayPredictionResponse>) => {
+          this.prediction = response.data;
         })
         .catch(error => {
           this.$store.commit("setFetchError", error);
