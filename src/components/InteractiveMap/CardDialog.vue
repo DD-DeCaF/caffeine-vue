@@ -80,6 +80,20 @@
             return-object
             @change="addReaction"
           ></v-autocomplete>
+
+          <v-autocomplete
+            v-model="knockoutReactionItem"
+            :items="knockoutReactionSearchResults"
+            :loading="isLoadingKnockoutReactions"
+            :search-input.sync="knockoutReactionSearchQuery"
+            hide-no-data
+            :item-text="reactionDisplay"
+            item-value="id"
+            label="Knock out a reaction from the model..."
+            prepend-icon="clear"
+            return-object
+            @change="knockoutReaction"
+          ></v-autocomplete>
         </v-container>
       </v-form>
 
@@ -93,9 +107,11 @@
       Could not search BiGG for reactions, please check your internet
       connection.
     </v-snackbar>
-
     <v-snackbar color="error" v-model="addedReactionExists" :timeout="6000">
       This reaction is already added.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="knockoutReactionExists" :timeout="6000">
+      This reaction is already knocked out.
     </v-snackbar>
   </v-dialog>
 </template>
@@ -120,12 +136,19 @@ export default Vue.extend({
       { text: "Name or ID", value: "id", sortable: false },
       { text: "Details", value: "details", sortable: false }
     ],
+    // Add reaction
     addReactionItem: null,
     addReactionSearchQuery: null,
     addReactionSearchResults: [],
     isLoadingAddReaction: false,
     biggRequestError: false,
-    addedReactionExists: false
+    addedReactionExists: false,
+    // Knockout reaction
+    knockoutReactionItem: null,
+    knockoutReactionSearchQuery: null,
+    knockoutReactionSearchResults: [], // TODO: Get reactions from the model
+    isLoadingKnockoutReactions: false,
+    knockoutReactionExists: false
   }),
   props: ["card", "modifications"],
   watch: {
@@ -199,6 +222,18 @@ export default Vue.extend({
         this.addedReactionExists = true;
       } else {
         this.card.reactionAdditions.push(addedReaction);
+      }
+    },
+    knockoutReaction(knockoutReaction) {
+      this.knockoutReactionItem = null;
+      this.knockoutReactionSearchQuery = null;
+      const existingReaction = this.card.reactionKnockouts.find(
+        reaction => reaction.id === knockoutReaction.id
+      );
+      if (existingReaction !== undefined) {
+        this.knockoutReactionExists = true;
+      } else {
+        this.card.reactionAdditions.push(knockoutReaction);
       }
     }
   }
