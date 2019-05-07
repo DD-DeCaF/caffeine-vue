@@ -162,8 +162,11 @@ export default Vue.extend({
     },
     modifications() {
       // Concatenate all modifications for a single table display.
-      // TODO: Added reactions
-      const addedReactions = [];
+      const reactionAdditions = this.card.reactionAdditions.map(reaction => ({
+        type: "Added reaction",
+        name: `${reaction.name} (${reaction.id})`,
+        details: "" // TODO: Reaction string
+      }));
       const reactionKnockouts = this.card.reactionKnockouts.map(reactionId => ({
         type: "Reaction knockout",
         name: `Name TBD (${reactionId})`, // TODO: Reaction name
@@ -180,7 +183,7 @@ export default Vue.extend({
         details: `Bounds set from ${bounds.lowerBound} to ${bounds.upperBound}`
       }));
       return [
-        ...addedReactions,
+        ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds

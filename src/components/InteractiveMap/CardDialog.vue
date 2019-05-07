@@ -66,6 +66,20 @@
               <td>{{ props.item.details }}</td>
             </template>
           </v-data-table>
+
+          <v-autocomplete
+            v-model="addReactionItem"
+            :items="addReactionSearchResults"
+            :loading="isLoadingAddReaction"
+            :search-input.sync="addReactionSearchQuery"
+            hide-no-data
+            :item-text="reactionDisplay"
+            item-value="id"
+            label="Add a reaction from BiGG..."
+            prepend-icon="get_app"
+            return-object
+            @change="addReaction"
+          ></v-autocomplete>
         </v-container>
       </v-form>
 
@@ -74,12 +88,22 @@
         <v-btn color="primary" @click="simulate">Simulate</v-btn>
       </v-card-actions>
     </v-card>
+
+    <v-snackbar color="error" v-model="biggRequestError" :timeout="6000">
+      Could not search BiGG for reactions, please check your internet
+      connection.
+    </v-snackbar>
+
+    <v-snackbar color="error" v-model="addedReactionExists" :timeout="6000">
+      This reaction is already added.
+    </v-snackbar>
   </v-dialog>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import * as settings from "@/settings";
 
 export default Vue.extend({
   name: "CardDialog",
@@ -95,9 +119,43 @@ export default Vue.extend({
       { text: "Modifications", value: "type", sortable: false },
       { text: "Name or ID", value: "id", sortable: false },
       { text: "Details", value: "details", sortable: false }
-    ]
+    ],
+    addReactionItem: null,
+    addReactionSearchQuery: null,
+    addReactionSearchResults: [],
+    isLoadingAddReaction: false,
+    biggRequestError: false,
+    addedReactionExists: false
   }),
   props: ["card", "modifications"],
+  watch: {
+    addReactionSearchQuery(query) {
+      this.addReactionSearchResults = [];
+      if (query === null || query.trim().length === 0) {
+        return;
+      }
+
+      this.isLoadingAddReaction = true;
+      axios
+        .get(
+          `${settings.apis.bigg}/search?query=${query}&search_type=reactions`
+        )
+        .then(response => {
+          this.addReactionSearchResults = response.data.results.map(
+            reaction => ({
+              id: reaction.bigg_id,
+              name: reaction.name
+            })
+          );
+        })
+        .catch(error => {
+          this.biggRequestError = true;
+        })
+        .then(() => {
+          this.isLoadingAddReaction = false;
+        });
+    }
+  },
   computed: {
     organisms() {
       return this.$store.state.organisms.organisms;
@@ -127,6 +185,21 @@ export default Vue.extend({
     simulate() {
       this.showDialog = false;
       this.$emit("simulate-card");
+    },
+    reactionDisplay(item) {
+      return `${item.name} (${item.id})`;
+    },
+    addReaction(addedReaction) {
+      this.addReactionItem = null;
+      this.addReactionSearchQuery = null;
+      const existingReaction = this.card.reactionAdditions.find(
+        reaction => addedReaction.id === reaction.id
+      );
+      if (existingReaction !== undefined) {
+        this.addedReactionExists = true;
+      } else {
+        this.card.reactionAdditions.push(addedReaction);
+      }
     }
   }
 });
