@@ -21,8 +21,34 @@
         :items="pathways"
         :expand="expand"
         :pagination.sync="pagination"
-        select-all="primary"
+        select-all
       >
+        <template v-slot:headers="props">
+          <tr>
+            <th>
+              <v-checkbox
+                :input-value="props.all"
+                :indeterminate="props.indeterminate"
+                color="primary"
+                hide-details
+                @click.stop="toggleAll"
+              ></v-checkbox>
+            </th>
+            <th
+              v-for="header in props.headers"
+              :key="header.text"
+              :class="[
+                'column sortable',
+                pagination.descending ? 'desc' : 'asc',
+                header.value === pagination.sortBy ? 'active' : ''
+              ]"
+              @click="changeSort(header.value)"
+            >
+              <v-icon small>arrow_upward</v-icon>
+              {{ header.text }}
+            </th>
+          </tr>
+        </template>
         <template v-slot:items="props">
           <tr
             @click="props.expanded = !props.expanded"
@@ -96,6 +122,23 @@ export default Vue.extend({
         id: index,
         ...item
       }));
+    }
+  },
+  methods: {
+    toggleAll() {
+      if (this.selected.length) {
+        this.selected = [];
+      } else {
+        this.selected = [...this.pathways];
+      }
+    },
+    changeSort(column) {
+      if (this.pagination.sortBy === column) {
+        this.pagination.descending = !this.pagination.descending;
+      } else {
+        this.pagination.sortBy = column;
+        this.pagination.descending = false;
+      }
     }
   }
 });
