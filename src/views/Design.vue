@@ -147,11 +147,16 @@
               </v-card-text>
             </v-slide-y-transition>
           </v-card>
-          <v-btn class="primary" :disabled="!isValid" @click="onSubmit">Submit
+          <v-btn class="primary" :disabled="!isValid" @click="onSubmit"
+            >Submit
           </v-btn>
         </v-form>
       </v-card-text>
     </v-card>
+    <v-snackbar color="error" v-model="hasSubmissionError" :timeout="8000">
+      Sorry, submitting your design job failed. Please try again in a few
+      seconds or contact us if the problem persists.
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -209,7 +214,8 @@ export default Vue.extend({
       modelOptions: [] as ModelItem[],
       isModelCreationDialogVisible: false,
       maxPredictions: 3,
-      isSubmitted: false
+      isSubmitted: false,
+      hasSubmissionError: false
     };
   },
   computed: {
@@ -288,8 +294,24 @@ export default Vue.extend({
     },
     onSubmit(): void {
       this.isSubmitted = true;
-      this.$store.dispatch("jobs/fetchJobs");
-      this.$router.push({ name: "jobs" });
+      axios
+        .post(`${settings.apis.metabolicNinja}/predictions`, {
+          aerobic: this.isAerobic,
+          bigg: this.bigg,
+          max_predictions: this.maxPredictions,
+          model_id: this.model.id,
+          organism_id: this.organism.id,
+          product_name: this.product.name,
+          project_id: this.project.id,
+          rhea: this.rhea
+        })
+        .then((response: AxiosResponse) => {
+          this.$store.dispatch("jobs/fetchJobs");
+          this.$router.push({ name: "jobs" });
+        })
+        .catch((error: Error) => {
+          this.hasSubmissionError = true;
+        });
     }
   },
   created() {
@@ -305,6 +327,8 @@ export default Vue.extend({
       } else {
         next(false);
       }
+    } else {
+      next();
     }
   }
 });
