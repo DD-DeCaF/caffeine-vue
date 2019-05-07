@@ -71,7 +71,10 @@
           >
           </v-switch>
           <v-card>
-            <v-card-actions @click="showAdvanced = !showAdvanced" class="clickable">
+            <v-card-actions
+              @click="showAdvanced = !showAdvanced"
+              class="clickable"
+            >
               <v-card-title>Advanced</v-card-title>
               <v-spacer></v-spacer>
               <v-btn icon>
@@ -134,36 +137,44 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { Route, RawLocation } from "vue-router";
 import axios, { AxiosResponse } from "axios";
 import * as settings from "@/settings";
 import { OrganismItem } from "@/store/modules/organisms";
 import { ProjectItem } from "@/store/modules/projects";
-import { ModelItem } from '@/store/modules/models';
+import { ModelItem } from "@/store/modules/models";
 
-export interface Product {
+interface Product {
   name: string;
 }
 
 type Nullable<T> = T | null;
 type RuleOutcome = string | true;
+type RuleHandler = (any) => RuleOutcome;
+type NextHandler = (to?: RawLocation | false | Function | void) => void;
 
 export default Vue.extend({
   name: "Design",
   data() {
     return {
       isValid: false,
-      organism: <Nullable<number>> null,
-      organismRules: [v => !!v || "Organism is required"],
-      product: "",
-      productRules: [v => !!v || "Product is required"],
-      productOptions: <Array<Product>> [],
-      project: <Nullable<number>> null,
-      projectRules: [v => !!v || "Project is required"],
+      organism: null as Nullable<OrganismItem>,
+      organismRules: [v => !!v || "Organism is required"] as ReadonlyArray<
+        RuleHandler
+      >,
+      product: null as Nullable<Product>,
+      productRules: [v => !!v || "Product is required"] as ReadonlyArray<
+        RuleHandler
+      >,
+      productOptions: [] as Product[],
+      project: null as Nullable<ProjectItem>,
+      projectRules: [v => !!v || "Project is required"] as ReadonlyArray<
+        RuleHandler
+      >,
       bigg: false,
       rhea: true,
-      model: null,
-      modelRules: [v => !!v || "Model is required"],
-      modelOptions: <Array<ModelItem>> [],
+      model: null as Nullable<ModelItem>,
+      modelOptions: [] as ModelItem[],
       maxPredictions: 3,
       isAerobic: false,
       isSubmitted: false,
@@ -171,38 +182,49 @@ export default Vue.extend({
     };
   },
   computed: {
-    projectOptions(): <Array<ProjectItem>> {
+    projectOptions(): ProjectItem[] {
       return this.$store.state.projects.projects;
     },
     // TODO (Moritz Beber): Selection of organism in future should depend on the
     //  selected project, i.e., you can only select public organisms and
     //  organisms within that project.
-    organismOptions(): <Array<OrganismItem>> {
+    organismOptions(): OrganismItem[] {
       return this.$store.state.organisms.organisms;
     },
-    predictionRules(): Array<(v: number) => RuleOutcome> {
-      const rules: Array<(v: number) => RuleOutcome> = [];
-      let rule: (v: number) => RuleOutcome = (v: number) => {
-        return (( v > 0 ) && ( v <= process.env.VUE_APP_MAX_PREDICTIONS )) ||
-          `Must be between 0 and ${process.env.VUE_APP_MAX_PREDICTIONS}.`;
-      };
-      rules.push(rule);
+    modelRules(): RuleHandler[] {
+      const rules: RuleHandler[] = [];
+      rules.push(
+        () =>
+          (this.project && this.organism) ||
+          "Please first select a project and organism"
+      );
+      rules.push(v => !!v || "Model is required");
+      return rules;
+    },
+    predictionRules(): RuleHandler[] {
+      const rules: RuleHandler[] = [];
+      rules.push((v: number) => {
+        return (
+          (v > 0 && v <= process.env.VUE_APP_MAX_PREDICTIONS) ||
+          `Must be between 0 and ${process.env.VUE_APP_MAX_PREDICTIONS}.`
+        );
+      });
       return rules;
     }
   },
   methods: {
-    onSubmit() {
+    onSubmit(): void {
       this.isSubmitted = true;
       this.$store.dispatch("jobs/fetchJobs");
       this.$router.push({ name: "jobs" });
     },
-    fetchProducts() {
+    fetchProducts(): void {
       axios
         .get(`${settings.apis.metabolicNinja}/products`)
         .then((response: AxiosResponse<Product[]>) => {
           this.productOptions = response.data;
         })
-        .catch(error => {
+        .catch((error: Error) => {
           this.$store.commit("setFetchError", error, { root: true });
         });
     }
@@ -210,10 +232,10 @@ export default Vue.extend({
   created() {
     this.fetchProducts();
   },
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave(to: Route, from: Route, next: NextHandler) {
     if (!this.isSubmitted) {
       const answer = window.confirm(
-        "Do you really want to leave? You have pending changes!"
+        "Do you really want to leave? You have pending changes."
       );
       if (answer) {
         next();
