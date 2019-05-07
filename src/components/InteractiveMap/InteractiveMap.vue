@@ -107,7 +107,7 @@ export default Vue.extend({
   computed: {
     maps() {
       // Sort maps by model name, then map name
-      const maps = this.$store.state.maps.maps;
+      const maps: any[] = [...this.$store.state.maps.maps];
       maps.sort((map1, map2) => {
         if (map1.model_id !== map2.model_id) {
           const model1 = this.$store.getters["models/getModelById"](
@@ -129,9 +129,9 @@ export default Vue.extend({
           } else {
             model2Name = "Unknown model";
           }
-          return model1Name > model2Name;
+          return model1Name.localeCompare(model2Name);
         } else {
-          return map1.name > map2.name;
+          return map1.name.localeCompare(map2.name);
         }
       });
 
