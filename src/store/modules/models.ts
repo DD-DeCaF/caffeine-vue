@@ -13,6 +13,10 @@ export interface ModelItem {
   model_serialized?: object;
 }
 
+export const organism2ModelMapping = {
+  "1": 1
+};
+
 export default {
   namespaced: true,
   state: {
