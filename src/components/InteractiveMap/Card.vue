@@ -173,23 +173,32 @@ export default Vue.extend({
     modifications() {
       // Concatenate all modifications for a single table display.
       const reactionAdditions = this.card.reactionAdditions.map(reaction => ({
-        type: "Added reaction",
-        name: `${reaction.name} (${reaction.id})`,
+        type: "added_reaction",
+        typeDisplay: "Added reaction",
+        id: reaction.id,
+        name: reaction.name,
+        nameDisplay: `${reaction.name} (${reaction.id})`,
         details: "" // TODO: Reaction string
       }));
       const reactionKnockouts = this.card.reactionKnockouts.map(reactionId => ({
-        type: "Reaction knockout",
-        name: `Name TBD (${reactionId})`, // TODO: Reaction name
+        type: "reaction_knockout",
+        typeDisplay: "Reaction knockout",
+        id: reactionId,
+        nameDisplay: `Name TBD (${reactionId})`, // TODO: Reaction name
         details: ""
       }));
       const geneKnockouts = this.card.geneKnockouts.map(geneId => ({
-        type: "Gene knockout",
-        name: geneId,
+        type: "gene_knockout",
+        typeDisplay: "Gene knockout",
+        id: geneId,
+        nameDisplay: geneId,
         details: "" // Would be nice to show related reactions here.
       }));
       const editedBounds = this.card.editedBounds.map(bounds => ({
-        type: "Modified bounds",
-        name: `Name TBD (${bounds.reactionId})`, // TODO: Reaction name
+        type: "edited_bounds",
+        typeDisplay: "Modified bounds",
+        id: bounds.reactionId,
+        nameDisplay: `Name TBD (${bounds.reactionId})`, // TODO: Reaction name
         details: `Bounds set from ${bounds.lowerBound} to ${bounds.upperBound}`
       }));
       return [

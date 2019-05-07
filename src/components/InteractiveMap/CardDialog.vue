@@ -59,11 +59,17 @@
             hide-actions
             :headers="modificationsHeaders"
             :items="modifications"
+            item-key="type + id"
           >
             <template v-slot:items="props">
-              <td>{{ props.item.type }}</td>
-              <td>{{ props.item.name }}</td>
+              <td>{{ props.item.typeDisplay }}</td>
+              <td>{{ props.item.nameDisplay }}</td>
               <td>{{ props.item.details }}</td>
+              <td>
+                <v-btn flat icon @click="clearModification(props.item)">
+                  <v-icon>delete</v-icon>
+                </v-btn>
+              </td>
             </template>
           </v-data-table>
 
@@ -385,6 +391,25 @@ export default Vue.extend({
         });
       }
       this.$refs.editBoundsForm.reset();
+    },
+    clearModification(modification) {
+      if (modification.type === "added_reaction") {
+        const index = this.card.reactionAdditions.findIndex(
+          reaction => reaction.id === modification.id
+        );
+        this.card.reactionAdditions.splice(index, 1);
+      } else if (modification.type === "reaction_knockout") {
+        const index = this.card.reactionKnockouts.indexOf(modification.id);
+        this.card.reactionKnockouts.splice(index, 1);
+      } else if (modification.type === "gene_knockout") {
+        const index = this.card.geneKnockouts.indexOf(modification.id);
+        this.card.geneKnockouts.splice(index, 1);
+      } else if (modification.type === "edited_bounds") {
+        const index = this.card.editedBounds.findIndex(
+          bounds => bounds.reactionId === modification.id
+        );
+        this.card.editedBounds.splice(index, 1);
+      }
     }
   }
 });
