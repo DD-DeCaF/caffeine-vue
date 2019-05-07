@@ -3,11 +3,23 @@
     <Escher
       @escher-loaded="escherLoaded"
       @simulate-card="simulate"
+      @click="isSidepanelOpen = false"
       :card="selectedCard"
       :mapData="mapData"
     />
     <Legend />
-    <v-navigation-drawer permanent right absolute>
+    <v-btn
+      color="primary"
+      small
+      fab
+      top
+      right
+      class="sidepanel-toggle"
+      @click="isSidepanelOpen = true"
+    >
+      <v-icon>apps</v-icon>
+    </v-btn>
+    <v-navigation-drawer v-model="isSidepanelOpen" right absolute hide-overlay>
       <v-container class="py-1">
         <v-select
           label="Selected Map"
@@ -96,6 +108,7 @@ export default Vue.extend({
     Legend
   },
   data: () => ({
+    isSidepanelOpen: true,
     escherBuilder: null,
     currentMapId: null,
     mapData: null,
@@ -339,3 +352,9 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style scoped>
+.sidepanel-toggle {
+  position: absolute;
+}
+</style>

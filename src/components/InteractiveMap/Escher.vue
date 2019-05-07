@@ -1,5 +1,5 @@
 <template>
-  <div class="escher-container fill-height">
+  <div class="escher-container fill-height" @click="$emit('click')">
     <v-container
       fluid
       fill-height
