@@ -361,7 +361,10 @@ export default Vue.extend({
       });
     },
     editBounds() {
-      if (this.editBoundsLowerBound > this.editBoundsUpperBound) {
+      const lowerBound = parseInt(this.editBoundsLowerBound);
+      const upperBound = parseInt(this.editBoundsUpperBound);
+
+      if (lowerBound > upperBound) {
         this.hasInvalidBoundsError = true;
         return;
       }
@@ -371,13 +374,13 @@ export default Vue.extend({
       });
       if (existingModification !== undefined) {
         // Update the existing modification
-        existingModification.lowerBound = this.editBoundsLowerBound;
-        existingModification.upperBound = this.editBoundsUpperBound;
+        existingModification.lowerBound = lowerBound;
+        existingModification.upperBound = upperBound;
       } else {
         this.card.editedBounds.push({
           reactionId: this.editBoundsReaction,
-          lowerBound: this.editBoundsLowerBound,
-          upperBound: this.editBoundsUpperBound
+          lowerBound: lowerBound,
+          upperBound: upperBound
         });
       }
       this.$refs.editBoundsForm.reset();
