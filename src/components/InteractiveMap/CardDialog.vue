@@ -79,6 +79,7 @@
                 hint="When left empty, the objective is growth."
                 persistent-hint
                 placeholder="Specify any reaction as objective..."
+                prepend-icon="done"
                 return-object
                 clearable
               ></v-select>
