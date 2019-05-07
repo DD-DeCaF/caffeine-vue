@@ -69,8 +69,8 @@ export default Vue.extend({
       if (this.card === null) {
         this.escherBuilder.set_knockout_reactions([]);
       } else {
-        // TODO: Bug: Knockout X does not disappear when undoing knockout
-        this.escherBuilder.set_knockout_reactions(reactionKnockouts);
+        // Copy the array to avoid Escher referencing the local state.
+        this.escherBuilder.set_knockout_reactions([...reactionKnockouts]);
       }
       this.escherBuilder._update_data(true, true);
     },
@@ -78,8 +78,8 @@ export default Vue.extend({
       if (this.card === null) {
         this.escherBuilder.set_knockout_genes([]);
       } else {
-        // TODO: Bug: Knockout X does not disappear when undoing knockout
-        this.escherBuilder.set_knockout_genes(geneKnockouts);
+        // Copy the array to avoid Escher referencing the local state.
+        this.escherBuilder.set_knockout_genes([...geneKnockouts]);
       }
       this.escherBuilder._update_data(true, true);
     },
