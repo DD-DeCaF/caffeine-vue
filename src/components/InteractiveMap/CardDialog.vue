@@ -111,7 +111,6 @@
             v-model="knockoutReactionItem"
             :items="knockoutReactionSearchResults"
             :loading="isLoadingKnockoutReactions"
-            :search-input.sync="knockoutReactionSearchQuery"
             hide-no-data
             :item-text="reactionDisplay"
             item-value="id"
@@ -125,7 +124,6 @@
             v-model="knockoutGeneItem"
             :items="knockoutGeneSearchResults"
             :loading="isLoadingKnockoutGenes"
-            :search-input.sync="knockoutGeneSearchQuery"
             hide-no-data
             item-text="id"
             item-value="id"
@@ -188,13 +186,11 @@ export default Vue.extend({
     addedReactionExists: false,
     // Knockout reaction
     knockoutReactionItem: null,
-    knockoutReactionSearchQuery: null,
     knockoutReactionSearchResults: [], // TODO: Get reactions from the model
     isLoadingKnockoutReactions: false,
     knockoutReactionExists: false,
     // Knockout gene
     knockoutGeneItem: null,
-    knockoutGeneSearchQuery: null,
     knockoutGeneSearchResults: [], // TODO: Get genes from the model
     isLoadingKnockoutGenes: false,
     knockoutGeneExists: false
