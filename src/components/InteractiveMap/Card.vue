@@ -138,19 +138,6 @@ export default Vue.extend({
   components: {
     CardDialog
   },
-  data: () => ({
-    methods: [
-      { id: "fba", name: "Flux Balance Analysis (FBA)" },
-      { id: "pfba", name: "Parsimonious FBA" },
-      { id: "fva", name: "Flux Variability Analysis (FVA)" },
-      { id: "pfba-fva", name: "Parsimonious FVA" }
-    ],
-    modificationsHeaders: [
-      { text: "Modifications", value: "type", sortable: false },
-      { text: "Name or ID", value: "id", sortable: false },
-      { text: "Details", value: "details", sortable: false }
-    ]
-  }),
   props: ["card", "isOnlyCard", "isSelected"],
   filters: {
     round(value) {
