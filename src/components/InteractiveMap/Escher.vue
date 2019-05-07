@@ -89,8 +89,7 @@ export default Vue.extend({
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (this.card.method === "fba" || this.card.method == "pfba") {
-          const fluxesFiltered = this.fluxFilter(fluxes);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          this.escherBuilder.set_reaction_data(this.fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
           // previous FVA simulation has been set on the map.
           // TODO: We should improve the escher API here.
@@ -107,8 +106,7 @@ export default Vue.extend({
             const average = (rxn.upper_bound + rxn.lower_bound) / 2;
             fluxesAverage[reaction] = average;
           });
-          const fluxesFiltered = this.fluxFilter(fluxesAverage);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
+          this.escherBuilder.set_reaction_data(this.fluxesFiltered);
           // Set the FVA data for transparency visualization.
           this.escherBuilder.set_reaction_fva_data(fluxes);
         }
@@ -116,18 +114,20 @@ export default Vue.extend({
       this.escherBuilder._update_data(true, true);
     }
   },
-  methods: {
-    fluxFilter(fluxes) {
+  computed: {
+    fluxesFiltered() {
       // Exclude fluxes with very low non-zero values, in order to not shift
       // the escher color scale.
       const fluxesFiltered = {};
-      Object.keys(fluxes).forEach(rxn => {
-        if (Math.abs(fluxes[rxn]) > 1e-7) {
-          fluxesFiltered[rxn] = fluxes[rxn];
+      Object.keys(this.card.fluxes).forEach(rxn => {
+        if (Math.abs(this.card.fluxes[rxn]) > 1e-7) {
+          fluxesFiltered[rxn] = this.card.fluxes[rxn];
         }
       });
       return fluxesFiltered;
-    },
+    }
+  },
+  methods: {
     getReactionState(id: string, type: string) {
       if (this.card === null) {
         return {
