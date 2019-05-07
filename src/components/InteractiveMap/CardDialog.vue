@@ -133,38 +133,48 @@
             @change="knockoutGene"
           ></v-autocomplete>
 
-          <v-layout wrap>
-            <v-flex grow>
-              <v-autocomplete
-                v-model="editBoundsReaction"
-                :items="reactions"
-                :loading="isLoadingEditableBounds"
-                hide-no-data
-                item-text="id"
-                item-value="id"
-                label="Edit the bounds of a reaction..."
-                prepend-icon="vertical_align_center"
-                return-object
-              ></v-autocomplete>
-            </v-flex>
-            <v-flex shrink>
-              <v-text-field
-                v-model="lowerBound"
-                type="number"
-                label="Number"
-              ></v-text-field>
-            </v-flex>
-            <v-flex shrink>
-              <v-text-field
-                v-model="upperBound"
-                type="number"
-                label="Number"
-              ></v-text-field>
-            </v-flex>
-            <v-flex shrink>
-              <v-btn color="primary" @click="editBounds">Update</v-btn>
-            </v-flex>
-          </v-layout>
+          <v-form ref="editBoundsForm" v-model="editBoundsValid">
+            <v-layout wrap>
+              <v-flex grow mr-2>
+                <v-autocomplete
+                  v-model="editBoundsReaction"
+                  :items="reactions"
+                  :loading="isLoadingEditableBounds"
+                  :rules="[editBoundsReactionRule]"
+                  hide-no-data
+                  item-text="id"
+                  item-value="id"
+                  label="Edit the bounds of a reaction..."
+                  prepend-icon="vertical_align_center"
+                  return-object
+                ></v-autocomplete>
+              </v-flex>
+              <v-flex shrink mr-2>
+                <v-text-field
+                  v-model="editBoundsLowerBound"
+                  type="number"
+                  label="Number"
+                  :rules="[editBoundsBoundRule]"
+                ></v-text-field>
+              </v-flex>
+              <v-flex shrink mr-2>
+                <v-text-field
+                  v-model="editBoundsUpperBound"
+                  type="number"
+                  label="Number"
+                  :rules="[editBoundsBoundRule]"
+                ></v-text-field>
+              </v-flex>
+              <v-flex shrink>
+                <v-btn
+                  color="primary"
+                  @click="editBounds"
+                  :disabled="!editBoundsValid"
+                  >Update</v-btn
+                >
+              </v-flex>
+            </v-layout>
+          </v-form>
         </v-container>
       </v-form>
 
@@ -186,6 +196,9 @@
     </v-snackbar>
     <v-snackbar color="error" v-model="knockoutGeneExists" :timeout="6000">
       This gene is already knocked out.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasInvalidBoundsError" :timeout="6000">
+      The lower bound cannot be larger than the upper bound.
     </v-snackbar>
   </v-dialog>
 </template>
@@ -229,6 +242,19 @@ export default Vue.extend({
     knockoutGeneExists: false,
     // Edit bounds
     editBoundsReaction: null,
+    editBoundsValid: false,
+    editBoundsReactionRule: value =>
+      (value && value.length > 0) || "Please specify the reaction ID",
+    editBoundsBoundRule: value => {
+      if (isNaN(parseFloat(value))) {
+        return "Bounds must be a number.";
+      }
+      if (value < -1000 || value > 1000) {
+        return "Bounds must be in the range of -1000 to 1000.";
+      }
+      return true;
+    },
+    hasInvalidBoundsError: false,
     editBoundsLowerBound: null,
     editBoundsUpperBound: null,
     isLoadingEditableBounds: false
@@ -332,23 +358,26 @@ export default Vue.extend({
       }
     },
     editBounds() {
+      if (this.editBoundsLowerBound > this.editBoundsUpperBound) {
+        this.hasInvalidBoundsError = true;
+        return;
+      }
+
       const existingModification = this.card.editedBounds.find(bounds => {
         return bounds.reactionId === this.editBoundsReaction;
       });
       if (existingModification !== undefined) {
         // Update the existing modification
-        existingModification.lowerBound = this.lowerBound;
-        existingModification.upperBound = this.upperBound;
+        existingModification.lowerBound = this.editBoundsLowerBound;
+        existingModification.upperBound = this.editBoundsUpperBound;
       } else {
         this.card.editedBounds.push({
           reactionId: this.editBoundsReaction,
-          lowerBound: this.lowerBound,
-          upperBound: this.upperBound
+          lowerBound: this.editBoundsLowerBound,
+          upperBound: this.editBoundsUpperBound
         });
       }
-      this.editBoundsReaction = null;
-      this.lowerBound = null;
-      this.upperBound = null;
+      this.$refs.editBoundsForm.reset();
     }
   }
 });
