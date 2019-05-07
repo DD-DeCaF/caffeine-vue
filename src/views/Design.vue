@@ -1,15 +1,29 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <v-container>
+    <NewProject
+      v-model="isProjectCreationDialogVisible"
+      @return-object="onNewProject"
+    />
+    <NewOrganism
+      v-model="isOrganismCreationDialogVisible"
+      @return-object="onNewOrganism"
+    />
+    <NewModel
+      v-model="isModelCreationDialogVisible"
+      @return-object="onNewModel"
+    />
     <v-card>
       <v-card-title></v-card-title>
       <v-card-text>
         <v-form v-model="isValid">
           <v-autocomplete
+            name="project"
             label="Project"
             v-model="project"
             :items="projectOptions"
             item-text="name"
             item-value="id"
+            return-object
             :rules="projectRules"
             clearable
           >
@@ -25,11 +39,13 @@
             </template>
           </v-autocomplete>
           <v-autocomplete
+            name="organism"
             label="Organism"
             v-model="organism"
             :items="organismOptions"
             item-text="name"
             item-value="id"
+            return-object
             :rules="organismRules"
             clearable
             placeholder="e.g., Escherichia coli"
@@ -53,11 +69,13 @@
             </template>
           </v-autocomplete>
           <v-autocomplete
+            name="product"
             label="Product"
             v-model="product"
             :items="productOptions"
             item-text="name"
             item-value="id"
+            return-object
             :rules="productRules"
             clearable
             placeholder="e.g., ethanol"
@@ -104,7 +122,8 @@
                   :items="modelOptions"
                   item-text="name"
                   item-value="id"
-                  :rules="modelRules"
+                  return-object
+                  :rules="modelRules()"
                   clearable
                 >
                   <template v-slot:prepend-item>
@@ -128,7 +147,8 @@
               </v-card-text>
             </v-slide-y-transition>
           </v-card>
-          <v-btn class="primary" :disabled="!isValid">Submit</v-btn>
+          <v-btn class="primary" :disabled="!isValid" @click="onSubmit">Submit
+          </v-btn>
         </v-form>
       </v-card-text>
     </v-card>
@@ -142,43 +162,54 @@ import axios, { AxiosResponse } from "axios";
 import * as settings from "@/settings";
 import { OrganismItem } from "@/store/modules/organisms";
 import { ProjectItem } from "@/store/modules/projects";
-import { ModelItem } from "@/store/modules/models";
+import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
+import NewProject from "./shared/NewProject.vue";
+import NewOrganism from "./shared/NewOrganism.vue";
+import NewModel from "./shared/NewModel.vue";
 
-interface Product {
+interface ProductItem {
   name: string;
 }
 
-type Nullable<T> = T | null;
+type Nullable<T> = T | null | undefined;
 type RuleOutcome = string | true;
 type RuleHandler = (any) => RuleOutcome;
 type NextHandler = (to?: RawLocation | false | Function | void) => void;
 
 export default Vue.extend({
   name: "Design",
+  components: {
+    NewProject,
+    NewOrganism,
+    NewModel
+  },
   data() {
     return {
       isValid: false,
-      organism: null as Nullable<OrganismItem>,
-      organismRules: [v => !!v || "Organism is required"] as ReadonlyArray<
-        RuleHandler
-      >,
-      product: null as Nullable<Product>,
-      productRules: [v => !!v || "Product is required"] as ReadonlyArray<
-        RuleHandler
-      >,
-      productOptions: [] as Product[],
       project: null as Nullable<ProjectItem>,
       projectRules: [v => !!v || "Project is required"] as ReadonlyArray<
         RuleHandler
       >,
+      isProjectCreationDialogVisible: false,
+      organism: null as Nullable<OrganismItem>,
+      organismRules: [v => !!v || "Organism is required"] as ReadonlyArray<
+        RuleHandler
+      >,
+      isOrganismCreationDialogVisible: false,
+      product: null as Nullable<ProductItem>,
+      productRules: [v => !!v || "Product is required"] as ReadonlyArray<
+        RuleHandler
+      >,
+      productOptions: [] as ProductItem[],
+      isAerobic: false,
+      showAdvanced: false,
       bigg: false,
       rhea: true,
       model: null as Nullable<ModelItem>,
       modelOptions: [] as ModelItem[],
+      isModelCreationDialogVisible: false,
       maxPredictions: 3,
-      isAerobic: false,
-      isSubmitted: false,
-      showAdvanced: false
+      isSubmitted: false
     };
   },
   computed: {
@@ -191,15 +222,8 @@ export default Vue.extend({
     organismOptions(): OrganismItem[] {
       return this.$store.state.organisms.organisms;
     },
-    modelRules(): RuleHandler[] {
-      const rules: RuleHandler[] = [];
-      rules.push(
-        () =>
-          (this.project && this.organism) ||
-          "Please first select a project and organism"
-      );
-      rules.push(v => !!v || "Model is required");
-      return rules;
+    allModels(): ModelItem[] {
+      return this.$store.state.models.models;
     },
     predictionRules(): RuleHandler[] {
       const rules: RuleHandler[] = [];
@@ -212,21 +236,60 @@ export default Vue.extend({
       return rules;
     }
   },
+  watch: {
+    project(project: ProjectItem): void {
+      this.selectModels(project, this.organism);
+    },
+    organism(organism: OrganismItem): void {
+      this.selectModels(this.project, organism);
+    }
+  },
   methods: {
-    onSubmit(): void {
-      this.isSubmitted = true;
-      this.$store.dispatch("jobs/fetchJobs");
-      this.$router.push({ name: "jobs" });
+    onNewProject(project: ProjectItem): void {
+      this.project = project;
+    },
+    onNewOrganism(organism: OrganismItem): void {
+      this.organism = organism;
     },
     fetchProducts(): void {
       axios
         .get(`${settings.apis.metabolicNinja}/products`)
-        .then((response: AxiosResponse<Product[]>) => {
+        .then((response: AxiosResponse<ProductItem[]>) => {
           this.productOptions = response.data;
         })
         .catch((error: Error) => {
           this.$store.commit("setFetchError", error, { root: true });
         });
+    },
+    selectModels(project: ProjectItem, organism: OrganismItem): void {
+      if (project == null || organism == null) {
+        this.modelOptions = [];
+        return;
+      }
+      this.modelOptions = this.allModels.filter(
+        (model: ModelItem) =>
+          model.organism_id === this.organism.id &&
+          (model.project_id === null || model.project_id === this.project.id)
+      );
+      this.model = organism2ModelMapping[this.organism.id];
+    },
+    modelRules(): RuleHandler[] {
+      const rules: RuleHandler[] = [];
+      rules.push(
+        () =>
+          (this.project != null && this.organism != null) ||
+          "Please first select a project and organism"
+      );
+      rules.push(v => !!v || "Model is required");
+      return rules;
+    },
+    onNewModel(model: ModelItem): void {
+      this.model = model;
+    },
+    onSubmit(): void {
+      this.isSubmitted = true;
+      this.$store.dispatch("jobs/fetchJobs");
+      this.$router.push({ name: "jobs" });
     }
   },
   created() {
