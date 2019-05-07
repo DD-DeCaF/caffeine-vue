@@ -150,7 +150,10 @@ export default Vue.extend({
         includedInModel: existsInModel,
         knockout: this.card.reactionKnockouts.includes(id),
         knockoutGenes: this.card.geneKnockouts.includes(id),
-        objective: this.card.objective,
+        objective: {
+          reactionId: this.card.objective.reactionId,
+          direction: this.card.objective.maximize ? "max" : "min"
+        },
         bounds: {
           // TODO: Check model
           lowerbound: -1,
@@ -182,18 +185,14 @@ export default Vue.extend({
       if (this.card.objective.reactionId === reactionId) {
         // This is already the objective; undo it and reset to growth
         this.card.objective.reactionId = null;
-        this.card.objective.direction = "max";
+        this.card.objective.maximize = true;
       } else {
         this.card.objective.reactionId = reactionId;
       }
       this.$emit("simulate-card", this.card);
     },
     setObjectiveDirection(reactionId: string) {
-      if (this.card.objective.direction === "max") {
-        this.card.objective.direction = "min";
-      } else {
-        this.card.objective.direction = "max";
-      }
+      this.card.objective.maximize = !this.card.objective.maximize;
       this.$emit("simulate-card", this.card);
     },
     editBounds(reactionId: string, lower: string, upper: string) {

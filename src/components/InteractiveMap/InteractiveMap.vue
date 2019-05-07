@@ -225,7 +225,7 @@ export default Vue.extend({
         method: method,
         objective: {
           reactionId: null,
-          direction: "max"
+          maximize: true
         },
         reactionAdditions: [],
         reactionKnockouts: [],
@@ -321,7 +321,7 @@ export default Vue.extend({
           method: card.method,
           operations: operations,
           objective_id: card.objective.reactionId,
-          objective_direction: card.objective.direction
+          objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
           card.growthRate = response.data.growth_rate;

@@ -42,9 +42,7 @@
         <v-flex class="xs6 text-xs-right">
           <span v-if="card.objective.reactionId === null">Growth</span>
           <span v-else>{{ card.objective.reactionId }}</span>
-          <v-icon v-if="card.objective.direction === 'max'" size="16"
-            >arrow_upward</v-icon
-          >
+          <v-icon v-if="card.objective.maximize" size="16">arrow_upward</v-icon>
           <v-icon v-else size="16">arrow_downward</v-icon>
         </v-flex>
         <v-flex class="xs6">Modifications:</v-flex>
@@ -72,13 +70,10 @@
             ></v-progress-circular>
           </div>
         </v-flex>
-        <v-flex class="xs6" v-if="card.objective.reactionId !== null"
+        <v-flex class="xs6" v-if="card.objective.reactionId"
           >{{ card.objective.reactionId }} flux:</v-flex
         >
-        <v-flex
-          class="xs6 text-xs-right"
-          v-if="card.objective.reactionId !== null"
-        >
+        <v-flex class="xs6 text-xs-right" v-if="card.objective.reactionId">
           <div v-if="!card.isSimulating">
             <span
               v-if="card.growthRate !== null"

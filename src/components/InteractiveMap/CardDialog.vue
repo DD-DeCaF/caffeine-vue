@@ -67,6 +67,32 @@
             </template>
           </v-data-table>
 
+          <!-- TODO get reactions from model -->
+          <v-layout wrap>
+            <v-flex grow>
+              <v-select
+                label="Objective"
+                :items="reactions"
+                v-model="card.objective.reactionId"
+                item-text="name"
+                item-value="id"
+                hint="When left empty, the objective is growth."
+                persistent-hint
+                placeholder="Specify any reaction as objective..."
+                return-object
+                clearable
+              ></v-select>
+            </v-flex>
+
+            <v-flex shrink>
+              <v-switch
+                v-model="card.objective.maximize"
+                color="primary"
+                :label="card.objective.maximize ? 'Maximize' : 'Minimize'"
+              ></v-switch>
+            </v-flex>
+          </v-layout>
+
           <v-autocomplete
             v-model="addReactionItem"
             :items="addReactionSearchResults"
