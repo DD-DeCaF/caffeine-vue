@@ -2,9 +2,11 @@
   <div class="interactive-map fill-height">
     <Escher
       @escher-loaded="escherLoaded"
-      :fluxDistribution="fluxDistribution"
+      @simulate-card="simulate"
+      :card="selectedCard"
       :mapData="mapData"
     />
+    <Legend />
     <v-navigation-drawer permanent right absolute>
       <v-container class="py-1">
         <v-select
@@ -18,137 +20,90 @@
       </v-container>
       <v-divider></v-divider>
       <v-container class="pa-0">
-        <v-layout justify-space-around>
-          <v-btn flat icon>
-            <v-icon @click="addDefaultCard">add</v-icon>
-          </v-btn>
-          <v-btn flat icon>
-            <v-icon>chevron_left</v-icon>
-          </v-btn>
-          <v-btn flat icon>
-            <v-icon>play_arrow</v-icon>
-          </v-btn>
-          <v-btn flat icon>
-            <v-icon>chevron_right</v-icon>
-          </v-btn>
-        </v-layout>
+        <v-menu offset-y>
+          <template v-slot:activator="{ on }">
+            <v-layout justify-space-around>
+              <v-btn flat icon v-on="on">
+                <v-icon>add</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="selectPreviousCard">
+                <v-icon>chevron_left</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="togglePlay">
+                <v-icon v-if="!playing">play_arrow</v-icon>
+                <v-icon v-else>pause</v-icon>
+              </v-btn>
+              <v-btn flat icon @click="selectNextCard">
+                <v-icon>chevron_right</v-icon>
+              </v-btn>
+            </v-layout>
+          </template>
+          <v-list>
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-list-tile @click="addDefaultCard">
+                  <v-list-tile-title v-on="on">Design</v-list-tile-title>
+                </v-list-tile>
+              </template>
+              <span>Manipulate and simulate models.</span>
+            </v-tooltip>
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-list-tile @click="addDataDrivenCard">
+                  <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
+                </v-list-tile>
+              </template>
+              <span>Integrate experimental data with models.</span>
+            </v-tooltip>
+          </v-list>
+        </v-menu>
       </v-container>
       <v-divider></v-divider>
       <v-container>
-        <!-- TODO proper unique key -->
         <Card
           v-for="card in cards"
-          :key="cards.indexOf(card)"
+          :key="card.uuid"
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
           @select-card="selectCard"
           @remove-card="removeCard"
+          @simulate-card="simulate"
         />
       </v-container>
     </v-navigation-drawer>
+    <v-snackbar color="error" v-model="hasSimulationError" :timeout="8000">
+      Sorry, we were not able to complete the simulation successfully. Please
+      try again in a few seconds, or contact us if the problem persists.
+    </v-snackbar>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/settings";
 import Escher from "@/components/InteractiveMap/Escher.vue";
 import Card from "@/components/InteractiveMap/Card.vue";
+import Legend from "@/components/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
   name: "InteractiveMap",
   components: {
     Escher,
-    Card
+    Card,
+    Legend
   },
   data: () => ({
     escherBuilder: null,
     currentMapId: null,
-    fluxDistribution: null,
     mapData: null,
     cards: [],
-    selectedCard: null
+    selectedCard: null,
+    playingInterval: null,
+    hasSimulationError: false
   }),
-  methods: {
-    escherLoaded() {
-      this.$store.getters["models/onData"](this.addDefaultCard);
-    },
-    changeMap() {
-      // TODO: Get map from maps state lazy loader
-      axios
-        .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
-        .then(response => {
-          this.mapData = response.data.map;
-        })
-        .catch(error => {
-          // TODO: show snackbar
-        });
-    },
-    addDefaultCard() {
-      const model = this.$store.state.models.models.find(
-        model => model.name === "e_coli_core"
-      );
-      if (model) {
-        const organism = this.$store.getters["organisms/getOrganismById"](
-          model.organism_id
-        );
-        this.addCard("Design", organism, model, "pfba");
-      } else {
-        this.addCard("Design", null, null, "pfba");
-      }
-    },
-    addCard(name, organism, model, method) {
-      const card = {
-        name: name,
-        organism: organism,
-        model: model,
-        method: method,
-        isSimulating: false,
-        growthRate: null
-      };
-      this.cards.push(card);
-      this.selectedCard = card;
-      this.simulate(card);
-    },
-    removeCard(card) {
-      this.cards.splice(this.cards.indexOf(card), 1);
-    },
-    selectCard(card) {
-      this.selectedCard = card;
-    },
-    simulate(card) {
-      if (card.model === null) {
-        // Cards are not guaranteed to have the model set (e.g. if the preferred
-        // default model doesn't exist - that could be the case for local
-        // installations of the platform).
-        return;
-      }
-
-      card.isSimulating = true;
-      axios
-        .post(`${settings.apis.model}/simulate`, {
-          model_id: card.model.id,
-          method: card.method
-        })
-        .then(response => {
-          card.growthRate = response.data.growth_rate;
-          // TODO: Flux distribution should belong to the card
-          this.fluxDistribution = response.data.flux_distribution;
-        })
-        .catch(error => {
-          // TODO: show snackbar
-          card.growthRate = null;
-          // TODO: Flux distribution should belong to the card
-          this.fluxDistribution = null;
-          console.error(error);
-        })
-        .then(response => {
-          card.isSimulating = false;
-        });
-    }
-  },
   computed: {
     maps() {
       // Sort maps by model name, then map name
@@ -202,6 +157,163 @@ export default Vue.extend({
         previousModelId = map.model_id;
       });
       return mapsWithHeaders;
+    },
+    playing() {
+      return this.playingInterval !== null;
+    }
+  },
+  methods: {
+    escherLoaded() {
+      this.$store.getters["models/onData"](this.addDefaultCard);
+    },
+    changeMap() {
+      // TODO: Get map from maps state lazy loader
+      axios
+        .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
+        .then(response => {
+          this.mapData = response.data.map;
+        })
+        .catch(error => {
+          // TODO: show snackbar
+        });
+    },
+    addDefaultCard() {
+      const model = this.$store.state.models.models.find(
+        model => model.name === "e_coli_core"
+      );
+      if (model) {
+        const organism = this.$store.getters["organisms/getOrganismById"](
+          model.organism_id
+        );
+        this.addCard("Design", organism, model, "pfba");
+      } else {
+        this.addCard("Design", null, null, "pfba");
+      }
+    },
+    addDataDrivenCard() {
+      // TODO
+      alert("Not implemented");
+    },
+    addCard(name, organism, model, method) {
+      const card = {
+        uuid: uuidv4(),
+        name: name,
+        organism: organism,
+        model: model,
+        method: method,
+        objective: {
+          reactionId: null,
+          direction: "max"
+        },
+        reactionAdditions: [],
+        reactionKnockouts: [],
+        geneKnockouts: [],
+        editedBounds: [],
+        isSimulating: false,
+        hasSimulationError: false,
+        growthRate: null,
+        fluxes: null
+      };
+      this.cards.push(card);
+      this.selectedCard = card;
+      this.simulate(card);
+    },
+    removeCard(card) {
+      if (card === this.selectedCard) {
+        // Removing the current card - be sure to unset the reference.
+        this.selectedCard = null;
+      }
+      this.cards.splice(this.cards.indexOf(card), 1);
+    },
+    selectCard(card) {
+      this.selectedCard = card;
+    },
+    selectPreviousCard() {
+      const index = this.cards.indexOf(this.selectedCard);
+      if (index === 0) {
+        this.selectCard(this.cards[this.cards.length - 1]);
+      } else {
+        this.selectCard(this.cards[index - 1]);
+      }
+    },
+    selectNextCard() {
+      const index = this.cards.indexOf(this.selectedCard);
+      if (index === this.cards.length - 1) {
+        this.selectCard(this.cards[0]);
+      } else {
+        this.selectCard(this.cards[index + 1]);
+      }
+    },
+    togglePlay() {
+      if (this.playing) {
+        clearInterval(this.playingInterval);
+        this.playingInterval = null;
+      } else {
+        // Trigger an instant call in addition to starting the interval timer.
+        this.selectNextCard();
+        this.playingInterval = setInterval(this.selectNextCard, 1000);
+      }
+    },
+    simulate(card) {
+      if (card.model === null) {
+        // Cards are not guaranteed to have the model set (e.g. if the preferred
+        // default model doesn't exist - that could be the case for local
+        // installations of the platform).
+        card.fluxes = null;
+        card.growthRate = null;
+        return;
+      }
+
+      // Add card operations
+      // TODO: Reaction additions
+      const reactionKnockouts = card.reactionKnockouts.map(reactionId => ({
+        operation: "knockout",
+        type: "reaction",
+        id: reactionId
+      }));
+      const geneKnockouts = card.geneKnockouts.map(geneId => ({
+        operation: "knockout",
+        type: "gene",
+        id: geneId
+      }));
+      const editedBounds = card.editedBounds.map(bounds => ({
+        operation: "modify",
+        type: "reaction",
+        id: bounds.reactionId,
+        data: {
+          lower_bound: bounds.lowerBound,
+          upper_bound: bounds.upperBound
+        }
+      }));
+      const operations = [
+        ...reactionKnockouts,
+        ...geneKnockouts,
+        ...editedBounds
+      ];
+
+      card.isSimulating = true;
+      card.hasSimulationError = false;
+      axios
+        .post(`${settings.apis.model}/simulate`, {
+          model_id: card.model.id,
+          method: card.method,
+          operations: operations,
+          objective_id: card.objective.reactionId,
+          objective_direction: card.objective.direction
+        })
+        .then(response => {
+          card.growthRate = response.data.growth_rate;
+          card.fluxes = response.data.flux_distribution;
+        })
+        .catch(error => {
+          card.growthRate = null;
+          card.fluxes = null;
+          card.hasSimulationError = true;
+          this.hasSimulationError = true;
+        })
+        .then(response => {
+          card.isSimulating = false;
+        });
     }
   },
   mounted() {

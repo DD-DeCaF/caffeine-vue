@@ -6,7 +6,8 @@ export const apis = {
   iam: `${process.env.VUE_APP_IAM_API}`,
   metabolicNinja: `${process.env.VUE_APP_METABOLIC_NINJA_API}`,
   designStorage: `${process.env.VUE_APP_DESIGN_STORAGE_API}`,
-  idMapper: `${process.env.VUE_APP_ID_MAPPER_API}`
+  idMapper: `${process.env.VUE_APP_ID_MAPPER_API}`,
+  bigg: `${process.env.VUE_APP_BIGG_API}`
 };
 
 export const trustedURLs = process.env.VUE_APP_TRUSTED_URLS.split(",");

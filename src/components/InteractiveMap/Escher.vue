@@ -21,6 +21,10 @@
       </v-layout>
     </v-container>
     <div ref="escher" class="fill-height"></div>
+    <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
+      Invalid bounds. Please make sure that the upper bound is larger than or
+      equal to the lower bound.
+    </v-snackbar>
   </div>
 </template>
 
@@ -31,11 +35,12 @@ import * as escher from "@dd-decaf/escher";
 
 export default Vue.extend({
   name: "Escher",
-  props: ["mapData", "fluxDistribution"],
+  props: ["mapData", "card"],
   data: () => ({
     escherBuilder: null,
     initializingEscher: null,
-    isLoadingMap: false
+    isLoadingMap: false,
+    hasBoundsError: false
   }),
   watch: {
     mapData(value) {
@@ -58,32 +63,175 @@ export default Vue.extend({
         loadMap();
       }
     },
-    fluxDistribution(value) {
-      this.escherBuilder.set_reaction_data(value);
+    // TODO: Watch added reactions
+    // TODO: Watch highlight reactions (for data-driven simulations)
+    "card.reactionKnockouts"(reactionKnockouts) {
+      if (this.card === null) {
+        this.escherBuilder.set_knockout_reactions([]);
+      } else {
+        // Copy the array to avoid Escher referencing the local state.
+        this.escherBuilder.set_knockout_reactions([...reactionKnockouts]);
+      }
+      this.escherBuilder._update_data(true, true);
+    },
+    "card.geneKnockouts"(geneKnockouts) {
+      if (this.card === null) {
+        this.escherBuilder.set_knockout_genes([]);
+      } else {
+        // Copy the array to avoid Escher referencing the local state.
+        this.escherBuilder.set_knockout_genes([...geneKnockouts]);
+      }
+      this.escherBuilder._update_data(true, true);
+    },
+    "card.fluxes"(fluxes) {
+      // Update the flux distribution
+      if (this.card === null || fluxes === null) {
+        this.escherBuilder.set_reaction_data(null);
+      } else {
+        if (this.card.method === "fba" || this.card.method == "pfba") {
+          this.escherBuilder.set_reaction_data(this.fluxesFiltered);
+          // Set FVA data with the current fluxes. This resets opacity in case a
+          // previous FVA simulation has been set on the map.
+          // TODO: We should improve the escher API here.
+          this.escherBuilder.set_reaction_fva_data(fluxes);
+        } else if (
+          this.card.method === "fva" ||
+          this.card.method == "pfba-fva"
+        ) {
+          // Render a flux distribution using the average values from the FVA
+          // data.
+          const fluxesAverage = {};
+          Object.keys(fluxes).map(reaction => {
+            const rxn = fluxes[reaction];
+            const average = (rxn.upper_bound + rxn.lower_bound) / 2;
+            fluxesAverage[reaction] = average;
+          });
+          this.escherBuilder.set_reaction_data(this.fluxesFiltered);
+          // Set the FVA data for transparency visualization.
+          this.escherBuilder.set_reaction_fva_data(fluxes);
+        }
+      }
       this.escherBuilder._update_data(true, true);
     }
   },
+  computed: {
+    fluxesFiltered() {
+      // Exclude fluxes with very low non-zero values, in order to not shift
+      // the escher color scale.
+      const fluxesFiltered = {};
+      Object.keys(this.card.fluxes).forEach(rxn => {
+        if (Math.abs(this.card.fluxes[rxn]) > 1e-7) {
+          fluxesFiltered[rxn] = this.card.fluxes[rxn];
+        }
+      });
+      return fluxesFiltered;
+    }
+  },
   methods: {
-    reactionState(id: string, type?: string) {
-      // TODO
+    getReactionState(id: string, type: string) {
+      if (this.card === null) {
+        return {
+          includedInModel: false,
+          bounds: {}
+        };
+      }
+
+      let existsInModel;
+      // Note: Escher never seems to actually set type to "gene".
+      if (type === "gene") {
+        // TODO: Check model genes
+        existsInModel = true;
+      } else {
+        // TODO: Check model reactions
+        existsInModel = true;
+      }
+
+      return {
+        includedInModel: existsInModel,
+        knockout: this.card.reactionKnockouts.includes(id),
+        knockoutGenes: this.card.geneKnockouts.includes(id),
+        objective: this.card.objective,
+        bounds: {
+          // TODO: Check model
+          lowerbound: -1,
+          upperbound: -1
+        }
+      };
     },
-    handleKnockout(reactionId: string) {
-      // TODO
+    knockoutReaction(reactionId: string) {
+      if (this.card.reactionKnockouts.includes(reactionId)) {
+        // This reaction is already knocked out; undo it
+        const index = this.card.reactionKnockouts.indexOf(reactionId);
+        this.card.reactionKnockouts.splice(index, 1);
+      } else {
+        this.card.reactionKnockouts.push(reactionId);
+      }
+      this.$emit("simulate-card", this.card);
     },
-    handleKnockoutGenes(reactionId: string) {
-      // TODO
+    knockoutGene(geneId: string) {
+      if (this.card.geneKnockouts.includes(geneId)) {
+        // This gene is already knocked out; undo it
+        const index = this.card.geneKnockouts.indexOf(geneId);
+        this.card.geneKnockouts.splice(index, 1);
+      } else {
+        this.card.geneKnockouts.push(geneId);
+      }
+      this.$emit("simulate-card", this.card);
     },
-    handleSetAsObjective(reactionId: string) {
-      // TODO
+    setObjective(reactionId: string) {
+      if (this.card.objective.reactionId === reactionId) {
+        // This is already the objective; undo it and reset to growth
+        this.card.objective.reactionId = null;
+        this.card.objective.direction = "max";
+      } else {
+        this.card.objective.reactionId = reactionId;
+      }
+      this.$emit("simulate-card", this.card);
     },
-    handleChangeBounds(reactionId: string, lower: string, upper: string) {
-      // TODO
+    setObjectiveDirection(reactionId: string) {
+      if (this.card.objective.direction === "max") {
+        this.card.objective.direction = "min";
+      } else {
+        this.card.objective.direction = "max";
+      }
+      this.$emit("simulate-card", this.card);
     },
-    handleResetBounds(reactionId: string) {
-      // TODO
+    editBounds(reactionId: string, lower: string, upper: string) {
+      const lowerBound = parseFloat(lower);
+      const upperBound = parseFloat(upper);
+
+      if (lowerBound > upperBound) {
+        this.hasBoundsError = true;
+        return;
+      }
+
+      const bounds = this.card.editedBounds.find(
+        b => b.reactionId === reactionId
+      );
+      if (bounds === undefined) {
+        // Add new modification
+        this.card.editedBounds.push({
+          reactionId,
+          lowerBound,
+          upperBound
+        });
+      } else {
+        // Update existing modification
+        bounds.lowerBound = lowerBound;
+        bounds.upperBound = upperBound;
+      }
+
+      this.$emit("simulate-card", this.card);
     },
-    handleObjectiveDirection(reactionId: string) {
-      // TODO
+    resetBounds(reactionId: string) {
+      const index = this.card.editedBounds.findIndex(
+        b => b.reactionId === reactionId
+      );
+      if (index === -1) {
+        return;
+      }
+      this.card.editedBounds.splice(index, 1);
+      this.$emit("simulate-card", this.card);
     }
   },
   mounted() {
@@ -117,14 +265,14 @@ export default Vue.extend({
           this.initializingEscher = null;
           this.$emit("escher-loaded");
         },
-        reaction_state: this.reactionState,
+        reaction_state: this.getReactionState,
         tooltip_callbacks: {
-          knockout: this.handleKnockout,
-          knockoutGenes: this.handleKnockoutGenes,
-          setAsObjective: this.handleSetAsObjective,
-          changeBounds: this.handleChangeBounds,
-          resetBounds: this.handleResetBounds,
-          objectiveDirection: this.handleObjectiveDirection
+          knockout: this.knockoutReaction,
+          knockoutGenes: this.knockoutGene,
+          setAsObjective: this.setObjective,
+          objectiveDirection: this.setObjectiveDirection,
+          changeBounds: this.editBounds,
+          resetBounds: this.resetBounds
         }
       });
     });
