@@ -401,6 +401,14 @@ export default Vue.extend({
         .then(() => {
           this.isLoadingAddReaction = false;
         });
+    },
+    editBoundsReaction(reaction) {
+      if (reaction === null) {
+        return;
+      }
+      // Fill the default bounds from the reaction in the model for convenience
+      this.editBoundsLowerBound = reaction.lower_bound;
+      this.editBoundsUpperBound = reaction.upper_bound;
     }
   },
   computed: {
