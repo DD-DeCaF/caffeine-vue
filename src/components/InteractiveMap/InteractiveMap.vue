@@ -89,6 +89,9 @@
       Sorry, we were not able to complete the simulation successfully. Please
       try again in a few seconds, or contact us if the problem persists.
     </v-snackbar>
+    <v-snackbar color="error" v-model="hasLoadMapError" :timeout="6000">
+      The map could not be loaded. Please try again in a few moments.
+    </v-snackbar>
     <v-snackbar color="error" v-model="hasLoadModelError" :timeout="6000">
       The model could not be loaded, please try updating the card's model.
       Certain features will not work properly without the model.
@@ -121,6 +124,7 @@ export default Vue.extend({
     selectedCard: null,
     playingInterval: null,
     hasSimulationError: false,
+    hasLoadMapError: false,
     hasLoadModelError: false
   }),
   computed: {
@@ -191,14 +195,15 @@ export default Vue.extend({
       });
     },
     changeMap() {
-      // TODO: Get map from maps state lazy loader
+      this.hasLoadMapError = false;
       axios
         .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
         .then(response => {
           this.mapData = response.data.map;
         })
         .catch(error => {
-          // TODO: show snackbar
+          this.mapData = null;
+          this.hasLoadMapError = true;
         });
     },
     addDefaultCard() {
