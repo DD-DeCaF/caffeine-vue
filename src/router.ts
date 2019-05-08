@@ -9,6 +9,7 @@ import Jobs from "./components/Jobs/Jobs.vue";
 import JobDetails from "./components/Jobs/JobDetails.vue";
 import Maps from "./components/Maps.vue";
 import Models from "./components/Models.vue";
+import Projects from "./components/Projects.vue";
 import NotFound from "./components/NotFound.vue";
 
 Vue.use(Router);
@@ -71,6 +72,12 @@ export default new Router({
     {
       path: "*",
       component: NotFound
+    },
+    {
+      path: "/projects",
+      name: "projects",
+      component: Projects,
+      beforeEnter: authGuard
     }
   ]
 });

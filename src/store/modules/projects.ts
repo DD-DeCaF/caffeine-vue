@@ -1,3 +1,4 @@
+import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/settings";
@@ -18,6 +19,14 @@ export default {
     },
     addProject(state, project: ProjectItem) {
       state.projects.push(project);
+    },
+    editProject(state, payload: any) {
+      Vue.set(state.projects, payload.index, payload.item);
+    },
+    delete(state, ids) {
+      state.projects = state.projects.filter(
+        project => !ids.includes(project.id)
+      );
     }
   },
   actions: {
