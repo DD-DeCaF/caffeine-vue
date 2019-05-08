@@ -51,6 +51,7 @@
                 v-model="card.method"
                 item-text="name"
                 item-value="id"
+                @change="$emit('simulate-card')"
               ></v-select>
             </v-flex>
           </v-layout>
@@ -185,6 +186,7 @@
                 prepend-icon="done"
                 return-object
                 clearable
+                @change="$emit('simulate-card')"
               ></v-autocomplete>
             </v-flex>
 
@@ -193,6 +195,7 @@
                 v-model="card.objective.maximize"
                 color="primary"
                 :label="card.objective.maximize ? 'Maximize' : 'Minimize'"
+                @change="$emit('simulate-card')"
               ></v-switch>
             </v-flex>
           </v-layout>
@@ -286,7 +289,18 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="simulate">Simulate</v-btn>
+        <v-progress-circular
+          v-if="card.isSimulating"
+          indeterminate
+          size="12"
+          :width="1"
+        ></v-progress-circular>
+        <span v-if="card.isSimulating" class="mx-2">
+          <em>Simulating...</em>
+        </span>
+        <v-btn color="primary" @click="showDialog = false">
+          Visualize simulation
+        </v-btn>
       </v-card-actions>
     </v-card>
 
@@ -353,6 +367,9 @@ export default Vue.extend({
   }),
   props: ["card", "modifications"],
   watch: {
+    "card.model"() {
+      this.$emit("simulate-card");
+    },
     addReactionSearchQuery(query) {
       this.addReactionSearchResults = [];
       if (query === null || query.trim().length === 0) {
@@ -418,10 +435,6 @@ export default Vue.extend({
       // TODO: Choose a default preferred model.
       this.card.model = null;
     },
-    simulate() {
-      this.showDialog = false;
-      this.$emit("simulate-card");
-    },
     reactionDisplay(reaction) {
       return `${reaction.name} (${reaction.id})`;
     },
@@ -437,6 +450,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.addReactionItem = null;
       });
+      this.$emit("simulate-card");
     },
     knockoutReaction() {
       const reaction = bigg.lookupReaction(this.knockoutReactionItem.id);
@@ -447,6 +461,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.knockoutReactionItem = null;
       });
+      this.$emit("simulate-card");
     },
     knockoutGene() {
       const gene = bigg.lookupGene(
@@ -460,6 +475,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.knockoutGeneItem = null;
       });
+      this.$emit("simulate-card");
     },
     editBounds() {
       const lowerBound = parseInt(this.editBoundsLowerBound);
@@ -484,6 +500,7 @@ export default Vue.extend({
         this.card.editedBounds.push(reaction);
       }
       this.$refs.editBoundsForm.reset();
+      this.$emit("simulate-card");
     },
     clearModification(modification) {
       if (modification.type === "added_reaction") {
@@ -503,6 +520,7 @@ export default Vue.extend({
         );
         this.card.editedBounds.splice(index, 1);
       }
+      this.$emit("simulate-card");
     }
   }
 });
