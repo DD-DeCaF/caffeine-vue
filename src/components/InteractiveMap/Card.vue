@@ -187,7 +187,13 @@ export default Vue.extend({
       if (this.card.objective.reaction.id === null) {
         return null;
       }
-      return this.card.fluxes[this.card.objective.reaction.id];
+      if (this.card.method === "fba" || this.card.method == "pfba") {
+        return this.card.fluxes[this.card.objective.reaction.id];
+      } else if (this.card.method === "fva" || this.card.method == "pfba-fva") {
+        // For FVA fluxes, calculate the average
+        const rxn = this.card.fluxes[this.card.objective.reaction.id];
+        return (rxn.upper_bound + rxn.lower_bound) / 2;
+      }
     },
     modifications() {
       // Concatenate all modifications for a single table display, and add a
