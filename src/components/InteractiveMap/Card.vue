@@ -53,8 +53,8 @@
         <v-layout>
           <v-flex>Objective:</v-flex>
           <v-flex class="text-xs-right">
-            <span v-if="card.objective.reactionId === null">Growth</span>
-            <span v-else>{{ card.objective.reactionId }}</span>
+            <span v-if="card.objective.reaction === null">Growth</span>
+            <span v-else>{{ card.objective.reaction.id }}</span>
             <v-icon v-if="card.objective.maximize" size="16"
               >arrow_upward</v-icon
             >
@@ -97,10 +97,10 @@
       </v-container>
       <v-container fluid class="pa-0">
         <v-layout wrap>
-          <v-flex v-if="card.objective.reactionId"
-            >{{ card.objective.reactionId }} flux:</v-flex
+          <v-flex v-if="card.objective.reaction"
+            >{{ card.objective.reaction.id }} flux:</v-flex
           >
-          <v-flex class="text-xs-right" v-if="card.objective.reactionId">
+          <v-flex class="text-xs-right" v-if="card.objective.reaction">
             <div v-if="!card.isSimulating">
               <span
                 v-if="card.growthRate !== null"
@@ -131,6 +131,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import * as settings from "@/settings";
 import CardDialog from "@/components/InteractiveMap/CardDialog.vue";
 
 export default Vue.extend({
@@ -145,12 +146,29 @@ export default Vue.extend({
     }
   },
   watch: {
-    "card.model"() {
-      // Reset all modifications when the selected model changes.
-      this.card.reactionAdditions = [];
-      this.card.reactionKnockouts = [];
-      this.card.geneKnockouts = [];
-      this.card.editedBounds = [];
+    "card.model": {
+      immediate: true,
+      handler() {
+        // Reset all modifications when the selected model changes.
+        this.card.reactionAdditions = [];
+        this.card.reactionKnockouts = [];
+        this.card.geneKnockouts = [];
+        this.card.editedBounds = [];
+
+        // Fetch and set the full model
+        this.card.fullModel = null;
+        if (this.card.model !== null) {
+          axios
+            .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
+            .then(response => {
+              this.card.fullModel = response.data;
+            })
+            .catch(error => {
+              // TODO
+              console.log(error);
+            });
+        }
+      }
     }
   },
   computed: {
@@ -165,41 +183,29 @@ export default Vue.extend({
     },
     production() {
       // If the objective is growth, ignore production.
-      if (this.card.objective.reactionId === null) {
+      if (this.card.objective.reaction.id === null) {
         return null;
       }
-      return this.card.fluxes[this.card.objective.reactionId];
+      return this.card.fluxes[this.card.objective.reaction.id];
     },
     modifications() {
-      // Concatenate all modifications for a single table display.
+      // Concatenate all modifications for a single table display, and add a
+      // `type` key to distinguish the different modifications.
       const reactionAdditions = this.card.reactionAdditions.map(reaction => ({
         type: "added_reaction",
-        typeDisplay: "Added reaction",
-        id: reaction.id,
-        name: reaction.name,
-        nameDisplay: `${reaction.name} (${reaction.id})`,
-        details: "" // TODO: Reaction string
+        ...reaction
       }));
-      const reactionKnockouts = this.card.reactionKnockouts.map(reactionId => ({
+      const reactionKnockouts = this.card.reactionKnockouts.map(reaction => ({
         type: "reaction_knockout",
-        typeDisplay: "Reaction knockout",
-        id: reactionId,
-        nameDisplay: `Name TBD (${reactionId})`, // TODO: Reaction name
-        details: ""
+        ...reaction
       }));
-      const geneKnockouts = this.card.geneKnockouts.map(geneId => ({
+      const geneKnockouts = this.card.geneKnockouts.map(gene => ({
         type: "gene_knockout",
-        typeDisplay: "Gene knockout",
-        id: geneId,
-        nameDisplay: geneId,
-        details: "" // Would be nice to show related reactions here.
+        ...gene
       }));
-      const editedBounds = this.card.editedBounds.map(bounds => ({
+      const editedBounds = this.card.editedBounds.map(reaction => ({
         type: "edited_bounds",
-        typeDisplay: "Modified bounds",
-        id: bounds.reactionId,
-        nameDisplay: `Name TBD (${bounds.reactionId})`, // TODO: Reaction name
-        details: `Bounds set from ${bounds.lowerBound} to ${bounds.upperBound}`
+        ...reaction
       }));
       return [
         ...reactionAdditions,

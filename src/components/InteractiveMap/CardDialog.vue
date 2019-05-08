@@ -62,9 +62,106 @@
             item-key="type + id"
           >
             <template v-slot:items="props">
-              <td>{{ props.item.typeDisplay }}</td>
-              <td>{{ props.item.nameDisplay }}</td>
-              <td>{{ props.item.details }}</td>
+              <!-- Added reaction -->
+              <td v-if="props.item.type === 'added_reaction'">
+                Added reaction
+              </td>
+              <td v-if="props.item.type === 'added_reaction'">
+                <span v-if="props.item.name !== null">
+                  {{ props.item.name }} ({{ props.item.id }})
+                </span>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+              <td v-if="props.item.type === 'added_reaction'">
+                <span v-if="props.item.reactionString !== null">
+                  {{ props.item.reactionString }}
+                </span>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+
+              <!-- Reaction knockout -->
+              <td v-if="props.item.type === 'reaction_knockout'">
+                Reaction knockout
+              </td>
+              <td v-if="props.item.type === 'reaction_knockout'">
+                <span v-if="props.item.name !== null">
+                  {{ props.item.name }} ({{ props.item.id }})
+                </span>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+              <td v-if="props.item.type === 'reaction_knockout'">
+                <span
+                  v-if="props.item.reactionString !== null"
+                  v-html="props.item.reactionString"
+                />
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+
+              <!-- Gene knockout -->
+              <td v-if="props.item.type === 'gene_knockout'">
+                Gene knockout
+              </td>
+              <td v-if="props.item.type === 'gene_knockout'">
+                <span v-if="props.item.name !== null">
+                  {{ props.item.name }} ({{ props.item.id }})
+                </span>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+              <td v-if="props.item.type === 'gene_knockout'">
+                <span v-if="props.item.reactions !== null">
+                  <p
+                    class="mb-0"
+                    v-for="reaction in props.item.reactions"
+                    :key="reaction.id"
+                  >
+                    {{ reaction.name }} ({{ reaction.bigg_id }})
+                  </p>
+                </span>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
+              </td>
+
+              <!-- Edited bounds -->
+              <td v-if="props.item.type === 'edited_bounds'">
+                Modified bounds
+              </td>
+              <td v-if="props.item.type === 'edited_bounds'">
+                {{ props.item.name }} ({{ props.item.id }})
+              </td>
+              <td v-if="props.item.type === 'edited_bounds'">
+                Bounds set from {{ props.item.lowerBound }} to
+                {{ props.item.upperBound }}
+              </td>
+
               <td>
                 <v-btn flat icon @click="clearModification(props.item)">
                   <v-icon>delete</v-icon>
@@ -73,14 +170,14 @@
             </template>
           </v-data-table>
 
-          <!-- TODO get reactions from model -->
           <v-layout wrap>
             <v-flex grow>
-              <v-select
+              <v-autocomplete
                 label="Objective"
                 :items="reactions"
-                v-model="card.objective.reactionId"
-                item-text="name"
+                :loading="card.fullModel === null"
+                v-model="card.objective.reaction"
+                :item-text="reactionDisplay"
                 item-value="id"
                 hint="When left empty, the objective is growth."
                 persistent-hint
@@ -88,7 +185,7 @@
                 prepend-icon="done"
                 return-object
                 clearable
-              ></v-select>
+              ></v-autocomplete>
             </v-flex>
 
             <v-flex shrink>
@@ -109,6 +206,7 @@
             :item-text="reactionDisplay"
             item-value="id"
             label="Add a reaction from BiGG..."
+            hint="Searches the entire <a href='http://bigg.ucsd.edu/'>BiGG</a> database for known reactions. Search by name or BiGG ID."
             prepend-icon="add"
             return-object
             @change="addReaction"
@@ -117,7 +215,7 @@
           <v-autocomplete
             v-model="knockoutReactionItem"
             :items="reactions"
-            :loading="isLoadingKnockoutReactions"
+            :loading="card.fullModel === null"
             hide-no-data
             :item-text="reactionDisplay"
             item-value="id"
@@ -131,9 +229,9 @@
           <v-autocomplete
             v-model="knockoutGeneItem"
             :items="genes"
-            :loading="isLoadingKnockoutGenes"
+            :loading="card.fullModel === null"
             hide-no-data
-            item-text="id"
+            :item-text="reactionDisplay"
             item-value="id"
             label="Knock out a gene from the model..."
             prepend-icon="remove"
@@ -147,10 +245,10 @@
                 <v-autocomplete
                   v-model="editBoundsReaction"
                   :items="reactions"
-                  :loading="isLoadingEditableBounds"
+                  :loading="card.fullModel === null"
                   :rules="[editBoundsReactionRule]"
                   hide-no-data
-                  item-text="id"
+                  :item-text="reactionDisplay"
                   item-value="id"
                   label="Edit the bounds of a reaction..."
                   prepend-icon="vertical_align_center"
@@ -215,6 +313,7 @@
 import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/settings";
+import * as bigg from "@/bigg";
 
 export default Vue.extend({
   name: "CardDialog",
@@ -227,9 +326,10 @@ export default Vue.extend({
       { id: "pfba-fva", name: "Parsimonious FVA" }
     ],
     modificationsHeaders: [
-      { text: "Modifications", value: "type", sortable: false },
-      { text: "Name or ID", value: "id", sortable: false },
-      { text: "Details", value: "details", sortable: false }
+      { text: "Type", value: "type", sortable: false },
+      { text: "Identification", value: "id", sortable: false },
+      { text: "Details", value: "details", sortable: false },
+      { text: "Remove", value: "remove", sortable: false }
     ],
     // Add reaction
     addReactionItem: null,
@@ -240,17 +340,16 @@ export default Vue.extend({
     addedReactionExists: false,
     // Knockout reaction
     knockoutReactionItem: null,
-    isLoadingKnockoutReactions: false,
     knockoutReactionExists: false,
     // Knockout gene
     knockoutGeneItem: null,
-    isLoadingKnockoutGenes: false,
     knockoutGeneExists: false,
     // Edit bounds
     editBoundsReaction: null,
     editBoundsValid: false,
     editBoundsReactionRule: value =>
-      (value && value.length > 0) || "Please specify the reaction ID",
+      (value && value.id && value.id.length > 0) ||
+      "Please specify the reaction",
     editBoundsBoundRule: value => {
       if (isNaN(parseFloat(value))) {
         return "Bounds must be a number.";
@@ -262,8 +361,7 @@ export default Vue.extend({
     },
     hasInvalidBoundsError: false,
     editBoundsLowerBound: null,
-    editBoundsUpperBound: null,
-    isLoadingEditableBounds: false
+    editBoundsUpperBound: null
   }),
   props: ["card", "modifications"],
   watch: {
@@ -311,6 +409,18 @@ export default Vue.extend({
       } else {
         return null;
       }
+    },
+    reactions() {
+      if (this.card.fullModel === null) {
+        return [];
+      }
+      return this.card.fullModel.model_serialized.reactions;
+    },
+    genes() {
+      if (this.card.fullModel === null) {
+        return [];
+      }
+      return this.card.fullModel.model_serialized.genes;
     }
   },
   methods: {
@@ -324,8 +434,11 @@ export default Vue.extend({
       this.showDialog = false;
       this.$emit("simulate-card");
     },
-    reactionDisplay(item) {
-      return `${item.name} (${item.id})`;
+    reactionDisplay(reaction) {
+      return `${reaction.name} (${reaction.id})`;
+    },
+    geneDisplay(gene) {
+      return `${gene.name} (${gene.id})`;
     },
     addReaction(addedReaction) {
       const existingReaction = this.card.reactionAdditions.find(
@@ -342,26 +455,29 @@ export default Vue.extend({
       });
     },
     knockoutReaction() {
+      const reaction = bigg.lookupReaction(this.knockoutReactionItem.id);
       const existingReaction = this.card.reactionKnockouts.find(
-        reaction => reaction === this.knockoutReactionItem
+        r => r.id === reaction.id
       );
       if (existingReaction !== undefined) {
         this.knockoutReactionExists = true;
       } else {
-        this.card.reactionKnockouts.push(this.knockoutReactionItem);
+        this.card.reactionKnockouts.push(reaction);
       }
       this.$nextTick(() => {
         this.knockoutReactionItem = null;
       });
     },
-    knockoutGene(knockoutGene) {
-      const existingGene = this.card.geneKnockouts.find(
-        gene => gene === knockoutGene
+    knockoutGene() {
+      const gene = bigg.lookupGene(
+        this.card.fullModel.model_serialized.id,
+        this.knockoutGeneItem.id
       );
+      const existingGene = this.card.geneKnockouts.find(g => g.id === gene.id);
       if (existingGene !== undefined) {
         this.knockoutGeneExists = true;
       } else {
-        this.card.geneKnockouts.push(knockoutGene);
+        this.card.geneKnockouts.push(gene);
       }
       this.$nextTick(() => {
         this.knockoutGeneItem = null;
@@ -377,18 +493,17 @@ export default Vue.extend({
       }
 
       const existingModification = this.card.editedBounds.find(bounds => {
-        return bounds.reactionId === this.editBoundsReaction;
+        return bounds.id === this.editBoundsReaction.id;
       });
       if (existingModification !== undefined) {
         // Update the existing modification
         existingModification.lowerBound = lowerBound;
         existingModification.upperBound = upperBound;
       } else {
-        this.card.editedBounds.push({
-          reactionId: this.editBoundsReaction,
-          lowerBound: lowerBound,
-          upperBound: upperBound
-        });
+        const reaction = bigg.lookupReaction(this.editBoundsReaction.id);
+        reaction.lowerBound = lowerBound;
+        reaction.upperBound = upperBound;
+        this.card.editedBounds.push(reaction);
       }
       this.$refs.editBoundsForm.reset();
     },

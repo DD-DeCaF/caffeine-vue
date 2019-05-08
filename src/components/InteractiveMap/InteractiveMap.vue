@@ -222,9 +222,10 @@ export default Vue.extend({
         name: name,
         organism: organism,
         model: model,
+        fullModel: null,
         method: method,
         objective: {
-          reactionId: null,
+          reaction: null,
           maximize: true
         },
         reactionAdditions: [],
@@ -288,23 +289,23 @@ export default Vue.extend({
 
       // Add card operations
       // TODO: Reaction additions
-      const reactionKnockouts = card.reactionKnockouts.map(reactionId => ({
+      const reactionKnockouts = card.reactionKnockouts.map(reaction => ({
         operation: "knockout",
         type: "reaction",
-        id: reactionId
+        id: reaction.id
       }));
-      const geneKnockouts = card.geneKnockouts.map(geneId => ({
+      const geneKnockouts = card.geneKnockouts.map(gene => ({
         operation: "knockout",
         type: "gene",
-        id: geneId
+        id: gene.id
       }));
-      const editedBounds = card.editedBounds.map(bounds => ({
+      const editedBounds = card.editedBounds.map(reaction => ({
         operation: "modify",
         type: "reaction",
-        id: bounds.reactionId,
+        id: reaction.id,
         data: {
-          lower_bound: bounds.lowerBound,
-          upper_bound: bounds.upperBound
+          lower_bound: reaction.lowerBound,
+          upper_bound: reaction.upperBound
         }
       }));
       const operations = [
@@ -320,7 +321,9 @@ export default Vue.extend({
           model_id: card.model.id,
           method: card.method,
           operations: operations,
-          objective_id: card.objective.reactionId,
+          objective_id: card.objective.reaction
+            ? card.objective.reaction.id
+            : null,
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {

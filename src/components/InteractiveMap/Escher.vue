@@ -32,6 +32,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
+import * as bigg from "@/bigg";
 
 export default Vue.extend({
   name: "Escher",
@@ -69,8 +70,9 @@ export default Vue.extend({
       if (this.card === null) {
         this.escherBuilder.set_knockout_reactions([]);
       } else {
-        // Copy the array to avoid Escher referencing the local state.
-        this.escherBuilder.set_knockout_reactions([...reactionKnockouts]);
+        this.escherBuilder.set_knockout_reactions(
+          reactionKnockouts.map(r => r.id)
+        );
       }
       this.escherBuilder._update_data(true, true);
     },
@@ -78,10 +80,16 @@ export default Vue.extend({
       if (this.card === null) {
         this.escherBuilder.set_knockout_genes([]);
       } else {
-        // Copy the array to avoid Escher referencing the local state.
-        this.escherBuilder.set_knockout_genes([...geneKnockouts]);
+        this.escherBuilder.set_knockout_genes(geneKnockouts.map(g => g.id));
       }
       this.escherBuilder._update_data(true, true);
+    },
+    "card.fullModel"(fullModel) {
+      if (this.card === null || fullModel === null) {
+        this.escherBuilder.load_model(null);
+      } else {
+        this.escherBuilder.load_model(fullModel.model_serialized);
+      }
     },
     "card.fluxes"(fluxes) {
       // Update the flux distribution
@@ -128,66 +136,110 @@ export default Vue.extend({
     }
   },
   methods: {
-    getReactionState(id: string, type: string) {
-      if (this.card === null) {
+    getObjectState(id: string, type: string) {
+      if (this.card === null || this.card.fullModel === null) {
         return {
           includedInModel: false,
           bounds: {}
         };
       }
-
-      let existsInModel;
-      // Note: Escher never seems to actually set type to "gene".
       if (type === "gene") {
-        // TODO: Check model genes
-        existsInModel = true;
+        return this.getGeneState(id);
       } else {
-        // TODO: Check model reactions
-        existsInModel = true;
+        return this.getReactionState(id);
       }
-
+    },
+    getReactionState(id: string) {
+      const modelReaction = this.card.fullModel.model_serialized.reactions.find(
+        r => r.id === id
+      );
+      const editedBounds = this.card.editedBounds.find(r => r.id === id);
+      // Resolve the current reaction bounds
+      let bounds;
+      if (editedBounds !== undefined) {
+        // The reaction bounds are modified locally, so show those values.
+        bounds = {
+          lowerbound: editedBounds.lowerBound,
+          upperbound: editedBounds.upperBound
+        };
+      } else if (modelReaction !== undefined) {
+        // Show the bounds that are set as default in model.
+        bounds = {
+          lowerbound: modelReaction.lower_bound,
+          upperbound: modelReaction.upper_bound
+        };
+      } else {
+        // The reaction is not in the model, so bounds are unknown
+        bounds = {
+          lowerbound: null,
+          upperbound: null
+        };
+      }
       return {
-        includedInModel: existsInModel,
-        knockout: this.card.reactionKnockouts.includes(id),
-        knockoutGenes: this.card.geneKnockouts.includes(id),
+        includedInModel: modelReaction !== undefined,
+        knockout: this.card.reactionKnockouts.some(r => r.id === id),
+        knockoutGenes: false,
         objective: {
-          reactionId: this.card.objective.reactionId,
+          reactionId: this.card.objective.reaction
+            ? this.card.objective.reaction.id
+            : null,
           direction: this.card.objective.maximize ? "max" : "min"
         },
-        bounds: {
-          // TODO: Check model
-          lowerbound: -1,
-          upperbound: -1
-        }
+        bounds: bounds
+      };
+    },
+    getGeneState(id: string, type: string) {
+      return {
+        includedInModel: this.card.fullModel.model_serialized.reactions.some(
+          g => g.id === id
+        ),
+        knockout: false,
+        knockoutGenes: this.card.geneKnockouts.some(g => g.id === id),
+        objective: null,
+        bounds: null
       };
     },
     knockoutReaction(reactionId: string) {
-      if (this.card.reactionKnockouts.includes(reactionId)) {
-        // This reaction is already knocked out; undo it
-        const index = this.card.reactionKnockouts.indexOf(reactionId);
+      const reaction = bigg.lookupReaction(reactionId);
+
+      // Check if the reaction is already knocked out.
+      const index = this.card.reactionKnockouts.findIndex(
+        reaction => reaction.id === reactionId
+      );
+      if (index !== -1) {
+        // This reaction is already knocked out; undo the knockout.
         this.card.reactionKnockouts.splice(index, 1);
       } else {
-        this.card.reactionKnockouts.push(reactionId);
+        this.card.reactionKnockouts.push(reaction);
       }
       this.$emit("simulate-card", this.card);
     },
     knockoutGene(geneId: string) {
-      if (this.card.geneKnockouts.includes(geneId)) {
+      const gene = bigg.lookupGene(
+        this.card.fullModel.model_serialized.id,
+        geneId
+      );
+
+      const index = this.card.geneKnockouts.findIndex(
+        gene => gene.id === geneId
+      );
+      if (index !== -1) {
         // This gene is already knocked out; undo it
-        const index = this.card.geneKnockouts.indexOf(geneId);
         this.card.geneKnockouts.splice(index, 1);
       } else {
-        this.card.geneKnockouts.push(geneId);
+        this.card.geneKnockouts.push(gene);
       }
       this.$emit("simulate-card", this.card);
     },
     setObjective(reactionId: string) {
-      if (this.card.objective.reactionId === reactionId) {
+      const reaction = this.lookupReaction(reactionId);
+
+      if (this.card.objective.reaction.id === reaction.id) {
         // This is already the objective; undo it and reset to growth
-        this.card.objective.reactionId = null;
+        this.card.objective.reaction = null;
         this.card.objective.maximize = true;
       } else {
-        this.card.objective.reactionId = reactionId;
+        this.card.objective.reaction = reaction;
       }
       this.$emit("simulate-card", this.card);
     },
@@ -204,20 +256,19 @@ export default Vue.extend({
         return;
       }
 
-      const bounds = this.card.editedBounds.find(
-        b => b.reactionId === reactionId
+      const existingReaction = this.card.editedBounds.find(
+        r => r.id === reactionId
       );
-      if (bounds === undefined) {
+      if (existingReaction === undefined) {
         // Add new modification
-        this.card.editedBounds.push({
-          reactionId,
-          lowerBound,
-          upperBound
-        });
+        const reaction = bigg.lookupReaction(reactionId);
+        reaction.lowerBound = lowerBound;
+        reaction.upperBound = upperBound;
+        this.card.editedBounds.push(reaction);
       } else {
         // Update existing modification
-        bounds.lowerBound = lowerBound;
-        bounds.upperBound = upperBound;
+        existingReaction.lowerBound = lowerBound;
+        existingReaction.upperBound = upperBound;
       }
 
       this.$emit("simulate-card", this.card);
@@ -264,7 +315,7 @@ export default Vue.extend({
           this.initializingEscher = null;
           this.$emit("escher-loaded");
         },
-        reaction_state: this.getReactionState,
+        reaction_state: this.getObjectState,
         tooltip_callbacks: {
           knockout: this.knockoutReaction,
           knockoutGenes: this.knockoutGene,
