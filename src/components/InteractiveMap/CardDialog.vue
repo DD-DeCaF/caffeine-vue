@@ -403,7 +403,7 @@ export default Vue.extend({
         });
     },
     editBoundsReaction(reaction) {
-      if (reaction === null) {
+      if (reaction === undefined) {
         return;
       }
       // Fill the default bounds from the reaction in the model for convenience
