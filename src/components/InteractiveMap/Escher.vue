@@ -251,9 +251,12 @@ export default Vue.extend({
       this.$emit("simulate-card", this.card);
     },
     setObjective(reactionId: string) {
-      const reaction = this.lookupReaction(reactionId);
+      const reaction = bigg.lookupReaction(reactionId);
 
-      if (this.card.objective.reaction.id === reaction.id) {
+      if (
+        this.card.objective.reaction !== null &&
+        this.card.objective.reaction.id === reaction.id
+      ) {
         // This is already the objective; undo it and reset to growth
         this.card.objective.reaction = null;
         this.card.objective.maximize = true;
