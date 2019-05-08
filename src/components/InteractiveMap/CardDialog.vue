@@ -188,6 +188,7 @@
                 return-object
                 clearable
                 @change="$emit('simulate-card')"
+                @click:clear="$nextTick(() => (card.objective.reaction = null))"
               ></v-autocomplete>
             </v-flex>
 
