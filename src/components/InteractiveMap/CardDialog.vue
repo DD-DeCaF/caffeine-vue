@@ -263,7 +263,7 @@
                 <v-text-field
                   v-model="editBoundsLowerBound"
                   type="number"
-                  label="Number"
+                  label="Lower bound"
                   :rules="[editBoundsBoundRule]"
                 ></v-text-field>
               </v-flex>
@@ -271,7 +271,7 @@
                 <v-text-field
                   v-model="editBoundsUpperBound"
                   type="number"
-                  label="Number"
+                  label="Upper bound"
                   :rules="[editBoundsBoundRule]"
                 ></v-text-field>
               </v-flex>
