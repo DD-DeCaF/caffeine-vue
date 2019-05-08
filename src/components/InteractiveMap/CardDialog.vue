@@ -206,6 +206,7 @@
             v-model="addReactionItem"
             :items="addReactionSearchResults"
             :loading="isLoadingAddReaction"
+            :disabled="card.fullModel === null"
             :search-input.sync="addReactionSearchQuery"
             hide-no-data
             :item-text="reactionDisplay"
