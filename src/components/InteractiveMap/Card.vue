@@ -103,7 +103,7 @@
           <v-flex class="text-xs-right" v-if="card.objective.reaction">
             <div v-if="!card.isSimulating">
               <span
-                v-if="card.growthRate !== null"
+                v-if="production != null"
                 :class="{ dead: production === 0 }"
               >
                 {{ production | round }}

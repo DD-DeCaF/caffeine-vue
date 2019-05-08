@@ -79,9 +79,10 @@
                 ></v-progress-circular>
               </td>
               <td v-if="props.item.type === 'added_reaction'">
-                <span v-if="props.item.reactionString !== null">
-                  {{ props.item.reactionString }}
-                </span>
+                <span
+                  v-if="props.item.reactionString !== null"
+                  v-html="props.item.reactionString"
+                />
                 <v-progress-circular
                   v-else
                   indeterminate
@@ -382,12 +383,17 @@ export default Vue.extend({
           `${settings.apis.bigg}/search?query=${query}&search_type=reactions`
         )
         .then(response => {
-          this.addReactionSearchResults = response.data.results.map(
-            reaction => ({
+          this.addReactionSearchResults = response.data.results
+            .map(reaction => ({
               id: reaction.bigg_id,
               name: reaction.name
-            })
-          );
+            }))
+            // Exclude results that already exist in the current model
+            .filter(reaction =>
+              this.card.fullModel.model_serialized.reactions.every(
+                r => r.id !== reaction.id
+              )
+            );
         })
         .catch(error => {
           this.biggRequestError = true;
@@ -442,15 +448,81 @@ export default Vue.extend({
       return `${gene.name} (${gene.id})`;
     },
     addReaction(addedReaction) {
-      // Add the reaction only if it's not already added.
-      if (!this.card.reactionAdditions.some(r => r.id === addedReaction.id)) {
-        this.card.reactionAdditions.push(addedReaction);
+      // Skip if the reaction is already added.
+      if (this.card.reactionAdditions.some(r => r.id === addedReaction.id)) {
+        return;
       }
+
+      // Reset the autocomplete form to signal that the reaction will be added.
       this.addReactionSearchQuery = null;
       this.$nextTick(() => {
         this.addReactionItem = null;
       });
-      this.$emit("simulate-card");
+
+      // Request full reaction information from BiGG. Only on success will the
+      // reaction actually be added.
+      axios
+        .get(
+          `${settings.apis.bigg}/models/universal/reactions/${addedReaction.id}`
+        )
+        .then(response => {
+          const reaction = {
+            id: response.data.bigg_id,
+            name: response.data.name,
+            reactionString: response.data.reaction_string,
+            // Note: Assuming all reactions in the universal model are
+            // reversible, but this might not be the case. Could potentially use
+            // the reaction string to check reversibility.
+            lowerBound: -1000,
+            upperBound: 1000,
+            metabolites: response.data.metabolites.map(m => ({
+              id: m.bigg_id,
+              name: m.name,
+              compartment: m.compartment_bigg_id,
+              charge: m.stoichiometry
+              // formula: null,
+              // annotation: null
+            }))
+          };
+
+          // Add the reaction to card modifications.
+          this.card.reactionAdditions.push(reaction);
+
+          // Add the reaction to the full model for Escher to find later.
+          // Update the structure for cobrapy format.
+          const model = this.card.fullModel.model_serialized;
+          model.reactions.push({
+            id: reaction.id,
+            name: reaction.name,
+            lower_bound: reaction.lowerBound,
+            upper_bound: reaction.upperBound,
+            gene_reaction_rule: "",
+            metabolites: Object.assign(
+              {},
+              ...reaction.metabolites.map(m => ({
+                [`${m.id}_${m.compartment}`]: m.charge
+              }))
+            )
+          });
+          // Also add any new metabolites.
+          reaction.metabolites.forEach(newMetabolite => {
+            // Add the compartment postfix to the metabolite id
+            const metabolite = {
+              ...newMetabolite,
+              id: `${newMetabolite.id}_${newMetabolite.compartment}`
+            };
+            // Skip it if the metabolite already exists in the model.
+            if (model.metabolites.some(m => m.id === metabolite.id)) {
+              return;
+            }
+            model.metabolites.push(metabolite);
+          });
+
+          this.$emit("simulate-card");
+        })
+        .catch(error => {
+          this.biggRequestError = true;
+        });
     },
     knockoutReaction() {
       const reaction = bigg.lookupReaction(this.knockoutReactionItem.id);
@@ -504,10 +576,30 @@ export default Vue.extend({
     },
     clearModification(modification) {
       if (modification.type === "added_reaction") {
-        const index = this.card.reactionAdditions.findIndex(
-          reaction => reaction.id === modification.id
+        // TODO: The reaction and any new metabolites should be removed from
+        // the full model here. Note that the user won't be able to add the same
+        // reaction again, because we're excluding reactions that already exist
+        // in the model.
+        this.card.reactionAdditions.splice(
+          this.card.reactionAdditions.findIndex(
+            reaction => reaction.id === modification.id
+          ),
+          1
         );
-        this.card.reactionAdditions.splice(index, 1);
+        // If the bounds were edited on the added reaction, remove those too.
+        this.card.editedBounds.splice(
+          this.card.editedBounds.findIndex(
+            bounds => bounds.id === modification.id
+          ),
+          1
+        );
+        // Adding and then knocking out the same reaction makes little sense,
+        // but is technically possible, so remove the knockouts too if that's
+        // the case.
+        this.card.reactionKnockouts.splice(
+          this.card.reactionKnockouts.indexOf(modification.id),
+          1
+        );
       } else if (modification.type === "reaction_knockout") {
         const index = this.card.reactionKnockouts.indexOf(modification.id);
         this.card.reactionKnockouts.splice(index, 1);
@@ -516,7 +608,7 @@ export default Vue.extend({
         this.card.geneKnockouts.splice(index, 1);
       } else if (modification.type === "edited_bounds") {
         const index = this.card.editedBounds.findIndex(
-          bounds => bounds.reactionId === modification.id
+          bounds => bounds.id === modification.id
         );
         this.card.editedBounds.splice(index, 1);
       }

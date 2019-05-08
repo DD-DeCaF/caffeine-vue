@@ -300,7 +300,23 @@ export default Vue.extend({
       }
 
       // Add card operations
-      // TODO: Reaction additions
+      const reactionAdditions = card.reactionAdditions.map(reaction => ({
+        operation: "add",
+        type: "reaction",
+        id: reaction.id,
+        data: {
+          id: reaction.id,
+          name: reaction.name,
+          lower_bound: reaction.lowerBound,
+          upper_bound: reaction.upperBound,
+          metabolites: Object.assign(
+            {},
+            ...reaction.metabolites.map(m => ({
+              [`${m.id}_${m.compartment}`]: m.charge
+            }))
+          )
+        }
+      }));
       const reactionKnockouts = card.reactionKnockouts.map(reaction => ({
         operation: "knockout",
         type: "reaction",
@@ -321,6 +337,7 @@ export default Vue.extend({
         }
       }));
       const operations = [
+        ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds

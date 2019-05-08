@@ -64,8 +64,31 @@ export default Vue.extend({
         loadMap();
       }
     },
-    // TODO: Watch added reactions
     // TODO: Watch highlight reactions (for data-driven simulations)
+    "card.fullModel": {
+      // Important note: This watcher *must* run before the
+      // `card.reactionAdditions` watcher below, because reactions added to the
+      // model must be available to Escher. Therefore, this watcher must be
+      // ordered first here.
+      deep: true,
+      handler(fullModel) {
+        if (this.card === null || fullModel === null) {
+          this.escherBuilder.load_model(null);
+        } else {
+          this.escherBuilder.load_model(fullModel.model_serialized);
+        }
+      }
+    },
+    "card.reactionAdditions"(reactionAdditions) {
+      if (this.card === null) {
+        this.escherBuilder.set_added_reactions([]);
+      } else {
+        this.escherBuilder.set_added_reactions(
+          reactionAdditions.filter(r => !r.id.startsWith("DM_")).map(r => r.id)
+        );
+      }
+      this.escherBuilder._update_data(true, true);
+    },
     "card.reactionKnockouts"(reactionKnockouts) {
       if (this.card === null) {
         this.escherBuilder.set_knockout_reactions([]);
@@ -83,13 +106,6 @@ export default Vue.extend({
         this.escherBuilder.set_knockout_genes(geneKnockouts.map(g => g.id));
       }
       this.escherBuilder._update_data(true, true);
-    },
-    "card.fullModel"(fullModel) {
-      if (this.card === null || fullModel === null) {
-        this.escherBuilder.load_model(null);
-      } else {
-        this.escherBuilder.load_model(fullModel.model_serialized);
-      }
     },
     "card.fluxes"(fluxes) {
       // Update the flux distribution
