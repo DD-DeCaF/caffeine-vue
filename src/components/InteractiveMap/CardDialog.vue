@@ -299,7 +299,7 @@
           <em>Simulating...</em>
         </span>
         <v-btn color="primary" @click="showDialog = false">
-          Visualize simulation
+          Close
         </v-btn>
       </v-card-actions>
     </v-card>
