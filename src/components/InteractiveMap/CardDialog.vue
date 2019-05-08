@@ -294,15 +294,6 @@
       Could not search BiGG for reactions, please check your internet
       connection.
     </v-snackbar>
-    <v-snackbar color="error" v-model="addedReactionExists" :timeout="6000">
-      This reaction is already added.
-    </v-snackbar>
-    <v-snackbar color="error" v-model="knockoutReactionExists" :timeout="6000">
-      This reaction is already knocked out.
-    </v-snackbar>
-    <v-snackbar color="error" v-model="knockoutGeneExists" :timeout="6000">
-      This gene is already knocked out.
-    </v-snackbar>
     <v-snackbar color="error" v-model="hasInvalidBoundsError" :timeout="6000">
       The lower bound cannot be larger than the upper bound.
     </v-snackbar>
@@ -337,13 +328,10 @@ export default Vue.extend({
     addReactionSearchResults: [],
     isLoadingAddReaction: false,
     biggRequestError: false,
-    addedReactionExists: false,
     // Knockout reaction
     knockoutReactionItem: null,
-    knockoutReactionExists: false,
     // Knockout gene
     knockoutGeneItem: null,
-    knockoutGeneExists: false,
     // Edit bounds
     editBoundsReaction: null,
     editBoundsValid: false,
@@ -441,12 +429,8 @@ export default Vue.extend({
       return `${gene.name} (${gene.id})`;
     },
     addReaction(addedReaction) {
-      const existingReaction = this.card.reactionAdditions.find(
-        reaction => addedReaction.id === reaction.id
-      );
-      if (existingReaction !== undefined) {
-        this.addedReactionExists = true;
-      } else {
+      // Add the reaction only if it's not already added.
+      if (!this.card.reactionAdditions.some(r => r.id === addedReaction.id)) {
         this.card.reactionAdditions.push(addedReaction);
       }
       this.addReactionSearchQuery = null;
@@ -456,12 +440,8 @@ export default Vue.extend({
     },
     knockoutReaction() {
       const reaction = bigg.lookupReaction(this.knockoutReactionItem.id);
-      const existingReaction = this.card.reactionKnockouts.find(
-        r => r.id === reaction.id
-      );
-      if (existingReaction !== undefined) {
-        this.knockoutReactionExists = true;
-      } else {
+      // Add the reaction only if it's not already added.
+      if (!this.card.reactionKnockouts.some(r => r.id === reaction.id)) {
         this.card.reactionKnockouts.push(reaction);
       }
       this.$nextTick(() => {
@@ -473,10 +453,8 @@ export default Vue.extend({
         this.card.fullModel.model_serialized.id,
         this.knockoutGeneItem.id
       );
-      const existingGene = this.card.geneKnockouts.find(g => g.id === gene.id);
-      if (existingGene !== undefined) {
-        this.knockoutGeneExists = true;
-      } else {
+      // Add the gene only if it's not already added.
+      if (!this.card.geneKnockouts.some(g => g.id === gene.id)) {
         this.card.geneKnockouts.push(gene);
       }
       this.$nextTick(() => {
