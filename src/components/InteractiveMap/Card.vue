@@ -193,6 +193,8 @@ export default Vue.extend({
         // For FVA fluxes, calculate the average
         const rxn = this.card.fluxes[this.card.objective.reaction.id];
         return (rxn.upper_bound + rxn.lower_bound) / 2;
+      } else {
+        throw new Error(`Unexpected simulation method ${this.card.method}`);
       }
     },
     modifications() {
