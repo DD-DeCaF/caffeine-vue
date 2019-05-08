@@ -81,12 +81,17 @@
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
+          @load-model-error="hasLoadModelError = true"
         />
       </v-container>
     </v-navigation-drawer>
     <v-snackbar color="error" v-model="hasSimulationError" :timeout="8000">
       Sorry, we were not able to complete the simulation successfully. Please
       try again in a few seconds, or contact us if the problem persists.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasLoadModelError" :timeout="6000">
+      The model could not be loaded, please try updating the card's model.
+      Certain features will not work properly without the model.
     </v-snackbar>
   </div>
 </template>
@@ -115,7 +120,8 @@ export default Vue.extend({
     cards: [],
     selectedCard: null,
     playingInterval: null,
-    hasSimulationError: false
+    hasSimulationError: false,
+    hasLoadModelError: false
   }),
   computed: {
     maps() {
@@ -234,6 +240,7 @@ export default Vue.extend({
         editedBounds: [],
         isSimulating: false,
         hasSimulationError: false,
+        hasLoadModelError: false,
         growthRate: null,
         fluxes: null
       };

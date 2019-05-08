@@ -157,6 +157,7 @@ export default Vue.extend({
 
         // Fetch and set the full model
         this.card.fullModel = null;
+        this.card.hasLoadModelError = false;
         if (this.card.model !== null) {
           axios
             .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
@@ -164,8 +165,8 @@ export default Vue.extend({
               this.card.fullModel = response.data;
             })
             .catch(error => {
-              // TODO
-              console.log(error);
+              this.card.hasLoadModelError = true;
+              this.$emit("load-model-error");
             });
         }
       }
@@ -173,7 +174,7 @@ export default Vue.extend({
   },
   computed: {
     titleColor() {
-      if (this.card.hasSimulationError) {
+      if (this.card.hasSimulationError || this.card.hasLoadModelError) {
         return "error";
       } else if (this.isSelected) {
         return "primary";
