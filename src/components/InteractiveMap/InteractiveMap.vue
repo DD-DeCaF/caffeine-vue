@@ -136,22 +136,11 @@ export default Vue.extend({
           const model1 = this.$store.getters["models/getModelById"](
             map1.model_id
           );
-          let model1Name;
-          if (model1) {
-            model1Name = model1.name;
-          } else {
-            model1Name = "Unknown model";
-          }
-
+          const model1Name = model1 ? model1.name : "Unknown model";
           const model2 = this.$store.getters["models/getModelById"](
             map2.model_id
           );
-          let model2Name;
-          if (model2) {
-            model2Name = model2.name;
-          } else {
-            model2Name = "Unknown model";
-          }
+          const model2Name = model2 ? model2.name : "Unknown model";
           return model1Name.localeCompare(model2Name);
         } else {
           return map1.name.localeCompare(map2.name);
@@ -167,13 +156,10 @@ export default Vue.extend({
           if (mapsWithHeaders.length !== 0) {
             mapsWithHeaders.push({ divider: true });
           }
-          let modelName;
-          try {
-            modelName = this.$store.getters["models/getModelById"](map.model_id)
-              .name;
-          } catch {
-            modelName = "Unknown model";
-          }
+          const model = this.$store.getters["models/getModelById"](
+            map.model_id
+          );
+          const modelName = model ? model.name : "Unknown model";
           mapsWithHeaders.push({ header: modelName });
         }
         mapsWithHeaders.push(map);
