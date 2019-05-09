@@ -209,7 +209,7 @@ export default Vue.extend({
     },
     getGeneState(id: string, type: string) {
       return {
-        includedInModel: this.card.fullModel.model_serialized.reactions.some(
+        includedInModel: this.card.fullModel.model_serialized.genes.some(
           g => g.id === id
         ),
         knockout: false,
