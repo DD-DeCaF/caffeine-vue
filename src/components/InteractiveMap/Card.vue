@@ -14,6 +14,12 @@
         :card="card"
         :modifications="modifications"
         @simulate-card="simulateCard"
+        @open-method-help-dialog="showMethodHelpDialog = true"
+      />
+      <!-- Define the method help dialog here to avoid nested dialogs. -->
+      <MethodHelpDialog
+        :showMethodHelpDialog="showMethodHelpDialog"
+        @close-dialog="showMethodHelpDialog = false"
       />
 
       <v-btn flat icon v-if="!isOnlyCard" @click="removeCard">
@@ -133,12 +139,17 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/settings";
 import CardDialog from "@/components/InteractiveMap/CardDialog.vue";
+import MethodHelpDialog from "@/components/InteractiveMap/MethodHelpDialog.vue";
 
 export default Vue.extend({
   name: "Card",
   components: {
-    CardDialog
+    CardDialog,
+    MethodHelpDialog
   },
+  data: () => ({
+    showMethodHelpDialog: false
+  }),
   props: ["card", "isOnlyCard", "isSelected"],
   filters: {
     round(value) {

@@ -51,6 +51,8 @@
                 v-model="card.method"
                 item-text="name"
                 item-value="id"
+                prepend-icon="help"
+                @click:prepend="$emit('open-method-help-dialog')"
                 @change="$emit('simulate-card')"
               ></v-select>
             </v-flex>
