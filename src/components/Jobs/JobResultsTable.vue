@@ -50,6 +50,7 @@
                 v-model="filters.manipulations"
                 :min="range.manipulations[0]"
                 :max="range.manipulations[1]"
+                :disabled="range.manipulations[1] - range.manipulations[0] === 0"
                 step="0"
                 thumb-label
                 always-dirty
@@ -74,6 +75,7 @@
                 v-model="filters.heterologous_reactions"
                 :min="range.heterologous_reactions[0]"
                 :max="range.heterologous_reactions[1]"
+                :disabled="range.heterologous_reactions[1] - range.heterologous_reactions[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -99,6 +101,7 @@
                 v-model="filters.knockouts"
                 :min="range.knockouts[0]"
                 :max="range.knockouts[1]"
+                :disabled="range.knockouts[1] - range.knockouts[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -123,6 +126,7 @@
                 v-model="filters.fitness"
                 :min="range.fitness[0]"
                 :max="range.fitness[1]"
+                :disabled="range.fitness[1] - range.fitness[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -147,6 +151,7 @@
                 v-model="filters.yield"
                 :min="range.yield[0]"
                 :max="range.yield[1]"
+                :disabled="range.yield[1] - range.yield[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -171,6 +176,7 @@
                 v-model="filters.product"
                 :min="range.product[0]"
                 :max="range.product[1]"
+                :disabled="range.product[1] - range.product[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -195,6 +201,7 @@
                 v-model="filters.biomass"
                 :min="range.biomass[0]"
                 :max="range.biomass[1]"
+                :disabled="range.biomass[1] - range.biomass[0] === 0"
                 step="0"
                 thumb-label
                 thumb-size="24"
