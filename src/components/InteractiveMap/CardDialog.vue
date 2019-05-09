@@ -41,6 +41,7 @@
                 item-value="id"
                 :hint="modificationsHint"
                 persistent-hint
+                :rules="[v => !!v || 'Please choose the metabolic model.']"
                 return-object
               ></v-select>
             </v-flex>
