@@ -219,6 +219,7 @@ export default Vue.extend({
         name: name,
         organism: organism,
         model: model,
+        isLoadingModel: false,
         fullModel: null,
         method: method,
         objective: {

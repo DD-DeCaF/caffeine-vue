@@ -179,7 +179,8 @@
               <v-autocomplete
                 label="Objective"
                 :items="reactions"
-                :loading="card.fullModel === null"
+                :loading="card.isLoadingModel"
+                :disabled="card.fullModel === null"
                 v-model="card.objective.reaction"
                 :item-text="reactionDisplay"
                 item-value="id"
@@ -223,7 +224,8 @@
           <v-autocomplete
             v-model="knockoutReactionItem"
             :items="reactions"
-            :loading="card.fullModel === null"
+            :loading="card.isLoadingModel"
+            :disabled="card.fullModel === null"
             hide-no-data
             :item-text="reactionDisplay"
             item-value="id"
@@ -237,7 +239,8 @@
           <v-autocomplete
             v-model="knockoutGeneItem"
             :items="genes"
-            :loading="card.fullModel === null"
+            :loading="card.isLoadingModel"
+            :disabled="card.fullModel === null"
             hide-no-data
             :item-text="reactionDisplay"
             item-value="id"
@@ -253,7 +256,8 @@
                 <v-autocomplete
                   v-model="editBoundsReaction"
                   :items="reactions"
-                  :loading="card.fullModel === null"
+                  :loading="card.isLoadingModel"
+                  :disabled="card.fullModel === null"
                   :rules="[editBoundsReactionRule]"
                   hide-no-data
                   :item-text="reactionDisplay"

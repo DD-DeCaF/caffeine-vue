@@ -170,6 +170,7 @@ export default Vue.extend({
         this.card.fullModel = null;
         this.card.hasLoadModelError = false;
         if (this.card.model !== null) {
+          this.card.isLoadingModel = true;
           axios
             .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
             .then(response => {
@@ -178,6 +179,9 @@ export default Vue.extend({
             .catch(error => {
               this.card.hasLoadModelError = true;
               this.$emit("load-model-error");
+            })
+            .then(() => {
+              this.card.isLoadingModel = false;
             });
         }
       }
