@@ -181,7 +181,7 @@
                 v-model="card.objective.reaction"
                 :item-text="reactionDisplay"
                 item-value="id"
-                hint="When left empty, the objective is growth."
+                :hint="objectiveHint"
                 persistent-hint
                 placeholder="Specify any reaction as objective..."
                 prepend-icon="done"
@@ -430,6 +430,13 @@ export default Vue.extend({
       } else {
         return null;
       }
+    },
+    objectiveHint() {
+      let objective = "growth";
+      if (this.card.model !== null) {
+        objective = this.card.model.default_biomass_reaction;
+      }
+      return `When left empty, the objective is ${objective}.`;
     },
     reactions() {
       if (this.card.fullModel === null) {
