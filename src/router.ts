@@ -11,6 +11,8 @@ import Maps from "./components/Maps.vue";
 import Models from "./components/Models.vue";
 import Projects from "./components/Projects.vue";
 import NotFound from "./components/NotFound.vue";
+import PrivacyPolicy from "./components/PrivacyPolicy.vue";
+import TermsOfService from "./components/TermsOfService.vue";
 
 Vue.use(Router);
 
@@ -78,6 +80,16 @@ export default new Router({
       name: "projects",
       component: Projects,
       beforeEnter: authGuard
+    },
+    {
+      path: "/privacy-policy",
+      name: "PrivacyPolicy",
+      component: PrivacyPolicy
+    },
+    {
+      path: "/terms-of-service",
+      name: "TermsOfService",
+      component: TermsOfService
     }
   ]
 });
