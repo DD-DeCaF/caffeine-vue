@@ -19,7 +19,7 @@
           <LoginDialog />
         </template>
       </v-toolbar>
-      <v-navigation-drawer v-model="drawer" app clipped>
+      <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-list>
           <v-list-tile to="/">
             <v-list-tile-action>
