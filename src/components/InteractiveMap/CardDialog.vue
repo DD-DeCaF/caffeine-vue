@@ -327,8 +327,8 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import * as settings from "@/settings";
-import * as bigg from "@/bigg";
+import * as settings from "@/utils/settings";
+import * as bigg from "@/utils/bigg";
 
 export default Vue.extend({
   name: "CardDialog",

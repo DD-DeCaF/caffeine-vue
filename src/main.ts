@@ -12,7 +12,7 @@ import NewMap from "@/components/shared/NewMap.vue";
 import LoaderDialog from "@/components/shared/LoaderDialog.vue";
 import DeletionDialog from "@/components/shared/DeletionDialog.vue";
 import FileUpload from "@/components/shared/FileUpload.vue";
-import { initFromStorage } from "@/startup";
+import { initFromStorage } from "@/utils/startup";
 
 Vue.use(require("vue-moment"));
 

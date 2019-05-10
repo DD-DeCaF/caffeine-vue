@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 
 export const lookupReaction = (reactionId: string) => {
   // Return a reaction object with info from BiGG (returned in a delayed

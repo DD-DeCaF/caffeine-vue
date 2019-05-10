@@ -212,7 +212,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 import { mapGetters } from "vuex";
 
 export default Vue.extend({

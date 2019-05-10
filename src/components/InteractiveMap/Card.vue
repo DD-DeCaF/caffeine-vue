@@ -138,7 +138,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 import CardDialog from "@/components/InteractiveMap/CardDialog.vue";
 import MethodHelpDialog from "@/components/InteractiveMap/MethodHelpDialog.vue";
 
