@@ -19,7 +19,13 @@
           <LoginDialog />
         </template>
       </v-toolbar>
-      <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
+
+      <v-navigation-drawer
+        v-model="drawer"
+        app
+        clipped
+        style="display:flex;flex-direction:column;"
+      >
         <v-list>
           <v-list-tile to="/">
             <v-list-tile-action>
@@ -137,12 +143,18 @@
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
+        <v-spacer></v-spacer>
+        <div>
+          <v-btn primary flat small to="/terms-of-service"
+            >Terms of Service</v-btn
+          >
+          <v-btn primary flat small to="/privacy-policy">Privacy Policy</v-btn>
+        </div>
       </v-navigation-drawer>
 
       <v-content>
         <router-view />
       </v-content>
-      <v-footer app></v-footer>
 
       <v-snackbar color="error" v-model="hasFetchDataError" :timeout="6000">
         Sorry, we were unable to retrieve some data from the server. Please try
