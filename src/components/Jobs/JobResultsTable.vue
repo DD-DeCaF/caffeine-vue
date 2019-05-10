@@ -21,6 +21,7 @@
         :expand="expand"
         :pagination.sync="pagination"
         :search="search"
+        :custom-sort="customSort"
         select-all
       >
         <template v-slot:headers="props">
@@ -460,6 +461,25 @@ export default Vue.extend({
         product: [this.range.product[0], this.range.product[1]],
         biomass: [this.range.biomass[0], this.range.biomass[1]]
       };
+    },
+    customSort(items, index, isDesc) {
+      items.sort((a, b) => {
+        if (
+          index === "manipulations" ||
+          index === "heterologous_reactions" ||
+          index === "knockouts"
+        ) {
+          if (!isDesc) {
+            return a[index].length - b[index].length;
+          }
+          return b[index].length - a[index].length;
+        }
+        if (!isDesc) {
+          return a[index] < b[index] ? -1 : 1;
+        }
+        return b[index] < a[index] ? -1 : 1;
+      });
+      return items;
     },
     toggleAll() {
       if (this.selected.length) {
