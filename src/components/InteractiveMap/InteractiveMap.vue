@@ -19,7 +19,13 @@
     >
       <v-icon>apps</v-icon>
     </v-btn>
-    <v-navigation-drawer v-model="isSidepanelOpen" right absolute hide-overlay class="elevation-6">
+    <v-navigation-drawer
+      v-model="isSidepanelOpen"
+      right
+      absolute
+      hide-overlay
+      class="elevation-6"
+    >
       <v-container class="py-1">
         <v-select
           label="Selected Map"
