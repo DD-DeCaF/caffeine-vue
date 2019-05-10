@@ -25,7 +25,7 @@
       >
         <template v-slot:headers="props">
           <tr>
-            <th>
+            <th width="5%">
               <v-checkbox
                 :input-value="props.all"
                 :indeterminate="props.indeterminate"
@@ -36,21 +36,24 @@
             </th>
 
             <th
+              width="10%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
-                'manipulation' === pagination.sortBy ? 'active' : ''
+                'manipulations' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('manipulation')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Manipulations
+              <span @click="changeSort('manipulations')" class="pointer ml-3"
+                >Manipulations <v-icon>arrow_upward</v-icon><br /><br
+              /></span>
               <v-range-slider
                 @click.stop
                 v-model="filters.manipulations"
                 :min="range.manipulations[0]"
                 :max="range.manipulations[1]"
-                :disabled="range.manipulations[1] - range.manipulations[0] === 0"
+                :disabled="
+                  range.manipulations[1] - range.manipulations[0] === 0
+                "
                 step="0"
                 thumb-label
                 always-dirty
@@ -61,21 +64,29 @@
             </th>
 
             <th
+              width="10%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'heterologous_reactions' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('heterologous_reactions')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Heterologous reactions
+              <span
+                @click="changeSort('heterologous_reactions')"
+                class="pointer ml-3"
+                >Heterologous reactions <v-icon>arrow_upward</v-icon> <br /><br
+              /></span>
+
               <v-range-slider
                 @click.stop
                 v-model="filters.heterologous_reactions"
                 :min="range.heterologous_reactions[0]"
                 :max="range.heterologous_reactions[1]"
-                :disabled="range.heterologous_reactions[1] - range.heterologous_reactions[0] === 0"
+                :disabled="
+                  range.heterologous_reactions[1] -
+                    range.heterologous_reactions[0] ===
+                    0
+                "
                 step="0"
                 thumb-label
                 thumb-size="24"
@@ -86,15 +97,17 @@
             </th>
 
             <th
+              width="10%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'knockouts' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('knockouts')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Knockouts
+              <span @click="changeSort('knockouts')" class="pointer ml-3"
+                >Knockouts <v-icon>arrow_upward</v-icon> <br /><br
+              /></span>
+
               <v-range-slider
                 @click.stop
                 @change="filters"
@@ -112,15 +125,19 @@
             </th>
 
             <th
+              width="12.5%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'fitness' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('fitness')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Fitness
+              <span @click="changeSort('fitness')" class="pointer ml-3"
+                >Fitness <v-icon>arrow_upward</v-icon><br /><span
+                  class="caption"
+                  >[Production*Growth/Carbon uptake]</span
+                ></span
+              >
               <v-range-slider
                 @click.stop
                 v-model="filters.fitness"
@@ -137,15 +154,18 @@
             </th>
 
             <th
+              width="12.5%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'yield' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('yield')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Yield
+              <span @click="changeSort('yield')" class="pointer ml-3"
+                >Yield <v-icon>arrow_upward</v-icon><br /><span class="caption"
+                  >[C-mol/C-mol]</span
+                ></span
+              >
               <v-range-slider
                 @click.stop
                 v-model="filters.yield"
@@ -162,15 +182,19 @@
             </th>
 
             <th
+              width="12.5%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'product' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('product')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Production
+              <span @click="changeSort('product')" class="pointer ml-3"
+                >Production <v-icon>arrow_upward</v-icon><br /><span
+                  class="caption"
+                  >[mmol gDW <sup>-1</sup> h <sup>-1</sup>]</span
+                ></span
+              >
               <v-range-slider
                 @click.stop
                 v-model="filters.product"
@@ -187,15 +211,18 @@
             </th>
 
             <th
+              width="12.5%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'biomass' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('biomass')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Biomass
+              <span @click="changeSort('biomass')" class="pointer ml-3"
+                >Growth <v-icon>arrow_upward</v-icon><br /><span class="caption"
+                  >[h <sup>-1</sup>]</span
+                ></span
+              >
               <v-range-slider
                 @click.stop
                 v-model="filters.biomass"
@@ -212,18 +239,19 @@
             </th>
 
             <th
+              width="15%"
               :class="[
-                'column sortable',
+                'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
                 'method' === pagination.sortBy ? 'active' : ''
               ]"
-              @click="changeSort('method')"
             >
-              <v-icon>arrow_upward</v-icon>
-              Method
+              <span @click="changeSort('method')" class="pointer ml-3"
+                >Method <v-icon>arrow_upward</v-icon> <br /><br
+              /></span>
               <v-text-field
                 v-model="search"
-                append-icon="search"
+                class="mb-4"
                 single-line
                 hide-details
               ></v-text-field>
@@ -288,7 +316,7 @@ export default Vue.extend({
       { text: "Method", value: "method" }
     ],
     pagination: {
-      rowsPerPage: 25
+      rowsPerPage: 10
     },
     range: null,
     filters: null
@@ -325,7 +353,7 @@ export default Vue.extend({
           );
         });
       });
-    },
+    }
   },
   methods: {
     getRange() {
@@ -455,3 +483,12 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style>
+.default-cursor {
+  cursor: default !important;
+}
+.pointer {
+  cursor: pointer;
+}
+</style>
