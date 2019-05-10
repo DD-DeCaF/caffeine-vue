@@ -110,9 +110,9 @@ import Vue from "vue";
 import axios from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
-import Escher from "@/components/InteractiveMap/Escher.vue";
-import Card from "@/components/InteractiveMap/Card.vue";
-import Legend from "@/components/InteractiveMap/Legend.vue";
+import Escher from "@/views/InteractiveMap/Escher.vue";
+import Card from "@/views/InteractiveMap/Card.vue";
+import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
   name: "InteractiveMap",
