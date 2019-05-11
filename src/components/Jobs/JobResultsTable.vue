@@ -16,7 +16,6 @@
       </v-list>
       <v-data-table
         v-model="selected"
-        :headers="headers"
         :items="filteredPathways"
         :expand="expand"
         :pagination.sync="pagination"
@@ -110,7 +109,6 @@
 
               <v-range-slider
                 @click.stop
-                @change="filters"
                 v-model="filters.knockouts"
                 :min="range.knockouts[0]"
                 :max="range.knockouts[1]"
@@ -303,16 +301,6 @@ export default Vue.extend({
     selected: [],
     search: "",
     expand: true,
-    headers: [
-      { text: "Manipulations", value: "manipulations" },
-      { text: "Heterologous reactions", value: "heterologous_reactions" },
-      { text: "Knockouts", value: "knockouts" },
-      { text: "Fitness", value: "fitness" },
-      { text: "Yield", value: "yield" },
-      { text: "Production", value: "product" },
-      { text: "Growth", value: "biomass" },
-      { text: "Method", value: "method" }
-    ],
     pagination: {
       rowsPerPage: 10
     },
