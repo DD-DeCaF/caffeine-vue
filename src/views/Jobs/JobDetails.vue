@@ -1,11 +1,11 @@
 <template>
   <div>
     <template v-if="job">
-      <v-container>
+      <v-container fluid>
         <v-layout column>
           <v-flex>
             <v-card>
-              <v-layout align-center justify-end row>
+              <v-layout align-center justify-end row wrap>
                 <h2 class="ma-3">
                   <router-link to="/jobs" class="link">Jobs</router-link> / #{{
                     jobId
@@ -14,25 +14,25 @@
                 <v-spacer></v-spacer>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">bug_report</v-icon>
-                  <div class="header-item">
+                  <div class="body-1">
                     Organism:<br /><strong>{{ organism.name }}</strong>
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">rounded_corner</v-icon>
-                  <div class="header-item">
+                  <div class="body-1">
                     Model:<br /><strong>{{ model.name }}</strong>
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">attach_money</v-icon>
-                  <div class="header-item">
+                  <div class="body-1">
                     Product:<br /><strong>{{ job.product_name }}</strong>
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">timelapse</v-icon>
-                  <div class="header-item">
+                  <div class="body-1">
                     Started:<br /><strong>{{
                       job.created | moment("D MMM YYYY, HH:mm")
                     }}</strong>
@@ -40,7 +40,7 @@
                 </v-list-tile>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">timelapse</v-icon>
-                  <div class="header-item">
+                  <div class="body-1">
                     Completed:<br /><strong v-if="job.status === 'FAILURE'"
                       >Failed</strong
                     >
@@ -189,8 +189,5 @@ export default Vue.extend({
 <style scoped>
 .link {
   text-decoration: none;
-}
-.header-item {
-  font-size: 14px;
 }
 </style>

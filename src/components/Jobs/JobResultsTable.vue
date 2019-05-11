@@ -26,7 +26,7 @@
       >
         <template v-slot:headers="props">
           <tr>
-            <th width="5%">
+            <th>
               <v-checkbox
                 :input-value="props.all"
                 :indeterminate="props.indeterminate"
@@ -37,7 +37,6 @@
             </th>
 
             <th
-              width="10%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -55,7 +54,7 @@
                 :disabled="
                   range.manipulations[1] - range.manipulations[0] === 0
                 "
-                step="0"
+                step="1"
                 thumb-label
                 always-dirty
                 thumb-size="24"
@@ -65,7 +64,6 @@
             </th>
 
             <th
-              width="10%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -75,8 +73,10 @@
               <span
                 @click="changeSort('heterologous_reactions')"
                 class="pointer ml-3"
-                >Heterologous reactions <v-icon>arrow_upward</v-icon> <br /><br
-              /></span>
+                >Heterologous <v-icon>arrow_upward</v-icon><br /><span
+                  >reactions</span
+                ></span
+              >
 
               <v-range-slider
                 @click.stop
@@ -88,7 +88,7 @@
                     range.heterologous_reactions[0] ===
                     0
                 "
-                step="0"
+                step="1"
                 thumb-label
                 thumb-size="24"
                 always-dirty
@@ -98,7 +98,6 @@
             </th>
 
             <th
-              width="10%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -116,7 +115,7 @@
                 :min="range.knockouts[0]"
                 :max="range.knockouts[1]"
                 :disabled="range.knockouts[1] - range.knockouts[0] === 0"
-                step="0"
+                step="1"
                 thumb-label
                 thumb-size="24"
                 always-dirty
@@ -126,7 +125,6 @@
             </th>
 
             <th
-              width="12.5%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -136,7 +134,10 @@
               <span @click="changeSort('fitness')" class="pointer ml-3"
                 >Fitness <v-icon>arrow_upward</v-icon><br /><span
                   class="caption"
-                  >[Production*Growth/Carbon uptake]</span
+                  ><span
+                    >[Production * Growth / <br />
+                    Carbon uptake]</span
+                  ></span
                 ></span
               >
               <v-range-slider
@@ -145,17 +146,16 @@
                 :min="range.fitness[0]"
                 :max="range.fitness[1]"
                 :disabled="range.fitness[1] - range.fitness[0] === 0"
-                step="0"
+                step="0.01"
                 thumb-label
-                thumb-size="24"
+                thumb-size="28"
                 always-dirty
                 color="primary"
-                class="mt-4"
+                class="mt-2"
               ></v-range-slider>
             </th>
 
             <th
-              width="12.5%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -164,7 +164,7 @@
             >
               <span @click="changeSort('yield')" class="pointer ml-3"
                 >Yield <v-icon>arrow_upward</v-icon><br /><span class="caption"
-                  >[C-mol/C-mol]</span
+                  >[C-mol / C-mol]</span
                 ></span
               >
               <v-range-slider
@@ -173,9 +173,9 @@
                 :min="range.yield[0]"
                 :max="range.yield[1]"
                 :disabled="range.yield[1] - range.yield[0] === 0"
-                step="0"
+                step="0.01"
                 thumb-label
-                thumb-size="24"
+                thumb-size="28"
                 always-dirty
                 color="primary"
                 class="mt-4"
@@ -183,7 +183,6 @@
             </th>
 
             <th
-              width="12.5%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -202,9 +201,9 @@
                 :min="range.product[0]"
                 :max="range.product[1]"
                 :disabled="range.product[1] - range.product[0] === 0"
-                step="0"
+                step="0.01"
                 thumb-label
-                thumb-size="24"
+                thumb-size="28"
                 always-dirty
                 color="primary"
                 class="mt-4"
@@ -212,7 +211,6 @@
             </th>
 
             <th
-              width="12.5%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -230,9 +228,9 @@
                 :min="range.biomass[0]"
                 :max="range.biomass[1]"
                 :disabled="range.biomass[1] - range.biomass[0] === 0"
-                step="0"
+                step="0.01"
                 thumb-label
-                thumb-size="24"
+                thumb-size="28"
                 always-dirty
                 color="primary"
                 class="mt-4"
@@ -240,7 +238,6 @@
             </th>
 
             <th
-              width="15%"
               :class="[
                 'column sortable default-cursor',
                 pagination.descending ? 'desc' : 'asc',
@@ -332,7 +329,11 @@ export default Vue.extend({
         .filter(pathway => pathway.biomass > 0)
         .map((pathway, index) => ({
           id: index,
-          ...pathway
+          ...pathway,
+          fitness: +pathway.fitness.toFixed(2),
+          yield: +pathway.yield.toFixed(2),
+          product: +pathway.product.toFixed(2),
+          biomass: +pathway.biomass.toFixed(2)
         }));
     },
     filteredPathways() {
