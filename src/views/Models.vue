@@ -2,30 +2,31 @@
   <v-container>
     <DeletionDialog
       v-model="isDeletionDialogVisible"
-      :items="[mapItem]"
-      itemsType="maps"
+      :items="[modelItem]"
+      itemsType="models"
     />
-    <NewProject
+    <NewModel v-model="isModelCreationDialogVisible" />
+    <!-- Disabled because its not on the old platform -->
+    <!-- <NewProject 
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
+    /> -->
+    <NewMap v-model="isMapCreationDialogVisible" @return-object="passMap" />
+    <NewOrganism
+      v-model="isOrganismCreationDialogVisible"
+      @return-object="passOrganism"
     />
-    <NewModel
-      v-model="isModelCreationDialogVisible"
-      @return-object="passModel"
-    />
-    <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Maps</h1>
+        <h1>Models</h1>
         <v-data-table
           :headers="headers"
-          :items="availableMaps"
+          :items="availableModels"
           class="elevation-8"
           :pagination.sync="pagination"
         >
           <template v-slot:items="props">
             <td>{{ props.item.name }}</td>
-            <td>{{ getModel(props.item.model_id).name }}</td>
             <td>
               <v-tooltip
                 bottom
@@ -43,7 +44,7 @@
                 </div>
                 <v-icon
                   slot="activator"
-                  @click="editItem(props.item)"
+                  @click="handler(props.item)"
                   :disabled="!isAuthenticated || props.item.project_id === null"
                   :class="{
                     pointerDisabled:
@@ -93,7 +94,7 @@
             bottom
             right
             :disabled="!isAuthenticated"
-            @click="isMapCreationDialogVisible = true"
+            @click.stop="isModelCreationDialogVisible = true"
             color="primary"
             v-bind:style="styleObject"
           >
@@ -103,7 +104,7 @@
       </v-flex>
     </v-layout>
     <!-- Definition of the edit dialog -->
-    <v-dialog v-model="isMapEditDialogVisible" width="650">
+    <v-dialog v-model="isModelEditDialogVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
@@ -111,7 +112,11 @@
               <h3>Edit {{ name }}</h3>
             </v-flex>
             <v-flex>
-              <v-form ref="form" v-model="valid" @keyup.native.enter="editMap">
+              <v-form
+                ref="form"
+                v-model="valid"
+                @keyup.native.enter="editModel"
+              >
                 <v-text-field
                   required
                   v-model="name"
@@ -119,55 +124,64 @@
                   name="name"
                   label="Name"
                   type="text"
-                  placeholder="e.g. My Favourite Map"
+                  placeholder="e.g. My Favourite Model"
                 ></v-text-field>
                 <v-autocomplete
-                  required
                   return-object
+                  required
                   item-text="name"
                   item-value="id"
-                  v-model="project"
-                  :items="availableProjects"
+                  v-model="organism"
+                  :items="availableOrganisms"
                   :rules="[rules.required]"
-                  name="project"
-                  label="Project"
+                  name="organism"
+                  label="Organism"
                   type="text"
                 >
                   <template v-slot:append-item>
                     <v-divider class="my-2"></v-divider>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       depressed
-                      @click.stop="isProjectCreationDialogVisible = true"
+                      @click.stop="isOrganismCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
-                      New project
+                      New organism
+                    </v-btn>
+                  </template>
+                </v-autocomplete>
+                <v-autocomplete
+                  return-object
+                  item-text="name"
+                  item-value="id"
+                  v-model="preferredMap"
+                  :items="availableMaps"
+                  persistent-hint
+                  name="map"
+                  label="Preferred Map"
+                  type="text"
+                >
+                  <template v-slot:append-item>
+                    <v-divider class="my-2"></v-divider>
+                    <v-btn
+                      depressed
+                      @click.stop="isMapCreationDialogVisible = true"
+                    >
+                      <v-icon class="mr-4">add_circle</v-icon>
+                      New Map
                     </v-btn>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
                   required
-                  return-object
-                  item-text="name"
-                  item-value="id"
-                  v-model="selectedModel"
-                  :items="availableModels"
-                  :rules="[rules.required]"
+                  item-text="id"
+                  v-model="default_biomass_reaction"
+                  :items="reactions"
+                  hint="The reaction identifier of this model's default biomass reaction"
                   persistent-hint
-                  name="model"
-                  label="Model"
+                  name="biomass"
+                  label="Default Biomass Reaction"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      depressed
-                      @click.stop="isModelCreationDialogVisible = true"
-                    >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New Model
-                    </v-btn>
-                  </template>
                 </v-autocomplete>
               </v-form>
             </v-flex>
@@ -181,14 +195,14 @@
           <v-btn
             color="secondary"
             flat
-            @click.stop="isMapEditDialogVisible = false"
+            @click.stop="isModelEditDialogVisible = false"
             :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
-            @click="editMap"
+            @click="editModel"
             :disabled="$store.state.isDialogVisible.loader || !valid"
           >
             Edit
@@ -212,83 +226,96 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 import { mapGetters } from "vuex";
 
 export default Vue.extend({
-  name: "Maps",
+  name: "Models",
   data: () => ({
-    valid: false,
-    isMapCreationDialogVisible: false,
+    modelItem: { name: null },
+    modelItemIndex: null,
     isModelCreationDialogVisible: false,
-    isProjectCreationDialogVisible: false,
+    isOrganismCreationDialogVisible: false,
+    isMapCreationDialogVisible: false,
+    // Disabled because its not on the old platform
+    // isProjectCreationDialogVisible: false,
+    isModelEditDialogVisible: false,
+    isDeletionDialogVisible: false,
+    valid: true,
     isMapEditSuccess: false,
     isInvalidCredentials: false,
     isUnauthorized: false,
     isNotFound: false,
     hasOtherError: false,
-    selectedModel: null,
-    name: null,
-    project: null,
+    reactions: [],
     rules: {
       required: value => !!value || "Required."
     },
-    mapItem: { name: null },
-    mapItemIndex: null,
-    isMapEditDialogVisible: false,
-    isDeletionDialogVisible: false,
+    id: null,
+    name: null,
+    preferredMap: null,
+    project: null,
+    organism: null,
+    default_biomass_reaction: null,
     headers: [
-      { text: "Name", align: "left", value: "name", width: "45%" },
-      { text: "Model", value: "model_id", width: "40%" },
+      { text: "Name", align: "left", value: "name", width: "85%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
       rowsPerPage: 10
     },
+    show: false,
     // Vuitify disables all pointer events on disabled objects.
     // https://stackoverflow.com/questions/51826891/how-do-i-enable-tooltips-on-a-disabled-text-field-in-vuetify
     // This style object is what we use to re-enable them so that the tooltip can be triggered on a disabled button.
     styleObject: {
       "pointer-events": "auto"
-    },
-    pointerDisabled: {
-      "pointer-events": "none"
     }
   }),
   methods: {
+    handler(item) {
+      this.editItem(item);
+      this.getReactions();
+    },
     editItem(item) {
       this.id = item.id;
       this.name = item.name;
+      this.preferredMap = this.availableMaps.find(
+        obj => obj.id == item.preferred_map_id
+      );
+      this.organism = this.availableOrganisms.find(
+        obj => obj.id == item.organism_id
+      );
       this.project = this.availableProjects.find(
         obj => obj.id == item.project_id
       );
-      this.selectedModel = this.availableModels.find(
-        obj => obj.id == item.model_id
-      );
-      this.mapItemIndex = this.availableMaps.indexOf(item);
-      this.isMapEditDialogVisible = true;
+      this.default_biomass_reaction = item.default_biomass_reaction;
+      this.modelItemIndex = this.availableModels.indexOf(item);
+      this.isModelEditDialogVisible = true;
     },
     deleteItem(item) {
-      this.mapItem = item;
+      this.modelItem = item;
       this.isDeletionDialogVisible = true;
     },
-    editMap() {
+    editModel() {
       const payload = {
         id: this.id,
         name: this.name,
+        preferred_map_id: this.preferredMap.id,
+        organism_id: this.organism.id,
         project_id: this.project.id,
-        model_id: this.selectedModel.id
+        default_biomass_reaction: this.default_biomass_reaction
       };
       axios
-        .put(`${settings.apis.maps}/maps/${this.id}`, payload)
+        .put(`${settings.apis.modelStorage}/models/${this.id}`, payload)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const commitPayload = {
             item: payload,
-            index: this.mapItemIndex
+            index: this.modelItemIndex
           };
-          this.$store.commit("maps/editMap", commitPayload);
-          this.isMapEditSuccess = true;
+          this.$store.commit("models/editModel", commitPayload);
+          this.isModelEditSuccess = true;
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -303,31 +330,51 @@ export default Vue.extend({
         })
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
-          this.isMapEditDialogVisible = false;
+          this.isModelEditDialogVisible = false;
+        });
+    },
+    getReactions() {
+      // Fetch the serialized selected model and return its reactions
+      axios
+        .get(`${settings.apis.modelStorage}/models/${this.id}`)
+        .then((response: AxiosResponse) => {
+          this.reactions = response.data.model_serialized.reactions;
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 404) {
+            this.isNotFound = true;
+            return null;
+          } else {
+            this.hasOtherError = true;
+            return null;
+          }
         });
     },
     passProject(project) {
       this.project = project;
     },
-    passModel(model) {
-      this.selectedModel = model;
+    passMap(map) {
+      this.preferredMap = map;
+    },
+    passOrganism(organism) {
+      this.organism = organism;
     }
   },
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     },
-    availableMaps() {
-      return this.$store.state.maps.maps;
+    availableModels() {
+      return this.$store.state.models.models;
     },
-    ...mapGetters({
-      getModel: "models/getModelById"
-    }),
     availableProjects() {
       return this.$store.state.projects.projects;
     },
-    availableModels() {
-      return this.$store.state.models.models;
+    availableMaps() {
+      return this.$store.state.maps.maps;
+    },
+    availableOrganisms() {
+      return this.$store.state.organisms.organisms;
     }
   }
 });

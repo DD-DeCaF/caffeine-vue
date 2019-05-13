@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 
 export interface JWT {
   jwt: string;

@@ -2,17 +2,17 @@ import Vue from "vue";
 import Router, { NavigationGuard } from "vue-router";
 import store from "@/store";
 import sessionStore from "@/store/modules/session";
-import Home from "./components/Home.vue";
-import Designs from "./components/Designs.vue";
-import InteractiveMap from "./components/InteractiveMap/InteractiveMap.vue";
-import Jobs from "./components/Jobs/Jobs.vue";
-import JobDetails from "./components/Jobs/JobDetails.vue";
-import Maps from "./components/Maps.vue";
-import Models from "./components/Models.vue";
-import Projects from "./components/Projects.vue";
-import NotFound from "./components/NotFound.vue";
-import PrivacyPolicy from "./components/PrivacyPolicy.vue";
-import TermsOfService from "./components/TermsOfService.vue";
+import Home from "./views/Home.vue";
+import Designs from "./views/Designs.vue";
+import InteractiveMap from "./views/InteractiveMap/InteractiveMap.vue";
+import Jobs from "./views/Jobs/Jobs.vue";
+import JobDetails from "./views/Jobs/JobDetails.vue";
+import Maps from "./views/Maps.vue";
+import Models from "./views/Models.vue";
+import Projects from "./views/Projects.vue";
+import NotFound from "./views/NotFound.vue";
+import PrivacyPolicy from "./views/PrivacyPolicy.vue";
+import TermsOfService from "./views/TermsOfService.vue";
 
 Vue.use(Router);
 
@@ -72,10 +72,6 @@ export default new Router({
       component: Models
     },
     {
-      path: "*",
-      component: NotFound
-    },
-    {
       path: "/projects",
       name: "projects",
       component: Projects,
@@ -90,6 +86,10 @@ export default new Router({
       path: "/terms-of-service",
       name: "TermsOfService",
       component: TermsOfService
+    },
+    {
+      path: "*",
+      component: NotFound
     }
   ]
 });

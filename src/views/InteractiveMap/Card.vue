@@ -138,9 +138,9 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import * as settings from "@/settings";
-import CardDialog from "@/components/InteractiveMap/CardDialog.vue";
-import MethodHelpDialog from "@/components/InteractiveMap/MethodHelpDialog.vue";
+import * as settings from "@/utils/settings";
+import CardDialog from "@/views/InteractiveMap/CardDialog.vue";
+import MethodHelpDialog from "@/views/InteractiveMap/MethodHelpDialog.vue";
 
 export default Vue.extend({
   name: "Card",

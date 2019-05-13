@@ -4,66 +4,33 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <NewMap v-model="isMapCreationDialogVisible" @return-object="passMap" />
-    <NewOrganism
-      v-model="isOrganismCreationDialogVisible"
-      @return-object="passOrganism"
-    />
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
             <v-flex md6>
-              <h3>Add a new model</h3>
-              <p>
-                We recommend that you visit
-                <a href="https://memote.io" target="_blank">memote.io</a> to
-                validate your model.
-              </p>
+              <h3>Add a new map</h3>
             </v-flex>
             <v-flex>
               <v-form
                 ref="form"
                 v-model="valid"
-                @keyup.native.enter="createModel"
+                @keyup.native.enter="createMap"
               >
                 <v-text-field
                   required
-                  v-model="modelName"
+                  v-model="mapName"
                   :rules="[rules.required]"
                   name="name"
                   label="Name"
                   type="text"
-                  placeholder="e.g. My Favourite Model"
+                  placeholder="e.g. My Favourite Map"
                 ></v-text-field>
                 <v-autocomplete
                   required
                   return-object
                   item-text="name"
-                  item-id="id"
-                  v-model="organism"
-                  :items="availableOrganisms"
-                  :rules="[rules.required]"
-                  name="organism"
-                  label="Organism"
-                  type="text"
-                >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      depressed
-                      @click.stop="isOrganismCreationDialogVisible = true"
-                    >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New Organism
-                    </v-btn>
-                  </template>
-                </v-autocomplete>
-                <v-autocomplete
-                  required
-                  return-object
-                  item-text="name"
-                  item-id="id"
+                  item-value="id"
                   v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
@@ -83,50 +50,27 @@
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
+                  required
                   return-object
                   item-text="name"
-                  item-id="id"
-                  v-model="map"
-                  :items="availableMaps"
-                  hint="The default map displayed on the Interactive Map, optional"
+                  item-value="id"
+                  v-model="model"
+                  :items="availableModels"
+                  :rules="[rules.required]"
                   persistent-hint
                   name="map"
-                  label="Preferred Map"
+                  label="Model"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
-                    <v-btn
-                      depressed
-                      @click.stop="isMapCreationDialogVisible = true"
-                    >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New Map
-                    </v-btn>
-                  </template>
                 </v-autocomplete>
                 <FileUpload
                   v-model="filename"
                   @formData="loadFile"
                   :accept="'.json'"
-                  :label="'Upload JSON model'"
+                  :label="'Upload JSON map'"
                   :required="true"
                   :rules="[rules.required]"
-                  :error-messages="errorMessage"
                 />
-                <v-autocomplete
-                  required
-                  item-text="id"
-                  v-model="default_biomass_reaction"
-                  :items="reactions"
-                  :rules="[rules.required]"
-                  hint="The reaction identifier of this model's default biomass reaction"
-                  persistent-hint
-                  name="map"
-                  label="Default Biomass Reaction"
-                  type="text"
-                >
-                </v-autocomplete>
               </v-form>
             </v-flex>
           </v-layout>
@@ -146,7 +90,7 @@
           </v-btn>
           <v-btn
             color="primary"
-            @click="createModel"
+            @click="createMap"
             :disabled="$store.state.isDialogVisible.loader || !valid"
           >
             Create
@@ -154,12 +98,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar
-      color="success"
-      v-model="isModelCreationSuccess"
-      :timeout="3000"
-    >
-      {{ modelName }} successfully created.
+    <v-snackbar color="success" v-model="isMapCreationSuccess" :timeout="3000">
+      {{ mapName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -168,49 +108,41 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 
 export default Vue.extend({
-  name: "NewModel",
+  name: "NewMap",
   props: ["value"],
   data: () => ({
+    isProjectCreationDialogVisible: false,
     filename: null,
     valid: true,
-    isProjectCreationDialogVisible: false,
-    isMapCreationDialogVisible: false,
-    isOrganismCreationDialogVisible: false,
-    isModelCreationSuccess: false,
+    isMapCreationSuccess: false,
     rules: {
       required: value => !!value || "Required."
     },
-    modelName: null,
-    model_serialized: null,
-    map: null,
-    project: null,
-    organism: null,
-    default_biomass_reaction: null,
-    modelError: false,
-    reactions: []
+    mapName: null,
+    model: { id: null },
+    project: { id: null },
+    map: null
   }),
   methods: {
-    createModel() {
+    createMap() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
-        name: this.modelName,
-        model_serialized: this.model_serialized,
-        preferred_map_id: this.map.id,
+        name: this.mapName,
+        model_id: this.model.id,
         project_id: this.project.id,
-        organism_id: this.organism.id,
-        default_biomass_reaction: this.default_biomass_reaction
+        map: this.map
       };
       axios
-        .post(`${settings.apis.modelStorage}/models`, payload)
+        .post(`${settings.apis.maps}/maps`, payload)
         .then((response: AxiosResponse) => {
-          const modelWithID = { ...payload, ...response.data };
-          this.$store.commit("models/addModel", modelWithID);
-          this.$emit("return-object", modelWithID);
+          const mapWithID = { ...payload, ...response.data };
+          this.$store.commit("maps/addMap", mapWithID);
+          this.$emit("return-object", mapWithID);
           this.isVisible = false;
-          this.isModelCreationSuccess = true;
+          this.isMapCreationSuccess = true;
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
@@ -230,15 +162,7 @@ export default Vue.extend({
       const fileReader = new FileReader();
       // Is called when the readAsText operation below successfully completes
       fileReader.onload = () => {
-        this.model_serialized = JSON.parse(fileReader.result as string);
-        if (this.model_serialized.reactions) {
-          this.modelError = false;
-          this.reactions = this.model_serialized.reactions.map(
-            reaction => reaction.id
-          );
-        } else {
-          this.modelError = true;
-        }
+        this.map = JSON.parse(fileReader.result as string);
       };
       if (file) {
         // Read the file asynchroniously.
@@ -248,33 +172,14 @@ export default Vue.extend({
     },
     passProject(project) {
       this.project = project;
-    },
-    passMap(map) {
-      this.map = map;
-    },
-    passOrganism(organism) {
-      this.organism = organism;
     }
   },
   computed: {
-    errorMessage() {
-      if (this.modelError) {
-        return "The file is not valid.";
-      } else {
-        return [];
-      }
-    },
     availableProjects() {
       return this.$store.state.projects.projects;
     },
-    availableOrganisms() {
-      return this.$store.state.organisms.organisms;
-    },
-    availableMaps() {
-      return this.$store.state.maps.maps;
-    },
-    availableReactions() {
-      return [{ id: "Biomass1" }, { id: "Biomass2" }];
+    availableModels() {
+      return this.$store.state.models.models;
     },
     isVisible: {
       get: function() {

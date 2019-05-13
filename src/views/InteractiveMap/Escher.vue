@@ -32,7 +32,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import * as bigg from "@/bigg";
+import * as bigg from "@/utils/bigg";
 
 export default Vue.extend({
   name: "Escher",

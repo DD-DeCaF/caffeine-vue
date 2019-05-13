@@ -5,14 +5,14 @@ import router from "./router";
 import store from "./store/index";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
-import NewProject from "@/components/shared/NewProject.vue";
-import NewOrganism from "@/components/shared/NewOrganism.vue";
-import NewModel from "@/components/shared/NewModel.vue";
-import NewMap from "@/components/shared/NewMap.vue";
-import LoaderDialog from "@/components/shared/LoaderDialog.vue";
-import DeletionDialog from "@/components/shared/DeletionDialog.vue";
-import FileUpload from "@/components/shared/FileUpload.vue";
-import { initFromStorage } from "@/startup";
+import NewProject from "@/components/NewProject.vue";
+import NewOrganism from "@/components/NewOrganism.vue";
+import NewModel from "@/components/NewModel.vue";
+import NewMap from "@/components/NewMap.vue";
+import LoaderDialog from "@/components/LoaderDialog.vue";
+import DeletionDialog from "@/components/DeletionDialog.vue";
+import FileUpload from "@/components/FileUpload.vue";
+import { initFromStorage } from "@/utils/startup";
 
 Vue.use(require("vue-moment"));
 
