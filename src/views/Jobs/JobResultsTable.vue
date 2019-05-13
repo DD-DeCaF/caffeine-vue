@@ -321,7 +321,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { PathwayPredictionResponse } from "@/components/Jobs/JobDetails.vue";
+import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
 
 export default Vue.extend({

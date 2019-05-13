@@ -93,8 +93,8 @@ import { mapGetters } from "vuex";
 import { JobItem } from "@/store/modules/jobs";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import * as settings from "@/settings";
-import JobResultsTable from "@/components/Jobs/JobResultsTable.vue";
+import * as settings from "@/utils/settings";
+import JobResultsTable from "@/views/Jobs/JobResultsTable.vue";
 
 export interface PathwayPredictionResponse extends JobItem {
   result: {
