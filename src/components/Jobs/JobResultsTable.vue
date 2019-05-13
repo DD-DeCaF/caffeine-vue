@@ -29,7 +29,6 @@
             :items="filteredPathways"
             :expand="expand"
             :pagination.sync="pagination"
-            :search="search"
             :custom-sort="customSort"
             select-all
           >
@@ -270,7 +269,7 @@
                     >Method <v-icon>arrow_upward</v-icon> <br /><br
                   /></span>
                   <v-text-field
-                    v-model="search"
+                    v-model="filters.method"
                     class="mb-4"
                     single-line
                     hide-details
@@ -308,13 +307,6 @@
                 </td>
               </tr>
             </template>
-            <template v-slot:no-results>
-              <tr>
-                <td colspan="100%" class="text-xs-center">
-                  Your search for "{{ search }}" found no results
-                </td>
-              </tr>
-            </template>
             <template v-slot:expand="props">
               <tr>
                 Expanded
@@ -339,7 +331,6 @@ export default Vue.extend({
   },
   data: () => ({
     selected: [],
-    search: "",
     expand: true,
     pagination: {
       rowsPerPage: 10
@@ -375,6 +366,12 @@ export default Vue.extend({
             return (
               pathway[filter].length >= this.filters[filter][0] &&
               pathway[filter].length <= this.filters[filter][1]
+            );
+          } else if (filter === "method") {
+            return (
+              pathway[filter]
+                .toLowerCase()
+                .indexOf(this.filters[filter].toLowerCase()) >= 0
             );
           }
           return (
@@ -493,7 +490,8 @@ export default Vue.extend({
         fitness: [this.range.fitness[0], this.range.fitness[1]],
         yield: [this.range.yield[0], this.range.yield[1]],
         product: [this.range.product[0], this.range.product[1]],
-        biomass: [this.range.biomass[0], this.range.biomass[1]]
+        biomass: [this.range.biomass[0], this.range.biomass[1]],
+        method: ""
       };
     },
     customSort(items, index, isDesc) {
