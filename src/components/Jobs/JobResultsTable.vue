@@ -35,7 +35,7 @@
           >
             <template v-slot:headers="props">
               <tr>
-                <th>
+                <th width="5%">
                   <v-checkbox
                     :input-value="props.all"
                     :indeterminate="props.indeterminate"
@@ -46,6 +46,7 @@
                 </th>
 
                 <th
+                  width="12%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -75,6 +76,7 @@
                 </th>
 
                 <th
+                  width="12%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -111,6 +113,7 @@
                 </th>
 
                 <th
+                  width="12%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -137,6 +140,7 @@
                 </th>
 
                 <th
+                  width="12%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -168,6 +172,7 @@
                 </th>
 
                 <th
+                  width="10%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -196,6 +201,7 @@
                 </th>
 
                 <th
+                  width="10%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -224,6 +230,7 @@
                 </th>
 
                 <th
+                  width="10%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -252,6 +259,7 @@
                 </th>
 
                 <th
+                  width="17%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
