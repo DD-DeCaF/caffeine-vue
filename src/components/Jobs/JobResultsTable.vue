@@ -293,10 +293,10 @@
                 <td>{{ props.item.manipulations.length }}</td>
                 <td>{{ props.item.heterologous_reactions.length }}</td>
                 <td>{{ props.item.knockouts.length }}</td>
-                <td>{{ props.item.fitness }}</td>
-                <td>{{ props.item.yield }}</td>
-                <td>{{ props.item.product }}</td>
-                <td>{{ props.item.biomass }}</td>
+                <td>{{ props.item.fitness | round }}</td>
+                <td>{{ props.item.yield | round }}</td>
+                <td>{{ props.item.product | round }}</td>
+                <td>{{ props.item.biomass | round }}</td>
                 <td>{{ props.item.method }}</td>
               </tr>
             </template>
@@ -338,6 +338,13 @@ export default Vue.extend({
     range: null,
     filters: null
   }),
+  filters: {
+    round: value => {
+      return value >= 0.005 || value === 0
+        ? +value.toFixed(2)
+        : value.toExponential(1);
+    }
+  },
   computed: {
     pathways() {
       return [
@@ -348,11 +355,7 @@ export default Vue.extend({
         .filter(pathway => pathway.biomass > 0)
         .map((pathway, index) => ({
           id: index,
-          ...pathway,
-          fitness: +pathway.fitness.toFixed(2),
-          yield: +pathway.yield.toFixed(2),
-          product: +pathway.product.toFixed(2),
-          biomass: +pathway.biomass.toFixed(2)
+          ...pathway
         }));
     },
     filteredPathways() {
