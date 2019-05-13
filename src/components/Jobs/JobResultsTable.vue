@@ -293,6 +293,20 @@
                 <td>{{ props.item.method }}</td>
               </tr>
             </template>
+            <template v-slot:no-data>
+              <tr>
+                <td colspan="100%" class="text-xs-center">
+                  No data available
+                </td>
+              </tr>
+            </template>
+            <template v-slot:no-results>
+              <tr>
+                <td colspan="100%" class="text-xs-center">
+                  Your search for "{{ search }}" found no results
+                </td>
+              </tr>
+            </template>
             <template v-slot:expand="props">
               <tr>
                 Expanded
