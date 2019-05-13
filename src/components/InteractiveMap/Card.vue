@@ -2,6 +2,7 @@
   <v-card class="mb-2">
     <v-toolbar
       dense
+      flat
       :color="titleColor"
       class="white--text"
       :class="{ clickable: !isSelected }"

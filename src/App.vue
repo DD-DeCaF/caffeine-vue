@@ -19,11 +19,13 @@
           <LoginDialog />
         </template>
       </v-toolbar>
+
       <v-navigation-drawer
         v-model="drawer"
         app
         clipped
         style="display:flex;flex-direction:column;"
+        class="elevation-6"
       >
         <v-list>
           <v-list-tile to="/">
