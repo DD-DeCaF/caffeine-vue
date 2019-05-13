@@ -25,30 +25,30 @@
           class="elevation-8"
           :pagination.sync="pagination"
         >
-          <template v-slot:items="props">
-            <td>{{ props.item.name }}</td>
+          <template v-slot:items="{ item: model }">
+            <td>{{ model.name }}</td>
             <td>
               <v-tooltip
                 bottom
-                :disabled="isAuthenticated && props.item.project_id !== null"
+                :disabled="isAuthenticated && model.project_id !== null"
               >
                 <div v-if="!isAuthenticated">
                   <span>
                     {{ $store.state.commonTooltipMessages.unauthenticated }}
                   </span>
                 </div>
-                <div v-else-if="props.item.project_id === null">
+                <div v-else-if="model.project_id === null">
                   <span>
                     {{ $store.state.commonTooltipMessages.publicData }}
                   </span>
                 </div>
                 <v-icon
                   slot="activator"
-                  @click="handler(props.item)"
-                  :disabled="!isAuthenticated || props.item.project_id === null"
+                  @click="handler(model)"
+                  :disabled="!isAuthenticated || model.project_id === null"
                   :class="{
                     pointerDisabled:
-                      !isAuthenticated || props.item.project_id === null
+                      !isAuthenticated || model.project_id === null
                   }"
                 >
                   edit
@@ -56,25 +56,25 @@
               </v-tooltip>
               <v-tooltip
                 bottom
-                :disabled="isAuthenticated && props.item.project_id !== null"
+                :disabled="isAuthenticated && model.project_id !== null"
               >
                 <div v-if="!isAuthenticated">
                   <span>
                     {{ $store.state.commonTooltipMessages.unauthenticated }}
                   </span>
                 </div>
-                <div v-else-if="props.item.project_id === null">
+                <div v-else-if="model.project_id === null">
                   <span>
                     {{ $store.state.commonTooltipMessages.publicData }}
                   </span>
                 </div>
                 <v-icon
                   slot="activator"
-                  @click="deleteItem(props.item)"
-                  :disabled="!isAuthenticated || props.item.project_id === null"
+                  @click="deleteItem(model)"
+                  :disabled="!isAuthenticated || model.project_id === null"
                   :class="{
                     pointerDisabled:
-                      !isAuthenticated || props.item.project_id === null
+                      !isAuthenticated || model.project_id === null
                   }"
                 >
                   delete
