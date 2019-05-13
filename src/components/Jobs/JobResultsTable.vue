@@ -11,7 +11,7 @@
     <template v-else>
       <v-card>
         <div>
-          <v-list>
+          <v-list class="mb-3">
             <v-list-tile>
               <h3>Results</h3>
               <v-spacer></v-spacer>
