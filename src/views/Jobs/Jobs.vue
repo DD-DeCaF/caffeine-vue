@@ -10,30 +10,27 @@
           must-sort
           class="elevation-8"
         >
-          <template v-slot:items="props">
-            <td>{{ props.item.product_name }}</td>
+          <template v-slot:items="{ item: job }">
+            <td>{{ job.product_name }}</td>
             <td>
-              {{ organism(model(props.item.model_id).organism_id).name }}
+              {{ organism(model(job.model_id).organism_id).name }}
             </td>
-            <td>{{ model(props.item.model_id).name }}</td>
+            <td>{{ model(job.model_id).name }}</td>
             <td>
-              {{ props.item.status }}
+              {{ job.status }}
               <v-progress-circular
                 indeterminate
                 color="primary"
                 class="ml-2"
                 :width="3"
                 :size="25"
-                v-if="
-                  props.item.status === 'STARTED' ||
-                    props.item.status === 'PENDING'
-                "
+                v-if="job.status === 'STARTED' || job.status === 'PENDING'"
               ></v-progress-circular>
             </td>
-            <td>{{ props.item.created | moment("D MMM YYYY, HH:mm") }}</td>
+            <td>{{ job.created | moment("D MMM YYYY, HH:mm") }}</td>
             <td>
               <router-link
-                :to="{ name: 'jobDetails', params: { id: props.item.id } }"
+                :to="{ name: 'jobDetails', params: { id: job.id } }"
                 class="link"
                 ><v-btn color="primary" flat>Details</v-btn></router-link
               >

@@ -65,14 +65,14 @@
             :items="modifications"
             item-key="type + id"
           >
-            <template v-slot:items="props">
+            <template v-slot:items="{ item: modification }">
               <!-- Added reaction -->
-              <td v-if="props.item.type === 'added_reaction'">
-                Added reaction
+              <td v-if="modification.type === 'added_reaction'">
+                Added reaction {{ modification.id }}
               </td>
-              <td v-if="props.item.type === 'added_reaction'">
-                <span v-if="props.item.name !== null">
-                  {{ props.item.name }} ({{ props.item.id }})
+              <td v-if="modification.type === 'added_reaction'">
+                <span v-if="modification.name !== null">
+                  {{ modification.name }} ({{ modification.id }})
                 </span>
                 <v-progress-circular
                   v-else
@@ -81,10 +81,10 @@
                   :width="1"
                 ></v-progress-circular>
               </td>
-              <td v-if="props.item.type === 'added_reaction'">
+              <td v-if="modification.type === 'added_reaction'">
                 <span
-                  v-if="props.item.reactionString !== null"
-                  v-html="props.item.reactionString"
+                  v-if="modification.reactionString !== null"
+                  v-html="modification.reactionString"
                 />
                 <v-progress-circular
                   v-else
@@ -95,12 +95,12 @@
               </td>
 
               <!-- Reaction knockout -->
-              <td v-if="props.item.type === 'reaction_knockout'">
+              <td v-if="modification.type === 'reaction_knockout'">
                 Reaction knockout
               </td>
-              <td v-if="props.item.type === 'reaction_knockout'">
-                <span v-if="props.item.name !== null">
-                  {{ props.item.name }} ({{ props.item.id }})
+              <td v-if="modification.type === 'reaction_knockout'">
+                <span v-if="modification.name !== null">
+                  {{ modification.name }} ({{ modification.id }})
                 </span>
                 <v-progress-circular
                   v-else
@@ -109,10 +109,10 @@
                   :width="1"
                 ></v-progress-circular>
               </td>
-              <td v-if="props.item.type === 'reaction_knockout'">
+              <td v-if="modification.type === 'reaction_knockout'">
                 <span
-                  v-if="props.item.reactionString !== null"
-                  v-html="props.item.reactionString"
+                  v-if="modification.reactionString !== null"
+                  v-html="modification.reactionString"
                 />
                 <v-progress-circular
                   v-else
@@ -123,12 +123,12 @@
               </td>
 
               <!-- Gene knockout -->
-              <td v-if="props.item.type === 'gene_knockout'">
+              <td v-if="modification.type === 'gene_knockout'">
                 Gene knockout
               </td>
-              <td v-if="props.item.type === 'gene_knockout'">
-                <span v-if="props.item.name !== null">
-                  {{ props.item.name }} ({{ props.item.id }})
+              <td v-if="modification.type === 'gene_knockout'">
+                <span v-if="modification.name !== null">
+                  {{ modification.name }} ({{ modification.id }})
                 </span>
                 <v-progress-circular
                   v-else
@@ -137,11 +137,11 @@
                   :width="1"
                 ></v-progress-circular>
               </td>
-              <td v-if="props.item.type === 'gene_knockout'">
-                <span v-if="props.item.reactions !== null">
+              <td v-if="modification.type === 'gene_knockout'">
+                <span v-if="modification.reactions !== null">
                   <p
                     class="mb-0"
-                    v-for="reaction in props.item.reactions"
+                    v-for="reaction in modification.reactions"
                     :key="reaction.id"
                   >
                     {{ reaction.name }} ({{ reaction.bigg_id }})
@@ -156,19 +156,19 @@
               </td>
 
               <!-- Edited bounds -->
-              <td v-if="props.item.type === 'edited_bounds'">
+              <td v-if="modification.type === 'edited_bounds'">
                 Modified bounds
               </td>
-              <td v-if="props.item.type === 'edited_bounds'">
-                {{ props.item.name }} ({{ props.item.id }})
+              <td v-if="modification.type === 'edited_bounds'">
+                {{ modification.name }} ({{ modification.id }})
               </td>
-              <td v-if="props.item.type === 'edited_bounds'">
-                Bounds set from {{ props.item.lowerBound }} to
-                {{ props.item.upperBound }}
+              <td v-if="modification.type === 'edited_bounds'">
+                Bounds set from {{ modification.lowerBound }} to
+                {{ modification.upperBound }}
               </td>
 
               <td>
-                <v-btn flat icon @click="clearModification(props.item)">
+                <v-btn flat icon @click="clearModification(modification)">
                   <v-icon>delete</v-icon>
                 </v-btn>
               </td>

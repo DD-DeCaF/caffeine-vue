@@ -63,7 +63,7 @@
                 <td>{{ props.item.design.gene_knockouts.length }}</td>
               </tr>
             </template>
-            <template v-slot:expand="props">
+            <template v-slot:expand="{ item: design }">
               <tr>
                 <td>
                   <v-checkbox hide-details class="hidden"></v-checkbox>
@@ -74,25 +74,19 @@
                 <td align="rigth" width="15%">
                   <div class="link-list">
                     <div
-                      v-for="(reactionKnockin, index) in props.item.design
+                      v-for="(reactionKnockin, index) in design.design
                         .reaction_knockins"
                       :key="index"
                     >
                       <div v-if="index < 10">
                         <a
                           :href="
-                            reactionLink(
-                              reactionKnockin,
-                              props.item.method,
-                              true
-                            )
+                            reactionLink(reactionKnockin, design.method, true)
                           "
                           class="link"
                           target="_blank"
                         >
-                          {{
-                            getReactionId(reactionKnockin, props.item.method)
-                          }}
+                          {{ getReactionId(reactionKnockin, design.method) }}
                         </a>
                       </div>
                       <div
@@ -101,22 +95,16 @@
                       >
                         <a
                           :href="
-                            reactionLink(
-                              reactionKnockin,
-                              props.item.method,
-                              true
-                            )
+                            reactionLink(reactionKnockin, design.method, true)
                           "
                           class="link"
                           target="_blank"
                         >
-                          {{
-                            getReactionId(reactionKnockin, props.item.method)
-                          }}
+                          {{ getReactionId(reactionKnockin, design.method) }}
                         </a>
                       </div>
                     </div>
-                    <div v-if="props.item.design.reaction_knockins.length > 10">
+                    <div v-if="design.design.reaction_knockins.length > 10">
                       <a
                         @click="showAllReactionKnockins = true"
                         :hidden="showAllReactionKnockins"
@@ -130,18 +118,14 @@
                 <td align="rigth" width="15%">
                   <div class="link-list">
                     <div
-                      v-for="(reactionKnockout, index) in props.item.design
+                      v-for="(reactionKnockout, index) in design.design
                         .reaction_knockouts"
                       :key="index"
                     >
                       <div v-if="index < 10">
                         <a
                           :href="
-                            reactionLink(
-                              reactionKnockout,
-                              props.item.method,
-                              false
-                            )
+                            reactionLink(reactionKnockout, design.method, false)
                           "
                           class="link"
                           target="_blank"
@@ -155,11 +139,7 @@
                       >
                         <a
                           :href="
-                            reactionLink(
-                              reactionKnockout,
-                              props.item.method,
-                              false
-                            )
+                            reactionLink(reactionKnockout, design.method, false)
                           "
                           class="link"
                           target="_blank"
@@ -168,9 +148,7 @@
                         </a>
                       </div>
                     </div>
-                    <div
-                      v-if="props.item.design.reaction_knockouts.length > 10"
-                    >
+                    <div v-if="design.design.reaction_knockouts.length > 10">
                       <a
                         @click="showAllReactionKnockouts = true"
                         :hidden="showAllReactionKnockouts"
@@ -184,7 +162,7 @@
                 <td align="rigth" width="15%">
                   <div class="link-list">
                     <div
-                      v-for="(geneKnockout, index) in props.item.design
+                      v-for="(geneKnockout, index) in design.design
                         .gene_knockouts"
                       :key="index"
                     >
@@ -211,7 +189,7 @@
                         </a>
                       </div>
                     </div>
-                    <div v-if="props.item.design.gene_knockouts.length > 10">
+                    <div v-if="design.design.gene_knockouts.length > 10">
                       <a
                         @click="showAllGeneKnockouts = true"
                         :hidden="showAllGeneKnockouts"

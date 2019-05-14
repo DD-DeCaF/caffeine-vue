@@ -15,13 +15,13 @@
           class="elevation-8"
           :pagination.sync="pagination"
         >
-          <template v-slot:items="props">
-            <td>{{ props.item.name }}</td>
+          <template v-slot:items="{ item: project }">
+            <td>{{ project.name }}</td>
             <td>
-              <v-icon slot="activator" @click="editItem(props.item)">
+              <v-icon slot="activator" @click="editItem(project)">
                 edit
               </v-icon>
-              <v-icon slot="activator" @click="deleteItem(props.item)">
+              <v-icon slot="activator" @click="deleteItem(project)">
                 delete
               </v-icon>
             </td>
