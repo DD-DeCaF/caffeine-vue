@@ -216,7 +216,7 @@ export default Vue.extend({
         return model.id === 15 && model.name === "e_coli_core";
       });
 
-      if (!organism || !model) {
+      if (!organism || !model || dataDriven) {
         this.addCard(name, null, null, "pfba", dataDriven);
       } else {
         this.addCard(name, organism, model, "pfba", dataDriven);

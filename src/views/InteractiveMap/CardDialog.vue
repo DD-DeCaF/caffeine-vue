@@ -24,9 +24,11 @@
                 label="Organism"
                 :items="organisms"
                 v-model="card.organism"
+                :loading="isLoadingOrganism"
+                :disabled="card.dataDriven"
                 item-text="name"
                 item-value="id"
-                :hint="modificationsHint"
+                :hint="organismHint"
                 persistent-hint
                 return-object
                 @change="onOrganismChange"
@@ -71,6 +73,7 @@
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
             @load-data-error="$emit('load-data-error')"
+            @set-loading-organism="setLoadingOrganism"
           />
         </v-container>
       </v-form>
@@ -110,6 +113,7 @@ export default Vue.extend({
   },
   data: () => ({
     showDialog: false,
+    isLoadingOrganism: false,
     methods: [
       { id: "fba", name: "Flux Balance Analysis (FBA)" },
       { id: "pfba", name: "Parsimonious FBA" },
@@ -128,9 +132,19 @@ export default Vue.extend({
       return this.$store.state.organisms.organisms;
     },
     modelsByOrganism() {
+      if (!this.card.organism) {
+        return [];
+      }
       return this.$store.state.models.models.filter(model => {
         return model.organism_id === this.card.organism.id;
       });
+    },
+    organismHint() {
+      if (this.card.dataDriven) {
+        return "This will update based on the strain used for the experiment.";
+      } else {
+        return this.modificationsHint;
+      }
     },
     modificationsHint() {
       if (this.modifications.length > 0) {
@@ -148,6 +162,9 @@ export default Vue.extend({
       // correspondingly.
       // TODO: Choose a default preferred model.
       this.card.model = null;
+    },
+    setLoadingOrganism(isLoading) {
+      this.isLoadingOrganism = isLoading;
     }
   }
 });

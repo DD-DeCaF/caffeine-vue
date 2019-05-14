@@ -140,11 +140,32 @@ export default Vue.extend({
         });
     },
     "card.condition"() {
+      this.card.organism = null;
+      this.card.conditionData = null;
+
       if (!this.card.condition) {
-        this.card.conditionData = null;
         return;
       }
-      this.card.conditionData = null;
+
+      // Load the organism based on conditions strain
+      this.$emit("is-loading-organism", true);
+      axios
+        .get(
+          `${settings.apis.warehouse}/strains/${this.card.condition.strain_id}`
+        )
+        .then(response => {
+          this.card.organism = this.$store.getters["organisms/getOrganismById"](
+            response.data.organism_id
+          );
+        })
+        .catch(error => {
+          this.$emit("load-data-error");
+        })
+        .then(() => {
+          this.$emit("is-loading-organism", false);
+        });
+
+      // Load condition data
       this.isLoadingConditionData = true;
       axios
         .get(
