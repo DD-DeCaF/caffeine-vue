@@ -79,6 +79,7 @@
             item-value="id"
             return-object
             :rules="productRules"
+            :loading="isLoadingProducts"
             clearable
             placeholder="e.g., ethanol"
           >
@@ -204,6 +205,7 @@ export default Vue.extend({
         RuleHandler
       >,
       productOptions: [] as ProductItem[],
+      isLoadingProducts: true,
       isAerobic: false,
       showAdvanced: false,
       bigg: false,
@@ -256,6 +258,9 @@ export default Vue.extend({
         })
         .catch((error: Error) => {
           this.$store.commit("setFetchError", error, { root: true });
+        })
+        .finally(() => {
+          this.isLoadingProducts = false;
         });
     },
     selectModels(project: ProjectItem, organism: OrganismItem): void {
