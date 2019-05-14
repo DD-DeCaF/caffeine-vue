@@ -253,6 +253,11 @@ export default Vue.extend({
     },
     modelRules(): RuleHandler[] {
       return [this.modelOkayRule, v => !!v || "Model is required"];
+    },
+    hasEdits(): boolean {
+      return (
+        !!this.project || !!this.organism || !!this.product || !!this.model
+      );
     }
   },
   watch: {
@@ -320,7 +325,7 @@ export default Vue.extend({
     this.fetchProducts();
   },
   beforeRouteLeave(to: Route, from: Route, next: NextHandler) {
-    if (!this.isSubmitted) {
+    if (!this.isSubmitted && this.hasEdits) {
       const answer = window.confirm(
         "Do you really want to leave? You have pending changes."
       );
