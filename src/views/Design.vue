@@ -173,15 +173,35 @@ import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
 import NewProject from "@/components/NewProject.vue";
 import NewOrganism from "@/components/NewOrganism.vue";
 import NewModel from "@/components/NewModel.vue";
-import {
-  Nullable,
-  RuleHandler,
-  NextHandler,
-  RuleOutcome
-} from "@/types/general";
+import { NextHandler } from "@/router";
+import { RuleHandler, RuleOutcome } from "@/types/forms";
 
 interface ProductItem {
   name: string;
+}
+
+interface DesignState {
+  isValid: boolean;
+  project?: ProjectItem;
+  projectRules: ReadonlyArray<RuleHandler>;
+  isProjectCreationDialogVisible: boolean;
+  organism?: OrganismItem;
+  organismRules: ReadonlyArray<RuleHandler>;
+  isOrganismCreationDialogVisible: boolean;
+  product?: ProductItem;
+  productRules: ReadonlyArray<RuleHandler>;
+  productOptions: ProductItem[];
+  isLoadingProducts: boolean;
+  isAerobic: boolean;
+  showAdvanced: boolean;
+  bigg: boolean;
+  rhea: boolean;
+  model?: ModelItem;
+  isModelCreationDialogVisible: boolean;
+  maxPredictions: number;
+  predictionRules: ReadonlyArray<RuleHandler>;
+  isSubmitted: boolean;
+  hasSubmissionError: boolean;
 }
 
 export default Vue.extend({
@@ -191,30 +211,24 @@ export default Vue.extend({
     NewOrganism,
     NewModel
   },
-  data() {
+  data(): DesignState {
     return {
       isValid: false,
-      project: null as Nullable<ProjectItem>,
-      projectRules: [v => !!v || "Project is required"] as ReadonlyArray<
-        RuleHandler
-      >,
+      project: undefined,
+      projectRules: [v => !!v || "Project is required"],
       isProjectCreationDialogVisible: false,
-      organism: null as Nullable<OrganismItem>,
-      organismRules: [v => !!v || "Organism is required"] as ReadonlyArray<
-        RuleHandler
-      >,
+      organism: undefined,
+      organismRules: [v => !!v || "Organism is required"],
       isOrganismCreationDialogVisible: false,
-      product: null as Nullable<ProductItem>,
-      productRules: [v => !!v || "Product is required"] as ReadonlyArray<
-        RuleHandler
-      >,
-      productOptions: [] as ProductItem[],
+      product: undefined,
+      productRules: [v => !!v || "Product is required"],
+      productOptions: [],
       isLoadingProducts: true,
       isAerobic: false,
       showAdvanced: false,
       bigg: false,
       rhea: true,
-      model: null as Nullable<ModelItem>,
+      model: undefined,
       isModelCreationDialogVisible: false,
       maxPredictions: 3,
       predictionRules: [
@@ -245,7 +259,7 @@ export default Vue.extend({
         return this.allModels.filter(
           (model: ModelItem) =>
             model.organism_id === this.organism.id &&
-            (model.project_id === null || model.project_id === this.project.id)
+            (model.project_id == null || model.project_id === this.project.id)
         );
       } else {
         return [];

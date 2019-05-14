@@ -1,5 +1,5 @@
 import Vue from "vue";
-import Router, { NavigationGuard } from "vue-router";
+import Router, { NavigationGuard, RawLocation } from "vue-router";
 import store from "@/store";
 import sessionStore from "@/store/modules/session";
 import Home from "./views/Home.vue";
@@ -14,6 +14,10 @@ import Projects from "./views/Projects.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import TermsOfService from "./views/TermsOfService.vue";
 import NotFound from "./views/NotFound.vue";
+
+// FIXME (Moritz Beber): In future we would like to import this from vue-router.
+// See https://github.com/vuejs/vue-router/issues/2758
+export type NextHandler = (to?: RawLocation | false | Function | void) => void;
 
 Vue.use(Router);
 
