@@ -100,7 +100,7 @@
               <v-spacer></v-spacer>
               <v-btn icon>
                 <v-icon>{{
-                  showAdvanced ? "keyboard_arrow_down" : "keyboard_arrow_up"
+                  showAdvanced ? "expand_less" : "expand_more"
                 }}</v-icon>
               </v-btn>
             </v-card-actions>
