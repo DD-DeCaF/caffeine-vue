@@ -114,10 +114,7 @@
                 :class="{ dead: production === 0 }"
               >
                 {{ production | round }}
-                <em>
-                  mmol/gDW/h
-                  <sup>-1</sup>
-                </em>
+                <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
             </div>
