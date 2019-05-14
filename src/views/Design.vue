@@ -126,8 +126,7 @@
                   item-text="name"
                   item-value="id"
                   return-object
-                  :rules="modelRules()"
-                  clearable
+                  :rules="modelRules"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
@@ -174,7 +173,12 @@ import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
 import NewProject from "@/components/NewProject.vue";
 import NewOrganism from "@/components/NewOrganism.vue";
 import NewModel from "@/components/NewModel.vue";
-import { Nullable, RuleHandler, NextHandler } from "@/types/general";
+import {
+  Nullable,
+  RuleHandler,
+  NextHandler,
+  RuleOutcome
+} from "@/types/general";
 
 interface ProductItem {
   name: string;
@@ -211,11 +215,10 @@ export default Vue.extend({
       bigg: false,
       rhea: true,
       model: null as Nullable<ModelItem>,
-      modelOptions: [] as ModelItem[],
       isModelCreationDialogVisible: false,
       maxPredictions: 3,
       predictionRules: [
-        (v: number) => (v > 0 && v <= 10) || "Must be between 1 and 10."
+        (v: number) => (v > 0 && v <= 10) || "Must be between 1 and 10"
       ],
       isSubmitted: false,
       hasSubmissionError: false
@@ -233,14 +236,32 @@ export default Vue.extend({
     },
     allModels(): ModelItem[] {
       return this.$store.state.models.models;
+    },
+    modelOkay() {
+      return !!this.project && !!this.organism;
+    },
+    modelOptions(): ModelItem[] {
+      if (this.modelOkay) {
+        return this.allModels.filter(
+          (model: ModelItem) =>
+            model.organism_id === this.organism.id &&
+            (model.project_id === null || model.project_id === this.project.id)
+        );
+      } else {
+        return [];
+      }
+    },
+    modelRules(): RuleHandler[] {
+      return [this.modelOkayRule, v => !!v || "Model is required"];
     }
   },
   watch: {
-    project(project: ProjectItem): void {
-      this.selectModels(project, this.organism);
-    },
-    organism(organism: OrganismItem): void {
-      this.selectModels(this.project, organism);
+    modelOkay(isOkay: boolean): void {
+      if (isOkay) {
+        this.model = organism2ModelMapping[this.organism.id];
+      } else {
+        this.model = undefined;
+      }
     }
   },
   methods: {
@@ -249,6 +270,16 @@ export default Vue.extend({
     },
     onNewOrganism(organism: OrganismItem): void {
       this.organism = organism;
+    },
+    onNewModel(model: ModelItem): void {
+      this.model = model;
+    },
+    modelOkayRule(): RuleOutcome {
+      if (this.modelOkay) {
+        return true;
+      } else {
+        return "Please first select a project and organism";
+      }
     },
     fetchProducts(): void {
       axios
@@ -262,31 +293,6 @@ export default Vue.extend({
         .finally(() => {
           this.isLoadingProducts = false;
         });
-    },
-    selectModels(project: ProjectItem, organism: OrganismItem): void {
-      if (project == null || organism == null) {
-        this.modelOptions = [];
-        return;
-      }
-      this.modelOptions = this.allModels.filter(
-        (model: ModelItem) =>
-          model.organism_id === this.organism.id &&
-          (model.project_id === null || model.project_id === this.project.id)
-      );
-      this.model = organism2ModelMapping[this.organism.id];
-    },
-    modelRules(): RuleHandler[] {
-      const rules: RuleHandler[] = [];
-      rules.push(
-        () =>
-          (this.project != null && this.organism != null) ||
-          "Please first select a project and organism"
-      );
-      rules.push(v => !!v || "Model is required");
-      return rules;
-    },
-    onNewModel(model: ModelItem): void {
-      this.model = model;
     },
     onSubmit(): void {
       this.isSubmitted = true;

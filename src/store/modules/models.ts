@@ -14,7 +14,7 @@ export interface ModelItem {
 }
 
 export const organism2ModelMapping = {
-  "1": 1
+  "2": 10
 };
 
 export default {
