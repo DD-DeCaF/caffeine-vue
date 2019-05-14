@@ -168,9 +168,9 @@ import * as settings from "@/utils/settings";
 import { OrganismItem } from "@/store/modules/organisms";
 import { ProjectItem } from "@/store/modules/projects";
 import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
-import NewProject from "./shared/NewProject.vue";
-import NewOrganism from "./shared/NewOrganism.vue";
-import NewModel from "./shared/NewModel.vue";
+import NewProject from "@/components/NewProject.vue";
+import NewOrganism from "@/components/NewOrganism.vue";
+import NewModel from "@/components/NewModel.vue";
 import { Nullable, RuleHandler, NextHandler } from "@/types/general";
 
 interface ProductItem {
