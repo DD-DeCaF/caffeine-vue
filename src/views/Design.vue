@@ -49,7 +49,6 @@
             :rules="organismRules"
             clearable
             placeholder="e.g., Escherichia coli"
-            class="font-italic"
           >
             <template v-slot:prepend-item>
               <v-btn
@@ -60,6 +59,9 @@
                 New organism
               </v-btn>
               <v-divider></v-divider>
+            </template>
+            <template v-slot:selection="{item}">
+              <span v-text="item.name" class="font-italic"></span>
             </template>
             <template v-slot:item="data">
               <v-list-tile-content
