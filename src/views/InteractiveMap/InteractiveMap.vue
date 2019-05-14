@@ -59,7 +59,7 @@
           <v-list>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard">
+                <v-list-tile @click="addDefaultCard(false)">
                   <v-list-tile-title v-on="on">Design</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -67,7 +67,7 @@
             </v-tooltip>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDataDrivenCard">
+                <v-list-tile @click="addDefaultCard(true)">
                   <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -88,6 +88,7 @@
           @remove-card="removeCard"
           @simulate-card="simulate"
           @load-model-error="hasLoadModelError = true"
+          @load-data-error="hasLoadDataError = true"
         />
       </v-container>
     </v-navigation-drawer>
@@ -101,6 +102,10 @@
     <v-snackbar color="error" v-model="hasLoadModelError" :timeout="6000">
       The model could not be loaded, please try updating the card's model.
       Certain features will not work properly without the model.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasLoadDataError" :timeout="6000">
+      Experimental data could not be loaded. Please try again in a few moments,
+      or contact us if the problem persists.
     </v-snackbar>
   </div>
 </template>
@@ -131,7 +136,8 @@ export default Vue.extend({
     playingInterval: null,
     hasSimulationError: false,
     hasLoadMapError: false,
-    hasLoadModelError: false
+    hasLoadModelError: false,
+    hasLoadDataError: false
   }),
   computed: {
     maps() {
@@ -182,7 +188,7 @@ export default Vue.extend({
       // Add a default card. Chain promises to ensure that data is available.
       this.$store.state.models.modelsPromise.then(() => {
         this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard();
+          this.addDefaultCard(false);
         });
       });
     },
@@ -198,7 +204,8 @@ export default Vue.extend({
           this.hasLoadMapError = true;
         });
     },
-    addDefaultCard() {
+    addDefaultCard(dataDriven) {
+      const name = dataDriven ? "Data driven" : "Design";
       // Select the default preferred organism and related model.
       // Note: Expecting organisms and models to be already loaded into state.
       // TODO: Use hardcoded list of preferred models for organisms
@@ -210,16 +217,12 @@ export default Vue.extend({
       });
 
       if (!organism || !model) {
-        this.addCard("Design", null, null, "pfba");
+        this.addCard(name, null, null, "pfba", dataDriven);
       } else {
-        this.addCard("Design", organism, model, "pfba");
+        this.addCard(name, organism, model, "pfba", dataDriven);
       }
     },
-    addDataDrivenCard() {
-      // TODO
-      alert("Not implemented");
-    },
-    addCard(name, organism, model, method) {
+    addCard(name, organism, model, method, dataDriven) {
       const card = {
         uuid: uuidv4(),
         name: name,
@@ -228,6 +231,8 @@ export default Vue.extend({
         isLoadingModel: false,
         fullModel: null,
         method: method,
+        dataDriven: dataDriven,
+        // Design card fields
         objective: {
           reaction: null,
           maximize: true
@@ -236,6 +241,13 @@ export default Vue.extend({
         reactionKnockouts: [],
         geneKnockouts: [],
         editedBounds: [],
+        // Data-driven card fields
+        experiment: null,
+        condition: null,
+        conditionData: null,
+        conditionWarnings: [],
+        conditionErrors: [],
+        // General simulation fields
         isSimulating: false,
         hasSimulationError: false,
         hasLoadModelError: false,
@@ -283,16 +295,25 @@ export default Vue.extend({
       }
     },
     simulate(card) {
+      // Reset the card
+      card.fluxes = null;
+      card.growthRate = null;
+
       if (card.model === null) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).
-        card.fluxes = null;
-        card.growthRate = null;
         return;
       }
 
-      // Add card operations
+      if (!card.dataDriven) {
+        this.simulateDesignCard(card);
+      } else {
+        this.simulateDataDrivenCard(card);
+      }
+    },
+    simulateDesignCard(card) {
+      // Collect card operations from modifications
       const reactionAdditions = card.reactionAdditions.map(reaction => ({
         operation: "add",
         type: "reaction",
@@ -329,13 +350,49 @@ export default Vue.extend({
           upper_bound: reaction.upperBound
         }
       }));
-      const operations = [
+      this.postSimulation(card, [
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
-      ];
+      ]);
+    },
+    simulateDataDrivenCard(card) {
+      // Reset warnings and errors
+      card.conditionWarnings = [];
+      card.conditionErrors = [];
 
+      if (!card.conditionData) {
+        return;
+      }
+
+      // We'll be modifying the model before simulating, but just re-use the
+      // loading flag for `isSimulating` to indicate that _something_ is going
+      // on.
+      card.isSimulating = true;
+      card.hasSimulationError = false;
+      axios
+        .post(
+          `${settings.apis.model}/models/${card.model.id}/modify`,
+          card.conditionData
+        )
+        .then(response => {
+          // Note: Don't toggle `card.isSimulating`, because we're still
+          // waiting for the actual simulation to finish.
+          card.conditionWarnings = response.data.warnings;
+          this.postSimulation(card, response.data.operations);
+        })
+        .catch(error => {
+          card.isSimulating = false;
+          card.hasSimulationError = true;
+          this.hasSimulationError = true;
+
+          if (error.response && error.response.data.errors) {
+            card.conditionErrors = error.response.data.errors;
+          }
+        });
+    },
+    postSimulation(card, operations) {
       card.isSimulating = true;
       card.hasSimulationError = false;
       axios
@@ -353,8 +410,6 @@ export default Vue.extend({
           card.fluxes = response.data.flux_distribution;
         })
         .catch(error => {
-          card.growthRate = null;
-          card.fluxes = null;
           card.hasSimulationError = true;
           this.hasSimulationError = true;
         })

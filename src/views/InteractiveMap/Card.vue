@@ -16,6 +16,7 @@
         :modifications="modifications"
         @simulate-card="simulateCard"
         @open-method-help-dialog="showMethodHelpDialog = true"
+        @load-data-error="$emit('load-data-error')"
       />
       <!-- Define the method help dialog here to avoid nested dialogs. -->
       <MethodHelpDialog
@@ -56,7 +57,9 @@
           <v-flex class="text-xs-right">{{ card.method }}</v-flex>
         </v-layout>
       </v-container>
-      <v-container fluid class="pa-0">
+
+      <!-- Design cards -->
+      <v-container v-if="!card.dataDriven" fluid class="pa-0">
         <v-layout>
           <v-flex>Objective:</v-flex>
           <v-flex class="text-xs-right">
@@ -69,26 +72,25 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container fluid class="pa-0">
+      <v-container v-if="!card.dataDriven" fluid class="pa-0">
         <v-layout wrap>
           <v-flex>Modifications:</v-flex>
           <v-flex class="text-xs-right">{{ modifications.length }}</v-flex>
         </v-layout>
       </v-container>
-      <v-container fluid class="pa-0">
+      <v-container v-if="!card.dataDriven" fluid class="pa-0">
         <v-layout wrap>
-          <v-flex>Growth rate:</v-flex>
-          <v-flex class="text-xs-right">
+          <v-flex v-if="card.objective.reaction"
+            >{{ card.objective.reaction.id }} flux:</v-flex
+          >
+          <v-flex class="text-xs-right" v-if="card.objective.reaction">
             <div v-if="!card.isSimulating">
               <span
-                v-if="card.growthRate !== null"
-                :class="{ dead: card.growthRate === 0 }"
+                v-if="production != null"
+                :class="{ dead: production === 0 }"
               >
-                {{ card.growthRate | round }}
-                <em>
-                  h
-                  <sup>-1</sup>
-                </em>
+                {{ production | round }}
+                <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
             </div>
@@ -102,19 +104,39 @@
           </v-flex>
         </v-layout>
       </v-container>
+
+      <!-- Data driven cards -->
+      <v-container v-if="card.dataDriven" fluid class="pa-0">
+        <v-layout>
+          <v-flex>Experiment:</v-flex>
+          <v-flex class="text-xs-right">
+            <span v-if="card.experiment === null"><em>Not selected</em></span>
+            <span v-else>{{ card.experiment.name }}</span>
+          </v-flex>
+        </v-layout>
+      </v-container>
+      <v-container v-if="card.dataDriven" fluid class="pa-0">
+        <v-layout>
+          <v-flex>Conditions:</v-flex>
+          <v-flex class="text-xs-right">
+            <span v-if="card.condition === null"><em>Not selected</em></span>
+            <span v-else>{{ card.condition.name }}</span>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <!-- Shared -->
       <v-container fluid class="pa-0">
         <v-layout wrap>
-          <v-flex v-if="card.objective.reaction"
-            >{{ card.objective.reaction.id }} flux:</v-flex
-          >
-          <v-flex class="text-xs-right" v-if="card.objective.reaction">
+          <v-flex>Growth rate:</v-flex>
+          <v-flex class="text-xs-right">
             <div v-if="!card.isSimulating">
               <span
-                v-if="production != null"
-                :class="{ dead: production === 0 }"
+                v-if="card.growthRate !== null"
+                :class="{ dead: card.growthRate === 0 }"
               >
-                {{ production | round }}
-                <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
+                {{ card.growthRate | round }}
+                <em>h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
             </div>

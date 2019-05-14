@@ -64,7 +64,6 @@ export default Vue.extend({
         loadMap();
       }
     },
-    // TODO: Watch highlight reactions (for data-driven simulations)
     "card.fullModel": {
       // Important note: This watcher *must* run before the
       // `card.reactionAdditions` watcher below, because reactions added to the
@@ -106,6 +105,15 @@ export default Vue.extend({
         this.escherBuilder.set_knockout_genes(geneKnockouts.map(g => g.id));
       }
       this.escherBuilder._update_data(true, true);
+    },
+    "card.conditionData"() {
+      if (!this.card || !this.card.conditionData) {
+        this.escherBuilder.set_highlight_reactions([]);
+        return;
+      }
+      this.escherBuilder.set_highlight_reactions(
+        this.card.conditionData.measurements.map(m => m.id)
+      );
     },
     "card.fluxes"(fluxes) {
       // Update the flux distribution

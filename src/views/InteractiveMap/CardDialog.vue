@@ -60,9 +60,17 @@
           </v-layout>
 
           <CardDialogDesign
+            v-if="!card.dataDriven"
             :card="card"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
+          />
+          <CardDialogDataDriven
+            v-else
+            :card="card"
+            :modifications="modifications"
+            @simulate-card="$emit('simulate-card')"
+            @load-data-error="$emit('load-data-error')"
           />
         </v-container>
       </v-form>
@@ -92,11 +100,13 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import * as bigg from "@/utils/bigg";
 import CardDialogDesign from "@/views/InteractiveMap/CardDialogDesign.vue";
+import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
 
 export default Vue.extend({
   name: "CardDialog",
   components: {
-    CardDialogDesign
+    CardDialogDesign,
+    CardDialogDataDriven
   },
   data: () => ({
     showDialog: false,
