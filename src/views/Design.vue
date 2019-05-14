@@ -210,6 +210,9 @@ export default Vue.extend({
       modelOptions: [] as ModelItem[],
       isModelCreationDialogVisible: false,
       maxPredictions: 3,
+      predictionRules: [
+        (v: number) => (v > 0 && v <= 10) || "Must be between 1 and 10."
+      ],
       isSubmitted: false,
       hasSubmissionError: false
     };
@@ -226,16 +229,6 @@ export default Vue.extend({
     },
     allModels(): ModelItem[] {
       return this.$store.state.models.models;
-    },
-    predictionRules(): RuleHandler[] {
-      const rules: RuleHandler[] = [];
-      rules.push((v: number) => {
-        return (
-          (v > 0 && v <= process.env.VUE_APP_MAX_PREDICTIONS) ||
-          `Must be between 0 and ${process.env.VUE_APP_MAX_PREDICTIONS}.`
-        );
-      });
-      return rules;
     }
   },
   watch: {
