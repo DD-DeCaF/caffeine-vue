@@ -162,24 +162,20 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Route, RawLocation } from "vue-router";
+import { Route } from "vue-router";
 import axios, { AxiosResponse } from "axios";
-import * as settings from "@/settings";
+import * as settings from "@/utils/settings";
 import { OrganismItem } from "@/store/modules/organisms";
 import { ProjectItem } from "@/store/modules/projects";
 import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
 import NewProject from "./shared/NewProject.vue";
 import NewOrganism from "./shared/NewOrganism.vue";
 import NewModel from "./shared/NewModel.vue";
+import { Nullable, RuleHandler, NextHandler } from "@/types/general";
 
 interface ProductItem {
   name: string;
 }
-
-type Nullable<T> = T | null | undefined;
-type RuleOutcome = string | true;
-type RuleHandler = (any) => RuleOutcome;
-type NextHandler = (to?: RawLocation | false | Function | void) => void;
 
 export default Vue.extend({
   name: "Design",
