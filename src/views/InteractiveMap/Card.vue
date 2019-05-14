@@ -209,10 +209,12 @@ export default Vue.extend({
   },
   computed: {
     titleColor() {
-      if (this.card.hasSimulationError || this.card.hasLoadModelError) {
-        return "error";
-      } else if (this.isSelected) {
-        return "primary";
+      if (this.isSelected) {
+        if (this.card.hasSimulationError || this.card.hasLoadModelError) {
+          return "error";
+        } else {
+          return "primary";
+        }
       } else {
         return "grey";
       }
