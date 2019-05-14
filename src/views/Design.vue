@@ -60,12 +60,12 @@
               </v-btn>
               <v-divider></v-divider>
             </template>
-            <template v-slot:selection="{item}">
-              <span v-text="item.name" class="font-italic"></span>
+            <template v-slot:selection="{ item: organism }">
+              <span v-text="organism.name" class="font-italic"></span>
             </template>
-            <template v-slot:item="data">
+            <template v-slot:item="{ item: organism }">
               <v-list-tile-content
-                v-text="data.item.name"
+                v-text="organism.name"
                 class="font-italic"
               ></v-list-tile-content>
             </template>
