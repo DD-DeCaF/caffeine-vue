@@ -15,13 +15,29 @@
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">bug_report</v-icon>
                   <div class="body-1">
-                    Organism:<br /><strong>{{ organism.name }}</strong>
+                    Organism:<br /><strong v-if="organism">{{
+                      organism.name
+                    }}</strong>
+                    <v-progress-circular
+                      v-else
+                      indeterminate
+                      color="primary"
+                      :width="2"
+                      :size="15"
+                    ></v-progress-circular>
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">
                   <v-icon class="mr-2">rounded_corner</v-icon>
                   <div class="body-1">
-                    Model:<br /><strong>{{ model.name }}</strong>
+                    Model:<br /><strong v-if="model">{{ model.name }}</strong>
+                    <v-progress-circular
+                      v-else
+                      indeterminate
+                      color="primary"
+                      :width="2"
+                      :size="15"
+                    ></v-progress-circular>
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">

@@ -4,7 +4,14 @@
       <span class="red--text"
         >There are no pathways to
         <strong>{{ prediction.product_name }}</strong> in
-        <strong>{{ organism.name }}</strong
+        <strong v-if="organism">{{ organism.name }}</strong>
+        <v-progress-circular
+          v-else
+          indeterminate
+          color="primary"
+          :width="2"
+          :size="15"
+        ></v-progress-circular
         >.</span
       >
     </template>
