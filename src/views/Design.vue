@@ -245,6 +245,7 @@ export default Vue.extend({
     // TODO (Moritz Beber): Selection of organism in future should depend on the
     //  selected project, i.e., you can only select public organisms and
     //  organisms within that project.
+    // See https://github.com/DD-DeCaF/caffeine-vue/issues/42
     organismOptions(): OrganismItem[] {
       return this.$store.state.organisms.organisms;
     },

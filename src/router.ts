@@ -16,7 +16,7 @@ import TermsOfService from "./views/TermsOfService.vue";
 import NotFound from "./views/NotFound.vue";
 
 // FIXME (Moritz Beber): In future we would like to import this from vue-router.
-// See https://github.com/vuejs/vue-router/issues/2758
+// This is tracked in https://github.com/DD-DeCaF/caffeine-vue/issues/40
 export type NextHandler = (to?: RawLocation | false | Function | void) => void;
 
 Vue.use(Router);
