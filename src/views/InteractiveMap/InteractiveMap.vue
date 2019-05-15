@@ -131,7 +131,6 @@ export default Vue.extend({
     escherBuilder: null,
     currentMapId: null,
     mapData: null,
-    cards: [],
     selectedCard: null,
     playingInterval: null,
     hasSimulationError: false,
@@ -140,6 +139,9 @@ export default Vue.extend({
     hasLoadDataError: false
   }),
   computed: {
+    cards() {
+      return this.$store.state.interactiveMap.cards;
+    },
     maps() {
       // Sort maps by model name, then map name
       const maps: any[] = [...this.$store.state.maps.maps];
@@ -254,7 +256,7 @@ export default Vue.extend({
         growthRate: null,
         fluxes: null
       };
-      this.cards.push(card);
+      this.$store.commit("interactiveMap/addCard", card);
       this.selectedCard = card;
       this.simulate(card);
     },
@@ -263,7 +265,7 @@ export default Vue.extend({
         // Removing the current card - be sure to unset the reference.
         this.selectedCard = null;
       }
-      this.cards.splice(this.cards.indexOf(card), 1);
+      this.$store.commit("interactiveMap/removeCard", card);
     },
     selectCard(card) {
       this.selectedCard = card;

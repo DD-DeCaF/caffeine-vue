@@ -8,6 +8,7 @@ import maps from "./modules/maps";
 import models from "./modules/models";
 import organisms from "./modules/organisms";
 import projects from "./modules/projects";
+import interactiveMap from "./modules/interactiveMap";
 
 Vue.use(Vuex);
 
@@ -20,7 +21,8 @@ export default new Vuex.Store({
     maps,
     models,
     organisms,
-    projects
+    projects,
+    interactiveMap
   },
   state: {
     fetchDataError: null,
