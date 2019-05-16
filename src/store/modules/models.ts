@@ -13,6 +13,12 @@ export interface ModelItem {
   model_serialized?: object;
 }
 
+// TODO (Moritz Beber): This mapping needs to be expanded to all organisms.
+// See https://github.com/DD-DeCaF/caffeine-vue/issues/41
+export const organism2ModelMapping = {
+  "2": 10
+};
+
 export default {
   namespaced: true,
   state: {
