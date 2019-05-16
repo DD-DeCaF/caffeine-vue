@@ -24,7 +24,7 @@
         <v-layout column justify-space-between fill-height>
           <v-list>
             <v-list-group 
-              v-if="!activeProjectID"
+              v-if="!$store.state.currentlyActiveProject"
               v-model="isExpanded"
             >
               <template v-slot:activator>
@@ -59,7 +59,7 @@
               </v-list-tile-action>
 
               <v-list-tile-content>
-                <v-list-tile-title>{{ project(activeProjectID).name }}</v-list-tile-title>
+                <v-list-tile-title>{{ project($store.state.currentlyActiveProject).name }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
@@ -235,7 +235,6 @@ export default Vue.extend({
     drawer: false,
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
-    activeProjectID: null,
     isExpanded: true,
   }),
   computed: {
@@ -305,13 +304,12 @@ export default Vue.extend({
   },
   methods: {
     setActiveProject(projectID) {
-      this.activeProjectID = projectID;
-      console.log(this.projectPrimaryColor(this.activeProjectID));
-      this.$vuetify.theme.primary = this.projectPrimaryColor(this.activeProjectID);
+      this.$store.commit("setCurrentlyActiveProject", projectID);
+      this.$vuetify.theme.primary = this.projectPrimaryColor(projectID);
     },
     returnToDefault() {
       this.$vuetify.theme.primary = colors.blue.base;
-      this.activeProjectID = null;
+      this.$store.commit("setCurrentlyActiveProject", null);
     },
     projectPrimaryColor(projectID){
       const sortedColors = Object.values(this.sensibleColors).sort()
