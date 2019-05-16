@@ -45,11 +45,8 @@
       <v-flex class="mr-2">
         <v-card>
           <v-subheader>Genotype changes</v-subheader>
-          <v-list
-            v-for="(genotype, index) in card.conditionData.genotype"
-            :key="index"
-          >
-            <v-list-tile v-for="gene in genotype.split(',')" :key="gene">
+          <v-list>
+            <v-list-tile v-for="gene in genotypes" :key="gene">
               <v-list-tile-content>
                 <v-list-tile-title v-text="gene"></v-list-tile-title>
               </v-list-tile-content>
@@ -193,6 +190,16 @@ export default Vue.extend({
   computed: {
     experiments() {
       return this.$store.state.experiments.experiments;
+    },
+    genotypes() {
+      if (!this.card.conditionData) {
+        return [];
+      }
+      const genesFlattened: object[] = [];
+      this.card.conditionData.genotype.forEach(geneString => {
+        geneString.split(",").forEach(gene => genesFlattened.push(gene));
+      });
+      return genesFlattened;
     }
   }
 });
