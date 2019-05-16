@@ -23,7 +23,7 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
-            <v-list-group>
+            <v-list-group v-if="!activeProjectID">
               <template v-slot:activator>
               <v-list-tile>
                 <v-list-tile-content>
@@ -34,7 +34,7 @@
             <v-list-tile 
               v-for="project in availableProjects"
               :key="project.id"
-              @click="''"
+              @click="setActiveProject(project.id)"
             >
                 <v-list-tile-action>
                   <v-icon color='primary'>folder</v-icon>
@@ -44,7 +44,21 @@
                   <v-list-tile-title>{{ project.name }}</v-list-tile-title>
                 </v-list-tile-content>
             </v-list-tile>
-            </v-list-group> 
+            </v-list-group>
+            <v-list-tile 
+              v-else
+              @click="activeProjectID = null"
+              class="primary"
+            >
+              <v-list-tile-action>
+                <v-icon>chevron_left</v-icon>
+              </v-list-tile-action>
+
+              <v-list-tile-content>
+                <v-list-tile-title>{{ project(activeProjectID).name }}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+
             <v-list-tile to="/">
               <v-list-tile-action>
                 <v-icon>home</v-icon>
@@ -206,6 +220,7 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
+import { mapGetters } from "vuex";
 
 export default Vue.extend({
   components: {
@@ -214,7 +229,8 @@ export default Vue.extend({
   data: () => ({
     drawer: false,
     isProjectCreationDialogVisible: false,
-    isOrganismCreationDialogVisible: false
+    isOrganismCreationDialogVisible: false,
+    activeProjectID: null,
   }),
   computed: {
     isAuthenticated() {
@@ -263,9 +279,16 @@ export default Vue.extend({
     },
     availableProjects() {
       return this.$store.state.projects.projects;
+    },
+    ...mapGetters({
+      project: "projects/getProjectById"
+    })
+  },
+  methods: {
+    setActiveProject(projectID) {
+      this.activeProjectID = projectID;
     }
   },
-  methods: {},
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
     // requests behave as expected. (See the interceptors for details)
@@ -277,6 +300,6 @@ export default Vue.extend({
     // Now fetch the user data, as session/token logic is ready and will ensure
     // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
-  }
+  },
 });
 </script>
