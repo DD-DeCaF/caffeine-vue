@@ -40,7 +40,7 @@
               @click="setActiveProject(project.id)"
             >
                 <v-list-tile-action>
-                  <v-icon :color="camelToKebab(projectPrimaryColor(project.id))">folder</v-icon>
+                  <v-icon :color="projectPrimaryColor(project.id)">folder</v-icon>
                 </v-list-tile-action>
 
                 <v-list-tile-content>
@@ -51,7 +51,8 @@
             <v-list-tile 
               v-else
               @click="returnToDefault"
-              class="primary"
+              class="primary white--text"
+              dark
             >
               <v-list-tile-action>
                 <v-icon>chevron_left</v-icon>
@@ -288,43 +289,33 @@ export default Vue.extend({
     ...mapGetters({
       project: "projects/getProjectById"
     }),
-    selectedProjectColor() {
-      return colors[this.projectPrimaryColor(this.activeProjectID)]
-    }
+    sensibleColors() {
+        let obj = {};
+        for (let color in colors) {
+          if (['yellow', 'shades'].indexOf(color) === -1){
+            for (let shade in colors[color]) {
+              if (shade.includes("base") || shade.includes("darken2")) {
+                obj[String(color + "_" + shade)] = colors[color][shade]
+              }
+            }
+          }
+        }
+        return obj 
+      }
   },
   methods: {
     setActiveProject(projectID) {
       this.activeProjectID = projectID;
-      console.log(this.$vuetify);
-      this.$vuetify.theme.primary = this.selectedProjectColor;
+      console.log(this.projectPrimaryColor(this.activeProjectID));
+      this.$vuetify.theme.primary = this.projectPrimaryColor(this.activeProjectID);
     },
     returnToDefault() {
       this.$vuetify.theme.primary = colors.blue.base;
       this.activeProjectID = null;
     },
     projectPrimaryColor(projectID){
-      const mainColors = [
-        'amber',
-        'blue',
-        'blueGrey',
-        'brown',
-        'cyan',
-        'deepOrange',
-        'deepPurple',
-        'green',
-        'grey',
-        'indigo',
-        'lightBlue',
-        'lightGreen',
-        'lime',
-        'orange',
-        'pink',
-        'purple',
-        'red',
-        'teal',
-        'yellow',
-      ];
-      return String(mainColors[ projectID % mainColors.length])
+      const sortedColors = Object.values(this.sensibleColors).sort()
+      return String(sortedColors[ projectID % Object.keys(this.sensibleColors).length])
     },
     camelToKebab(string) {
       return string.replace(/\W+/g, '-')
