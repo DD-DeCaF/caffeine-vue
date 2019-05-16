@@ -23,32 +23,34 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
-            <v-list-group 
+            <v-list-group
               v-if="!$store.state.currentlyActiveProject"
               v-model="isExpanded"
             >
               <template v-slot:activator>
-              <v-list-tile>
-                <v-list-tile-content>
-                  <v-list-tile-title>Projects</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-            <v-list-tile 
-              v-for="project in availableProjects"
-              :key="project.id"
-              @click="setActiveProject(project.id)"
-            >
+                <v-list-tile>
+                  <v-list-tile-content>
+                    <v-list-tile-title>Projects</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </template>
+              <v-list-tile
+                v-for="project in availableProjects"
+                :key="project.id"
+                @click="setActiveProject(project.id)"
+              >
                 <v-list-tile-action>
-                  <v-icon :color="projectPrimaryColor(project.id)">folder</v-icon>
+                  <v-icon :color="projectPrimaryColor(project.id)"
+                    >folder</v-icon
+                  >
                 </v-list-tile-action>
 
                 <v-list-tile-content>
                   <v-list-tile-title>{{ project.name }}</v-list-tile-title>
                 </v-list-tile-content>
-            </v-list-tile>
+              </v-list-tile>
             </v-list-group>
-            <v-list-tile 
+            <v-list-tile
               v-else
               @click="returnToDefault"
               class="primary white--text"
@@ -59,7 +61,9 @@
               </v-list-tile-action>
 
               <v-list-tile-content>
-                <v-list-tile-title>{{ project($store.state.currentlyActiveProject).name }}</v-list-tile-title>
+                <v-list-tile-title>{{
+                  project($store.state.currentlyActiveProject).name
+                }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
@@ -235,7 +239,7 @@ export default Vue.extend({
     drawer: false,
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
-    isExpanded: true,
+    isExpanded: true
   }),
   computed: {
     isAuthenticated() {
@@ -289,18 +293,18 @@ export default Vue.extend({
       project: "projects/getProjectById"
     }),
     sensibleColors() {
-        let obj = {};
-        for (let color in colors) {
-          if (['yellow', 'shades'].indexOf(color) === -1){
-            for (let shade in colors[color]) {
-              if (shade.includes("base") || shade.includes("darken2")) {
-                obj[String(color + "_" + shade)] = colors[color][shade]
-              }
+      let obj = {};
+      for (let color in colors) {
+        if (["yellow", "shades"].indexOf(color) === -1) {
+          for (let shade in colors[color]) {
+            if (shade.includes("base") || shade.includes("darken2")) {
+              obj[String(color + "_" + shade)] = colors[color][shade];
             }
           }
         }
-        return obj 
       }
+      return obj;
+    }
   },
   methods: {
     setActiveProject(projectID) {
@@ -311,15 +315,18 @@ export default Vue.extend({
       this.$vuetify.theme.primary = colors.blue.base;
       this.$store.commit("setCurrentlyActiveProject", null);
     },
-    projectPrimaryColor(projectID){
-      const sortedColors = Object.values(this.sensibleColors).sort()
-      return String(sortedColors[ projectID % Object.keys(this.sensibleColors).length])
+    projectPrimaryColor(projectID) {
+      const sortedColors = Object.values(this.sensibleColors).sort();
+      return String(
+        sortedColors[projectID % Object.keys(this.sensibleColors).length]
+      );
     },
     camelToKebab(string) {
-      return string.replace(/\W+/g, '-')
-                .replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
-   }
-
+      return string
+        .replace(/\W+/g, "-")
+        .replace(/([a-z\d])([A-Z])/g, "$1-$2")
+        .toLowerCase();
+    }
   },
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
@@ -332,6 +339,6 @@ export default Vue.extend({
     // Now fetch the user data, as session/token logic is ready and will ensure
     // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
-  },
+  }
 });
 </script>

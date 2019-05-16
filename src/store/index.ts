@@ -37,7 +37,7 @@ export default new Vuex.Store({
       unauthenticated: "Please log in or register to use this functionality!",
       publicData: "Public data can not be modified."
     },
-    currentlyActiveProject: null,
+    currentlyActiveProject: null
   },
   mutations: {
     setFetchError(state, error) {
