@@ -278,7 +278,9 @@ export default Vue.extend({
   watch: {
     modelOkay(isOkay: boolean): void {
       if (isOkay) {
-        this.model = organism2ModelMapping[this.organism.id];
+        this.model = this.$store.getters["models/getModelById"](
+          organism2ModelMapping[this.organism.id]
+        );
       } else {
         this.model = undefined;
       }
