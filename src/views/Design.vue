@@ -17,29 +17,6 @@
       <v-card-text>
         <v-form v-model="isValid">
           <v-autocomplete
-            name="project"
-            label="Project"
-            v-model="project"
-            :items="projectOptions"
-            item-text="name"
-            item-value="id"
-            return-object
-            :rules="projectRules"
-            clearable
-            required
-          >
-            <template v-slot:prepend-item>
-              <v-btn
-                depressed
-                @click.stop="isProjectCreationDialogVisible = true"
-              >
-                <v-icon class="mr-4">add_circle</v-icon>
-                New project
-              </v-btn>
-              <v-divider></v-divider>
-            </template>
-          </v-autocomplete>
-          <v-autocomplete
             name="organism"
             label="Organism"
             v-model="organism"
@@ -86,6 +63,29 @@
             placeholder="e.g., ethanol"
             required
           >
+          </v-autocomplete>
+          <v-autocomplete
+            name="project"
+            label="Project"
+            v-model="project"
+            :items="projectOptions"
+            item-text="name"
+            item-value="id"
+            return-object
+            :rules="projectRules"
+            clearable
+            required
+          >
+            <template v-slot:prepend-item>
+              <v-btn
+                depressed
+                @click.stop="isProjectCreationDialogVisible = true"
+              >
+                <v-icon class="mr-4">add_circle</v-icon>
+                New project
+              </v-btn>
+              <v-divider></v-divider>
+            </template>
           </v-autocomplete>
           <v-switch
             v-model="isAerobic"
