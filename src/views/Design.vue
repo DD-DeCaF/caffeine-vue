@@ -179,7 +179,6 @@ import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
 import NewProject from "@/components/NewProject.vue";
 import NewOrganism from "@/components/NewOrganism.vue";
 import NewModel from "@/components/NewModel.vue";
-import { NextHandler } from "@/router";
 import { RuleHandler, RuleOutcome } from "@/types/forms";
 
 interface ProductItem {
@@ -353,7 +352,7 @@ export default Vue.extend({
   created() {
     this.fetchProducts();
   },
-  beforeRouteLeave(to: Route, from: Route, next: NextHandler) {
+  beforeRouteLeave(to: Route, from: Route, next) {
     if (!this.isSubmitted && this.hasEdits) {
       const answer = window.confirm(
         "Do you really want to leave? You have pending changes."
