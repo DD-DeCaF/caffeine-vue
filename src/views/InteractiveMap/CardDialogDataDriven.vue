@@ -5,7 +5,7 @@
         class="mr-2"
         label="Experiment"
         :items="experiments"
-        v-model="card.experiment"
+        v-model="cardExperiment"
         item-text="name"
         placeholder="Choose the experiment you wish to simulate..."
         return-object
@@ -15,7 +15,7 @@
         class="ml-2"
         label="Conditions"
         :items="conditions"
-        v-model="card.condition"
+        v-model="cardCondition"
         :loading="isLoadingConditions"
         :disabled="conditions === []"
         item-text="name"
@@ -150,7 +150,10 @@ export default Vue.extend({
     },
     "card.condition"() {
       this.conditionOrganism = null;
-      this.card.conditionData = null;
+      this.$store.commit("interactiveMap/updateCard", {
+        uuid: this.card.uuid,
+        props: { conditionData: null }
+      });
 
       if (!this.card.condition) {
         return;
@@ -181,7 +184,10 @@ export default Vue.extend({
           `${settings.apis.warehouse}/conditions/${this.card.condition.id}/data`
         )
         .then(response => {
-          this.card.conditionData = response.data;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: this.card.uuid,
+            props: { conditionData: response.data }
+          });
         })
         .catch(error => {
           this.$emit("load-data-error");
@@ -216,6 +222,28 @@ export default Vue.extend({
         geneString.split(",").forEach(gene => genesFlattened.push(gene));
       });
       return genesFlattened;
+    },
+    cardExperiment: {
+      get() {
+        return this.card.experiment;
+      },
+      set(experiment) {
+        this.$store.commit("interactiveMap/updateCard", {
+          uuid: this.card.uuid,
+          props: { experiment: experiment }
+        });
+      }
+    },
+    cardCondition: {
+      get() {
+        return this.card.condition;
+      },
+      set(condition) {
+        this.$store.commit("interactiveMap/updateCard", {
+          uuid: this.card.uuid,
+          props: { condition: condition }
+        });
+      }
     }
   }
 });

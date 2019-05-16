@@ -123,7 +123,7 @@
           :items="reactions"
           :loading="card.isLoadingModel"
           :disabled="card.fullModel === null"
-          v-model="card.objective.reaction"
+          v-model="objectiveReaction"
           :item-text="reactionDisplay"
           item-value="id"
           :hint="objectiveHint"
@@ -133,13 +133,13 @@
           return-object
           clearable
           @change="$emit('simulate-card')"
-          @click:clear="$nextTick(() => (card.objective.reaction = null))"
+          @click:clear="$nextTick(() => (objectiveReaction = null))"
         ></v-autocomplete>
       </v-flex>
 
       <v-flex shrink>
         <v-switch
-          v-model="card.objective.maximize"
+          v-model="objectiveDirection"
           color="primary"
           :label="card.objective.maximize ? 'Maximize' : 'Minimize'"
           @change="$emit('simulate-card')"
@@ -250,7 +250,6 @@
 import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
-import * as bigg from "@/utils/bigg";
 
 export default Vue.extend({
   name: "CardDialogDesign",
@@ -354,6 +353,28 @@ export default Vue.extend({
         return [];
       }
       return this.card.fullModel.model_serialized.genes;
+    },
+    objectiveReaction: {
+      get() {
+        return this.card.objective.reaction;
+      },
+      set(reaction) {
+        this.$store.commit("interactiveMap/setObjectiveReaction", {
+          uuid: this.card.uuid,
+          reaction: reaction
+        });
+      }
+    },
+    objectiveDirection: {
+      get() {
+        return this.card.objective.maximize;
+      },
+      set(maximize) {
+        this.$store.commit("interactiveMap/setObjectiveDirection", {
+          uuid: this.card.uuid,
+          maximize: maximize
+        });
+      }
     }
   },
   methods: {
@@ -395,43 +416,16 @@ export default Vue.extend({
               id: m.bigg_id,
               name: m.name,
               compartment: m.compartment_bigg_id,
-              charge: m.stoichiometry
+              stoichiometry: m.stoichiometry
               // formula: null,
               // annotation: null
             }))
           };
 
-          // Add the reaction to card modifications.
-          this.card.reactionAdditions.push(reaction);
-
-          // Add the reaction to the full model for Escher to find later.
-          // Update the structure for cobrapy format.
-          const model = this.card.fullModel.model_serialized;
-          model.reactions.push({
-            id: reaction.id,
-            name: reaction.name,
-            lower_bound: reaction.lowerBound,
-            upper_bound: reaction.upperBound,
-            gene_reaction_rule: "",
-            metabolites: Object.assign(
-              {},
-              ...reaction.metabolites.map(m => ({
-                [`${m.id}_${m.compartment}`]: m.charge
-              }))
-            )
-          });
-          // Also add any new metabolites.
-          reaction.metabolites.forEach(newMetabolite => {
-            // Add the compartment postfix to the metabolite id
-            const metabolite = {
-              ...newMetabolite,
-              id: `${newMetabolite.id}_${newMetabolite.compartment}`
-            };
-            // Skip it if the metabolite already exists in the model.
-            if (model.metabolites.some(m => m.id === metabolite.id)) {
-              return;
-            }
-            model.metabolites.push(metabolite);
+          // Add the reaction to the card.
+          this.$store.commit("interactiveMap/addReaction", {
+            uuid: this.card.uuid,
+            reaction: reaction
           });
 
           this.$emit("simulate-card");
@@ -441,10 +435,16 @@ export default Vue.extend({
         });
     },
     knockoutReaction() {
-      const reaction = bigg.lookupReaction(this.knockoutReactionItem.id);
       // Add the reaction only if it's not already added.
-      if (!this.card.reactionKnockouts.some(r => r.id === reaction.id)) {
-        this.card.reactionKnockouts.push(reaction);
+      if (
+        !this.card.reactionKnockouts.some(
+          r => r.id === this.knockoutReactionItem.id
+        )
+      ) {
+        this.$store.dispatch("interactiveMap/knockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: this.knockoutReactionItem.id
+        });
       }
       this.$nextTick(() => {
         this.knockoutReactionItem = null;
@@ -452,13 +452,14 @@ export default Vue.extend({
       this.$emit("simulate-card");
     },
     knockoutGene() {
-      const gene = bigg.lookupGene(
-        this.card.fullModel.model_serialized.id,
-        this.knockoutGeneItem.id
-      );
       // Add the gene only if it's not already added.
-      if (!this.card.geneKnockouts.some(g => g.id === gene.id)) {
-        this.card.geneKnockouts.push(gene);
+      if (
+        !this.card.geneKnockouts.some(g => g.id === this.knockoutGeneItem.id)
+      ) {
+        this.$store.dispatch("interactiveMap/knockoutGene", {
+          uuid: this.card.uuid,
+          geneId: this.knockoutGeneItem.id
+        });
       }
       this.$nextTick(() => {
         this.knockoutGeneItem = null;
@@ -474,19 +475,22 @@ export default Vue.extend({
         return;
       }
 
-      const existingModification = this.card.editedBounds.find(bounds => {
-        return bounds.id === this.editBoundsReaction.id;
-      });
-      if (existingModification !== undefined) {
-        // Update the existing modification
-        existingModification.lowerBound = lowerBound;
-        existingModification.upperBound = upperBound;
+      const payload = {
+        uuid: this.card.uuid,
+        reactionId: this.editBoundsReaction.id,
+        lowerBound: lowerBound,
+        upperBound: upperBound
+      };
+      if (
+        !this.card.editedBounds.find(r => r.id === this.editBoundsReaction.id)
+      ) {
+        // Add new modification
+        this.$store.dispatch("interactiveMap/editBounds", payload);
       } else {
-        const reaction = bigg.lookupReaction(this.editBoundsReaction.id);
-        reaction.lowerBound = lowerBound;
-        reaction.upperBound = upperBound;
-        this.card.editedBounds.push(reaction);
+        // Update existing modification
+        this.$store.commit("interactiveMap/updateEditedBounds", payload);
       }
+
       this.$refs.editBoundsForm.reset();
       this.$emit("simulate-card");
     },
@@ -496,37 +500,37 @@ export default Vue.extend({
         // the full model here. Note that the user won't be able to add the same
         // reaction again, because we're excluding reactions that already exist
         // in the model.
-        this.card.reactionAdditions.splice(
-          this.card.reactionAdditions.findIndex(
-            reaction => reaction.id === modification.id
-          ),
-          1
-        );
+        this.$store.commit("interactiveMap/undoAddReaction", {
+          uuid: this.card.uuid,
+          reactionId: modification.id
+        });
         // If the bounds were edited on the added reaction, remove those too.
-        this.card.editedBounds.splice(
-          this.card.editedBounds.findIndex(
-            bounds => bounds.id === modification.id
-          ),
-          1
-        );
+        this.$store.commit("interactiveMap/undoEditBounds", {
+          uuid: this.card.uuid,
+          reactionId: modification.id
+        });
         // Adding and then knocking out the same reaction makes little sense,
         // but is technically possible, so remove the knockouts too if that's
         // the case.
-        this.card.reactionKnockouts.splice(
-          this.card.reactionKnockouts.indexOf(modification.id),
-          1
-        );
+        this.$store.commit("interactiveMap/undoKnockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: modification.id
+        });
       } else if (modification.type === "reaction_knockout") {
-        const index = this.card.reactionKnockouts.indexOf(modification.id);
-        this.card.reactionKnockouts.splice(index, 1);
+        this.$store.commit("interactiveMap/undoKnockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: modification.id
+        });
       } else if (modification.type === "gene_knockout") {
-        const index = this.card.geneKnockouts.indexOf(modification.id);
-        this.card.geneKnockouts.splice(index, 1);
+        this.$store.commit("interactiveMap/undoKnockoutGene", {
+          uuid: this.card.uuid,
+          geneId: modification.id
+        });
       } else if (modification.type === "edited_bounds") {
-        const index = this.card.editedBounds.findIndex(
-          bounds => bounds.id === modification.id
-        );
-        this.card.editedBounds.splice(index, 1);
+        this.$store.commit("interactiveMap/undoEditBounds", {
+          uuid: this.card.uuid,
+          reactionId: modification.id
+        });
       }
       this.$emit("simulate-card");
     }

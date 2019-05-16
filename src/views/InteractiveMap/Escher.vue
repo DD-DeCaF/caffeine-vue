@@ -32,7 +32,6 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import * as bigg from "@/utils/bigg";
 
 export default Vue.extend({
   name: "Escher",
@@ -230,55 +229,65 @@ export default Vue.extend({
         bounds: null
       };
     },
-    knockoutReaction(reactionId: string) {
-      const reaction = bigg.lookupReaction(reactionId);
-
-      // Check if the reaction is already knocked out.
-      const index = this.card.reactionKnockouts.findIndex(
-        reaction => reaction.id === reactionId
-      );
-      if (index !== -1) {
-        // This reaction is already knocked out; undo the knockout.
-        this.card.reactionKnockouts.splice(index, 1);
-      } else {
-        this.card.reactionKnockouts.push(reaction);
-      }
-      this.$emit("simulate-card", this.card);
-    },
-    knockoutGene(geneId: string) {
-      const gene = bigg.lookupGene(
-        this.card.fullModel.model_serialized.id,
-        geneId
-      );
-
-      const index = this.card.geneKnockouts.findIndex(
-        gene => gene.id === geneId
-      );
-      if (index !== -1) {
-        // This gene is already knocked out; undo it
-        this.card.geneKnockouts.splice(index, 1);
-      } else {
-        this.card.geneKnockouts.push(gene);
-      }
-      this.$emit("simulate-card", this.card);
-    },
     setObjective(reactionId: string) {
-      const reaction = bigg.lookupReaction(reactionId);
-
       if (
         this.card.objective.reaction !== null &&
-        this.card.objective.reaction.id === reaction.id
+        this.card.objective.reaction.id === reactionId
       ) {
         // This is already the objective; undo it and reset to growth
-        this.card.objective.reaction = null;
-        this.card.objective.maximize = true;
+        this.$store.commit("interactiveMap/setObjectiveReaction", {
+          uuid: this.card.uuid,
+          reaction: null
+        });
+        this.$store.commit("interactiveMap/setObjectiveDirection", {
+          uuid: this.card.uuid,
+          maximize: true
+        });
       } else {
-        this.card.objective.reaction = reaction;
+        this.$store.dispatch("interactiveMap/setObjective", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
       }
       this.$emit("simulate-card", this.card);
     },
     setObjectiveDirection(reactionId: string) {
-      this.card.objective.maximize = !this.card.objective.maximize;
+      this.$store.commit("interactiveMap/setObjectiveDirection", {
+        uuid: this.card.uuid,
+        maximize: !this.card.objective.maximize
+      });
+      this.$emit("simulate-card", this.card);
+    },
+    knockoutReaction(reactionId: string) {
+      // Both knockout and undo knockout will call this, so depend the behaviour
+      // on whether the reaction is already knocked out.
+      if (this.card.reactionKnockouts.find(r => r.id === reactionId)) {
+        this.$store.commit("interactiveMap/undoKnockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
+      } else {
+        this.$store.dispatch("interactiveMap/knockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
+      }
+      this.$emit("simulate-card", this.card);
+    },
+    knockoutGene(geneId: string) {
+      // Both knockout and undo knockout will call this, so depend the behaviour
+      // on whether the gene is already knocked out.
+      if (this.card.geneKnockouts.find(g => g.id === geneId)) {
+        this.$store.commit("interactiveMap/undoKnockoutGene", {
+          uuid: this.card.uuid,
+          geneId: geneId
+        });
+      } else {
+        this.$store.dispatch("interactiveMap/knockoutGene", {
+          uuid: this.card.uuid,
+          geneId: geneId
+        });
+      }
       this.$emit("simulate-card", this.card);
     },
     editBounds(reactionId: string, lower: string, upper: string) {
@@ -290,31 +299,27 @@ export default Vue.extend({
         return;
       }
 
-      const existingReaction = this.card.editedBounds.find(
-        r => r.id === reactionId
-      );
-      if (existingReaction === undefined) {
+      const payload = {
+        uuid: this.card.uuid,
+        reactionId: reactionId,
+        lowerBound: lowerBound,
+        upperBound: upperBound
+      };
+      if (!this.card.editedBounds.find(r => r.id === reactionId)) {
         // Add new modification
-        const reaction = bigg.lookupReaction(reactionId);
-        reaction.lowerBound = lowerBound;
-        reaction.upperBound = upperBound;
-        this.card.editedBounds.push(reaction);
+        this.$store.dispatch("interactiveMap/editBounds", payload);
       } else {
         // Update existing modification
-        existingReaction.lowerBound = lowerBound;
-        existingReaction.upperBound = upperBound;
+        this.$store.commit("interactiveMap/updateEditedBounds", payload);
       }
 
       this.$emit("simulate-card", this.card);
     },
     resetBounds(reactionId: string) {
-      const index = this.card.editedBounds.findIndex(
-        b => b.reactionId === reactionId
-      );
-      if (index === -1) {
-        return;
-      }
-      this.card.editedBounds.splice(index, 1);
+      this.$store.commit("interactiveMap/undoEditBounds", {
+        uuid: this.card.uuid,
+        reactionId: reactionId
+      });
       this.$emit("simulate-card", this.card);
     }
   },

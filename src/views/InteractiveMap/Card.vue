@@ -181,27 +181,46 @@ export default Vue.extend({
       immediate: true,
       handler() {
         // Reset all modifications when the selected model changes.
-        this.card.reactionAdditions = [];
-        this.card.reactionKnockouts = [];
-        this.card.geneKnockouts = [];
-        this.card.editedBounds = [];
+        this.$store.commit("interactiveMap/updateCard", {
+          uuid: this.card.uuid,
+          props: {
+            reactionAdditions: [],
+            reactionKnockouts: [],
+            geneKnockouts: [],
+            editedBounds: []
+          }
+        });
 
         // Fetch and set the full model
-        this.card.fullModel = null;
-        this.card.hasLoadModelError = false;
+        this.$store.commit("interactiveMap/updateCard", {
+          uuid: this.card.uuid,
+          props: { fullModel: null, hasLoadModelError: false }
+        });
         if (this.card.model !== null) {
-          this.card.isLoadingModel = true;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: this.card.uuid,
+            props: { isLoadingModel: true }
+          });
           axios
             .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
             .then(response => {
-              this.card.fullModel = response.data;
+              this.$store.commit("interactiveMap/updateCard", {
+                uuid: this.card.uuid,
+                props: { fullModel: response.data }
+              });
             })
             .catch(error => {
-              this.card.hasLoadModelError = true;
+              this.$store.commit("interactiveMap/updateCard", {
+                uuid: this.card.uuid,
+                props: { hasLoadModelError: true }
+              });
               this.$emit("load-model-error");
             })
             .then(() => {
-              this.card.isLoadingModel = false;
+              this.$store.commit("interactiveMap/updateCard", {
+                uuid: this.card.uuid,
+                props: { isLoadingModel: false }
+              });
             });
         }
       }
@@ -267,6 +286,7 @@ export default Vue.extend({
     },
     removeCard() {
       this.$emit("remove-card", this.card);
+      this.$store.commit("interactiveMap/removeCard", this.card);
     },
     simulateCard() {
       this.$emit("simulate-card", this.card);

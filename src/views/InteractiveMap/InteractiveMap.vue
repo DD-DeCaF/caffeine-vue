@@ -265,7 +265,6 @@ export default Vue.extend({
         // Removing the current card - be sure to unset the reference.
         this.selectedCard = null;
       }
-      this.$store.commit("interactiveMap/removeCard", card);
     },
     selectCard(card) {
       this.selectedCard = card;
@@ -298,8 +297,10 @@ export default Vue.extend({
     },
     simulate(card) {
       // Reset the card
-      card.fluxes = null;
-      card.growthRate = null;
+      this.$store.commit("interactiveMap/updateCard", {
+        uuid: card.uuid,
+        props: { fluxes: null, growthRate: null }
+      });
 
       if (card.model === null) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
@@ -328,7 +329,7 @@ export default Vue.extend({
           metabolites: Object.assign(
             {},
             ...reaction.metabolites.map(m => ({
-              [`${m.id}_${m.compartment}`]: m.charge
+              [`${m.id}_${m.compartment}`]: m.stoichiometry
             }))
           )
         }
@@ -361,8 +362,10 @@ export default Vue.extend({
     },
     simulateDataDrivenCard(card) {
       // Reset warnings and errors
-      card.conditionWarnings = [];
-      card.conditionErrors = [];
+      this.$store.commit("interactiveMap/updateCard", {
+        uuid: card.uuid,
+        props: { conditionWarnings: [], conditionErrors: [] }
+      });
 
       if (!card.conditionData) {
         return;
@@ -371,8 +374,10 @@ export default Vue.extend({
       // We'll be modifying the model before simulating, but just re-use the
       // loading flag for `isSimulating` to indicate that _something_ is going
       // on.
-      card.isSimulating = true;
-      card.hasSimulationError = false;
+      this.$store.commit("interactiveMap/updateCard", {
+        uuid: card.uuid,
+        props: { isSimulating: true, hasSimulationError: false }
+      });
       axios
         .post(
           `${settings.apis.model}/models/${card.model.id}/modify`,
@@ -381,22 +386,35 @@ export default Vue.extend({
         .then(response => {
           // Note: Don't toggle `card.isSimulating`, because we're still
           // waiting for the actual simulation to finish.
-          card.conditionWarnings = response.data.warnings;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: card.uuid,
+            props: { conditionWarnings: response.data.warnings }
+          });
           this.postSimulation(card, response.data.operations);
         })
         .catch(error => {
-          card.isSimulating = false;
-          card.hasSimulationError = true;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: card.uuid,
+            props: { isSimulating: false, hasSimulationError: true }
+          });
           this.hasSimulationError = true;
 
           if (error.response && error.response.data.errors) {
-            card.conditionErrors = error.response.data.errors;
+            this.$store.commit("interactiveMap/updateCard", {
+              uuid: card.uuid,
+              props: { conditionErrors: error.response.data.errors }
+            });
           }
         });
     },
     postSimulation(card, operations) {
-      card.isSimulating = true;
-      card.hasSimulationError = false;
+      this.$store.commit("interactiveMap/updateCard", {
+        uuid: card.uuid,
+        props: {
+          isSimulating: true,
+          hasSimulationError: false
+        }
+      });
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: card.model.id,
@@ -408,15 +426,26 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          card.growthRate = response.data.growth_rate;
-          card.fluxes = response.data.flux_distribution;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: card.uuid,
+            props: {
+              growthRate: response.data.growth_rate,
+              fluxes: response.data.flux_distribution
+            }
+          });
         })
         .catch(error => {
-          card.hasSimulationError = true;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: card.uuid,
+            props: { hasSimulationError: true }
+          });
           this.hasSimulationError = true;
         })
         .then(response => {
-          card.isSimulating = false;
+          this.$store.commit("interactiveMap/updateCard", {
+            uuid: card.uuid,
+            props: { isSimulating: false }
+          });
         });
     }
   },
