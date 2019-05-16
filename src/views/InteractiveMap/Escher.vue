@@ -164,7 +164,11 @@ export default Vue.extend({
       return fluxesFiltered;
     },
     getObjectState(id: string, type: string) {
-      if (this.card === null || this.card.fullModel === null) {
+      if (
+        this.card === null ||
+        this.card.fullModel === null ||
+        this.card.dataDriven
+      ) {
         return {
           includedInModel: false,
           bounds: {}
