@@ -62,6 +62,7 @@
           <v-subheader>Measurements</v-subheader>
           <v-list>
             <!-- TODO: Handle non-bigg namespaces -->
+            <!-- See: https://github.com/DD-DeCaF/caffeine-vue/issues/46 -->
             <v-list-tile
               v-for="measurement in card.conditionData.measurements"
               :key="measurement.id"
@@ -83,6 +84,7 @@
           <v-subheader>Medium</v-subheader>
           <v-list>
             <!-- TODO: Handle non-chebi namespaces -->
+            <!-- See: https://github.com/DD-DeCaF/caffeine-vue/issues/46 -->
             <v-list-tile
               v-for="medium in card.conditionData.medium"
               :key="medium.id"
