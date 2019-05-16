@@ -23,6 +23,28 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
+            <v-list-group>
+              <template v-slot:activator>
+              <v-list-tile>
+                <v-list-tile-content>
+                  <v-list-tile-title>Projects</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
+            <v-list-tile 
+              v-for="project in availableProjects"
+              :key="project.id"
+              @click="''"
+            >
+                <v-list-tile-action>
+                  <v-icon color='primary'>folder</v-icon>
+                </v-list-tile-action>
+
+                <v-list-tile-content>
+                  <v-list-tile-title>{{ project.name }}</v-list-tile-title>
+                </v-list-tile-content>
+            </v-list-tile>
+            </v-list-group> 
             <v-list-tile to="/">
               <v-list-tile-action>
                 <v-icon>home</v-icon>
@@ -238,6 +260,9 @@ export default Vue.extend({
         // Ignore passed value argument.
         this.$store.commit("setUnauthorizedError", null);
       }
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
     }
   },
   methods: {},
