@@ -26,6 +26,7 @@
             return-object
             :rules="projectRules"
             clearable
+            required
           >
             <template v-slot:prepend-item>
               <v-btn
@@ -49,6 +50,7 @@
             :rules="organismRules"
             clearable
             placeholder="e.g., Escherichia coli"
+            required
           >
             <template v-slot:prepend-item>
               <v-btn
@@ -82,6 +84,7 @@
             :loading="isLoadingProducts"
             clearable
             placeholder="e.g., ethanol"
+            required
           >
           </v-autocomplete>
           <v-switch
@@ -127,6 +130,9 @@
                   item-value="id"
                   return-object
                   :rules="modelRules"
+                  :hint="modelHint"
+                  persistent-hint
+                  required
                 >
                   <template v-slot:prepend-item>
                     <v-btn
@@ -197,6 +203,7 @@ interface DesignState {
   bigg: boolean;
   rhea: boolean;
   model?: ModelItem;
+  modelRules: ReadonlyArray<RuleHandler>;
   isModelCreationDialogVisible: boolean;
   maxPredictions: number;
   predictionRules: ReadonlyArray<RuleHandler>;
@@ -229,6 +236,7 @@ export default Vue.extend({
       bigg: false,
       rhea: true,
       model: undefined,
+      modelRules: [v => !!v || "Model is required"],
       isModelCreationDialogVisible: false,
       maxPredictions: 3,
       predictionRules: [
@@ -252,6 +260,13 @@ export default Vue.extend({
     allModels(): ModelItem[] {
       return this.$store.state.models.models;
     },
+    modelHint() {
+      if (this.modelOkay) {
+        return "";
+      } else {
+        return "Please first select a project and organism";
+      }
+    },
     modelOkay() {
       return !!this.project && !!this.organism;
     },
@@ -265,9 +280,6 @@ export default Vue.extend({
       } else {
         return [];
       }
-    },
-    modelRules(): RuleHandler[] {
-      return [this.modelOkayRule, v => !!v || "Model is required"];
     },
     hasEdits(): boolean {
       return (
