@@ -23,7 +23,10 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
-            <v-list-group v-if="!activeProjectID">
+            <v-list-group 
+              v-if="!activeProjectID"
+              v-model="isExpanded"
+            >
               <template v-slot:activator>
               <v-list-tile>
                 <v-list-tile-content>
@@ -37,7 +40,7 @@
               @click="setActiveProject(project.id)"
             >
                 <v-list-tile-action>
-                  <v-icon color='primary'>folder</v-icon>
+                  <v-icon :color="camelToKebab(projectPrimaryColor(project.id))">folder</v-icon>
                 </v-list-tile-action>
 
                 <v-list-tile-content>
@@ -47,7 +50,7 @@
             </v-list-group>
             <v-list-tile 
               v-else
-              @click="activeProjectID = null"
+              @click="returnToDefault"
               class="primary"
             >
               <v-list-tile-action>
@@ -221,6 +224,7 @@
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
 import { mapGetters } from "vuex";
+import colors from "vuetify/es5/util/colors";
 
 export default Vue.extend({
   components: {
@@ -231,6 +235,7 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
     activeProjectID: null,
+    isExpanded: true,
   }),
   computed: {
     isAuthenticated() {
@@ -282,12 +287,50 @@ export default Vue.extend({
     },
     ...mapGetters({
       project: "projects/getProjectById"
-    })
+    }),
+    selectedProjectColor() {
+      return colors[this.projectPrimaryColor(this.activeProjectID)]
+    }
   },
   methods: {
     setActiveProject(projectID) {
       this.activeProjectID = projectID;
-    }
+      console.log(this.$vuetify);
+      this.$vuetify.theme.primary = this.selectedProjectColor;
+    },
+    returnToDefault() {
+      this.$vuetify.theme.primary = colors.blue.base;
+      this.activeProjectID = null;
+    },
+    projectPrimaryColor(projectID){
+      const mainColors = [
+        'amber',
+        'blue',
+        'blueGrey',
+        'brown',
+        'cyan',
+        'deepOrange',
+        'deepPurple',
+        'green',
+        'grey',
+        'indigo',
+        'lightBlue',
+        'lightGreen',
+        'lime',
+        'orange',
+        'pink',
+        'purple',
+        'red',
+        'teal',
+        'yellow',
+      ];
+      return String(mainColors[ projectID % mainColors.length])
+    },
+    camelToKebab(string) {
+      return string.replace(/\W+/g, '-')
+                .replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
+   }
+
   },
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
