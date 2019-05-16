@@ -232,7 +232,7 @@ export default Vue.extend({
       isLoadingProducts: true,
       isAerobic: false,
       showAdvanced: false,
-      bigg: false,
+      bigg: true,
       rhea: true,
       model: undefined,
       modelRules: [v => !!v || "Model is required"],
