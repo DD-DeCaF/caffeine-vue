@@ -29,6 +29,15 @@
       v-if="isLoadingConditionData"
     ></v-progress-linear>
 
+    <div v-if="organismMismatch" class="mb-2">
+      <v-alert :value="true" type="warning">
+        You are applying experimental data for the strain
+        <em>{{ conditionOrganism.name }}</em> to a model based on a different
+        organism (<em>{{ card.organism.name }}</em
+        >). Some data points may not apply succesfully.
+      </v-alert>
+    </div>
+
     <div v-for="warning in card.conditionWarnings" :key="warning" class="mb-2">
       <v-alert :value="true" type="warning">
         {{ warning }}
@@ -110,6 +119,7 @@ export default Vue.extend({
   name: "CardDialogDataDriven",
   data: () => ({
     conditions: [],
+    conditionOrganism: null,
     isLoadingConditions: false,
     isLoadingConditionData: false
   }),
@@ -139,7 +149,7 @@ export default Vue.extend({
         });
     },
     "card.condition"() {
-      this.card.organism = null;
+      this.conditionOrganism = null;
       this.card.conditionData = null;
 
       if (!this.card.condition) {
@@ -153,9 +163,9 @@ export default Vue.extend({
           `${settings.apis.warehouse}/strains/${this.card.condition.strain_id}`
         )
         .then(response => {
-          this.card.organism = this.$store.getters["organisms/getOrganismById"](
-            response.data.organism_id
-          );
+          this.conditionOrganism = this.$store.getters[
+            "organisms/getOrganismById"
+          ](response.data.organism_id);
         })
         .catch(error => {
           this.$emit("load-data-error");
@@ -190,6 +200,12 @@ export default Vue.extend({
   computed: {
     experiments() {
       return this.$store.state.experiments.experiments;
+    },
+    organismMismatch() {
+      if (!this.card.organism || !this.conditionOrganism) {
+        return false;
+      }
+      return this.card.organism.id != this.conditionOrganism.id;
     },
     genotypes() {
       if (!this.card.conditionData) {
