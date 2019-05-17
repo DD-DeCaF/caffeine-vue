@@ -54,10 +54,33 @@
                   ></v-checkbox>
                 </td>
                 <td>{{ props.item.name }}</td>
-                <td>
+                <td
+                  v-if="
+                    model(props.item.model_id) &&
+                      organism(model(props.item.model_id).organism_id)
+                  "
+                >
                   {{ organism(model(props.item.model_id).organism_id).name }}
                 </td>
-                <td>{{ model(props.item.model_id).name }}</td>
+                <td v-else>
+                  <v-progress-circular
+                    indeterminate
+                    color="primary"
+                    :width="2"
+                    :size="15"
+                  ></v-progress-circular>
+                </td>
+                <td v-if="model(props.item.model_id)">
+                  {{ model(props.item.model_id).name }}
+                </td>
+                <td v-else>
+                  <v-progress-circular
+                    indeterminate
+                    color="primary"
+                    :width="2"
+                    :size="15"
+                  ></v-progress-circular>
+                </td>
                 <td>{{ props.item.design.reaction_knockins.length }}</td>
                 <td>{{ props.item.design.reaction_knockouts.length }}</td>
                 <td>{{ props.item.design.gene_knockouts.length }}</td>
