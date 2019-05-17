@@ -286,6 +286,22 @@ export default Vue.extend({
       this.isLoading = !this.isLoading;
     }
   },
+  watch: {
+    designs: {
+      immediate: true,
+      handler(newValue, oldValue) {
+        if (oldValue === undefined && newValue.length === 0) {
+          this.isLoading = true;
+        } else if (
+          ((oldValue === undefined || oldValue.length === 0) &&
+            newValue.length > 0) ||
+          (oldValue.length === 0 && newValue.length === 0)
+        ) {
+          this.isLoading = false;
+        }
+      }
+    }
+  },
   computed: {
     designs() {
       return this.$store.state.designs.designs;
