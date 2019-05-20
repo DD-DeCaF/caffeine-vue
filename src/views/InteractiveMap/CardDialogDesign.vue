@@ -467,8 +467,8 @@ export default Vue.extend({
       this.$emit("simulate-card");
     },
     editBounds() {
-      const lowerBound = parseInt(this.editBoundsLowerBound);
-      const upperBound = parseInt(this.editBoundsUpperBound);
+      const lowerBound = parseFloat(this.editBoundsLowerBound);
+      const upperBound = parseFloat(this.editBoundsUpperBound);
 
       if (lowerBound > upperBound) {
         this.hasInvalidBoundsError = true;
