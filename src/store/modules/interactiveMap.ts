@@ -7,7 +7,7 @@ import { ModelItem } from "./models";
 
 export interface Metabolite {
   id: string;
-  naem: string;
+  name: string;
   compartmentId: string;
   stoichiometry: number;
 }
