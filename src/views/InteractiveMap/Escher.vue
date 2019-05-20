@@ -53,6 +53,14 @@ export default Vue.extend({
         setTimeout(() => {
           this.escherBuilder.load_map(value);
           this.isLoadingMap = false;
+          // Update the map state, since it will be reset whenever the map is
+          // changed.
+          this.setFullModel();
+          this.setReactionAdditions();
+          this.setReactionKnockouts();
+          this.setGeneKnockouts();
+          this.setConditionData();
+          this.setFluxes();
         }, 10);
       };
 
