@@ -67,7 +67,7 @@ export default {
     updateCard(state, { uuid, props }) {
       const card = state.cards.find(c => c.uuid === uuid);
       Object.keys(props).forEach(key => {
-        card[key] = props[key];
+        Vue.set(card, key, props[key]);
       });
     },
     setObjectiveReaction(state, { uuid, reaction }) {
