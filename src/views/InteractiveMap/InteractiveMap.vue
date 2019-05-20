@@ -194,12 +194,21 @@ export default Vue.extend({
   },
   methods: {
     escherLoaded() {
-      // Add a default card. Chain promises to ensure that data is available.
-      this.$store.state.models.modelsPromise.then(() => {
-        this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard(false);
+      if (this.$store.state.interactiveMap.cards.length > 0) {
+        // Card have been added (user might be visualizing jobs or existing
+        // designs), so select the last card in the list.
+        this.selectedCard = this.$store.state.interactiveMap.cards[
+          this.$store.state.interactiveMap.cards.length - 1
+        ];
+      } else {
+        // Otherwise, add a default card. Chain promises to ensure that data is
+        // available.
+        this.$store.state.models.modelsPromise.then(() => {
+          this.$store.state.organisms.organismsPromise.then(() => {
+            this.addDefaultCard(false);
+          });
         });
-      });
+      }
     },
     changeMap() {
       this.hasLoadMapError = false;
