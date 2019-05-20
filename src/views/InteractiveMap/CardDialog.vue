@@ -44,6 +44,7 @@
                 persistent-hint
                 :rules="[v => !!v || 'Please choose the metabolic model.']"
                 return-object
+                @change="onModelChange"
               ></v-select>
             </v-flex>
             <v-flex xs12 md3>
@@ -199,6 +200,24 @@ export default Vue.extend({
       this.updateCard({
         uuid: this.card.uuid,
         props: { model: null }
+      });
+      // Since the model was updated, trigger `onModelChange` to make sure card
+      // modifications are reset.
+      this.onModelChange();
+    },
+    onModelChange() {
+      // Reset all modifications when the selected model changes.
+      // Note: We cannot simply watch `card.model` with `immediate: true`,
+      // because that would reset modifications when cars are added from other
+      // components, i.e., when visualizing jobs or designs.
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: {
+          reactionAdditions: [],
+          reactionKnockouts: [],
+          geneKnockouts: [],
+          editedBounds: []
+        }
       });
     },
     setLoadingOrganism(isLoading) {

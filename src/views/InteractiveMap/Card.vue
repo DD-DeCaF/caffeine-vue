@@ -181,17 +181,6 @@ export default Vue.extend({
     "card.model": {
       immediate: true,
       handler() {
-        // Reset all modifications when the selected model changes.
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: {
-            reactionAdditions: [],
-            reactionKnockouts: [],
-            geneKnockouts: [],
-            editedBounds: []
-          }
-        });
-
         // Fetch and set the full model
         this.updateCard({
           uuid: this.card.uuid,
