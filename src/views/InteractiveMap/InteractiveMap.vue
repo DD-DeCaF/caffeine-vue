@@ -297,12 +297,6 @@ export default Vue.extend({
       }
     },
     simulate(card) {
-      // Reset the card
-      this.updateCard({
-        uuid: card.uuid,
-        props: { fluxes: null, growthRate: null }
-      });
-
       if (card.model === null) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
