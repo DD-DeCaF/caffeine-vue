@@ -63,6 +63,9 @@ export default Vue.extend({
         loadMap();
       }
     },
+    // Add separate watchers for the different properties on the card, instead
+    // of a single deep watcher on the card, to be able to only update the
+    // relevant portions of the map.
     "card.fullModel": {
       // Important note: This watcher *must* run before the
       // `card.reactionAdditions` watcher below, because reactions added to the
@@ -70,42 +73,66 @@ export default Vue.extend({
       // ordered first here.
       deep: true,
       handler(fullModel) {
-        if (this.card === null || fullModel === null) {
-          this.escherBuilder.load_model(null);
-        } else {
-          this.escherBuilder.load_model(fullModel.model_serialized);
-        }
+        this.setFullModel();
       }
     },
-    "card.reactionAdditions"(reactionAdditions) {
+    "card.reactionAdditions"() {
+      this.setReactionAdditions();
+    },
+    "card.reactionKnockouts"() {
+      this.setReactionKnockouts();
+    },
+    "card.geneKnockouts"() {
+      this.setGeneKnockouts();
+    },
+    "card.conditionData"() {
+      this.setConditionData();
+    },
+    "card.fluxes"() {
+      this.setFluxes();
+    }
+  },
+  methods: {
+    setFullModel() {
+      if (this.card === null || this.card.fullModel === null) {
+        this.escherBuilder.load_model(null);
+      } else {
+        this.escherBuilder.load_model(this.card.fullModel.model_serialized);
+      }
+    },
+    setReactionAdditions() {
       if (this.card === null) {
         this.escherBuilder.set_added_reactions([]);
       } else {
         this.escherBuilder.set_added_reactions(
-          reactionAdditions.filter(r => !r.id.startsWith("DM_")).map(r => r.id)
+          this.card.reactionAdditions
+            .filter(r => !r.id.startsWith("DM_"))
+            .map(r => r.id)
         );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.reactionKnockouts"(reactionKnockouts) {
+    setReactionKnockouts() {
       if (this.card === null) {
         this.escherBuilder.set_knockout_reactions([]);
       } else {
         this.escherBuilder.set_knockout_reactions(
-          reactionKnockouts.map(r => r.id)
+          this.card.reactionKnockouts.map(r => r.id)
         );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.geneKnockouts"(geneKnockouts) {
+    setGeneKnockouts() {
       if (this.card === null) {
         this.escherBuilder.set_knockout_genes([]);
       } else {
-        this.escherBuilder.set_knockout_genes(geneKnockouts.map(g => g.id));
+        this.escherBuilder.set_knockout_genes(
+          this.card.geneKnockouts.map(g => g.id)
+        );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.conditionData"() {
+    setConditionData() {
       if (!this.card || !this.card.conditionData) {
         this.escherBuilder.set_highlight_reactions([]);
         return;
@@ -114,18 +141,18 @@ export default Vue.extend({
         this.card.conditionData.measurements.map(m => m.id)
       );
     },
-    "card.fluxes"(fluxes) {
+    setFluxes() {
       // Update the flux distribution
-      if (this.card === null || fluxes === null) {
+      if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (this.card.method === "fba" || this.card.method == "pfba") {
-          const fluxesFiltered = this.fluxFilter(fluxes);
+          const fluxesFiltered = this.fluxFilter(this.card.fluxes);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
           // previous FVA simulation has been set on the map.
           // TODO: We should improve the escher API here.
-          this.escherBuilder.set_reaction_fva_data(fluxes);
+          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         } else if (
           this.card.method === "fva" ||
           this.card.method == "pfba-fva"
@@ -133,21 +160,19 @@ export default Vue.extend({
           // Render a flux distribution using the average values from the FVA
           // data.
           const fluxesAverage = {};
-          Object.keys(fluxes).map(reaction => {
-            const rxn = fluxes[reaction];
+          Object.keys(this.card.fluxes).map(reaction => {
+            const rxn = this.card.fluxes[reaction];
             const average = (rxn.upper_bound + rxn.lower_bound) / 2;
             fluxesAverage[reaction] = average;
           });
           const fluxesFiltered = this.fluxFilter(fluxesAverage);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set the FVA data for transparency visualization.
-          this.escherBuilder.set_reaction_fva_data(fluxes);
+          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         }
       }
       this.escherBuilder._update_data(true, true);
-    }
-  },
-  methods: {
+    },
     fluxFilter(fluxes) {
       // Exclude fluxes with very low non-zero values, in order to not shift
       // the escher color scale.
