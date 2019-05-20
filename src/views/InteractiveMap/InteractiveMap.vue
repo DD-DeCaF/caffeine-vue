@@ -195,14 +195,19 @@ export default Vue.extend({
   methods: {
     escherLoaded() {
       if (this.$store.state.interactiveMap.cards.length > 0) {
-        // Card have been added (user might be visualizing jobs or existing
-        // designs), so select the last card in the list.
+        // There are already cards in the store - ensure they are all simulated
+        // (cards added from other components won't initially be simulated)
+        this.$store.state.interactiveMap.cards.forEach(card => {
+          this.simulate(card);
+        });
+        // Select the last card in the list by default.
         this.selectedCard = this.$store.state.interactiveMap.cards[
           this.$store.state.interactiveMap.cards.length - 1
         ];
       } else {
-        // Otherwise, add a default card. Chain promises to ensure that data is
-        // available.
+        // No cards are added at this point, so add a default card to provide
+        // the user with some initial data. Chain promises to ensure that data
+        // is available.
         this.$store.state.models.modelsPromise.then(() => {
           this.$store.state.organisms.organismsPromise.then(() => {
             this.addDefaultCard(false);
