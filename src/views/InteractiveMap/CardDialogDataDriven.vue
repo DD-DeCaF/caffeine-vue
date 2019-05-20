@@ -112,6 +112,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 
@@ -150,7 +151,7 @@ export default Vue.extend({
     },
     "card.condition"() {
       this.conditionOrganism = null;
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: this.card.uuid,
         props: { conditionData: null }
       });
@@ -184,7 +185,7 @@ export default Vue.extend({
           `${settings.apis.warehouse}/conditions/${this.card.condition.id}/data`
         )
         .then(response => {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: this.card.uuid,
             props: { conditionData: response.data }
           });
@@ -228,7 +229,7 @@ export default Vue.extend({
         return this.card.experiment;
       },
       set(experiment) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { experiment: experiment }
         });
@@ -239,12 +240,17 @@ export default Vue.extend({
         return this.card.condition;
       },
       set(condition) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { condition: condition }
         });
       }
     }
+  },
+  methods: {
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   }
 });
 </script>

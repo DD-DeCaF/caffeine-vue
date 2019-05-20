@@ -97,6 +97,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialogDesign from "@/views/InteractiveMap/CardDialogDesign.vue";
@@ -150,7 +151,7 @@ export default Vue.extend({
         return this.card.name;
       },
       set(name) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { name: name }
         });
@@ -161,7 +162,7 @@ export default Vue.extend({
         return this.card.organism;
       },
       set(organism) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { organism: organism }
         });
@@ -172,7 +173,7 @@ export default Vue.extend({
         return this.card.model;
       },
       set(model) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { model: model }
         });
@@ -183,7 +184,7 @@ export default Vue.extend({
         return this.card.method;
       },
       set(method) {
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { method: method }
         });
@@ -195,14 +196,17 @@ export default Vue.extend({
       // When selected organism is updated, update the selected model
       // correspondingly.
       // TODO: Choose a default preferred model.
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: this.card.uuid,
         props: { model: null }
       });
     },
     setLoadingOrganism(isLoading) {
       this.isLoadingOrganism = isLoading;
-    }
+    },
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   }
 });
 </script>

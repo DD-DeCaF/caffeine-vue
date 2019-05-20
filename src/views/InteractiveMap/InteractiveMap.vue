@@ -112,6 +112,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
@@ -297,7 +298,7 @@ export default Vue.extend({
     },
     simulate(card) {
       // Reset the card
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: card.uuid,
         props: { fluxes: null, growthRate: null }
       });
@@ -362,7 +363,7 @@ export default Vue.extend({
     },
     simulateDataDrivenCard(card) {
       // Reset warnings and errors
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: card.uuid,
         props: { conditionWarnings: [], conditionErrors: [] }
       });
@@ -374,7 +375,7 @@ export default Vue.extend({
       // We'll be modifying the model before simulating, but just re-use the
       // loading flag for `isSimulating` to indicate that _something_ is going
       // on.
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: card.uuid,
         props: { isSimulating: true, hasSimulationError: false }
       });
@@ -386,21 +387,21 @@ export default Vue.extend({
         .then(response => {
           // Note: Don't toggle `card.isSimulating`, because we're still
           // waiting for the actual simulation to finish.
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: card.uuid,
             props: { conditionWarnings: response.data.warnings }
           });
           this.postSimulation(card, response.data.operations);
         })
         .catch(error => {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: card.uuid,
             props: { isSimulating: false, hasSimulationError: true }
           });
           this.hasSimulationError = true;
 
           if (error.response && error.response.data.errors) {
-            this.$store.commit("interactiveMap/updateCard", {
+            this.updateCard({
               uuid: card.uuid,
               props: { conditionErrors: error.response.data.errors }
             });
@@ -408,7 +409,7 @@ export default Vue.extend({
         });
     },
     postSimulation(card, operations) {
-      this.$store.commit("interactiveMap/updateCard", {
+      this.updateCard({
         uuid: card.uuid,
         props: {
           isSimulating: true,
@@ -426,7 +427,7 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: card.uuid,
             props: {
               growthRate: response.data.growth_rate,
@@ -435,19 +436,22 @@ export default Vue.extend({
           });
         })
         .catch(error => {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: card.uuid,
             props: { hasSimulationError: true }
           });
           this.hasSimulationError = true;
         })
         .then(response => {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: card.uuid,
             props: { isSimulating: false }
           });
         });
-    }
+    },
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   },
   mounted() {
     // Set the chosen map to the preferred default. Wait for a potential fetch

@@ -156,6 +156,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialog from "@/views/InteractiveMap/CardDialog.vue";
@@ -181,7 +182,7 @@ export default Vue.extend({
       immediate: true,
       handler() {
         // Reset all modifications when the selected model changes.
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: {
             reactionAdditions: [],
@@ -192,32 +193,32 @@ export default Vue.extend({
         });
 
         // Fetch and set the full model
-        this.$store.commit("interactiveMap/updateCard", {
+        this.updateCard({
           uuid: this.card.uuid,
           props: { fullModel: null, hasLoadModelError: false }
         });
         if (this.card.model !== null) {
-          this.$store.commit("interactiveMap/updateCard", {
+          this.updateCard({
             uuid: this.card.uuid,
             props: { isLoadingModel: true }
           });
           axios
             .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
             .then(response => {
-              this.$store.commit("interactiveMap/updateCard", {
+              this.updateCard({
                 uuid: this.card.uuid,
                 props: { fullModel: response.data }
               });
             })
             .catch(error => {
-              this.$store.commit("interactiveMap/updateCard", {
+              this.updateCard({
                 uuid: this.card.uuid,
                 props: { hasLoadModelError: true }
               });
               this.$emit("load-model-error");
             })
             .then(() => {
-              this.$store.commit("interactiveMap/updateCard", {
+              this.updateCard({
                 uuid: this.card.uuid,
                 props: { isLoadingModel: false }
               });
@@ -290,7 +291,10 @@ export default Vue.extend({
     },
     simulateCard() {
       this.$emit("simulate-card", this.card);
-    }
+    },
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   }
 });
 </script>
