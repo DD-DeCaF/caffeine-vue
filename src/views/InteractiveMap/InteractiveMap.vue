@@ -1,5 +1,11 @@
 <template>
   <div class="interactive-map fill-height">
+    <v-progress-linear
+      v-if="selectedCard && selectedCard.isSimulating"
+      color="primary"
+      :indeterminate="true"
+      class="my-0"
+    ></v-progress-linear>
     <Escher
       @escher-loaded="escherLoaded"
       @simulate-card="simulate"
