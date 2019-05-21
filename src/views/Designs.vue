@@ -70,10 +70,10 @@
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
-                    'organism' === pagination.sortBy ? 'active' : ''
+                    'organism_id' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('organism')" class="pointer ml-3"
+                  <span @click="changeSort('organism_id')" class="pointer ml-3"
                     >Organism <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -83,10 +83,10 @@
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
-                    'model' === pagination.sortBy ? 'active' : ''
+                    'model_id' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('knockouts')" class="pointer ml-3"
+                  <span @click="changeSort('model_id')" class="pointer ml-3"
                     >Model <v-icon>arrow_upward</v-icon> <br
                   /></span>
                 </th>
