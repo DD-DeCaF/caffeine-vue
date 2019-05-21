@@ -28,18 +28,107 @@
           </v-list>
           <v-data-table
             v-model="selected"
-            :headers="headers"
             :items="designs"
             :expand="expand"
             :pagination.sync="pagination"
             :custom-sort="customSort"
-            :loading="isLoading || isDeleting"
-            select-all="primary"
+            :loading="isLoading"
+            select-all
+            headers-length="7"
           >
             <v-progress-linear
               v-slot:progress
               color="primary"
             ></v-progress-linear>
+             <template v-slot:headers="props">
+              <tr>
+                <th width="5%">
+                  <v-checkbox
+                    :input-value="props.all"
+                    :indeterminate="props.indeterminate"
+                    color="primary"
+                    hide-details
+                    @click.stop="toggleAll"
+                  ></v-checkbox>
+                </th>
+
+                <th width="20%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'name' === pagination.sortBy ? 'active' : ''
+                  ]"
+                >
+                  <span
+                    @click="changeSort('name')"
+                    class="pointer ml-3"
+                    >Name <v-icon>arrow_upward</v-icon><br /></span>
+                </th>
+
+                <th width="15%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'organism' === pagination.sortBy
+                      ? 'active'
+                      : ''
+                  ]"
+                >
+                  <span
+                    @click="changeSort('organism')"
+                    class="pointer ml-3"
+                    >Organism <v-icon>arrow_upward</v-icon><br /></span
+                  >
+                </th>
+
+                <th width="15%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'model' === pagination.sortBy ? 'active' : ''
+                  ]"
+                >
+                  <span @click="changeSort('knockouts')" class="pointer ml-3"
+                    >Model <v-icon>arrow_upward</v-icon> <br /></span>
+                </th>
+
+                <th width="15%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'reaction_knockins' === pagination.sortBy ? 'active' : ''
+                  ]"
+                >
+                  <span @click="changeSort('reaction_knockins')" class="pointer ml-3"
+                    >Added Reactions <v-icon>arrow_upward</v-icon><br /></span
+                  >
+                </th>
+
+                <th width="15%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'reaction_knockouts' === pagination.sortBy ? 'active' : ''
+                  ]"
+                >
+                  <span @click="changeSort('reaction_knockouts')" class="pointer ml-3"
+                    >Reaction Knockouts <v-icon>arrow_upward</v-icon><br /></span
+                  >
+                </th>
+
+                <th width="15%"
+                  :class="[
+                    'column sortable default-cursor',
+                    pagination.descending ? 'desc' : 'asc',
+                    'gene_knockouts' === pagination.sortBy ? 'active' : ''
+                  ]"
+                >
+                  <span @click="changeSort('gene_knockouts')" class="pointer ml-3"
+                    >Gene Knockouts <v-icon>arrow_upward</v-icon><br /></span
+                  >
+                </th>
+              </tr>
+            </template>
             <template v-slot:items="props">
               <tr
                 @click="props.expanded = !props.expanded"
@@ -87,15 +176,11 @@
               </tr>
             </template>
             <template v-slot:expand="{ item: design }">
-              <tr>
-                <td>
-                  <v-checkbox hide-details class="hidden"></v-checkbox>
-                </td>
-                <td align="rigth" width="20%">Name</td>
-                <td align="rigth" width="15%">Organism</td>
-                <td align="rigth" width="15%">Model</td>
-                <td align="rigth" width="15%">
-                  <div class="link-list">
+              <v-container style="padding:0;" class="elevation-8">
+                <v-layout justify-end>
+                    <v-flex style="width:55%; padding:0 24px; box-sizing: border-box;"></v-flex>
+                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
+                                      <div class="link-list">
                     <div
                       v-for="(reactionKnockin, index) in design.design
                         .reaction_knockins"
@@ -136,10 +221,9 @@
                       </a>
                     </div>
                   </div>
-                </td>
-
-                <td align="rigth" width="15%">
-                  <div class="link-list">
+                  </v-flex>
+                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
+                     <div class="link-list">
                     <div
                       v-for="(reactionKnockout, index) in design.design
                         .reaction_knockouts"
@@ -180,10 +264,9 @@
                       </a>
                     </div>
                   </div>
-                </td>
-
-                <td align="rigth" width="15%">
-                  <div class="link-list">
+                  </v-flex>
+                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
+                     <div class="link-list">
                     <div
                       v-for="(geneKnockout, index) in design.design
                         .gene_knockouts"
@@ -221,8 +304,9 @@
                       </a>
                     </div>
                   </div>
-                </td>
-              </tr>
+                  </v-flex>
+                </v-layout>
+              </v-container>
             </template>
           </v-data-table>
         </div>
@@ -244,16 +328,7 @@ export default Vue.extend({
     showAllReactionKnockouts: false,
     showAllGeneKnockouts: false,
     isDeletionDialogVisible: false,
-    isDeleting: false,
-    isLoading: true,
-    headers: [
-      { text: "Name", value: "name", width: "20%" },
-      { text: "Organism", value: "organism_id", width: "15%" },
-      { text: "Model", value: "model_id", width: "15%" },
-      { text: "Added reactions", value: "reaction_knockins", width: "15%" },
-      { text: "Reaction knockouts", value: "reaction_knockouts", width: "15%" },
-      { text: "Gene knockouts", value: "gene_knockouts", width: "15%" }
-    ],
+    isLoading: false,
     pagination: {
       rowsPerPage: 10
     }
@@ -307,7 +382,22 @@ export default Vue.extend({
       return `http://bigg.ucsd.edu/search?query=${reactionId}`;
     },
     toggleLoader() {
-      this.isDeleting = !this.isDeleting;
+      this.isLoading = !this.isLoading;
+    },
+    toggleAll() {
+      if (this.selected.length) {
+        this.selected = [];
+      } else {
+        this.selected = [...this.pathways];
+      }
+    },
+    changeSort(column) {
+      if (this.pagination.sortBy === column) {
+        this.pagination.descending = !this.pagination.descending;
+      } else {
+        this.pagination.sortBy = column;
+        this.pagination.descending = false;
+      }
     }
   },
   computed: {
