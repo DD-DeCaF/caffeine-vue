@@ -329,18 +329,10 @@ export default Vue.extend({
       if (reaction === undefined) {
         return;
       }
-      if (
-        this.modifications.some(
-          modification =>
-            modification.id == reaction.id &&
-            modification.type == "edited_bounds"
-        )
-      ) {
-        const modifiedReaction = this.modifications.find(
-          modification =>
-            modification.id == reaction.id &&
-            modification.type == "edited_bounds"
-        );
+      const modifiedReaction = this.card.editedBounds.find(
+        modification => modification.id == reaction.id
+      );
+      if (modifiedReaction) {
         this.editBoundsLowerBound = modifiedReaction.lowerBound;
         this.editBoundsUpperBound = modifiedReaction.upperBound;
       } else {
