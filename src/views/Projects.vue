@@ -4,6 +4,7 @@
       v-model="isDeletionDialogVisible"
       :items="[projectItem]"
       itemsType="projects"
+      @toggleLoader="toggleLoader()"
     />
     <NewProject v-model="isProjectCreationDialogVisible" />
     <v-layout justify-center>
@@ -13,7 +14,7 @@
           :headers="headers"
           :items="availableProjects"
           class="elevation-8"
-          :loading="isLoading"
+          :loading="isLoading || isDeleting"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: project }">
@@ -139,6 +140,7 @@ export default Vue.extend({
   data: () => ({
     projectItem: { name: null },
     projectItemIndex: null,
+    isDeleting: false,
     isLoading: true,
     isProjectCreationDialogVisible: false,
     isProjectEditDialogVisible: false,
@@ -215,6 +217,9 @@ export default Vue.extend({
     },
     passProject(project) {
       this.project = project;
+    },
+    toggleLoader() {
+      this.isDeleting = !this.isDeleting;
     }
   },
   computed: {
