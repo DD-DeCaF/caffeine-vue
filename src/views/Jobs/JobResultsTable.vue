@@ -527,7 +527,7 @@ export default Vue.extend({
       if (this.selected.length) {
         this.selected = [];
       } else {
-        this.selected = [...this.pathways];
+        this.selected = [...this.filteredPathways];
       }
     },
     changeSort(column) {
