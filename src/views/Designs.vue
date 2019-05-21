@@ -412,7 +412,7 @@ export default Vue.extend({
       if (this.selected.length) {
         this.selected = [];
       } else {
-        this.selected = [...this.pathways];
+        this.selected = [...this.designs];
       }
     },
     changeSort(column) {
