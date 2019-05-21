@@ -23,6 +23,7 @@
           :headers="headers"
           :items="availableModels"
           class="elevation-8"
+          :loading="isLoading"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: model }">
@@ -234,6 +235,7 @@ export default Vue.extend({
   data: () => ({
     modelItem: { name: null },
     modelItemIndex: null,
+    isLoading: true,
     isModelCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
     isMapCreationDialogVisible: false,
@@ -376,6 +378,11 @@ export default Vue.extend({
     availableOrganisms() {
       return this.$store.state.organisms.organisms;
     }
+  },
+  created() {
+    this.$store.state.models.modelsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>
