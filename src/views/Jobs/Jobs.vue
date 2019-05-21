@@ -50,7 +50,7 @@ import { mapGetters } from "vuex";
 export default Vue.extend({
   name: "Jobs",
   data: () => ({
-    isLoading: false,
+    isLoading: true,
     headers: [
       { text: "Product", value: "product_name", width: "15%" },
       { text: "Organism", value: "organism_id", width: "20%" },
@@ -67,22 +67,6 @@ export default Vue.extend({
     areAllJobsFinished: true,
     timerId: 0
   }),
-  watch: {
-    jobs: {
-      immediate: true,
-      handler(newValue, oldValue) {
-        if (oldValue === undefined && newValue.length === 0) {
-          this.isLoading = true;
-        } else if (
-          ((oldValue === undefined || oldValue.length === 0) &&
-            newValue.length > 0) ||
-          (oldValue.length === 0 && newValue.length === 0)
-        ) {
-          this.isLoading = false;
-        }
-      }
-    }
-  },
   computed: {
     jobs() {
       return this.$store.state.jobs.jobs;
@@ -91,6 +75,11 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
+  },
+  created() {
+    this.$store.state.jobs.jobsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>

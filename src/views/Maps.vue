@@ -4,6 +4,7 @@
       v-model="isDeletionDialogVisible"
       :items="[mapItem]"
       itemsType="maps"
+      @toggleLoader="toggleLoader()"
     />
     <NewProject
       v-model="isProjectCreationDialogVisible"
@@ -16,11 +17,12 @@
     <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Maps</h1>
+        <h1 class="mb-2">Maps</h1>
         <v-data-table
           :headers="headers"
           :items="availableMaps"
           class="elevation-8"
+          :loading="isLoading || isDeleting"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: map }">
@@ -217,6 +219,8 @@ export default Vue.extend({
   name: "Maps",
   data: () => ({
     valid: false,
+    isDeleting: false,
+    isLoading: true,
     isMapCreationDialogVisible: false,
     isModelCreationDialogVisible: false,
     isProjectCreationDialogVisible: false,
@@ -309,6 +313,9 @@ export default Vue.extend({
     },
     passModel(model) {
       this.selectedModel = model;
+    },
+    toggleLoader() {
+      this.isDeleting = !this.isDeleting;
     }
   },
   computed: {
@@ -327,6 +334,11 @@ export default Vue.extend({
     availableModels() {
       return this.$store.state.models.models;
     }
+  },
+  created() {
+    this.$store.state.maps.mapsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>

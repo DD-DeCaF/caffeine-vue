@@ -4,6 +4,7 @@
       v-model="isDeletionDialogVisible"
       :items="[modelItem]"
       itemsType="models"
+      @toggleLoader="toggleLoader()"
     />
     <NewModel v-model="isModelCreationDialogVisible" />
     <!-- Disabled because its not on the old platform -->
@@ -18,11 +19,12 @@
     />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Models</h1>
+        <h1 class="mb-2">Models</h1>
         <v-data-table
           :headers="headers"
           :items="availableModels"
           class="elevation-8"
+          :loading="isLoading || isDeleting"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: model }">
@@ -234,6 +236,8 @@ export default Vue.extend({
   data: () => ({
     modelItem: { name: null },
     modelItemIndex: null,
+    isDeleting: false,
+    isLoading: true,
     isModelCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
     isMapCreationDialogVisible: false,
@@ -358,6 +362,9 @@ export default Vue.extend({
     },
     passOrganism(organism) {
       this.organism = organism;
+    },
+    toggleLoader() {
+      this.isDeleting = !this.isDeleting;
     }
   },
   computed: {
@@ -376,6 +383,11 @@ export default Vue.extend({
     availableOrganisms() {
       return this.$store.state.organisms.organisms;
     }
+  },
+  created() {
+    this.$store.state.models.modelsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>

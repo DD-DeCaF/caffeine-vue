@@ -33,7 +33,7 @@
             :expand="expand"
             :pagination.sync="pagination"
             :custom-sort="customSort"
-            :loading="isLoading"
+            :loading="isLoading || isDeleting"
             select-all="primary"
           >
             <v-progress-linear
@@ -244,7 +244,8 @@ export default Vue.extend({
     showAllReactionKnockouts: false,
     showAllGeneKnockouts: false,
     isDeletionDialogVisible: false,
-    isLoading: false,
+    isDeleting: false,
+    isLoading: true,
     headers: [
       { text: "Name", value: "name", width: "20%" },
       { text: "Organism", value: "organism_id", width: "15%" },
@@ -306,23 +307,7 @@ export default Vue.extend({
       return `http://bigg.ucsd.edu/search?query=${reactionId}`;
     },
     toggleLoader() {
-      this.isLoading = !this.isLoading;
-    }
-  },
-  watch: {
-    designs: {
-      immediate: true,
-      handler(newValue, oldValue) {
-        if (oldValue === undefined && newValue.length === 0) {
-          this.isLoading = true;
-        } else if (
-          ((oldValue === undefined || oldValue.length === 0) &&
-            newValue.length > 0) ||
-          (oldValue.length === 0 && newValue.length === 0)
-        ) {
-          this.isLoading = false;
-        }
-      }
+      this.isDeleting = !this.isDeleting;
     }
   },
   computed: {
@@ -333,6 +318,11 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
+  },
+  created() {
+    this.$store.state.designs.designsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>

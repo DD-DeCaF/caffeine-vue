@@ -18,7 +18,8 @@ export default {
   namespaced: true,
   state: {
     jobs: [],
-    isPolling: false
+    isPolling: false,
+    jobsPromise: null
   },
   mutations: {
     setJobs(state, jobs: JobItem[]) {
@@ -26,6 +27,9 @@ export default {
     },
     togglePollingStatus(state) {
       state.isPolling = !state.isPolling;
+    },
+    setJobsPromise(state, jobsPromise) {
+      state.jobsPromise = jobsPromise;
     }
   },
   actions: {
@@ -36,7 +40,7 @@ export default {
       }
     },
     fetchJobsPolling({ state, commit, dispatch }) {
-      axios
+      const jobsPromise = axios
         .get(`${settings.apis.metabolicNinja}/predictions`)
         .then((response: AxiosResponse<JobItem[]>) => {
           commit("setJobs", response.data);
@@ -57,6 +61,7 @@ export default {
             commit("togglePollingStatus");
           }
         });
+      commit("setJobsPromise", jobsPromise);
     }
   },
   getters: {
