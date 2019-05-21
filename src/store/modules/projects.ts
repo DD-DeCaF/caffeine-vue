@@ -11,7 +11,8 @@ export interface ProjectItem {
 export default {
   namespaced: true,
   state: {
-    projects: []
+    projects: [],
+    projectsPromise: null
   },
   mutations: {
     setProjects(state, projects: ProjectItem[]) {
@@ -27,11 +28,14 @@ export default {
       state.projects = state.projects.filter(
         project => !ids.includes(project.id)
       );
+    },
+    setProjectsPromise(state, projectsPromise) {
+      state.projectsPromise = projectsPromise;
     }
   },
   actions: {
     fetchProjects({ commit }) {
-      axios
+      const projectsPromise = axios
         .get(`${settings.apis.iam}/projects`)
         .then((response: AxiosResponse<ProjectItem[]>) => {
           commit("setProjects", response.data);
@@ -39,6 +43,7 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+      commit("setProjectsPromise", projectsPromise);
     }
   },
   getters: {

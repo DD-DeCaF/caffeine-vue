@@ -13,6 +13,7 @@
           :headers="headers"
           :items="availableProjects"
           class="elevation-8"
+          :loading="isLoading"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: project }">
@@ -138,6 +139,7 @@ export default Vue.extend({
   data: () => ({
     projectItem: { name: null },
     projectItemIndex: null,
+    isLoading: true,
     isProjectCreationDialogVisible: false,
     isProjectEditDialogVisible: false,
     isDeletionDialogVisible: false,
@@ -222,6 +224,11 @@ export default Vue.extend({
     availableProjects() {
       return this.$store.state.projects.projects;
     }
+  },
+  created() {
+    this.$store.state.projects.projectsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>
