@@ -38,6 +38,7 @@
             :pagination.sync="pagination"
             :custom-sort="customSort"
             select-all
+            :headers-length=9
           >
             <template v-slot:headers="props">
               <tr>
@@ -314,9 +315,50 @@
                 </td>
               </tr>
             </template>
-            <template v-slot:expand="props">
+            <template v-slot:expand="{ item: prediction }">
               <tr>
-                Expanded
+                <td width="5%"></td>
+                <td>
+                  <div class="link-list">
+                    <div
+                      v-for="(manipulation, index) in prediction.manipulations"
+                      :key="index"
+                    >
+                      <div v-if="index < 10">
+                        <a v-if="prediction.method === 'PathwayPredictor+DifferentialFVA'"
+                          :href="`http://bigg.ucsd.edu/search?query=${manipulation.id}`"
+                          class="link"
+                          target="_blank"
+                        >
+                          {{`${indicators[manipulation.direction]} ${manipulation.id}`}}
+                        </a>
+                      </div>
+                      <div
+                        v-if="index >= 10"
+                        :hidden="!showAllManipulations"
+                      >
+                        <a v-if="prediction.method === 'PathwayPredictor+DifferentialFVA'"
+                          :href="`http://bigg.ucsd.edu/search?query=${manipulation.id}`"
+                          class="link"
+                          target="_blank"
+                        >
+                          {{`${indicators[manipulation.direction]} ${manipulation.id}`}}
+                        </a>
+                      </div>
+                    </div>
+                    <div v-if="prediction.manipulations.length > 10">
+                      <a
+                        @click="showAllManipulations = true"
+                        :hidden="showAllManipulations"
+                      >
+                        ...
+                      </a>
+                    </div>
+                    <div v-if="prediction.manipulations.length > 0">
+                      <span class="caption">↑ up-regulation<br>↓ down-regulation</span>
+                    </div>
+                  </div>
+                </td>
               </tr>
             </template>
           </v-data-table>
@@ -343,7 +385,13 @@ export default Vue.extend({
       rowsPerPage: 10
     },
     range: null,
-    filters: null
+    filters: null,
+    indicators: {
+      delta: 'Δ',
+      up: '↑',
+      down: '↓',
+    },
+    showAllManipulations: false,
   }),
   filters: {
     round: value => {
@@ -527,7 +575,7 @@ export default Vue.extend({
       if (this.selected.length) {
         this.selected = [];
       } else {
-        this.selected = [...this.pathways];
+        this.selected = [...this.filteredPathways];
       }
     },
     changeSort(column) {
@@ -554,5 +602,12 @@ export default Vue.extend({
 }
 .pointer {
   cursor: pointer;
+}
+.link {
+  text-decoration: none;
+}
+.link-list {
+  max-height: 300px;
+  overflow-y: auto;
 }
 </style>
