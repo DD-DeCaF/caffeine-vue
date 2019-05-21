@@ -54,8 +54,7 @@ export default Vue.extend({
           this.escherBuilder.load_map(value);
           this.isLoadingMap = false;
           // Update the map state, since it will be reset whenever the map is
-          // changed.
-          this.setFullModel();
+          // changed. Note that we don't need to update the model.
           this.setReactionAdditions();
           this.setReactionKnockouts();
           this.setGeneKnockouts();
