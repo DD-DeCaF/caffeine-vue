@@ -329,9 +329,17 @@ export default Vue.extend({
       if (reaction === undefined) {
         return;
       }
-      // Fill the default bounds from the reaction in the model for convenience
-      this.editBoundsLowerBound = reaction.lower_bound;
-      this.editBoundsUpperBound = reaction.upper_bound;
+      const modifiedReaction = this.card.editedBounds.find(
+        modification => modification.id == reaction.id
+      );
+      if (modifiedReaction) {
+        this.editBoundsLowerBound = modifiedReaction.lowerBound;
+        this.editBoundsUpperBound = modifiedReaction.upperBound;
+      } else {
+        // Fill the default bounds from the reaction in the model for convenience
+        this.editBoundsLowerBound = reaction.lower_bound;
+        this.editBoundsUpperBound = reaction.upper_bound;
+      }
     }
   },
   computed: {
