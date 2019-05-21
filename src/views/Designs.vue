@@ -40,7 +40,7 @@
               v-slot:progress
               color="primary"
             ></v-progress-linear>
-             <template v-slot:headers="props">
+            <template v-slot:headers="props">
               <tr>
                 <th width="5%">
                   <v-checkbox
@@ -52,36 +52,34 @@
                   ></v-checkbox>
                 </th>
 
-                <th width="20%"
+                <th
+                  width="20%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
                     'name' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span
-                    @click="changeSort('name')"
-                    class="pointer ml-3"
-                    >Name <v-icon>arrow_upward</v-icon><br /></span>
+                  <span @click="changeSort('name')" class="pointer ml-3"
+                    >Name <v-icon>arrow_upward</v-icon><br
+                  /></span>
                 </th>
 
-                <th width="15%"
+                <th
+                  width="15%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
-                    'organism' === pagination.sortBy
-                      ? 'active'
-                      : ''
+                    'organism' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span
-                    @click="changeSort('organism')"
-                    class="pointer ml-3"
-                    >Organism <v-icon>arrow_upward</v-icon><br /></span
-                  >
+                  <span @click="changeSort('organism')" class="pointer ml-3"
+                    >Organism <v-icon>arrow_upward</v-icon><br
+                  /></span>
                 </th>
 
-                <th width="15%"
+                <th
+                  width="15%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
@@ -89,43 +87,53 @@
                   ]"
                 >
                   <span @click="changeSort('knockouts')" class="pointer ml-3"
-                    >Model <v-icon>arrow_upward</v-icon> <br /></span>
+                    >Model <v-icon>arrow_upward</v-icon> <br
+                  /></span>
                 </th>
 
-                <th width="15%"
+                <th
+                  width="15%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
                     'reaction_knockins' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('reaction_knockins')" class="pointer ml-3"
-                    >Added Reactions <v-icon>arrow_upward</v-icon><br /></span
-                  >
+                  <span
+                    @click="changeSort('reaction_knockins')"
+                    class="pointer ml-3"
+                    >Added Reactions <v-icon>arrow_upward</v-icon><br
+                  /></span>
                 </th>
 
-                <th width="15%"
+                <th
+                  width="15%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
                     'reaction_knockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('reaction_knockouts')" class="pointer ml-3"
-                    >Reaction Knockouts <v-icon>arrow_upward</v-icon><br /></span
-                  >
+                  <span
+                    @click="changeSort('reaction_knockouts')"
+                    class="pointer ml-3"
+                    >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
+                  /></span>
                 </th>
 
-                <th width="15%"
+                <th
+                  width="15%"
                   :class="[
                     'column sortable default-cursor',
                     pagination.descending ? 'desc' : 'asc',
                     'gene_knockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('gene_knockouts')" class="pointer ml-3"
-                    >Gene Knockouts <v-icon>arrow_upward</v-icon><br /></span
-                  >
+                  <span
+                    @click="changeSort('gene_knockouts')"
+                    class="pointer ml-3"
+                    >Gene Knockouts <v-icon>arrow_upward</v-icon><br
+                  /></span>
                 </th>
               </tr>
             </template>
@@ -178,132 +186,148 @@
             <template v-slot:expand="{ item: design }">
               <v-container style="padding:0;" class="elevation-8">
                 <v-layout justify-end>
-                    <v-flex style="width:55%; padding:0 24px; box-sizing: border-box;"></v-flex>
-                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
-                                      <div class="link-list">
-                    <div
-                      v-for="(reactionKnockin, index) in design.design
-                        .reaction_knockins"
-                      :key="index"
-                    >
-                      <div v-if="index < 10">
-                        <a
-                          :href="
-                            reactionLink(reactionKnockin, design.method, true)
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{ getReactionId(reactionKnockin, design.method) }}
-                        </a>
-                      </div>
+                  <v-flex
+                    style="width:55%; padding:0 24px; box-sizing: border-box;"
+                  ></v-flex>
+                  <v-flex
+                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                  >
+                    <div class="link-list">
                       <div
-                        v-if="index >= 10"
-                        :hidden="!showAllReactionKnockins"
+                        v-for="(reactionKnockin, index) in design.design
+                          .reaction_knockins"
+                        :key="index"
                       >
-                        <a
-                          :href="
-                            reactionLink(reactionKnockin, design.method, true)
-                          "
-                          class="link"
-                          target="_blank"
+                        <div v-if="index < 10">
+                          <a
+                            :href="
+                              reactionLink(reactionKnockin, design.method, true)
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ getReactionId(reactionKnockin, design.method) }}
+                          </a>
+                        </div>
+                        <div
+                          v-if="index >= 10"
+                          :hidden="!showAllReactionKnockins"
                         >
-                          {{ getReactionId(reactionKnockin, design.method) }}
+                          <a
+                            :href="
+                              reactionLink(reactionKnockin, design.method, true)
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ getReactionId(reactionKnockin, design.method) }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="design.design.reaction_knockins.length > 10">
+                        <a
+                          @click="showAllReactionKnockins = true"
+                          :hidden="showAllReactionKnockins"
+                        >
+                          ...
                         </a>
                       </div>
                     </div>
-                    <div v-if="design.design.reaction_knockins.length > 10">
-                      <a
-                        @click="showAllReactionKnockins = true"
-                        :hidden="showAllReactionKnockins"
-                      >
-                        ...
-                      </a>
-                    </div>
-                  </div>
                   </v-flex>
-                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
-                     <div class="link-list">
-                    <div
-                      v-for="(reactionKnockout, index) in design.design
-                        .reaction_knockouts"
-                      :key="index"
-                    >
-                      <div v-if="index < 10">
-                        <a
-                          :href="
-                            reactionLink(reactionKnockout, design.method, false)
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{ reactionKnockout }}
-                        </a>
-                      </div>
+                  <v-flex
+                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                  >
+                    <div class="link-list">
                       <div
-                        v-if="index >= 10"
-                        :hidden="!showAllReactionKnockouts"
+                        v-for="(reactionKnockout, index) in design.design
+                          .reaction_knockouts"
+                        :key="index"
                       >
-                        <a
-                          :href="
-                            reactionLink(reactionKnockout, design.method, false)
-                          "
-                          class="link"
-                          target="_blank"
+                        <div v-if="index < 10">
+                          <a
+                            :href="
+                              reactionLink(
+                                reactionKnockout,
+                                design.method,
+                                false
+                              )
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ reactionKnockout }}
+                          </a>
+                        </div>
+                        <div
+                          v-if="index >= 10"
+                          :hidden="!showAllReactionKnockouts"
                         >
-                          {{ reactionKnockout }}
+                          <a
+                            :href="
+                              reactionLink(
+                                reactionKnockout,
+                                design.method,
+                                false
+                              )
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ reactionKnockout }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="design.design.reaction_knockouts.length > 10">
+                        <a
+                          @click="showAllReactionKnockouts = true"
+                          :hidden="showAllReactionKnockouts"
+                        >
+                          ...
                         </a>
                       </div>
                     </div>
-                    <div v-if="design.design.reaction_knockouts.length > 10">
-                      <a
-                        @click="showAllReactionKnockouts = true"
-                        :hidden="showAllReactionKnockouts"
-                      >
-                        ...
-                      </a>
-                    </div>
-                  </div>
                   </v-flex>
-                  <v-flex style="width:15%; padding:0 24px; box-sizing: border-box;">
-                     <div class="link-list">
-                    <div
-                      v-for="(geneKnockout, index) in design.design
-                        .gene_knockouts"
-                      :key="index"
-                    >
-                      <div v-if="index < 10">
-                        <a
-                          :href="
-                            `http://bigg.ucsd.edu/search?query=${geneKnockout}`
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{ geneKnockout }}
-                        </a>
-                      </div>
-                      <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
-                        <a
-                          :href="
-                            `http://bigg.ucsd.edu/search?query=${geneKnockout}`
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{ geneKnockout }}
-                        </a>
-                      </div>
-                    </div>
-                    <div v-if="design.design.gene_knockouts.length > 10">
-                      <a
-                        @click="showAllGeneKnockouts = true"
-                        :hidden="showAllGeneKnockouts"
+                  <v-flex
+                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                  >
+                    <div class="link-list">
+                      <div
+                        v-for="(geneKnockout, index) in design.design
+                          .gene_knockouts"
+                        :key="index"
                       >
-                        ...
-                      </a>
+                        <div v-if="index < 10">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ geneKnockout }}
+                          </a>
+                        </div>
+                        <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ geneKnockout }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="design.design.gene_knockouts.length > 10">
+                        <a
+                          @click="showAllGeneKnockouts = true"
+                          :hidden="showAllGeneKnockouts"
+                        >
+                          ...
+                        </a>
+                      </div>
                     </div>
-                  </div>
                   </v-flex>
                 </v-layout>
               </v-container>
