@@ -354,7 +354,8 @@ export default Vue.extend({
     isDeletionDialogVisible: false,
     isLoading: false,
     pagination: {
-      rowsPerPage: 10
+      rowsPerPage: 10,
+      sortBy: "name"
     }
   }),
   methods: {
