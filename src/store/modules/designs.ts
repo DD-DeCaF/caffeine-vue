@@ -25,7 +25,8 @@ export interface DesignItem {
 export default {
   namespaced: true,
   state: {
-    designs: []
+    designs: [],
+    designsPromise: null
   },
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
@@ -33,11 +34,14 @@ export default {
     },
     delete(state, ids) {
       state.designs = state.designs.filter(design => !ids.includes(design.id));
+    },
+    setDesignsPromise(state, designsPromise) {
+      state.designsPromise = designsPromise;
     }
   },
   actions: {
     fetchDesigns({ commit }) {
-      axios
+      const designsPromise = axios
         .get(`${settings.apis.designStorage}/designs`)
         .then((response: AxiosResponse<DesignItem[]>) => {
           const designs = response.data.map(design => {
@@ -56,6 +60,7 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+      commit("setDesignsPromise", designsPromise);
     }
   }
 };
