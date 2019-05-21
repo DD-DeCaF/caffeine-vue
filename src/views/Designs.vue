@@ -55,12 +55,12 @@
                 <th
                   width="20%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'name' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('name')" class="pointer ml-3"
+                  <span @click="changeSort('name')" class="pointer"
                     >Name <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -68,12 +68,12 @@
                 <th
                   width="15%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'organism_id' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('organism_id')" class="pointer ml-3"
+                  <span @click="changeSort('organism_id')" class="pointer"
                     >Organism <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -81,12 +81,12 @@
                 <th
                   width="15%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'model_id' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('model_id')" class="pointer ml-3"
+                  <span @click="changeSort('model_id')" class="pointer"
                     >Model <v-icon>arrow_upward</v-icon> <br
                   /></span>
                 </th>
@@ -94,14 +94,14 @@
                 <th
                   width="15%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'reaction_knockins' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
                   <span
                     @click="changeSort('reaction_knockins')"
-                    class="pointer ml-3"
+                    class="pointer"
                     >Added Reactions <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -109,14 +109,14 @@
                 <th
                   width="15%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'reaction_knockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
                   <span
                     @click="changeSort('reaction_knockouts')"
-                    class="pointer ml-3"
+                    class="pointer"
                     >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -124,14 +124,14 @@
                 <th
                   width="15%"
                   :class="[
-                    'column sortable default-cursor',
+                    'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
                     'gene_knockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
                   <span
                     @click="changeSort('gene_knockouts')"
-                    class="pointer ml-3"
+                    class="pointer"
                     >Gene Knockouts <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -356,8 +356,16 @@ export default Vue.extend({
     pagination: {
       rowsPerPage: 10,
       sortBy: "name"
-    }
-  }),
+    },
+    headers: [
+      { value: 'name', align: 'left' },
+      { value: 'organism_id', align: 'left' },
+      { value: 'model_id', align: 'left' },
+      { value: 'reaction_knockins', align: 'left' },
+      { value: 'reaction_knockouts', align: 'left' },
+      { value: 'gene_knockouts', align: 'left' },
+    ],
+}),
   methods: {
     customSort(items, index, isDesc) {
       items.sort((a, b) => {
