@@ -184,7 +184,7 @@
               </tr>
             </template>
             <template v-slot:expand="{ item: design }">
-              <v-container style="padding:0;" class="elevation-8">
+              <v-container style="padding:0;" class="elevation-1">
                 <v-layout justify-end>
                   <v-flex
                     style="width:55%; padding:0 24px; box-sizing: border-box;"
