@@ -21,6 +21,7 @@
           :headers="headers"
           :items="availableMaps"
           class="elevation-8"
+          :loading="isLoading"
           :pagination.sync="pagination"
         >
           <template v-slot:items="{ item: map }">
@@ -217,6 +218,7 @@ export default Vue.extend({
   name: "Maps",
   data: () => ({
     valid: false,
+    isLoading: true,
     isMapCreationDialogVisible: false,
     isModelCreationDialogVisible: false,
     isProjectCreationDialogVisible: false,
@@ -327,6 +329,11 @@ export default Vue.extend({
     availableModels() {
       return this.$store.state.models.models;
     }
+  },
+  created() {
+    this.$store.state.maps.mapsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>
