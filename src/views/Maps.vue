@@ -17,7 +17,7 @@
     <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Maps</h1>
+        <h1 class="mb-2">Maps</h1>
         <v-data-table
           :headers="headers"
           :items="availableMaps"

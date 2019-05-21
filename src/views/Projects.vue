@@ -9,7 +9,7 @@
     <NewProject v-model="isProjectCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Projects</h1>
+        <h1 class="mb-2">Projects</h1>
         <v-data-table
           :headers="headers"
           :items="availableProjects"

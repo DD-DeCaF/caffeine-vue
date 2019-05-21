@@ -19,7 +19,7 @@
     />
     <v-layout justify-center>
       <v-flex md6>
-        <h1>Models</h1>
+        <h1 class="mb-2">Models</h1>
         <v-data-table
           :headers="headers"
           :items="availableModels"
