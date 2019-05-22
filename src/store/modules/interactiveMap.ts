@@ -25,9 +25,7 @@ export interface Card {
   uuid: string;
   name: string;
   organism: OrganismItem;
-  model: ModelItem;
-  isLoadingModel: boolean;
-  fullModel: ModelItem;
+  modelId: number;
   method: string;
   // Design card fields
   objective: {
@@ -47,7 +45,6 @@ export interface Card {
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;
-  hasLoadModelError: boolean;
   growthRate: number;
   fluxes: number;
 }
@@ -79,36 +76,6 @@ export default {
     addReaction(state, { uuid, reaction }) {
       const card = state.cards.find(c => c.uuid === uuid);
       card.reactionAdditions.push(reaction);
-
-      // Add the reaction to the full model for Escher to find later.
-      // Update the structure for cobrapy format.
-      const model = card.fullModel.model_serialized;
-      model.reactions.push({
-        id: reaction.id,
-        name: reaction.name,
-        lower_bound: reaction.lowerBound,
-        upper_bound: reaction.upperBound,
-        gene_reaction_rule: "",
-        metabolites: Object.assign(
-          {},
-          ...reaction.metabolites.map(m => ({
-            [`${m.id}_${m.compartment}`]: m.stoichiometry
-          }))
-        )
-      });
-      // Also add any new metabolites.
-      reaction.metabolites.forEach(newMetabolite => {
-        // Add the compartment postfix to the metabolite id
-        const metabolite = {
-          ...newMetabolite,
-          id: `${newMetabolite.id}_${newMetabolite.compartment}`
-        };
-        // Skip it if the metabolite already exists in the model.
-        if (model.metabolites.some(m => m.id === metabolite.id)) {
-          return;
-        }
-        model.metabolites.push(metabolite);
-      });
     },
     undoAddReaction(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
@@ -222,13 +189,19 @@ export default {
     },
     knockoutGene({ state, commit, dispatch }, { uuid, geneId }) {
       commit("knockoutGene", { uuid: uuid, gene: { id: geneId } });
-      dispatch("getBiggGene", {
-        modelId: state.cards.find(c => c.uuid === uuid).fullModel
-          .model_serialized.id,
-        geneId: geneId
-      }).then(gene => {
-        commit("updateKnockoutGene", { uuid: uuid, gene: gene });
-      });
+      // Fetch the full model, because we need the BiGG ID of the model to
+      // retrieve gene information.
+      const card = state.cards.find(c => c.uuid === uuid);
+      dispatch("models/withFullModel", card.modelId, { root: true }).then(
+        model => {
+          dispatch("getBiggGene", {
+            modelId: model.model_serialized.id,
+            geneId: geneId
+          }).then(gene => {
+            commit("updateKnockoutGene", { uuid: uuid, gene: gene });
+          });
+        }
+      );
     },
     editBounds(
       { commit, dispatch },

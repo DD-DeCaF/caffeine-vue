@@ -121,8 +121,8 @@
         <v-autocomplete
           label="Objective"
           :items="reactions"
-          :loading="card.isLoadingModel"
-          :disabled="card.fullModel === null"
+          :loading="model && !model.model_serialized"
+          :disabled="!model"
           v-model="objectiveReaction"
           :item-text="reactionDisplay"
           item-value="id"
@@ -151,7 +151,7 @@
       v-model="addReactionItem"
       :items="addReactionSearchResults"
       :loading="isLoadingAddReaction"
-      :disabled="card.fullModel === null"
+      :disabled="!model"
       :search-input.sync="addReactionSearchQuery"
       hide-no-data
       :item-text="reactionDisplay"
@@ -166,8 +166,8 @@
     <v-autocomplete
       v-model="knockoutReactionItem"
       :items="reactions"
-      :loading="card.isLoadingModel"
-      :disabled="card.fullModel === null"
+      :loading="model && !model.model_serialized"
+      :disabled="!model"
       hide-no-data
       :item-text="reactionDisplay"
       item-value="id"
@@ -181,8 +181,8 @@
     <v-autocomplete
       v-model="knockoutGeneItem"
       :items="genes"
-      :loading="card.isLoadingModel"
-      :disabled="card.fullModel === null"
+      :loading="model && !model.model_serialized"
+      :disabled="!model"
       hide-no-data
       :item-text="reactionDisplay"
       item-value="id"
@@ -198,8 +198,8 @@
           <v-autocomplete
             v-model="editBoundsReaction"
             :items="reactions"
-            :loading="card.isLoadingModel"
-            :disabled="card.fullModel === null"
+            :loading="model && !model.model_serialized"
+            :disabled="!model"
             :rules="[editBoundsReactionRule]"
             hide-no-data
             :item-text="reactionDisplay"
@@ -289,11 +289,8 @@ export default Vue.extend({
     editBoundsLowerBound: null,
     editBoundsUpperBound: null
   }),
-  props: ["card", "modifications"],
+  props: ["card", "model", "modifications"],
   watch: {
-    "card.model"() {
-      this.$emit("simulate-card");
-    },
     addReactionSearchQuery(query) {
       this.addReactionSearchResults = [];
       if (query === null || query.trim().length === 0) {
@@ -306,17 +303,23 @@ export default Vue.extend({
           `${settings.apis.bigg}/search?query=${query}&search_type=reactions`
         )
         .then(response => {
-          this.addReactionSearchResults = response.data.results
-            .map(reaction => ({
-              id: reaction.bigg_id,
-              name: reaction.name
-            }))
-            // Exclude results that already exist in the current model
-            .filter(reaction =>
-              this.card.fullModel.model_serialized.reactions.every(
-                r => r.id !== reaction.id
-              )
-            );
+          // Wait for the full model to be able to filter out results that
+          // already exist in the model.
+          this.$store
+            .dispatch("models/withFullModel", this.model.id)
+            .then(model => {
+              this.addReactionSearchResults = response.data.results
+                .map(reaction => ({
+                  id: reaction.bigg_id,
+                  name: reaction.name
+                }))
+                // Exclude results that already exist in the current model
+                .filter(reaction =>
+                  model.model_serialized.reactions.every(
+                    r => r.id !== reaction.id
+                  )
+                );
+            });
         })
         .catch(error => {
           this.biggRequestError = true;
@@ -345,22 +348,22 @@ export default Vue.extend({
   computed: {
     objectiveHint() {
       let objective = "growth";
-      if (this.card.model !== null) {
-        objective = this.card.model.default_biomass_reaction;
+      if (this.model) {
+        objective = this.model.default_biomass_reaction;
       }
       return `When left empty, the objective is ${objective}.`;
     },
     reactions() {
-      if (this.card.fullModel === null) {
+      if (!this.model || !this.model.model_serialized) {
         return [];
       }
-      return this.card.fullModel.model_serialized.reactions;
+      return this.model.model_serialized.reactions;
     },
     genes() {
-      if (this.card.fullModel === null) {
+      if (!this.model || !this.model.model_serialized) {
         return [];
       }
-      return this.card.fullModel.model_serialized.genes;
+      return this.model.model_serialized.genes;
     },
     objectiveReaction: {
       get() {

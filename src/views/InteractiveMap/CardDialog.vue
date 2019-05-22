@@ -64,6 +64,7 @@
           <CardDialogDesign
             v-if="!card.dataDriven"
             :card="card"
+            :model="model"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
           />
@@ -103,6 +104,7 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialogDesign from "@/views/InteractiveMap/CardDialogDesign.vue";
 import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
+import { ModelItem } from "@/store/modules/models";
 
 export default Vue.extend({
   name: "CardDialog",
@@ -120,12 +122,7 @@ export default Vue.extend({
       { id: "pfba-fva", name: "Parsimonious FVA" }
     ]
   }),
-  props: ["card", "modifications"],
-  watch: {
-    "card.model"() {
-      this.$emit("simulate-card");
-    }
-  },
+  props: ["card", "model", "modifications"],
   computed: {
     organisms() {
       return this.$store.state.organisms.organisms;
@@ -171,12 +168,12 @@ export default Vue.extend({
     },
     cardModel: {
       get() {
-        return this.card.model;
+        return this.model;
       },
-      set(model) {
+      set(model: ModelItem) {
         this.updateCard({
           uuid: this.card.uuid,
-          props: { model: model }
+          props: { modelId: model.id }
         });
       }
     },
@@ -199,7 +196,7 @@ export default Vue.extend({
       // TODO: Choose a default preferred model.
       this.updateCard({
         uuid: this.card.uuid,
-        props: { model: null }
+        props: { modelId: null }
       });
       // Since the model was updated, trigger `onModelChange` to make sure card
       // modifications are reset.
@@ -207,8 +204,8 @@ export default Vue.extend({
     },
     onModelChange() {
       // Reset all modifications when the selected model changes.
-      // Note: We cannot simply watch `card.model` with `immediate: true`,
-      // because that would reset modifications when cars are added from other
+      // Note: We cannot simply watch `model` with `immediate: true`, because
+      // that would reset modifications when cards are added from other
       // components, i.e., when visualizing jobs or designs.
       this.updateCard({
         uuid: this.card.uuid,
@@ -219,6 +216,7 @@ export default Vue.extend({
           editedBounds: []
         }
       });
+      this.$emit("simulate-card");
     },
     setLoadingOrganism(isLoading) {
       this.isLoadingOrganism = isLoading;

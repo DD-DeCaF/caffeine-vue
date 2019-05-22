@@ -70,19 +70,20 @@ export default Vue.extend({
         loadMap();
       }
     },
+    model: {
+      // Whenever the model (with local modifications) changes, update it in
+      // Escher.
+      // Important note: This watcher *must* be ordered before the
+      // `card.reactionAdditions` watcher below, because reactions added to the
+      // model must be available to Escher.
+      deep: true,
+      handler() {
+        this.setModel();
+      }
+    },
     // Add separate watchers for the different properties on the card, instead
     // of a single deep watcher on the card, to be able to only update the
     // relevant portions of the map.
-    "card.fullModel": {
-      // Important note: This watcher *must* run before the
-      // `card.reactionAdditions` watcher below, because reactions added to the
-      // model must be available to Escher. Therefore, this watcher must be
-      // ordered first here.
-      deep: true,
-      handler(fullModel) {
-        this.setFullModel();
-      }
-    },
     "card.reactionAdditions"() {
       this.setReactionAdditions();
     },
@@ -99,12 +100,80 @@ export default Vue.extend({
       this.setFluxes();
     }
   },
+  computed: {
+    model() {
+      // Returns the modified model (original model + added reactions) for the
+      // currently selected card.
+      // TODO: This is duplicated logic, a very similar computed property exists
+      // in the Card component.
+      if (!this.card) {
+        return null;
+      }
+
+      const selectedModel = this.$store.getters["models/getModelById"](
+        this.card.modelId
+      );
+
+      if (!selectedModel || !selectedModel.model_serialized) {
+        return selectedModel;
+      }
+
+      // Create a copy of the model object to avoid references to the object in
+      // the store.
+      const model = {
+        ...selectedModel,
+        model_serialized: {
+          ...selectedModel.model_serialized
+        }
+      };
+      this.card.reactionAdditions.forEach(reaction => {
+        // Add the reaction to the model. (Take care to replace, not modify, the
+        // original array.)
+        model.model_serialized.reactions = [
+          ...model.model_serialized.reactions,
+          {
+            id: reaction.id,
+            name: reaction.name,
+            lower_bound: reaction.lowerBound,
+            upper_bound: reaction.upperBound,
+            gene_reaction_rule: "",
+            metabolites: Object.assign(
+              {},
+              ...reaction.metabolites.map(m => ({
+                [`${m.id}_${m.compartment}`]: m.stoichiometry
+              }))
+            )
+          }
+        ];
+
+        // Add any new metabolites from the reaction. (Take care to replace, not
+        // modify, the original array.)
+        const metabolites = reaction.metabolites
+          // Add the compartment postfix to the metabolite id
+          .map(metabolite => ({
+            ...metabolite,
+            id: `${metabolite.id}_${metabolite.compartment}`
+          }))
+          // Exclude metabolites that already exist in the model
+          .filter(metabolite => {
+            return !model.model_serialized.metabolites.some(
+              m => m.id === metabolite.id
+            );
+          });
+        model.model_serialized.metabolites = [
+          ...model.model_serialized.metabolites,
+          ...metabolites
+        ];
+      });
+      return model;
+    }
+  },
   methods: {
-    setFullModel() {
-      if (this.card === null || this.card.fullModel === null) {
+    setModel() {
+      if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.load_model(null);
       } else {
-        this.escherBuilder.load_model(this.card.fullModel.model_serialized);
+        this.escherBuilder.load_model(this.model.model_serialized);
       }
     },
     setReactionAdditions() {
@@ -196,8 +265,9 @@ export default Vue.extend({
     },
     getObjectState(id: string, type: string) {
       if (
-        this.card === null ||
-        this.card.fullModel === null ||
+        !this.card ||
+        !this.model ||
+        !this.model.model_serialized ||
         this.card.dataDriven
       ) {
         return {
@@ -212,7 +282,7 @@ export default Vue.extend({
       }
     },
     getReactionState(id: string) {
-      const modelReaction = this.card.fullModel.model_serialized.reactions.find(
+      const modelReaction = this.model.model_serialized.reactions.find(
         r => r.id === id
       );
       const editedBounds = this.card.editedBounds.find(r => r.id === id);
@@ -252,7 +322,7 @@ export default Vue.extend({
     },
     getGeneState(id: string, type: string) {
       return {
-        includedInModel: this.card.fullModel.model_serialized.genes.some(
+        includedInModel: this.model.model_serialized.genes.some(
           g => g.id === id
         ),
         knockout: false,
@@ -281,14 +351,14 @@ export default Vue.extend({
           reactionId: reactionId
         });
       }
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     setObjectiveDirection(reactionId: string) {
       this.$store.commit("interactiveMap/setObjectiveDirection", {
         uuid: this.card.uuid,
         maximize: !this.card.objective.maximize
       });
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     knockoutReaction(reactionId: string) {
       // Both knockout and undo knockout will call this, so depend the behaviour
@@ -304,7 +374,7 @@ export default Vue.extend({
           reactionId: reactionId
         });
       }
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     knockoutGene(geneId: string) {
       // Both knockout and undo knockout will call this, so depend the behaviour
@@ -320,7 +390,7 @@ export default Vue.extend({
           geneId: geneId
         });
       }
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     editBounds(reactionId: string, lower: string, upper: string) {
       const lowerBound = parseFloat(lower);
@@ -345,14 +415,14 @@ export default Vue.extend({
         this.$store.commit("interactiveMap/updateEditedBounds", payload);
       }
 
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     resetBounds(reactionId: string) {
       this.$store.commit("interactiveMap/undoEditBounds", {
         uuid: this.card.uuid,
         reactionId: reactionId
       });
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     }
   },
   mounted() {
