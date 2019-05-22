@@ -393,39 +393,35 @@
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">
                       <div
-                        v-for="(reaction,
+                        v-for="(reactionId,
                         index) in jobPrediction.heterologous_reactions"
                         :key="index"
                       >
                         <v-menu offset-y max-width="200px" content-class="menu">
                           <template v-slot:activator="{ on }">
                             <a
-                              :hidden="reaction.startsWith('DM')"
+                              :hidden="reactionId.startsWith('DM')"
                               class="link"
                               v-on="on"
                             >
-                              {{ reaction }}
+                              {{ prediction.result.reactions[reactionId].name }}
                             </a>
                           </template>
-                          <div class="text-xs-center caption pa-1">
-                            <strong>{{
-                              prediction.result.reactions[reaction].name
-                            }}</strong
-                            ><br />
-                            <span>{{
+                          <div class="text-xs-center caption ma-2">
+                            {{
                               prediction.result.reactions[
-                                reaction
+                                reactionId
                               ].annotation.Description.split("`").join("")
-                            }}</span>
+                            }}
                           </div>
                           <v-divider></v-divider>
-                          <v-container>
+                          <v-container class="pa-2 ml-2">
                             <v-layout>
                               <v-flex>
                                 <a
                                   class="link caption"
                                   :href="
-                                    `https://www.metanetx.org/equa_info/${reaction}`
+                                    `https://www.metanetx.org/equa_info/${reactionId}`
                                   "
                                   target="_blank"
                                   >MetaNetX</a
@@ -434,13 +430,13 @@
                               <v-flex>
                                 <a
                                   v-if="
-                                    prediction.result.reactions[reaction]
+                                    prediction.result.reactions[reactionId]
                                       .annotation.EC
                                   "
                                   class="link caption"
                                   :href="
                                     `https://www.uniprot.org/uniprot/?query=${
-                                      prediction.result.reactions[reaction]
+                                      prediction.result.reactions[reactionId]
                                         .annotation.EC
                                     }`
                                   "
@@ -451,13 +447,13 @@
                               <v-flex>
                                 <a
                                   v-if="
-                                    prediction.result.reactions[reaction]
+                                    prediction.result.reactions[reactionId]
                                       .annotation.EC
                                   "
                                   class="link caption"
                                   :href="
                                     `http://gmgc.embl.de/search/${
-                                      prediction.result.reactions[reaction]
+                                      prediction.result.reactions[reactionId]
                                         .annotation.EC
                                     }`
                                   "
