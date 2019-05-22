@@ -831,7 +831,7 @@ export default Vue.extend({
             return {
               id: reactions[reactionId].id,
               name: reactions[reactionId].name,
-              reactionString: reactions[reactionId].annotation
+              reactionString: reactions[reactionId].annotation.Description
                 ? reactions[reactionId].annotation.Description
                 : "N/A",
               lowerBound: reactions[reactionId].lower_bound,
