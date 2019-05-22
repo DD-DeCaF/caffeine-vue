@@ -210,10 +210,17 @@ export default Vue.extend({
       this.updateCard({
         uuid: this.card.uuid,
         props: {
+          objective: {
+            reaction: null,
+            maximize: true
+          },
           reactionAdditions: [],
           reactionKnockouts: [],
           geneKnockouts: [],
-          editedBounds: []
+          editedBounds: [],
+          // Reset simulation results too
+          fluxes: null,
+          growthRate: null
         }
       });
       this.$emit("simulate-card");
