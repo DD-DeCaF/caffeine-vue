@@ -23,6 +23,43 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
+            <v-list-group v-if="!project" v-model="isExpanded">
+              <template v-slot:activator>
+                <v-list-tile>
+                  <v-list-tile-content>
+                    <v-list-tile-title>Projects</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </template>
+              <v-list-tile
+                v-for="project in availableProjects"
+                :key="project.id"
+                @click="setActiveProject(project.id)"
+              >
+                <v-list-tile-action>
+                  <v-icon :color="project.color">folder</v-icon>
+                </v-list-tile-action>
+
+                <v-list-tile-content>
+                  <v-list-tile-title>{{ project.name }}</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list-group>
+            <v-list-tile
+              v-else
+              @click="unsetActiveProject"
+              class="primary white--text"
+              dark
+            >
+              <v-list-tile-action>
+                <v-icon>chevron_left</v-icon>
+              </v-list-tile-action>
+
+              <v-list-tile-content>
+                <v-list-tile-title>{{ project.name }}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+
             <v-list-tile to="/">
               <v-list-tile-action>
                 <v-icon>home</v-icon>
@@ -184,6 +221,8 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
+import colors from "vuetify/es5/util/colors";
+import { ColoredProjectItem } from "@/store/modules/projects";
 
 export default Vue.extend({
   components: {
@@ -192,7 +231,8 @@ export default Vue.extend({
   data: () => ({
     drawer: false,
     isProjectCreationDialogVisible: false,
-    isOrganismCreationDialogVisible: false
+    isOrganismCreationDialogVisible: false,
+    isExpanded: true
   }),
   computed: {
     isAuthenticated() {
@@ -238,9 +278,24 @@ export default Vue.extend({
         // Ignore passed value argument.
         this.$store.commit("setUnauthorizedError", null);
       }
+    },
+    availableProjects(): ColoredProjectItem[] {
+      return this.$store.state.projects.projects;
+    },
+    project(): ColoredProjectItem {
+      return this.$store.state.projects.activeProject;
     }
   },
-  methods: {},
+  methods: {
+    setActiveProject(projectID: number) {
+      this.$store.commit("projects/setActiveProject", projectID);
+      this.$vuetify.theme.primary = this.project.color;
+    },
+    unsetActiveProject() {
+      this.$store.commit("projects/setActiveProject", null);
+      this.$vuetify.theme.primary = colors.blue.base;
+    }
+  },
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
     // requests behave as expected. (See the interceptors for details)

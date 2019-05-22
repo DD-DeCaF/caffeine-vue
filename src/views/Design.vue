@@ -174,7 +174,7 @@ import { Route } from "vue-router";
 import axios, { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
 import { OrganismItem } from "@/store/modules/organisms";
-import { ProjectItem } from "@/store/modules/projects";
+import { ColoredProjectItem } from "@/store/modules/projects";
 import { ModelItem, organism2ModelMapping } from "@/store/modules/models";
 import NewProject from "@/components/NewProject.vue";
 import NewOrganism from "@/components/NewOrganism.vue";
@@ -187,7 +187,7 @@ interface ProductItem {
 
 interface DesignState {
   isValid: boolean;
-  project?: ProjectItem;
+  project?: ColoredProjectItem;
   projectRules: ReadonlyArray<RuleHandler>;
   isProjectCreationDialogVisible: boolean;
   organism?: OrganismItem;
@@ -246,7 +246,7 @@ export default Vue.extend({
     };
   },
   computed: {
-    projectOptions(): ProjectItem[] {
+    projectOptions(): ColoredProjectItem[] {
       return this.$store.state.projects.projects;
     },
     // TODO (Moritz Beber): Selection of organism in future should depend on the
@@ -298,7 +298,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    onNewProject(project: ProjectItem): void {
+    onNewProject(project: ColoredProjectItem): void {
       this.project = project;
     },
     onNewOrganism(organism: OrganismItem): void {
