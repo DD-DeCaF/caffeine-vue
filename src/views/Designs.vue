@@ -32,10 +32,9 @@
             :expand="expand"
             :pagination.sync="pagination"
             :custom-sort="customSort"
-            :loading="isLoading"
+            :loading="isLoading || isDeleting"
             select-all
-            :headers-length=7
-            class="data-table-fix"
+            :headers-length="7"
           >
             <v-progress-linear
               v-slot:progress
@@ -100,9 +99,7 @@
                     'reaction_knockins' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span
-                    @click="changeSort('reaction_knockins')"
-                    class="pointer"
+                  <span @click="changeSort('reaction_knockins')" class="pointer"
                     >Added Reactions <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -130,9 +127,7 @@
                     'gene_knockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span
-                    @click="changeSort('gene_knockouts')"
-                    class="pointer"
+                  <span @click="changeSort('gene_knockouts')" class="pointer"
                     >Gene Knockouts <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -185,23 +180,17 @@
               </tr>
             </template>
             <template v-slot:expand="{ item: design }">
-                <v-data-table
-        :items="[design]"
-        :expand="expand"
-        item-key="name"
-        hide-actions
-        hide-headers
-        class="data-table-fix"
-        :headers-length=7
-      >
-        <template v-slot:items="props">
-           <td width="5%"></td>
-            <td width="20%"></td>
-              <td width="15%"></td>
-            <td width="15%"></td>
-                  <td
-                    width="15%"
-                  >
+              <v-data-table
+                :items="[design]"
+                :expand="expand"
+                item-key="name"
+                hide-actions
+                hide-headers
+                :headers-length="7"
+              >
+                <template v-slot:items="props">
+                  <td width="55%"></td>
+                  <td width="15%">
                     <div class="link-list">
                       <div
                         v-for="(reactionKnockin, index) in design.design
@@ -244,9 +233,7 @@
                       </div>
                     </div>
                   </td>
-                  <td
-                    width="15%"
-                  >
+                  <td width="15%">
                     <div class="link-list">
                       <div
                         v-for="(reactionKnockout, index) in design.design
@@ -297,9 +284,7 @@
                       </div>
                     </div>
                   </td>
-                  <td
-                    width="15%"
-                  >
+                  <td width="15%">
                     <div class="link-list">
                       <div
                         v-for="(geneKnockout, index) in design.design
@@ -339,8 +324,8 @@
                       </div>
                     </div>
                   </td>
-               </template>
-</v-data-table>
+                </template>
+              </v-data-table>
             </template>
           </v-data-table>
         </div>
@@ -362,20 +347,21 @@ export default Vue.extend({
     showAllReactionKnockouts: false,
     showAllGeneKnockouts: false,
     isDeletionDialogVisible: false,
-    isLoading: false,
+    isDeleting: false,
+    isLoading: true,
     pagination: {
       rowsPerPage: 10,
       sortBy: "name"
     },
     headers: [
-      { value: 'name', align: 'left' },
-      { value: 'organism_id', align: 'left' },
-      { value: 'model_id', align: 'left' },
-      { value: 'reaction_knockins', align: 'left' },
-      { value: 'reaction_knockouts', align: 'left' },
-      { value: 'gene_knockouts', align: 'left' },
-    ],
-}),
+      { value: "name", align: "left" },
+      { value: "organism_id", align: "left" },
+      { value: "model_id", align: "left" },
+      { value: "reaction_knockins", align: "left" },
+      { value: "reaction_knockouts", align: "left" },
+      { value: "gene_knockouts", align: "left" }
+    ]
+  }),
   methods: {
     customSort(items, index, isDesc) {
       items.sort((a, b) => {
@@ -425,7 +411,7 @@ export default Vue.extend({
       return `http://bigg.ucsd.edu/search?query=${reactionId}`;
     },
     toggleLoader() {
-      this.isLoading = !this.isLoading;
+      this.isDeleting = !this.isDeleting;
     },
     toggleAll() {
       if (this.selected.length) {
