@@ -168,7 +168,11 @@ export default {
             resolve({
               id: response.data.bigg_id,
               name: response.data.name,
-              reactions: response.data.reactions
+              reactions: response.data.reactions.map(r => ({
+                id: r.bigg_id,
+                name: r.name,
+                geneReactionRule: r.gene_reaction_rule
+              }))
             });
           });
       });
