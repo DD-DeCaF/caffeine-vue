@@ -57,7 +57,7 @@ export default {
                   reactionString: r.reaction_string,
                   metabolites: r.metabolites.map(m => ({
                     ...m,
-                    compartmentId: m.compartment_id
+                    compartment: m.compartment_id
                   }))
                 })),
                 reactionKnockouts: design.design.reaction_knockouts.map(r => ({
@@ -67,7 +67,7 @@ export default {
                   reactionString: r.reaction_string,
                   metabolites: r.metabolites.map(m => ({
                     ...m,
-                    compartmentId: m.compartment_id
+                    compartment: m.compartment_id
                   }))
                 })),
                 geneKnockouts: design.design.gene_knockouts.map(g => ({

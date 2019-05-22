@@ -14,7 +14,7 @@ export interface Gene {
 export interface Metabolite {
   id: string;
   name: string;
-  compartmentId: string;
+  compartment: string;
   stoichiometry: number;
 }
 
@@ -159,7 +159,7 @@ export default {
               metabolites: response.data.metabolites.map(m => ({
                 id: m.bigg_id,
                 name: m.name,
-                compartmentId: m.compartment_bigg_id,
+                compartment: m.compartment_bigg_id,
                 stoichiometry: m.stoichiometry
               }))
             });

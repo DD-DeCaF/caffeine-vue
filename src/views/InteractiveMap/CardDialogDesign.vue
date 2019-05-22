@@ -12,7 +12,7 @@
           Added reaction
         </td>
         <td v-if="modification.type === 'added_reaction'">
-          <span v-if="modification.name !== null">
+          <span v-if="modification.name">
             {{ modification.name }} ({{ modification.id }})
           </span>
           <v-progress-circular
@@ -24,7 +24,7 @@
         </td>
         <td v-if="modification.type === 'added_reaction'">
           <span
-            v-if="modification.reactionString !== null"
+            v-if="modification.reactionString"
             v-html="modification.reactionString"
           />
           <v-progress-circular
@@ -40,7 +40,7 @@
           Reaction knockout
         </td>
         <td v-if="modification.type === 'reaction_knockout'">
-          <span v-if="modification.name !== null">
+          <span v-if="modification.name">
             {{ modification.name }} ({{ modification.id }})
           </span>
           <v-progress-circular
@@ -52,7 +52,7 @@
         </td>
         <td v-if="modification.type === 'reaction_knockout'">
           <span
-            v-if="modification.reactionString !== null"
+            v-if="modification.reactionString"
             v-html="modification.reactionString"
           />
           <v-progress-circular
@@ -68,7 +68,7 @@
           Gene knockout
         </td>
         <td v-if="modification.type === 'gene_knockout'">
-          <span v-if="modification.name !== null">
+          <span v-if="modification.name">
             {{ modification.name }} ({{ modification.id }})
           </span>
           <v-progress-circular
@@ -79,13 +79,13 @@
           ></v-progress-circular>
         </td>
         <td v-if="modification.type === 'gene_knockout'">
-          <span v-if="modification.reactions !== null">
+          <span v-if="modification.reactions">
             <p
               class="mb-0"
               v-for="reaction in modification.reactions"
               :key="reaction.id"
             >
-              {{ reaction.name }} ({{ reaction.bigg_id }})
+              {{ reaction.name }} ({{ reaction.id }})
             </p>
           </span>
           <v-progress-circular
@@ -184,7 +184,7 @@
       :loading="model && !model.model_serialized"
       :disabled="!model"
       hide-no-data
-      :item-text="reactionDisplay"
+      :item-text="geneDisplay"
       item-value="id"
       label="Knock out a gene from the model..."
       prepend-icon="remove"
