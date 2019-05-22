@@ -5,6 +5,12 @@ import * as settings from "@/utils/settings";
 import { OrganismItem } from "./organisms";
 import { ModelItem } from "./models";
 
+export interface Gene {
+  id: string;
+  name: string;
+  reactions: any[];
+}
+
 export interface Metabolite {
   id: string;
   name: string;
