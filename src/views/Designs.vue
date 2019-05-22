@@ -35,7 +35,7 @@
             :loading="isLoading"
             select-all
             :headers-length=7
-            class="table-size"
+            class="data-table-fix"
           >
             <v-progress-linear
               v-slot:progress
@@ -189,10 +189,11 @@
         :items="[design]"
         :expand="expand"
         item-key="name"
-hide-actions
+        hide-actions
+        hide-headers
+        class="data-table-fix"
+        :headers-length=7
       >
-            <template v-slot:headers="props">
-             </template>
         <template v-slot:items="props">
            <td width="5%"></td>
             <td width="20%"></td>
