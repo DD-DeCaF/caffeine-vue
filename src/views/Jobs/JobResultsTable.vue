@@ -574,14 +574,14 @@ export default Vue.extend({
           .post(`${settings.apis.idMapper}`, body)
           .then((response: AxiosResponse<Object>) => {
             const biggIds = response.data["ids"];
-            let metabolites: Object[] = [];
+            const metabolites: Object[] = [];
             for (const mnxId of mnxMetaboliteIds) {
               const { id, name, compartment } = mnxMetabolites[mnxId];
               const stoichiometry = mnxMetabolitesInReaction[mnxId];
-              let metabolite = { id, name, compartment, stoichiometry };
+              const metabolite = { id, name, compartment, stoichiometry };
               if (biggIds.hasOwnProperty(mnxId)) {
-                metabolite.id = biggIds[mnxId][0] + "_c";
-                metabolite.compartment = "_c";
+                metabolite.id = biggIds[mnxId][0];
+                metabolite.compartment = "c";
               }
               metabolites.push(metabolite);
             }
