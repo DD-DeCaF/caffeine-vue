@@ -27,6 +27,7 @@
                 color="primary"
                 :disabled="selected.length < 1"
                 class="mt-3"
+                @click="visualize()"
                 ><v-icon>share</v-icon>VISUALIZE</v-btn
               >
             </v-list-tile>
@@ -330,6 +331,9 @@
 import Vue from "vue";
 import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "JobResultsTable",
@@ -537,6 +541,65 @@ export default Vue.extend({
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    visualize() {
+      const predictions = this.selected.map(jobPrediction => {
+        const addedReactionIds = [
+          ...jobPrediction.heterologous_reactions,
+          ...jobPrediction.synthetic_reactions
+        ];
+        const promises = this.getAddedReactions(addedReactionIds);
+        Promise.all(promises).then(
+          addedReactions => console.log("addedReactions", addedReactions)
+          // todo: add visualization functionality
+        );
+      });
+    },
+    getAddedReactions(addedReactionIds) {
+      return addedReactionIds.map(reactionId => {
+        const mnxMetabolitesInReaction = this.prediction.result.reactions[
+          reactionId
+        ].metabolites;
+        const mnxMetabolites = this.prediction.result.metabolites;
+        const mnxMetaboliteIds = Object.keys(mnxMetabolitesInReaction);
+        const reactions = this.prediction.result.reactions;
+
+        const body = {
+          ids: mnxMetaboliteIds,
+          db_from: "mnx",
+          db_to: "bigg",
+          type: "Metabolite"
+        };
+        return axios
+          .post(`${settings.apis.idMapper}`, body)
+          .then((response: AxiosResponse<Object>) => {
+            const biggIds = response.data["ids"];
+            let metabolites: Object[] = [];
+            for (const mnxId of mnxMetaboliteIds) {
+              const { id, name, compartment } = mnxMetabolites[mnxId];
+              const stoichiometry = mnxMetabolitesInReaction[mnxId];
+              let metabolite = { id, name, compartment, stoichiometry };
+              if (biggIds.hasOwnProperty(mnxId)) {
+                metabolite.id = biggIds[mnxId][0] + "_c";
+                metabolite.compartment = "_c";
+              }
+              metabolites.push(metabolite);
+            }
+            return {
+              id: reactions[reactionId].id,
+              name: reactions[reactionId].name,
+              reactionString: reactions[reactionId].annotation
+                ? reactions[reactionId].annotation.Description
+                : "",
+              lowerBound: reactions[reactionId].lower_bound,
+              upperBound: reactions[reactionId].upper_bound,
+              metabolites
+            };
+          })
+          .catch(error => {
+            this.$store.commit("setFetchError", error);
+          });
+      });
     }
   },
   created() {
