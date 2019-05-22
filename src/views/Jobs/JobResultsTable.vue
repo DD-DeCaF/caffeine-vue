@@ -478,14 +478,35 @@
                         v-for="(knockout, index) in jobPrediction.knockouts"
                         :key="index"
                       >
+                        <div v-if="index < 10">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${knockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ knockout }}
+                          </a>
+                        </div>
+                        <div v-if="index >= 10" :hidden="!showAllKnockouts">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${knockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ knockout }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="jobPrediction.knockouts.length > 10">
                         <a
-                          :href="
-                            `http://bigg.ucsd.edu/search?query=${knockout}`
-                          "
-                          class="link"
-                          target="_blank"
+                          @click="showAllKnockouts = true"
+                          :hidden="showAllKnockouts"
                         >
-                          {{ knockout }}
+                          ...
                         </a>
                       </div>
                     </div>
@@ -524,7 +545,8 @@ export default Vue.extend({
       up: "↑",
       down: "↓"
     },
-    showAllManipulations: false
+    showAllManipulations: false,
+    showAllKnockouts: false
   }),
   filters: {
     round: value => {
@@ -740,7 +762,7 @@ export default Vue.extend({
   text-decoration: none;
 }
 .link-list {
-  max-height: 300px;
+  max-height: 250px;
   overflow-y: auto;
 }
 .menu {
