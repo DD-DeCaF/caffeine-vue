@@ -7,9 +7,14 @@
           <v-list class="table-buttons">
             <v-list-tile>
               <v-layout justify-end>
-                <v-btn flat color="primary" :disabled="selected.length < 1"
-                  ><v-icon>share</v-icon>VISUALIZE</v-btn
+                <v-btn
+                  flat
+                  color="primary"
+                  :disabled="selected.length < 1"
+                  @click="visualize"
                 >
+                  <v-icon>share</v-icon> Visualize
+                </v-btn>
                 <v-btn
                   flat
                   color="primary"
@@ -21,8 +26,9 @@
                     :items="selected"
                     itemsType="designs"
                     @toggleLoader="toggleLoader()"
-                  /><v-icon>delete</v-icon>DELETE</v-btn
-                >
+                  />
+                  <v-icon>delete</v-icon> Delete
+                </v-btn>
               </v-layout>
             </v-list-tile>
           </v-list>
@@ -234,6 +240,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import uuidv4 from "uuid/v4";
 
 export default Vue.extend({
   name: "Designs",
@@ -308,6 +315,46 @@ export default Vue.extend({
     },
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
+    },
+    visualize() {
+      this.selected.forEach(design => {
+        // TODO: Associate design id with the card
+        const card = {
+          uuid: uuidv4(),
+          name: design.name,
+          organism: this.organism(this.model(design.model_id).organism_id),
+          modelId: design.model_id,
+          method: "pfba", // TODO - should this be default?
+          dataDriven: false,
+          // Design card fields
+          objective: {
+            reaction: null,
+            maximize: true
+          },
+          reactionAdditions: design.design.reactionKnockins,
+          reactionKnockouts: design.design.reactionKnockouts,
+          geneKnockouts: design.design.geneKnockouts,
+          editedBounds: design.design.constraints,
+          // Data-driven card fields
+          experiment: null,
+          condition: null,
+          conditionData: null,
+          conditionWarnings: [],
+          conditionErrors: [],
+          // General simulation fields
+          isSimulating: false,
+          hasSimulationError: false,
+          growthRate: null,
+          fluxes: null
+        };
+        // Make sure the full model is available before adding the card.
+        this.$store
+          .dispatch("models/withFullModel", design.model_id)
+          .then(() => {
+            this.$store.commit("interactiveMap/addCard", card);
+          });
+      });
+      this.$router.push({ name: "interactiveMap" });
     }
   },
   computed: {
