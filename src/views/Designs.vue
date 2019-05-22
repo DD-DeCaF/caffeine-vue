@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-layout justify-center>
-      <v-flex md10>
+      <v-flex md10 sm12>
         <h1 class="mb-2">Designs</h1>
         <div class="elevation-8">
           <v-list class="table-buttons">
@@ -34,7 +34,7 @@
             :custom-sort="customSort"
             :loading="isLoading"
             select-all
-            headers-length="7"
+            :headers-length=7
           >
             <v-progress-linear
               v-slot:progress
@@ -184,13 +184,21 @@
               </tr>
             </template>
             <template v-slot:expand="{ item: design }">
-              <v-container style="padding:0;" class="elevation-1">
-                <v-layout justify-end>
-                  <v-flex
-                    style="width:55%; padding:0 24px; box-sizing: border-box;"
-                  ></v-flex>
-                  <v-flex
-                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                <v-data-table
+        :items="[design]"
+        :expand="expand"
+        item-key="name"
+hide-actions
+      >
+            <template v-slot:headers="props">
+             </template>
+        <template v-slot:items="props">
+           <td width="5%"></td>
+            <td width="20%"></td>
+              <td width="15%"></td>
+            <td width="15%"></td>
+                  <td
+                    width="15%"
                   >
                     <div class="link-list">
                       <div
@@ -233,9 +241,9 @@
                         </a>
                       </div>
                     </div>
-                  </v-flex>
-                  <v-flex
-                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                  </td>
+                  <td
+                    width="15%"
                   >
                     <div class="link-list">
                       <div
@@ -286,9 +294,9 @@
                         </a>
                       </div>
                     </div>
-                  </v-flex>
-                  <v-flex
-                    style="width:15%; padding:0 24px; box-sizing: border-box;"
+                  </td>
+                  <td
+                    width="15%"
                   >
                     <div class="link-list">
                       <div
@@ -328,9 +336,9 @@
                         </a>
                       </div>
                     </div>
-                  </v-flex>
-                </v-layout>
-              </v-container>
+                  </td>
+               </template>
+</v-data-table>
             </template>
           </v-data-table>
         </div>
