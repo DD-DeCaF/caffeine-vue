@@ -174,7 +174,7 @@ export default Vue.extend({
       }
     },
     setReactionAdditions() {
-      if (this.card === null) {
+      if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.set_added_reactions([]);
       } else {
         this.escherBuilder.set_added_reactions(
