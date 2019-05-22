@@ -1,7 +1,7 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-layout justify-center>
-      <v-flex md10 sm12>
+      <v-flex>
         <h1 class="mb-2">Designs</h1>
         <div class="elevation-8">
           <v-list class="table-buttons">
@@ -35,6 +35,7 @@
             :loading="isLoading"
             select-all
             :headers-length=7
+            class="table-size"
           >
             <v-progress-linear
               v-slot:progress
