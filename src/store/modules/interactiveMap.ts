@@ -27,6 +27,7 @@ export interface Card {
   organism: OrganismItem;
   modelId: number;
   method: string;
+  dataDriven: boolean;
   // Design card fields
   objective: {
     reaction: Reaction;
