@@ -414,7 +414,7 @@
                         </div>
                         <v-divider></v-divider>
                         <v-container>
-                          <v-layout align-start>
+                          <v-layout>
                             <v-flex>
                               <a
                                 class="link caption"
@@ -462,6 +462,23 @@
                           </v-layout>
                         </v-container>
                       </v-menu>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="link-list">
+                    <div
+                      v-for="(knockout, index) in jobPrediction.knockouts"
+                      :key="index"
+                    >
+                      <a
+                        :href="`http://bigg.ucsd.edu/search?query=${knockout}`"
+                        class="link"
+                        target="_blank"
+                      >
+                        {{ knockout }}
+                      </a>
                     </div>
                   </div>
                 </td>
@@ -698,7 +715,6 @@ export default Vue.extend({
       this.range = this.getRange();
       this.filters = this.getFilters();
     }
-    console.log("log", this.prediction);
   }
 });
 </script>
