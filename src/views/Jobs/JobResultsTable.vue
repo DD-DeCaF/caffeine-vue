@@ -404,7 +404,11 @@
                               class="link"
                               v-on="on"
                             >
-                              {{ prediction.result.reactions[reactionId].name }}
+                              {{
+                                prediction.result.reactions[reactionId].name
+                                  ? prediction.result.reactions[reactionId].name
+                                  : reactionId
+                              }}
                             </a>
                           </template>
                           <div class="text-xs-center caption ma-2">
