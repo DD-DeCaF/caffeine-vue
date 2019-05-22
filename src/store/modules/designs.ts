@@ -11,9 +11,9 @@ export interface DesignItem {
         upper_bound: number;
       }
     ];
-    gene_knockouts: string[];
-    reaction_knockins: string[];
-    reaction_knockouts: string[];
+    gene_knockouts: object[];
+    reaction_knockins: object[];
+    reaction_knockouts: object[];
   };
   id: number;
   model_id: number;
@@ -44,18 +44,7 @@ export default {
       const designsPromise = axios
         .get(`${settings.apis.designStorage}/designs`)
         .then((response: AxiosResponse<DesignItem[]>) => {
-          const designs = response.data.map(design => {
-            return {
-              ...design,
-              design: {
-                ...design.design,
-                reaction_knockins: design.design.reaction_knockins.map(
-                  reaction => JSON.parse(reaction)
-                )
-              }
-            };
-          });
-          commit("setDesigns", designs);
+          commit("setDesigns", response.data);
         })
         .catch(error => {
           commit("setFetchError", error, { root: true });
