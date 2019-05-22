@@ -27,6 +27,7 @@
                 color="primary"
                 :disabled="selected.length < 1"
                 class="mt-3"
+                @click="visualize()"
                 ><v-icon>share</v-icon>VISUALIZE</v-btn
               >
             </v-list-tile>
@@ -38,6 +39,7 @@
             :pagination.sync="pagination"
             :custom-sort="customSort"
             select-all
+            :headers-length="9"
           >
             <template v-slot:headers="props">
               <tr>
@@ -314,10 +316,205 @@
                 </td>
               </tr>
             </template>
-            <template v-slot:expand="props">
-              <tr>
-                Expanded
-              </tr>
+            <template v-slot:expand="{ item: jobPrediction }">
+              <v-data-table
+                :items="[jobPrediction]"
+                :expand="expand"
+                hide-actions
+                hide-headers
+              >
+                <template v-slot:items="props">
+                  <td width="5%"></td>
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(manipulation,
+                        index) in jobPrediction.manipulations"
+                        :key="index"
+                      >
+                        <div v-if="index < 10">
+                          <a
+                            v-if="
+                              jobPrediction.method ===
+                                'PathwayPredictor+DifferentialFVA'
+                            "
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${
+                                manipulation.id
+                              }`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{
+                              `${indicators[manipulation.direction]} ${
+                                manipulation.id
+                              }`
+                            }}
+                          </a>
+                        </div>
+                        <div v-if="index >= 10" :hidden="!showAllManipulations">
+                          <a
+                            v-if="
+                              jobPrediction.method ===
+                                'PathwayPredictor+DifferentialFVA'
+                            "
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${
+                                manipulation.id
+                              }`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{
+                              `${indicators[manipulation.direction]} ${
+                                manipulation.id
+                              }`
+                            }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="jobPrediction.manipulations.length > 10">
+                        <a
+                          @click="showAllManipulations = true"
+                          :hidden="showAllManipulations"
+                        >
+                          ...
+                        </a>
+                      </div>
+                      <div v-if="jobPrediction.manipulations.length > 0">
+                        <span class="caption grey--text"
+                          >↑ up-regulation<br />↓ down-regulation</span
+                        >
+                      </div>
+                    </div>
+                  </td>
+
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(reactionId,
+                        index) in jobPrediction.heterologous_reactions"
+                        :key="index"
+                      >
+                        <v-menu offset-y max-width="200px" content-class="menu">
+                          <template v-slot:activator="{ on }">
+                            <a
+                              :hidden="reactionId.startsWith('DM')"
+                              class="link"
+                              v-on="on"
+                            >
+                              {{
+                                prediction.result.reactions[reactionId].name
+                                  ? prediction.result.reactions[reactionId].name
+                                  : reactionId
+                              }}
+                            </a>
+                          </template>
+                          <div class="text-xs-center caption ma-2">
+                            {{
+                              prediction.result.reactions[
+                                reactionId
+                              ].annotation.Description.split("`").join("")
+                            }}
+                          </div>
+                          <v-divider></v-divider>
+                          <v-container class="pa-2 ml-2">
+                            <v-layout>
+                              <v-flex>
+                                <a
+                                  class="link caption"
+                                  :href="
+                                    `https://www.metanetx.org/equa_info/${reactionId}`
+                                  "
+                                  target="_blank"
+                                  >MetaNetX</a
+                                >
+                              </v-flex>
+                              <v-flex>
+                                <a
+                                  v-if="
+                                    prediction.result.reactions[reactionId]
+                                      .annotation.EC
+                                  "
+                                  class="link caption"
+                                  :href="
+                                    `https://www.uniprot.org/uniprot/?query=${
+                                      prediction.result.reactions[reactionId]
+                                        .annotation.EC
+                                    }`
+                                  "
+                                  target="_blank"
+                                  >UniProt</a
+                                >
+                              </v-flex>
+                              <v-flex>
+                                <a
+                                  v-if="
+                                    prediction.result.reactions[reactionId]
+                                      .annotation.EC
+                                  "
+                                  class="link caption"
+                                  :href="
+                                    `http://gmgc.embl.de/search/${
+                                      prediction.result.reactions[reactionId]
+                                        .annotation.EC
+                                    }`
+                                  "
+                                  target="_blank"
+                                  >GMGC</a
+                                >
+                              </v-flex>
+                            </v-layout>
+                          </v-container>
+                        </v-menu>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(knockout, index) in jobPrediction.knockouts"
+                        :key="index"
+                      >
+                        <div v-if="index < 10">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${knockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ knockout }}
+                          </a>
+                        </div>
+                        <div v-if="index >= 10" :hidden="!showAllKnockouts">
+                          <a
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${knockout}`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{ knockout }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="jobPrediction.knockouts.length > 10">
+                        <a
+                          @click="showAllKnockouts = true"
+                          :hidden="showAllKnockouts"
+                        >
+                          ...
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td width="59%"></td>
+                </template>
+              </v-data-table>
             </template>
           </v-data-table>
         </div>
@@ -330,6 +527,9 @@
 import Vue from "vue";
 import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "JobResultsTable",
@@ -343,7 +543,14 @@ export default Vue.extend({
       rowsPerPage: 10
     },
     range: null,
-    filters: null
+    filters: null,
+    indicators: {
+      delta: "Δ",
+      up: "↑",
+      down: "↓"
+    },
+    showAllManipulations: false,
+    showAllKnockouts: false
   }),
   filters: {
     round: value => {
@@ -527,7 +734,7 @@ export default Vue.extend({
       if (this.selected.length) {
         this.selected = [];
       } else {
-        this.selected = [...this.pathways];
+        this.selected = [...this.filteredPathways];
       }
     },
     changeSort(column) {
@@ -537,6 +744,65 @@ export default Vue.extend({
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    visualize() {
+      const predictions = this.selected.map(jobPrediction => {
+        const addedReactionIds = [
+          ...jobPrediction.heterologous_reactions,
+          ...jobPrediction.synthetic_reactions
+        ];
+        const promises = this.getAddedReactions(addedReactionIds);
+        Promise.all(promises).then(
+          addedReactions => console.log("addedReactions", addedReactions)
+          // todo: add visualization functionality
+        );
+      });
+    },
+    getAddedReactions(addedReactionIds) {
+      return addedReactionIds.map(reactionId => {
+        const mnxMetabolitesInReaction = this.prediction.result.reactions[
+          reactionId
+        ].metabolites;
+        const mnxMetabolites = this.prediction.result.metabolites;
+        const mnxMetaboliteIds = Object.keys(mnxMetabolitesInReaction);
+        const reactions = this.prediction.result.reactions;
+
+        const body = {
+          ids: mnxMetaboliteIds,
+          db_from: "mnx",
+          db_to: "bigg",
+          type: "Metabolite"
+        };
+        return axios
+          .post(`${settings.apis.idMapper}`, body)
+          .then((response: AxiosResponse<Object>) => {
+            const biggIds = response.data["ids"];
+            const metabolites: Object[] = [];
+            for (const mnxId of mnxMetaboliteIds) {
+              const { id, name, compartment } = mnxMetabolites[mnxId];
+              const stoichiometry = mnxMetabolitesInReaction[mnxId];
+              const metabolite = { id, name, compartment, stoichiometry };
+              if (biggIds.hasOwnProperty(mnxId)) {
+                metabolite.id = biggIds[mnxId][0];
+                metabolite.compartment = "c";
+              }
+              metabolites.push(metabolite);
+            }
+            return {
+              id: reactions[reactionId].id,
+              name: reactions[reactionId].name,
+              reactionString: reactions[reactionId].annotation
+                ? reactions[reactionId].annotation.Description
+                : "",
+              lowerBound: reactions[reactionId].lower_bound,
+              upperBound: reactions[reactionId].upper_bound,
+              metabolites
+            };
+          })
+          .catch(error => {
+            this.$store.commit("setFetchError", error);
+          });
+      });
     }
   },
   created() {
@@ -554,5 +820,19 @@ export default Vue.extend({
 }
 .pointer {
   cursor: pointer;
+}
+.link {
+  text-decoration: none;
+}
+.link-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+.menu {
+  background: #fdfcfc;
+  border-radius: 5px;
+}
+.expanded-cell {
+  vertical-align: top;
 }
 </style>

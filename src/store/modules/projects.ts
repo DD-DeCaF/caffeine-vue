@@ -16,6 +16,7 @@ export interface ColoredProjectItem extends ProjectItem {
 interface ProjectStore {
   projects: ColoredProjectItem[];
   activeProject?: ColoredProjectItem;
+  projectsPromise?: Promise<void>;
 }
 
 const sensibleColors = {};
@@ -37,7 +38,8 @@ export default {
   namespaced: true,
   state: {
     projects: [],
-    activeProject: null
+    activeProject: null,
+    projectsPromise: null
   },
   mutations: {
     setProjects(state: ProjectStore, projects: ColoredProjectItem[]) {
@@ -56,11 +58,14 @@ export default {
     },
     setActiveProject(state: ProjectStore, id: number) {
       state.activeProject = state.projects.find(project => project.id === id);
+    },
+    setProjectsPromise(state: ProjectStore, projectsPromise: Promise<void>) {
+      state.projectsPromise = projectsPromise;
     }
   },
   actions: {
     fetchProjects({ commit }) {
-      axios
+      const projectsPromise: Promise<void> = axios
         .get(`${settings.apis.iam}/projects`)
         .then((response: AxiosResponse<ProjectItem[]>) => {
           commit(
@@ -78,6 +83,7 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+      commit("setProjectsPromise", projectsPromise);
     }
   },
   getters: {

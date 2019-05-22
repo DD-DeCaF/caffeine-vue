@@ -32,7 +32,6 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import * as bigg from "@/utils/bigg";
 
 export default Vue.extend({
   name: "Escher",
@@ -54,6 +53,14 @@ export default Vue.extend({
         setTimeout(() => {
           this.escherBuilder.load_map(value);
           this.isLoadingMap = false;
+          // Update the map state, since it will be reset whenever the map is
+          // changed.
+          this.setFullModel();
+          this.setReactionAdditions();
+          this.setReactionKnockouts();
+          this.setGeneKnockouts();
+          this.setConditionData();
+          this.setFluxes();
         }, 10);
       };
 
@@ -64,6 +71,9 @@ export default Vue.extend({
         loadMap();
       }
     },
+    // Add separate watchers for the different properties on the card, instead
+    // of a single deep watcher on the card, to be able to only update the
+    // relevant portions of the map.
     "card.fullModel": {
       // Important note: This watcher *must* run before the
       // `card.reactionAdditions` watcher below, because reactions added to the
@@ -71,42 +81,66 @@ export default Vue.extend({
       // ordered first here.
       deep: true,
       handler(fullModel) {
-        if (this.card === null || fullModel === null) {
-          this.escherBuilder.load_model(null);
-        } else {
-          this.escherBuilder.load_model(fullModel.model_serialized);
-        }
+        this.setFullModel();
       }
     },
-    "card.reactionAdditions"(reactionAdditions) {
+    "card.reactionAdditions"() {
+      this.setReactionAdditions();
+    },
+    "card.reactionKnockouts"() {
+      this.setReactionKnockouts();
+    },
+    "card.geneKnockouts"() {
+      this.setGeneKnockouts();
+    },
+    "card.conditionData"() {
+      this.setConditionData();
+    },
+    "card.fluxes"() {
+      this.setFluxes();
+    }
+  },
+  methods: {
+    setFullModel() {
+      if (this.card === null || this.card.fullModel === null) {
+        this.escherBuilder.load_model(null);
+      } else {
+        this.escherBuilder.load_model(this.card.fullModel.model_serialized);
+      }
+    },
+    setReactionAdditions() {
       if (this.card === null) {
         this.escherBuilder.set_added_reactions([]);
       } else {
         this.escherBuilder.set_added_reactions(
-          reactionAdditions.filter(r => !r.id.startsWith("DM_")).map(r => r.id)
+          this.card.reactionAdditions
+            .filter(r => !r.id.startsWith("DM_"))
+            .map(r => r.id)
         );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.reactionKnockouts"(reactionKnockouts) {
+    setReactionKnockouts() {
       if (this.card === null) {
         this.escherBuilder.set_knockout_reactions([]);
       } else {
         this.escherBuilder.set_knockout_reactions(
-          reactionKnockouts.map(r => r.id)
+          this.card.reactionKnockouts.map(r => r.id)
         );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.geneKnockouts"(geneKnockouts) {
+    setGeneKnockouts() {
       if (this.card === null) {
         this.escherBuilder.set_knockout_genes([]);
       } else {
-        this.escherBuilder.set_knockout_genes(geneKnockouts.map(g => g.id));
+        this.escherBuilder.set_knockout_genes(
+          this.card.geneKnockouts.map(g => g.id)
+        );
       }
       this.escherBuilder._update_data(true, true);
     },
-    "card.conditionData"() {
+    setConditionData() {
       if (!this.card || !this.card.conditionData) {
         this.escherBuilder.set_highlight_reactions([]);
         return;
@@ -115,18 +149,18 @@ export default Vue.extend({
         this.card.conditionData.measurements.map(m => m.id)
       );
     },
-    "card.fluxes"(fluxes) {
+    setFluxes() {
       // Update the flux distribution
-      if (this.card === null || fluxes === null) {
+      if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (this.card.method === "fba" || this.card.method == "pfba") {
-          const fluxesFiltered = this.fluxFilter(fluxes);
+          const fluxesFiltered = this.fluxFilter(this.card.fluxes);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
           // previous FVA simulation has been set on the map.
           // TODO: We should improve the escher API here.
-          this.escherBuilder.set_reaction_fva_data(fluxes);
+          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         } else if (
           this.card.method === "fva" ||
           this.card.method == "pfba-fva"
@@ -134,21 +168,19 @@ export default Vue.extend({
           // Render a flux distribution using the average values from the FVA
           // data.
           const fluxesAverage = {};
-          Object.keys(fluxes).map(reaction => {
-            const rxn = fluxes[reaction];
+          Object.keys(this.card.fluxes).map(reaction => {
+            const rxn = this.card.fluxes[reaction];
             const average = (rxn.upper_bound + rxn.lower_bound) / 2;
             fluxesAverage[reaction] = average;
           });
           const fluxesFiltered = this.fluxFilter(fluxesAverage);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set the FVA data for transparency visualization.
-          this.escherBuilder.set_reaction_fva_data(fluxes);
+          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         }
       }
       this.escherBuilder._update_data(true, true);
-    }
-  },
-  methods: {
+    },
     fluxFilter(fluxes) {
       // Exclude fluxes with very low non-zero values, in order to not shift
       // the escher color scale.
@@ -230,55 +262,65 @@ export default Vue.extend({
         bounds: null
       };
     },
-    knockoutReaction(reactionId: string) {
-      const reaction = bigg.lookupReaction(reactionId);
-
-      // Check if the reaction is already knocked out.
-      const index = this.card.reactionKnockouts.findIndex(
-        reaction => reaction.id === reactionId
-      );
-      if (index !== -1) {
-        // This reaction is already knocked out; undo the knockout.
-        this.card.reactionKnockouts.splice(index, 1);
-      } else {
-        this.card.reactionKnockouts.push(reaction);
-      }
-      this.$emit("simulate-card", this.card);
-    },
-    knockoutGene(geneId: string) {
-      const gene = bigg.lookupGene(
-        this.card.fullModel.model_serialized.id,
-        geneId
-      );
-
-      const index = this.card.geneKnockouts.findIndex(
-        gene => gene.id === geneId
-      );
-      if (index !== -1) {
-        // This gene is already knocked out; undo it
-        this.card.geneKnockouts.splice(index, 1);
-      } else {
-        this.card.geneKnockouts.push(gene);
-      }
-      this.$emit("simulate-card", this.card);
-    },
     setObjective(reactionId: string) {
-      const reaction = bigg.lookupReaction(reactionId);
-
       if (
         this.card.objective.reaction !== null &&
-        this.card.objective.reaction.id === reaction.id
+        this.card.objective.reaction.id === reactionId
       ) {
         // This is already the objective; undo it and reset to growth
-        this.card.objective.reaction = null;
-        this.card.objective.maximize = true;
+        this.$store.commit("interactiveMap/setObjectiveReaction", {
+          uuid: this.card.uuid,
+          reaction: null
+        });
+        this.$store.commit("interactiveMap/setObjectiveDirection", {
+          uuid: this.card.uuid,
+          maximize: true
+        });
       } else {
-        this.card.objective.reaction = reaction;
+        this.$store.dispatch("interactiveMap/setObjective", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
       }
       this.$emit("simulate-card", this.card);
     },
     setObjectiveDirection(reactionId: string) {
-      this.card.objective.maximize = !this.card.objective.maximize;
+      this.$store.commit("interactiveMap/setObjectiveDirection", {
+        uuid: this.card.uuid,
+        maximize: !this.card.objective.maximize
+      });
+      this.$emit("simulate-card", this.card);
+    },
+    knockoutReaction(reactionId: string) {
+      // Both knockout and undo knockout will call this, so depend the behaviour
+      // on whether the reaction is already knocked out.
+      if (this.card.reactionKnockouts.find(r => r.id === reactionId)) {
+        this.$store.commit("interactiveMap/undoKnockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
+      } else {
+        this.$store.dispatch("interactiveMap/knockoutReaction", {
+          uuid: this.card.uuid,
+          reactionId: reactionId
+        });
+      }
+      this.$emit("simulate-card", this.card);
+    },
+    knockoutGene(geneId: string) {
+      // Both knockout and undo knockout will call this, so depend the behaviour
+      // on whether the gene is already knocked out.
+      if (this.card.geneKnockouts.find(g => g.id === geneId)) {
+        this.$store.commit("interactiveMap/undoKnockoutGene", {
+          uuid: this.card.uuid,
+          geneId: geneId
+        });
+      } else {
+        this.$store.dispatch("interactiveMap/knockoutGene", {
+          uuid: this.card.uuid,
+          geneId: geneId
+        });
+      }
       this.$emit("simulate-card", this.card);
     },
     editBounds(reactionId: string, lower: string, upper: string) {
@@ -290,31 +332,27 @@ export default Vue.extend({
         return;
       }
 
-      const existingReaction = this.card.editedBounds.find(
-        r => r.id === reactionId
-      );
-      if (existingReaction === undefined) {
+      const payload = {
+        uuid: this.card.uuid,
+        reactionId: reactionId,
+        lowerBound: lowerBound,
+        upperBound: upperBound
+      };
+      if (!this.card.editedBounds.find(r => r.id === reactionId)) {
         // Add new modification
-        const reaction = bigg.lookupReaction(reactionId);
-        reaction.lowerBound = lowerBound;
-        reaction.upperBound = upperBound;
-        this.card.editedBounds.push(reaction);
+        this.$store.dispatch("interactiveMap/editBounds", payload);
       } else {
         // Update existing modification
-        existingReaction.lowerBound = lowerBound;
-        existingReaction.upperBound = upperBound;
+        this.$store.commit("interactiveMap/updateEditedBounds", payload);
       }
 
       this.$emit("simulate-card", this.card);
     },
     resetBounds(reactionId: string) {
-      const index = this.card.editedBounds.findIndex(
-        b => b.reactionId === reactionId
-      );
-      if (index === -1) {
-        return;
-      }
-      this.card.editedBounds.splice(index, 1);
+      this.$store.commit("interactiveMap/undoEditBounds", {
+        uuid: this.card.uuid,
+        reactionId: reactionId
+      });
       this.$emit("simulate-card", this.card);
     }
   },

@@ -11,9 +11,9 @@ export interface DesignItem {
         upper_bound: number;
       }
     ];
-    gene_knockouts: string[];
-    reaction_knockins: string[];
-    reaction_knockouts: string[];
+    gene_knockouts: object[];
+    reaction_knockins: object[];
+    reaction_knockouts: object[];
   };
   id: number;
   model_id: number;
@@ -25,7 +25,8 @@ export interface DesignItem {
 export default {
   namespaced: true,
   state: {
-    designs: []
+    designs: [],
+    designsPromise: null
   },
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
@@ -33,11 +34,14 @@ export default {
     },
     delete(state, ids) {
       state.designs = state.designs.filter(design => !ids.includes(design.id));
+    },
+    setDesignsPromise(state, designsPromise) {
+      state.designsPromise = designsPromise;
     }
   },
   actions: {
     fetchDesigns({ commit }) {
-      axios
+      const designsPromise = axios
         .get(`${settings.apis.designStorage}/designs`)
         .then((response: AxiosResponse<DesignItem[]>) => {
           commit("setDesigns", response.data);
@@ -45,6 +49,7 @@ export default {
         .catch(error => {
           commit("setFetchError", error, { root: true });
         });
+      commit("setDesignsPromise", designsPromise);
     }
   }
 };

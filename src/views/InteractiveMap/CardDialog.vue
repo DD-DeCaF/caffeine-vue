@@ -15,7 +15,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 label="Card name"
-                v-model="card.name"
+                v-model="cardName"
                 required
               ></v-text-field>
             </v-flex>
@@ -23,7 +23,7 @@
               <v-select
                 label="Organism"
                 :items="organisms"
-                v-model="card.organism"
+                v-model="cardOrganism"
                 :loading="isLoadingOrganism"
                 item-text="name"
                 item-value="id"
@@ -37,7 +37,7 @@
               <v-select
                 label="Model"
                 :items="modelsByOrganism"
-                v-model="card.model"
+                v-model="cardModel"
                 item-text="name"
                 item-value="id"
                 :hint="modificationsHint"
@@ -50,7 +50,7 @@
               <v-select
                 label="Method"
                 :items="methods"
-                v-model="card.method"
+                v-model="cardMethod"
                 item-text="name"
                 item-value="id"
                 prepend-icon="help"
@@ -97,9 +97,9 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
-import * as bigg from "@/utils/bigg";
 import CardDialogDesign from "@/views/InteractiveMap/CardDialogDesign.vue";
 import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
 
@@ -145,6 +145,50 @@ export default Vue.extend({
       } else {
         return null;
       }
+    },
+    cardName: {
+      get() {
+        return this.card.name;
+      },
+      set(name) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { name: name }
+        });
+      }
+    },
+    cardOrganism: {
+      get() {
+        return this.card.organism;
+      },
+      set(organism) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { organism: organism }
+        });
+      }
+    },
+    cardModel: {
+      get() {
+        return this.card.model;
+      },
+      set(model) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { model: model }
+        });
+      }
+    },
+    cardMethod: {
+      get() {
+        return this.card.method;
+      },
+      set(method) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { method: method }
+        });
+      }
     }
   },
   methods: {
@@ -152,11 +196,17 @@ export default Vue.extend({
       // When selected organism is updated, update the selected model
       // correspondingly.
       // TODO: Choose a default preferred model.
-      this.card.model = null;
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: { model: null }
+      });
     },
     setLoadingOrganism(isLoading) {
       this.isLoadingOrganism = isLoading;
-    }
+    },
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   }
 });
 </script>

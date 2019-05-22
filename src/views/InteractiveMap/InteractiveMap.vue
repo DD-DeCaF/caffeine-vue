@@ -1,5 +1,11 @@
 <template>
   <div class="interactive-map fill-height">
+    <v-progress-linear
+      v-if="selectedCard && selectedCard.isSimulating"
+      color="primary"
+      :indeterminate="true"
+      class="my-0"
+    ></v-progress-linear>
     <Escher
       @escher-loaded="escherLoaded"
       @simulate-card="simulate"
@@ -112,6 +118,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
@@ -131,7 +138,6 @@ export default Vue.extend({
     escherBuilder: null,
     currentMapId: null,
     mapData: null,
-    cards: [],
     selectedCard: null,
     playingInterval: null,
     hasSimulationError: false,
@@ -140,6 +146,9 @@ export default Vue.extend({
     hasLoadDataError: false
   }),
   computed: {
+    cards() {
+      return this.$store.state.interactiveMap.cards;
+    },
     maps() {
       // Sort maps by model name, then map name
       const maps: any[] = [...this.$store.state.maps.maps];
@@ -254,7 +263,7 @@ export default Vue.extend({
         growthRate: null,
         fluxes: null
       };
-      this.cards.push(card);
+      this.$store.commit("interactiveMap/addCard", card);
       this.selectedCard = card;
       this.simulate(card);
     },
@@ -263,7 +272,6 @@ export default Vue.extend({
         // Removing the current card - be sure to unset the reference.
         this.selectedCard = null;
       }
-      this.cards.splice(this.cards.indexOf(card), 1);
     },
     selectCard(card) {
       this.selectedCard = card;
@@ -295,10 +303,6 @@ export default Vue.extend({
       }
     },
     simulate(card) {
-      // Reset the card
-      card.fluxes = null;
-      card.growthRate = null;
-
       if (card.model === null) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
@@ -326,7 +330,7 @@ export default Vue.extend({
           metabolites: Object.assign(
             {},
             ...reaction.metabolites.map(m => ({
-              [`${m.id}_${m.compartment}`]: m.charge
+              [`${m.id}_${m.compartment}`]: m.stoichiometry
             }))
           )
         }
@@ -359,8 +363,10 @@ export default Vue.extend({
     },
     simulateDataDrivenCard(card) {
       // Reset warnings and errors
-      card.conditionWarnings = [];
-      card.conditionErrors = [];
+      this.updateCard({
+        uuid: card.uuid,
+        props: { conditionWarnings: [], conditionErrors: [] }
+      });
 
       if (!card.conditionData) {
         return;
@@ -369,8 +375,10 @@ export default Vue.extend({
       // We'll be modifying the model before simulating, but just re-use the
       // loading flag for `isSimulating` to indicate that _something_ is going
       // on.
-      card.isSimulating = true;
-      card.hasSimulationError = false;
+      this.updateCard({
+        uuid: card.uuid,
+        props: { isSimulating: true, hasSimulationError: false }
+      });
       axios
         .post(
           `${settings.apis.model}/models/${card.model.id}/modify`,
@@ -379,22 +387,35 @@ export default Vue.extend({
         .then(response => {
           // Note: Don't toggle `card.isSimulating`, because we're still
           // waiting for the actual simulation to finish.
-          card.conditionWarnings = response.data.warnings;
+          this.updateCard({
+            uuid: card.uuid,
+            props: { conditionWarnings: response.data.warnings }
+          });
           this.postSimulation(card, response.data.operations);
         })
         .catch(error => {
-          card.isSimulating = false;
-          card.hasSimulationError = true;
+          this.updateCard({
+            uuid: card.uuid,
+            props: { isSimulating: false, hasSimulationError: true }
+          });
           this.hasSimulationError = true;
 
           if (error.response && error.response.data.errors) {
-            card.conditionErrors = error.response.data.errors;
+            this.updateCard({
+              uuid: card.uuid,
+              props: { conditionErrors: error.response.data.errors }
+            });
           }
         });
     },
     postSimulation(card, operations) {
-      card.isSimulating = true;
-      card.hasSimulationError = false;
+      this.updateCard({
+        uuid: card.uuid,
+        props: {
+          isSimulating: true,
+          hasSimulationError: false
+        }
+      });
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: card.model.id,
@@ -406,17 +427,31 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          card.growthRate = response.data.growth_rate;
-          card.fluxes = response.data.flux_distribution;
+          this.updateCard({
+            uuid: card.uuid,
+            props: {
+              growthRate: response.data.growth_rate,
+              fluxes: response.data.flux_distribution
+            }
+          });
         })
         .catch(error => {
-          card.hasSimulationError = true;
+          this.updateCard({
+            uuid: card.uuid,
+            props: { hasSimulationError: true }
+          });
           this.hasSimulationError = true;
         })
         .then(response => {
-          card.isSimulating = false;
+          this.updateCard({
+            uuid: card.uuid,
+            props: { isSimulating: false }
+          });
         });
-    }
+    },
+    ...mapMutations({
+      updateCard: "interactiveMap/updateCard"
+    })
   },
   mounted() {
     // Set the chosen map to the preferred default. Wait for a potential fetch

@@ -33,7 +33,7 @@
             :expand="expand"
             :pagination.sync="pagination"
             :custom-sort="customSort"
-            :loading="isLoading"
+            :loading="isLoading || isDeleting"
             select-all="primary"
           >
             <v-progress-linear
@@ -54,10 +54,33 @@
                   ></v-checkbox>
                 </td>
                 <td>{{ props.item.name }}</td>
-                <td>
+                <td
+                  v-if="
+                    model(props.item.model_id) &&
+                      organism(model(props.item.model_id).organism_id)
+                  "
+                >
                   {{ organism(model(props.item.model_id).organism_id).name }}
                 </td>
-                <td>{{ model(props.item.model_id).name }}</td>
+                <td v-else>
+                  <v-progress-circular
+                    indeterminate
+                    color="primary"
+                    :width="2"
+                    :size="15"
+                  ></v-progress-circular>
+                </td>
+                <td v-if="model(props.item.model_id)">
+                  {{ model(props.item.model_id).name }}
+                </td>
+                <td v-else>
+                  <v-progress-circular
+                    indeterminate
+                    color="primary"
+                    :width="2"
+                    :size="15"
+                  ></v-progress-circular>
+                </td>
                 <td>{{ props.item.design.reaction_knockins.length }}</td>
                 <td>{{ props.item.design.reaction_knockouts.length }}</td>
                 <td>{{ props.item.design.gene_knockouts.length }}</td>
@@ -221,7 +244,8 @@ export default Vue.extend({
     showAllReactionKnockouts: false,
     showAllGeneKnockouts: false,
     isDeletionDialogVisible: false,
-    isLoading: false,
+    isDeleting: false,
+    isLoading: true,
     headers: [
       { text: "Name", value: "name", width: "20%" },
       { text: "Organism", value: "organism_id", width: "15%" },
@@ -283,7 +307,7 @@ export default Vue.extend({
       return `http://bigg.ucsd.edu/search?query=${reactionId}`;
     },
     toggleLoader() {
-      this.isLoading = !this.isLoading;
+      this.isDeleting = !this.isDeleting;
     }
   },
   computed: {
@@ -294,6 +318,11 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
+  },
+  created() {
+    this.$store.state.designs.designsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>

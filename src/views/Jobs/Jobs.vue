@@ -7,6 +7,7 @@
           :headers="headers"
           :items="jobs"
           :pagination.sync="pagination"
+          :loading="isLoading"
           must-sort
           class="elevation-8"
         >
@@ -49,6 +50,7 @@ import { mapGetters } from "vuex";
 export default Vue.extend({
   name: "Jobs",
   data: () => ({
+    isLoading: true,
     headers: [
       { text: "Product", value: "product_name", width: "15%" },
       { text: "Organism", value: "organism_id", width: "20%" },
@@ -73,6 +75,11 @@ export default Vue.extend({
       model: "models/getModelById",
       organism: "organisms/getOrganismById"
     })
+  },
+  created() {
+    this.$store.state.jobs.jobsPromise.then(() => {
+      this.isLoading = false;
+    });
   }
 });
 </script>
