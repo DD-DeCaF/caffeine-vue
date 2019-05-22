@@ -36,8 +36,7 @@ export default new Vuex.Store({
     commonTooltipMessages: {
       unauthenticated: "Please log in or register to use this functionality!",
       publicData: "Public data can not be modified."
-    },
-    currentlyActiveProject: null
+    }
   },
   mutations: {
     setFetchError(state, error) {
@@ -54,9 +53,6 @@ export default new Vuex.Store({
     },
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
-    },
-    setCurrentlyActiveProject(state, value) {
-      state.currentlyActiveProject = value;
     }
   },
   actions: {

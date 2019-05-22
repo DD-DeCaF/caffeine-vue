@@ -308,24 +308,18 @@ export default Vue.extend({
   },
   methods: {
     setActiveProject(projectID) {
-      this.$store.commit("setCurrentlyActiveProject", projectID);
+      this.$store.commit("projects/setCurrentlyActiveProject", projectID);
       this.$vuetify.theme.primary = this.projectPrimaryColor(projectID);
     },
     returnToDefault() {
       this.$vuetify.theme.primary = colors.blue.base;
-      this.$store.commit("setCurrentlyActiveProject", null);
+      this.$store.commit("projects/setCurrentlyActiveProject", null);
     },
     projectPrimaryColor(projectID) {
       const sortedColors = Object.values(this.sensibleColors).sort();
       return String(
         sortedColors[projectID % Object.keys(this.sensibleColors).length]
       );
-    },
-    camelToKebab(string) {
-      return string
-        .replace(/\W+/g, "-")
-        .replace(/([a-z\d])([A-Z])/g, "$1-$2")
-        .toLowerCase();
     }
   },
   beforeCreate() {

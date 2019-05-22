@@ -11,7 +11,8 @@ export interface ProjectItem {
 export default {
   namespaced: true,
   state: {
-    projects: []
+    projects: [],
+    currentlyActiveProject: null
   },
   mutations: {
     setProjects(state, projects: ProjectItem[]) {
@@ -27,6 +28,9 @@ export default {
       state.projects = state.projects.filter(
         project => !ids.includes(project.id)
       );
+    },
+    setCurrentlyActiveProject(state, value) {
+      state.currentlyActiveProject = value;
     }
   },
   actions: {
