@@ -23,10 +23,7 @@
       <v-navigation-drawer v-model="drawer" app clipped class="elevation-6">
         <v-layout column justify-space-between fill-height>
           <v-list>
-            <v-list-group
-              v-if="!$store.state.currentlyActiveProject"
-              v-model="isExpanded"
-            >
+            <v-list-group v-if="!project" v-model="isExpanded">
               <template v-slot:activator>
                 <v-list-tile>
                   <v-list-tile-content>
@@ -40,9 +37,7 @@
                 @click="setActiveProject(project.id)"
               >
                 <v-list-tile-action>
-                  <v-icon :color="projectPrimaryColor(project.id)"
-                    >folder</v-icon
-                  >
+                  <v-icon :color="project.color">folder</v-icon>
                 </v-list-tile-action>
 
                 <v-list-tile-content>
@@ -52,7 +47,7 @@
             </v-list-group>
             <v-list-tile
               v-else
-              @click="returnToDefault"
+              @click="unsetActiveProject"
               class="primary white--text"
               dark
             >
@@ -61,9 +56,7 @@
               </v-list-tile-action>
 
               <v-list-tile-content>
-                <v-list-tile-title>{{
-                  project($store.state.currentlyActiveProject).name
-                }}</v-list-tile-title>
+                <v-list-tile-title>{{ project.name }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
@@ -228,8 +221,8 @@
 <script lang="ts">
 import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
-import { mapGetters } from "vuex";
 import colors from "vuetify/es5/util/colors";
+import { ColoredProjectItem } from "@/store/modules/projects";
 
 export default Vue.extend({
   components: {
@@ -286,40 +279,21 @@ export default Vue.extend({
         this.$store.commit("setUnauthorizedError", null);
       }
     },
-    availableProjects() {
+    availableProjects(): ColoredProjectItem[] {
       return this.$store.state.projects.projects;
     },
-    ...mapGetters({
-      project: "projects/getProjectById"
-    }),
-    sensibleColors() {
-      let obj = {};
-      for (let color in colors) {
-        if (["yellow", "shades"].indexOf(color) === -1) {
-          for (let shade in colors[color]) {
-            if (shade.includes("base") || shade.includes("darken2")) {
-              obj[String(color + "_" + shade)] = colors[color][shade];
-            }
-          }
-        }
-      }
-      return obj;
+    project(): ColoredProjectItem {
+      return this.$store.state.projects.activeProject;
     }
   },
   methods: {
-    setActiveProject(projectID) {
-      this.$store.commit("projects/setCurrentlyActiveProject", projectID);
-      this.$vuetify.theme.primary = this.projectPrimaryColor(projectID);
+    setActiveProject(projectID: number) {
+      this.$store.commit("projects/setActiveProject", projectID);
+      this.$vuetify.theme.primary = this.project.color;
     },
-    returnToDefault() {
+    unsetActiveProject() {
+      this.$store.commit("projects/setActiveProject", null);
       this.$vuetify.theme.primary = colors.blue.base;
-      this.$store.commit("projects/setCurrentlyActiveProject", null);
-    },
-    projectPrimaryColor(projectID) {
-      const sortedColors = Object.values(this.sensibleColors).sort();
-      return String(
-        sortedColors[projectID % Object.keys(this.sensibleColors).length]
-      );
     }
   },
   beforeCreate() {
