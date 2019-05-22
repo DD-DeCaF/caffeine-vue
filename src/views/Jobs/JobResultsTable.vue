@@ -525,10 +525,12 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapGetters } from "vuex";
 import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
 import axios from "axios";
 import { AxiosResponse } from "axios";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
@@ -601,6 +603,11 @@ export default Vue.extend({
     organism() {
       return this.$store.getters["organisms/getOrganismById"](
         this.prediction.organism_id
+      );
+    },
+    model() {
+      return this.$store.getters["models/getModelById"](
+        this.prediction.model_id
       );
     }
   },
@@ -752,10 +759,43 @@ export default Vue.extend({
           ...jobPrediction.synthetic_reactions
         ];
         const promises = this.getAddedReactions(addedReactionIds);
-        Promise.all(promises).then(
-          addedReactions => console.log("addedReactions", addedReactions)
-          // todo: add visualization functionality
-        );
+        Promise.all(promises).then(addedReactions => {
+          const card = {
+            uuid: uuidv4(),
+            name: `Job #${this.prediction.id}`,
+            organism: this.organism,
+            modelId: this.model.id,
+            method: "pfba", // TODO - should this be default?
+            dataDriven: false,
+            // Design card fields
+            objective: {
+              reaction: null,
+              maximize: true
+            },
+            reactionAdditions: addedReactions,
+            reactionKnockouts: [],
+            geneKnockouts: [],
+            editedBounds: [],
+            // Data-driven card fields
+            experiment: null,
+            condition: null,
+            conditionData: null,
+            conditionWarnings: [],
+            conditionErrors: [],
+            // General simulation fields
+            isSimulating: false,
+            hasSimulationError: false,
+            growthRate: null,
+            fluxes: null
+          };
+          // Make sure the full model is available before adding the card.
+          this.$store
+            .dispatch("models/withFullModel", this.model.id)
+            .then(() => {
+              this.$store.commit("interactiveMap/addCard", card);
+            });
+          this.$router.push({ name: "interactiveMap" });
+        });
       });
     },
     getAddedReactions(addedReactionIds) {
@@ -793,7 +833,7 @@ export default Vue.extend({
               name: reactions[reactionId].name,
               reactionString: reactions[reactionId].annotation
                 ? reactions[reactionId].annotation.Description
-                : "",
+                : "N/A",
               lowerBound: reactions[reactionId].lower_bound,
               upperBound: reactions[reactionId].upper_bound,
               metabolites
