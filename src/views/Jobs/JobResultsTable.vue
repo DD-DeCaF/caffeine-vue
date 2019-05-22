@@ -38,7 +38,7 @@
             :pagination.sync="pagination"
             :custom-sort="customSort"
             select-all
-            :headers-length=9
+            :headers-length="9"
           >
             <template v-slot:headers="props">
               <tr>
@@ -315,38 +315,60 @@
                 </td>
               </tr>
             </template>
-            <template v-slot:expand="{ item: prediction }">
+            <template v-slot:expand="{ item: jobPrediction }">
               <tr>
                 <td width="5%"></td>
                 <td>
                   <div class="link-list">
                     <div
-                      v-for="(manipulation, index) in prediction.manipulations"
+                      v-for="(manipulation,
+                      index) in jobPrediction.manipulations"
                       :key="index"
                     >
                       <div v-if="index < 10">
-                        <a v-if="prediction.method === 'PathwayPredictor+DifferentialFVA'"
-                          :href="`http://bigg.ucsd.edu/search?query=${manipulation.id}`"
+                        <a
+                          v-if="
+                            jobPrediction.method ===
+                              'PathwayPredictor+DifferentialFVA'
+                          "
+                          :href="
+                            `http://bigg.ucsd.edu/search?query=${
+                              manipulation.id
+                            }`
+                          "
                           class="link"
                           target="_blank"
                         >
-                          {{`${indicators[manipulation.direction]} ${manipulation.id}`}}
+                          {{
+                            `${indicators[manipulation.direction]} ${
+                              manipulation.id
+                            }`
+                          }}
                         </a>
                       </div>
-                      <div
-                        v-if="index >= 10"
-                        :hidden="!showAllManipulations"
-                      >
-                        <a v-if="prediction.method === 'PathwayPredictor+DifferentialFVA'"
-                          :href="`http://bigg.ucsd.edu/search?query=${manipulation.id}`"
+                      <div v-if="index >= 10" :hidden="!showAllManipulations">
+                        <a
+                          v-if="
+                            jobPrediction.method ===
+                              'PathwayPredictor+DifferentialFVA'
+                          "
+                          :href="
+                            `http://bigg.ucsd.edu/search?query=${
+                              manipulation.id
+                            }`
+                          "
                           class="link"
                           target="_blank"
                         >
-                          {{`${indicators[manipulation.direction]} ${manipulation.id}`}}
+                          {{
+                            `${indicators[manipulation.direction]} ${
+                              manipulation.id
+                            }`
+                          }}
                         </a>
                       </div>
                     </div>
-                    <div v-if="prediction.manipulations.length > 10">
+                    <div v-if="jobPrediction.manipulations.length > 10">
                       <a
                         @click="showAllManipulations = true"
                         :hidden="showAllManipulations"
@@ -354,8 +376,92 @@
                         ...
                       </a>
                     </div>
-                    <div v-if="prediction.manipulations.length > 0">
-                      <span class="caption">↑ up-regulation<br>↓ down-regulation</span>
+                    <div v-if="jobPrediction.manipulations.length > 0">
+                      <span class="caption"
+                        >↑ up-regulation<br />↓ down-regulation</span
+                      >
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="link-list">
+                    <div
+                      v-for="(reaction,
+                      index) in jobPrediction.heterologous_reactions"
+                      :key="index"
+                    >
+                      <v-menu offset-y max-width="200px" content-class="menu">
+                        <template v-slot:activator="{ on }">
+                          <a
+                            :hidden="reaction.startsWith('DM')"
+                            class="link"
+                            v-on="on"
+                          >
+                            {{ reaction }}
+                          </a>
+                        </template>
+                        <div class="text-xs-center caption pa-1">
+                          <strong>{{
+                            prediction.result.reactions[reaction].name
+                          }}</strong
+                          ><br />
+                          <span>{{
+                            prediction.result.reactions[
+                              reaction
+                            ].annotation.Description.split("`").join("")
+                          }}</span>
+                        </div>
+                        <v-divider></v-divider>
+                        <v-container>
+                          <v-layout align-start>
+                            <v-flex>
+                              <a
+                                class="link caption"
+                                :href="
+                                  `https://www.metanetx.org/equa_info/${reaction}`
+                                "
+                                target="_blank"
+                                >MetaNetX</a
+                              >
+                            </v-flex>
+                            <v-flex>
+                              <a
+                                v-if="
+                                  prediction.result.reactions[reaction]
+                                    .annotation.EC
+                                "
+                                class="link caption"
+                                :href="
+                                  `https://www.uniprot.org/uniprot/?query=${
+                                    prediction.result.reactions[reaction]
+                                      .annotation.EC
+                                  }`
+                                "
+                                target="_blank"
+                                >UniProt</a
+                              >
+                            </v-flex>
+                            <v-flex>
+                              <a
+                                v-if="
+                                  prediction.result.reactions[reaction]
+                                    .annotation.EC
+                                "
+                                class="link caption"
+                                :href="
+                                  `http://gmgc.embl.de/search/${
+                                    prediction.result.reactions[reaction]
+                                      .annotation.EC
+                                  }`
+                                "
+                                target="_blank"
+                                >GMGC</a
+                              >
+                            </v-flex>
+                          </v-layout>
+                        </v-container>
+                      </v-menu>
                     </div>
                   </div>
                 </td>
@@ -387,11 +493,11 @@ export default Vue.extend({
     range: null,
     filters: null,
     indicators: {
-      delta: 'Δ',
-      up: '↑',
-      down: '↓',
+      delta: "Δ",
+      up: "↑",
+      down: "↓"
     },
-    showAllManipulations: false,
+    showAllManipulations: false
   }),
   filters: {
     round: value => {
@@ -592,6 +698,7 @@ export default Vue.extend({
       this.range = this.getRange();
       this.filters = this.getFilters();
     }
+    console.log("log", this.prediction);
   }
 });
 </script>
@@ -609,5 +716,9 @@ export default Vue.extend({
 .link-list {
   max-height: 300px;
   overflow-y: auto;
+}
+.menu {
+  background: #fdfcfc;
+  border-radius: 5px;
 }
 </style>
