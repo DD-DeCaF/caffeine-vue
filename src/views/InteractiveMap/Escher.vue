@@ -4,7 +4,7 @@
       fluid
       fill-height
       class="overlay"
-      v-if="initializingEscher !== null || isLoadingMap"
+      v-if="initializingEscher || isLoadingMap"
     >
       <v-layout align-center justify-center>
         <v-progress-circular
@@ -15,7 +15,7 @@
           color="white"
         ></v-progress-circular>
         <p class="display-1 white--text mb-0">
-          <span v-if="initializingEscher !== null">Initializing Escher...</span>
+          <span v-if="initializingEscher">Initializing Escher...</span>
           <span v-else-if="isLoadingMap">Loading map...</span>
         </p>
       </v-layout>
@@ -38,7 +38,8 @@ export default Vue.extend({
   props: ["mapData", "card"],
   data: () => ({
     escherBuilder: null,
-    initializingEscher: null,
+    initializingEscher: true,
+    onEscherReady: null,
     isLoadingMap: false,
     hasBoundsError: false
   }),
@@ -64,11 +65,7 @@ export default Vue.extend({
       };
 
       // Wait for escher to initialize before loading the map.
-      if (this.initializingEscher !== null) {
-        this.initializingEscher.then(loadMap);
-      } else {
-        loadMap();
-      }
+      this.onEscherReady.then(loadMap);
     },
     model: {
       // Whenever the model (with local modifications) changes, update it in
@@ -426,7 +423,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.initializingEscher = new Promise((resolve, reject) => {
+    this.onEscherReady = new Promise((resolve, reject) => {
       this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
         menu: "zoom",
         scroll_behavior: "zoom",
@@ -453,7 +450,7 @@ export default Vue.extend({
         zoom_extent_canvas: true,
         first_load_callback: () => {
           resolve();
-          this.initializingEscher = null;
+          this.initializingEscher = false;
           this.$emit("escher-loaded");
         },
         reaction_state: this.getObjectState,
