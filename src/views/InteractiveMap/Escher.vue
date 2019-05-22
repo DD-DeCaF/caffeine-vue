@@ -75,26 +75,26 @@ export default Vue.extend({
       // model must be available to Escher.
       deep: true,
       handler() {
-        this.setModel();
+        this.onEscherReady.then(this.setModel);
       }
     },
     // Add separate watchers for the different properties on the card, instead
     // of a single deep watcher on the card, to be able to only update the
     // relevant portions of the map.
     "card.reactionAdditions"() {
-      this.setReactionAdditions();
+      this.onEscherReady.then(this.setReactionAdditions);
     },
     "card.reactionKnockouts"() {
-      this.setReactionKnockouts();
+      this.onEscherReady.then(this.setReactionKnockouts);
     },
     "card.geneKnockouts"() {
-      this.setGeneKnockouts();
+      this.onEscherReady.then(this.setGeneKnockouts);
     },
     "card.conditionData"() {
-      this.setConditionData();
+      this.onEscherReady.then(this.setConditionData);
     },
     "card.fluxes"() {
-      this.setFluxes();
+      this.onEscherReady.then(this.setFluxes);
     }
   },
   computed: {
