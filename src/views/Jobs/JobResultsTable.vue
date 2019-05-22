@@ -316,173 +316,183 @@
               </tr>
             </template>
             <template v-slot:expand="{ item: jobPrediction }">
-              <tr>
-                <td width="5%"></td>
-                <td>
-                  <div class="link-list">
-                    <div
-                      v-for="(manipulation,
-                      index) in jobPrediction.manipulations"
-                      :key="index"
-                    >
-                      <div v-if="index < 10">
-                        <a
-                          v-if="
-                            jobPrediction.method ===
-                              'PathwayPredictor+DifferentialFVA'
-                          "
-                          :href="
-                            `http://bigg.ucsd.edu/search?query=${
-                              manipulation.id
-                            }`
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{
-                            `${indicators[manipulation.direction]} ${
-                              manipulation.id
-                            }`
-                          }}
-                        </a>
-                      </div>
-                      <div v-if="index >= 10" :hidden="!showAllManipulations">
-                        <a
-                          v-if="
-                            jobPrediction.method ===
-                              'PathwayPredictor+DifferentialFVA'
-                          "
-                          :href="
-                            `http://bigg.ucsd.edu/search?query=${
-                              manipulation.id
-                            }`
-                          "
-                          class="link"
-                          target="_blank"
-                        >
-                          {{
-                            `${indicators[manipulation.direction]} ${
-                              manipulation.id
-                            }`
-                          }}
-                        </a>
-                      </div>
-                    </div>
-                    <div v-if="jobPrediction.manipulations.length > 10">
-                      <a
-                        @click="showAllManipulations = true"
-                        :hidden="showAllManipulations"
+              <v-data-table
+                :items="[jobPrediction]"
+                :expand="expand"
+                hide-actions
+                hide-headers
+              >
+                <template v-slot:items="props">
+                  <td width="5%"></td>
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(manipulation,
+                        index) in jobPrediction.manipulations"
+                        :key="index"
                       >
-                        ...
-                      </a>
-                    </div>
-                    <div v-if="jobPrediction.manipulations.length > 0">
-                      <span class="caption"
-                        >↑ up-regulation<br />↓ down-regulation</span
-                      >
-                    </div>
-                  </div>
-                </td>
-
-                <td>
-                  <div class="link-list">
-                    <div
-                      v-for="(reaction,
-                      index) in jobPrediction.heterologous_reactions"
-                      :key="index"
-                    >
-                      <v-menu offset-y max-width="200px" content-class="menu">
-                        <template v-slot:activator="{ on }">
+                        <div v-if="index < 10">
                           <a
-                            :hidden="reaction.startsWith('DM')"
+                            v-if="
+                              jobPrediction.method ===
+                                'PathwayPredictor+DifferentialFVA'
+                            "
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${
+                                manipulation.id
+                              }`
+                            "
                             class="link"
-                            v-on="on"
+                            target="_blank"
                           >
-                            {{ reaction }}
+                            {{
+                              `${indicators[manipulation.direction]} ${
+                                manipulation.id
+                              }`
+                            }}
                           </a>
-                        </template>
-                        <div class="text-xs-center caption pa-1">
-                          <strong>{{
-                            prediction.result.reactions[reaction].name
-                          }}</strong
-                          ><br />
-                          <span>{{
-                            prediction.result.reactions[
-                              reaction
-                            ].annotation.Description.split("`").join("")
-                          }}</span>
                         </div>
-                        <v-divider></v-divider>
-                        <v-container>
-                          <v-layout>
-                            <v-flex>
-                              <a
-                                class="link caption"
-                                :href="
-                                  `https://www.metanetx.org/equa_info/${reaction}`
-                                "
-                                target="_blank"
-                                >MetaNetX</a
-                              >
-                            </v-flex>
-                            <v-flex>
-                              <a
-                                v-if="
-                                  prediction.result.reactions[reaction]
-                                    .annotation.EC
-                                "
-                                class="link caption"
-                                :href="
-                                  `https://www.uniprot.org/uniprot/?query=${
-                                    prediction.result.reactions[reaction]
-                                      .annotation.EC
-                                  }`
-                                "
-                                target="_blank"
-                                >UniProt</a
-                              >
-                            </v-flex>
-                            <v-flex>
-                              <a
-                                v-if="
-                                  prediction.result.reactions[reaction]
-                                    .annotation.EC
-                                "
-                                class="link caption"
-                                :href="
-                                  `http://gmgc.embl.de/search/${
-                                    prediction.result.reactions[reaction]
-                                      .annotation.EC
-                                  }`
-                                "
-                                target="_blank"
-                                >GMGC</a
-                              >
-                            </v-flex>
-                          </v-layout>
-                        </v-container>
-                      </v-menu>
+                        <div v-if="index >= 10" :hidden="!showAllManipulations">
+                          <a
+                            v-if="
+                              jobPrediction.method ===
+                                'PathwayPredictor+DifferentialFVA'
+                            "
+                            :href="
+                              `http://bigg.ucsd.edu/search?query=${
+                                manipulation.id
+                              }`
+                            "
+                            class="link"
+                            target="_blank"
+                          >
+                            {{
+                              `${indicators[manipulation.direction]} ${
+                                manipulation.id
+                              }`
+                            }}
+                          </a>
+                        </div>
+                      </div>
+                      <div v-if="jobPrediction.manipulations.length > 10">
+                        <a
+                          @click="showAllManipulations = true"
+                          :hidden="showAllManipulations"
+                        >
+                          ...
+                        </a>
+                      </div>
+                      <div v-if="jobPrediction.manipulations.length > 0">
+                        <span class="caption grey--text"
+                          >↑ up-regulation<br />↓ down-regulation</span
+                        >
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                <td>
-                  <div class="link-list">
-                    <div
-                      v-for="(knockout, index) in jobPrediction.knockouts"
-                      :key="index"
-                    >
-                      <a
-                        :href="`http://bigg.ucsd.edu/search?query=${knockout}`"
-                        class="link"
-                        target="_blank"
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(reaction,
+                        index) in jobPrediction.heterologous_reactions"
+                        :key="index"
                       >
-                        {{ knockout }}
-                      </a>
+                        <v-menu offset-y max-width="200px" content-class="menu">
+                          <template v-slot:activator="{ on }">
+                            <a
+                              :hidden="reaction.startsWith('DM')"
+                              class="link"
+                              v-on="on"
+                            >
+                              {{ reaction }}
+                            </a>
+                          </template>
+                          <div class="text-xs-center caption pa-1">
+                            <strong>{{
+                              prediction.result.reactions[reaction].name
+                            }}</strong
+                            ><br />
+                            <span>{{
+                              prediction.result.reactions[
+                                reaction
+                              ].annotation.Description.split("`").join("")
+                            }}</span>
+                          </div>
+                          <v-divider></v-divider>
+                          <v-container>
+                            <v-layout>
+                              <v-flex>
+                                <a
+                                  class="link caption"
+                                  :href="
+                                    `https://www.metanetx.org/equa_info/${reaction}`
+                                  "
+                                  target="_blank"
+                                  >MetaNetX</a
+                                >
+                              </v-flex>
+                              <v-flex>
+                                <a
+                                  v-if="
+                                    prediction.result.reactions[reaction]
+                                      .annotation.EC
+                                  "
+                                  class="link caption"
+                                  :href="
+                                    `https://www.uniprot.org/uniprot/?query=${
+                                      prediction.result.reactions[reaction]
+                                        .annotation.EC
+                                    }`
+                                  "
+                                  target="_blank"
+                                  >UniProt</a
+                                >
+                              </v-flex>
+                              <v-flex>
+                                <a
+                                  v-if="
+                                    prediction.result.reactions[reaction]
+                                      .annotation.EC
+                                  "
+                                  class="link caption"
+                                  :href="
+                                    `http://gmgc.embl.de/search/${
+                                      prediction.result.reactions[reaction]
+                                        .annotation.EC
+                                    }`
+                                  "
+                                  target="_blank"
+                                  >GMGC</a
+                                >
+                              </v-flex>
+                            </v-layout>
+                          </v-container>
+                        </v-menu>
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
+                  </td>
+
+                  <td width="12%" class="expanded-cell">
+                    <div class="link-list mt-2 mb-3">
+                      <div
+                        v-for="(knockout, index) in jobPrediction.knockouts"
+                        :key="index"
+                      >
+                        <a
+                          :href="
+                            `http://bigg.ucsd.edu/search?query=${knockout}`
+                          "
+                          class="link"
+                          target="_blank"
+                        >
+                          {{ knockout }}
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td width="59%"></td>
+                </template>
+              </v-data-table>
             </template>
           </v-data-table>
         </div>
@@ -736,5 +746,8 @@ export default Vue.extend({
 .menu {
   background: #fdfcfc;
   border-radius: 5px;
+}
+.expanded-cell {
+  vertical-align: top;
 }
 </style>
