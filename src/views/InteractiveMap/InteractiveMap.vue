@@ -138,7 +138,7 @@ export default Vue.extend({
     escherBuilder: null,
     currentMapId: null,
     mapData: null,
-    selectedCard: null,
+    selectedCardId: null,
     playingInterval: null,
     hasSimulationError: false,
     hasLoadMapError: false,
@@ -148,6 +148,12 @@ export default Vue.extend({
   computed: {
     cards() {
       return this.$store.state.interactiveMap.cards;
+    },
+    selectedCard() {
+      if (!this.selectedCardId) {
+        return null;
+      }
+      return this.cards.find(c => c.uuid === this.selectedCardId);
     },
     maps() {
       // Sort maps by model name, then map name
@@ -201,9 +207,9 @@ export default Vue.extend({
           this.simulate(card);
         });
         // Select the last card in the list by default.
-        this.selectedCard = this.$store.state.interactiveMap.cards[
+        this.selectedCardId = this.$store.state.interactiveMap.cards[
           this.$store.state.interactiveMap.cards.length - 1
-        ];
+        ].uuid;
       } else {
         // No cards are added at this point, so add a default card to provide
         // the user with some initial data. Chain promises to ensure that data
@@ -278,17 +284,17 @@ export default Vue.extend({
         fluxes: null
       };
       this.$store.commit("interactiveMap/addCard", card);
-      this.selectedCard = card;
+      this.selectedCardId = card.uuid;
       this.simulate(card);
     },
     removeCard(card) {
       if (card === this.selectedCard) {
         // Removing the current card - be sure to unset the reference.
-        this.selectedCard = null;
+        this.selectedCardId = null;
       }
     },
     selectCard(card) {
-      this.selectedCard = card;
+      this.selectedCardId = card.uuid;
     },
     selectPreviousCard() {
       const index = this.cards.indexOf(this.selectedCard);
