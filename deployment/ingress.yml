@@ -1,7 +1,29 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: caffeine-vue
+  name: caffeine-production
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+  - hosts:
+    - caffeine.dd-decaf.eu
+    secretName: decaf-tls
+  rules:
+  - host: caffeine.dd-decaf.eu
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: caffeine-production
+          servicePort: 80
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: caffeine-staging
   annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
@@ -15,5 +37,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: caffeine-vue
+          serviceName: caffeine-staging
           servicePort: 80

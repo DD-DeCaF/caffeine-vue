@@ -16,8 +16,10 @@
 
 set -eu
 
-if [ "${TRAVIS_BRANCH}" = "devel" ]; then
-  DEPLOYMENT=caffeine-vue
+if [ "${TRAVIS_BRANCH}" = "master" ]; then
+  DEPLOYMENT=caffeine-production
+elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
+  DEPLOYMENT=caffeine-staging
 else
   echo "Skipping deployment for branch ${TRAVIS_BRANCH}"
   exit 0
@@ -48,4 +50,9 @@ docker push ${IMAGE_REPO}:${TRAVIS_COMMIT::12}
 docker push ${IMAGE_REPO}:${TRAVIS_BRANCH}
 
 kubectl set image deployment/${DEPLOYMENT} web=${IMAGE_REPO}:${TRAVIS_COMMIT::12}
-curl -X POST --data-urlencode "payload={\"channel\": \"decaf-vue-rewrite\", \"username\": \"DeCaF Giraffe\", \"text\": \"Deployed Caffeine @ <https://staging.dd-decaf.eu|*${TRAVIS_COMMIT::8}*>\", \"icon_emoji\": \":decaf-giraffe:\"}" ${SLACK_WEBHOOK_URL}
+
+if [ "${TRAVIS_BRANCH}" = "master" ]; then
+  curl -X POST --data-urlencode "payload={\"channel\": \"decaf-vue-rewrite\", \"username\": \"Caffeine Production\", \"text\": \"Deployed @ <https://caffeine.dd-decaf.eu|*${TRAVIS_COMMIT::8}*>\", \"icon_emoji\": \":dd-decaf:\"}" ${SLACK_WEBHOOK_URL}
+elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
+  curl -X POST --data-urlencode "payload={\"channel\": \"decaf-vue-rewrite\", \"username\": \"Caffeine Staging\", \"text\": \"Deployed @ <https://staging.dd-decaf.eu|*${TRAVIS_COMMIT::8}*>\", \"icon_emoji\": \":decaf-giraffe:\"}" ${SLACK_WEBHOOK_URL}
+fi
