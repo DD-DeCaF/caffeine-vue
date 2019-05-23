@@ -209,18 +209,12 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                reactionLink(
-                                  reactionKnockin.id,
-                                  design.method,
-                                  true
-                                )
+                                reactionLink(reactionKnockin.id, design.method)
                               "
                               class="link"
                               target="_blank"
                             >
-                              {{
-                                getReactionId(reactionKnockin.id, design.method)
-                              }}
+                              {{ reactionKnockin.id }}
                             </a>
                           </div>
                           <div
@@ -229,18 +223,12 @@
                           >
                             <a
                               :href="
-                                reactionLink(
-                                  reactionKnockin.id,
-                                  design.method,
-                                  true
-                                )
+                                reactionLink(reactionKnockin.id, design.method)
                               "
                               class="link"
                               target="_blank"
                             >
-                              {{
-                                getReactionId(reactionKnockin.id, design.method)
-                              }}
+                              {{ reactionKnockin.id }}
                             </a>
                           </div>
                         </div>
@@ -264,11 +252,7 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                reactionLink(
-                                  reactionKnockout.id,
-                                  design.method,
-                                  false
-                                )
+                                reactionLink(reactionKnockout.id, design.method)
                               "
                               class="link"
                               target="_blank"
@@ -282,11 +266,7 @@
                           >
                             <a
                               :href="
-                                reactionLink(
-                                  reactionKnockout.id,
-                                  design.method,
-                                  false
-                                )
+                                reactionLink(reactionKnockout.id, design.method)
                               "
                               class="link"
                               target="_blank"
@@ -437,17 +417,7 @@ export default Vue.extend({
       });
       return items;
     },
-    getReactionId(reaction, method) {
-      if (method === "Pathway") {
-        return JSON.parse(reaction).bigg_id;
-      }
-      return reaction;
-    },
-    reactionLink(reaction, method, isReactionKnockin) {
-      const reactionId =
-        isReactionKnockin && method === "Pathway"
-          ? JSON.parse(reaction).bigg_id
-          : reaction;
+    reactionLink(reactionId, method) {
       if (reactionId.startsWith("MNX")) {
         return `https://www.metanetx.org/equa_info/${reactionId}`;
       }
