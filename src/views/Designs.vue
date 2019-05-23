@@ -204,12 +204,18 @@
                         <div v-if="index < 10">
                           <a
                             :href="
-                              reactionLink(reactionKnockin, design.method, true)
+                              reactionLink(
+                                reactionKnockin.id,
+                                design.method,
+                                true
+                              )
                             "
                             class="link"
                             target="_blank"
                           >
-                            {{ getReactionId(reactionKnockin, design.method) }}
+                            {{
+                              getReactionId(reactionKnockin.id, design.method)
+                            }}
                           </a>
                         </div>
                         <div
@@ -218,12 +224,18 @@
                         >
                           <a
                             :href="
-                              reactionLink(reactionKnockin, design.method, true)
+                              reactionLink(
+                                reactionKnockin.id,
+                                design.method,
+                                true
+                              )
                             "
                             class="link"
                             target="_blank"
                           >
-                            {{ getReactionId(reactionKnockin, design.method) }}
+                            {{
+                              getReactionId(reactionKnockin.id, design.method)
+                            }}
                           </a>
                         </div>
                       </div>
@@ -248,7 +260,7 @@
                           <a
                             :href="
                               reactionLink(
-                                reactionKnockout,
+                                reactionKnockout.id,
                                 design.method,
                                 false
                               )
@@ -256,7 +268,7 @@
                             class="link"
                             target="_blank"
                           >
-                            {{ reactionKnockout }}
+                            {{ reactionKnockout.id }}
                           </a>
                         </div>
                         <div
@@ -266,7 +278,7 @@
                           <a
                             :href="
                               reactionLink(
-                                reactionKnockout,
+                                reactionKnockout.id,
                                 design.method,
                                 false
                               )
@@ -274,7 +286,7 @@
                             class="link"
                             target="_blank"
                           >
-                            {{ reactionKnockout }}
+                            {{ reactionKnockout.id }}
                           </a>
                         </div>
                       </div>
@@ -298,23 +310,27 @@
                         <div v-if="index < 10">
                           <a
                             :href="
-                              `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                              `http://bigg.ucsd.edu/search?query=${
+                                geneKnockout.id
+                              }`
                             "
                             class="link"
                             target="_blank"
                           >
-                            {{ geneKnockout }}
+                            {{ geneKnockout.id }}
                           </a>
                         </div>
                         <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
                           <a
                             :href="
-                              `http://bigg.ucsd.edu/search?query=${geneKnockout}`
+                              `http://bigg.ucsd.edu/search?query=${
+                                geneKnockout.id
+                              }`
                             "
                             class="link"
                             target="_blank"
                           >
-                            {{ geneKnockout }}
+                            {{ geneKnockout.id }}
                           </a>
                         </div>
                       </div>
