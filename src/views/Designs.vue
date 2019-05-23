@@ -10,10 +10,19 @@
                 <v-btn
                   flat
                   color="primary"
-                  :disabled="selected.length < 1"
+                  :disabled="selected.length < 1 || isVisualizing"
                   @click="visualize"
                 >
-                  <v-icon>share</v-icon> Visualize
+                  <v-icon v-if="!isVisualizing">share</v-icon>
+                  <v-progress-circular
+                    v-else
+                    indeterminate
+                    color="primary"
+                    class="mr-1"
+                    :width="2"
+                    :size="15"
+                  ></v-progress-circular>
+                  Visualize
                 </v-btn>
                 <v-btn
                   flat
@@ -381,7 +390,10 @@ export default Vue.extend({
       { value: "reactionKnockins", align: "left" },
       { value: "reactionKnockouts", align: "left" },
       { value: "geneKnockouts", align: "left" }
-    ]
+    ],
+    // True when user clicked visualize, and we're waiting mapping and/or model
+    // to load before routing them to the interactive map.
+    isVisualizing: false
   }),
   methods: {
     customSort(items, index, isDesc) {
@@ -450,6 +462,7 @@ export default Vue.extend({
       }
     },
     visualize() {
+      this.isVisualizing = true;
       this.selected.forEach(design => {
         // TODO: Associate design id with the card
         const card = {
