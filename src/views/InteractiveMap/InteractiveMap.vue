@@ -260,7 +260,7 @@ export default Vue.extend({
         uuid: uuidv4(),
         name: name,
         organism: organism,
-        modelId: model.id,
+        modelId: model ? model.id : null,
         method: method,
         dataDriven: dataDriven,
         // Design card fields
