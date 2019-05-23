@@ -1,357 +1,371 @@
 <template>
-  <v-container fluid>
-    <v-layout justify-center>
-      <v-flex>
-        <h1 class="mb-2">Designs</h1>
-        <div class="elevation-8">
-          <v-list class="table-buttons">
-            <v-list-tile>
-              <v-layout justify-end>
-                <v-btn
-                  flat
-                  color="primary"
-                  :disabled="selected.length < 1"
-                  @click="visualize"
-                >
-                  <v-icon>share</v-icon> Visualize
-                </v-btn>
-                <v-btn
-                  flat
-                  color="primary"
-                  @click.stop="isDeletionDialogVisible = true"
-                  :disabled="selected.length < 1"
-                >
-                  <DeletionDialog
-                    v-model="isDeletionDialogVisible"
-                    :items="selected"
-                    itemsType="designs"
-                    @toggleLoader="toggleLoader()"
-                  />
-                  <v-icon>delete</v-icon> Delete
-                </v-btn>
-              </v-layout>
-            </v-list-tile>
-          </v-list>
-          <v-data-table
-            v-model="selected"
-            :items="designs"
-            :expand="expand"
-            :pagination.sync="pagination"
-            :custom-sort="customSort"
-            :loading="isLoading || isDeleting"
-            select-all
-            :headers-length="7"
-          >
-            <v-progress-linear
-              v-slot:progress
-              color="primary"
-            ></v-progress-linear>
-            <template v-slot:headers="props">
-              <tr>
-                <th width="5%">
-                  <v-checkbox
-                    :input-value="props.all"
-                    :indeterminate="props.indeterminate"
+  <div>
+    <v-container fluid>
+      <v-layout justify-center>
+        <v-flex>
+          <h1 class="mb-2">Designs</h1>
+          <div class="elevation-8">
+            <v-list class="table-buttons">
+              <v-list-tile>
+                <v-layout justify-end>
+                  <v-btn
+                    flat
                     color="primary"
-                    hide-details
-                    @click.stop="toggleAll"
-                  ></v-checkbox>
-                </th>
-
-                <th
-                  width="20%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'name' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('name')" class="pointer"
-                    >Name <v-icon>arrow_upward</v-icon><br
-                  /></span>
-                </th>
-
-                <th
-                  width="15%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'organismId' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('organism_id')" class="pointer"
-                    >Organism <v-icon>arrow_upward</v-icon><br
-                  /></span>
-                </th>
-
-                <th
-                  width="15%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'modelId' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('modelId')" class="pointer"
-                    >Model <v-icon>arrow_upward</v-icon> <br
-                  /></span>
-                </th>
-
-                <th
-                  width="15%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'reactionKnockins' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('reactionKnockins')" class="pointer"
-                    >Added Reactions <v-icon>arrow_upward</v-icon><br
-                  /></span>
-                </th>
-
-                <th
-                  width="15%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'reactionKnockouts' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('reactionKnockouts')" class="pointer"
-                    >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
-                  /></span>
-                </th>
-
-                <th
-                  width="15%"
-                  :class="[
-                    'column sortable default-cursor text-xs-left',
-                    pagination.descending ? 'desc' : 'asc',
-                    'geneKnockouts' === pagination.sortBy ? 'active' : ''
-                  ]"
-                >
-                  <span @click="changeSort('geneKnockouts')" class="pointer"
-                    >Gene Knockouts <v-icon>arrow_upward</v-icon><br
-                  /></span>
-                </th>
-              </tr>
-            </template>
-            <template v-slot:items="props">
-              <tr
-                @click="props.expanded = !props.expanded"
-                class="expandable-row"
-                :key="props.item.id"
-              >
-                <td @click.stop>
-                  <v-checkbox
-                    v-model="props.selected"
+                    :disabled="selected.length < 1"
+                    @click="visualize"
+                  >
+                    <v-icon>share</v-icon> Visualize
+                  </v-btn>
+                  <v-btn
+                    flat
                     color="primary"
-                    hide-details
-                  ></v-checkbox>
-                </td>
-                <td>{{ props.item.name }}</td>
-                <td
-                  v-if="
-                    model(props.item.model_id) &&
-                      organism(model(props.item.model_id).organism_id)
-                  "
+                    @click.stop="isDeletionDialogVisible = true"
+                    :disabled="selected.length < 1"
+                  >
+                    <DeletionDialog
+                      v-model="isDeletionDialogVisible"
+                      :items="selected"
+                      itemsType="designs"
+                      @toggleLoader="toggleLoader()"
+                    />
+                    <v-icon>delete</v-icon> Delete
+                  </v-btn>
+                </v-layout>
+              </v-list-tile>
+            </v-list>
+            <v-data-table
+              v-model="selected"
+              :items="designs"
+              :expand="expand"
+              :pagination.sync="pagination"
+              :custom-sort="customSort"
+              :loading="isLoading || isDeleting"
+              select-all
+              :headers-length="7"
+            >
+              <v-progress-linear
+                v-slot:progress
+                color="primary"
+              ></v-progress-linear>
+              <template v-slot:headers="props">
+                <tr>
+                  <th width="5%">
+                    <v-checkbox
+                      :input-value="props.all"
+                      :indeterminate="props.indeterminate"
+                      color="primary"
+                      hide-details
+                      @click.stop="toggleAll"
+                    ></v-checkbox>
+                  </th>
+
+                  <th
+                    width="20%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'name' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('name')" class="pointer"
+                      >Name <v-icon>arrow_upward</v-icon><br
+                    /></span>
+                  </th>
+
+                  <th
+                    width="15%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'organismId' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('organism_id')" class="pointer"
+                      >Organism <v-icon>arrow_upward</v-icon><br
+                    /></span>
+                  </th>
+
+                  <th
+                    width="15%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'modelId' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('modelId')" class="pointer"
+                      >Model <v-icon>arrow_upward</v-icon> <br
+                    /></span>
+                  </th>
+
+                  <th
+                    width="15%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'reactionKnockins' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('reactionKnockins')" class="pointer"
+                      >Added Reactions <v-icon>arrow_upward</v-icon><br
+                    /></span>
+                  </th>
+
+                  <th
+                    width="15%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'reactionKnockouts' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('reactionKnockouts')" class="pointer"
+                      >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
+                    /></span>
+                  </th>
+
+                  <th
+                    width="15%"
+                    :class="[
+                      'column sortable default-cursor text-xs-left',
+                      pagination.descending ? 'desc' : 'asc',
+                      'geneKnockouts' === pagination.sortBy ? 'active' : ''
+                    ]"
+                  >
+                    <span @click="changeSort('geneKnockouts')" class="pointer"
+                      >Gene Knockouts <v-icon>arrow_upward</v-icon><br
+                    /></span>
+                  </th>
+                </tr>
+              </template>
+              <template v-slot:items="props">
+                <tr
+                  @click="props.expanded = !props.expanded"
+                  class="expandable-row"
+                  :key="props.item.id"
                 >
-                  {{ organism(model(props.item.model_id).organism_id).name }}
-                </td>
-                <td v-else>
-                  <v-progress-circular
-                    indeterminate
-                    color="primary"
-                    :width="2"
-                    :size="15"
-                  ></v-progress-circular>
-                </td>
-                <td v-if="model(props.item.model_id)">
-                  {{ model(props.item.model_id).name }}
-                </td>
-                <td v-else>
-                  <v-progress-circular
-                    indeterminate
-                    color="primary"
-                    :width="2"
-                    :size="15"
-                  ></v-progress-circular>
-                </td>
-                <td>{{ props.item.design.reactionKnockins.length }}</td>
-                <td>{{ props.item.design.reactionKnockouts.length }}</td>
-                <td>{{ props.item.design.geneKnockouts.length }}</td>
-              </tr>
-            </template>
-            <template v-slot:expand="{ item: design }">
-              <v-data-table
-                :items="[design]"
-                :expand="expand"
-                item-key="name"
-                hide-actions
-                hide-headers
-                :headers-length="7"
-              >
-                <template v-slot:items="props">
-                  <td width="55%"></td>
-                  <td width="15%">
-                    <div class="link-list">
-                      <div
-                        v-for="(reactionKnockin, index) in design.design
-                          .reactionKnockins"
-                        :key="index"
-                      >
-                        <div v-if="index < 10">
-                          <a
-                            :href="
-                              reactionLink(
-                                reactionKnockin.id,
-                                design.method,
-                                true
-                              )
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{
-                              getReactionId(reactionKnockin.id, design.method)
-                            }}
-                          </a>
-                        </div>
+                  <td @click.stop>
+                    <v-checkbox
+                      v-model="props.selected"
+                      color="primary"
+                      hide-details
+                    ></v-checkbox>
+                  </td>
+                  <td>{{ props.item.name }}</td>
+                  <td
+                    v-if="
+                      model(props.item.model_id) &&
+                        organism(model(props.item.model_id).organism_id)
+                    "
+                  >
+                    {{ organism(model(props.item.model_id).organism_id).name }}
+                  </td>
+                  <td v-else>
+                    <v-progress-circular
+                      indeterminate
+                      color="primary"
+                      :width="2"
+                      :size="15"
+                    ></v-progress-circular>
+                  </td>
+                  <td v-if="model(props.item.model_id)">
+                    {{ model(props.item.model_id).name }}
+                  </td>
+                  <td v-else>
+                    <v-progress-circular
+                      indeterminate
+                      color="primary"
+                      :width="2"
+                      :size="15"
+                    ></v-progress-circular>
+                  </td>
+                  <td>{{ props.item.design.reactionKnockins.length }}</td>
+                  <td>{{ props.item.design.reactionKnockouts.length }}</td>
+                  <td>{{ props.item.design.geneKnockouts.length }}</td>
+                </tr>
+              </template>
+              <template v-slot:expand="{ item: design }">
+                <v-data-table
+                  :items="[design]"
+                  :expand="expand"
+                  item-key="name"
+                  hide-actions
+                  hide-headers
+                  :headers-length="7"
+                >
+                  <template v-slot:items="props">
+                    <td width="55%"></td>
+                    <td width="15%">
+                      <div class="link-list">
                         <div
-                          v-if="index >= 10"
-                          :hidden="!showAllReactionKnockins"
+                          v-for="(reactionKnockin, index) in design.design
+                            .reactionKnockins"
+                          :key="index"
                         >
-                          <a
-                            :href="
-                              reactionLink(
-                                reactionKnockin.id,
-                                design.method,
-                                true
-                              )
-                            "
-                            class="link"
-                            target="_blank"
+                          <div v-if="index < 10">
+                            <a
+                              :href="
+                                reactionLink(
+                                  reactionKnockin.id,
+                                  design.method,
+                                  true
+                                )
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{
+                                getReactionId(reactionKnockin.id, design.method)
+                              }}
+                            </a>
+                          </div>
+                          <div
+                            v-if="index >= 10"
+                            :hidden="!showAllReactionKnockins"
                           >
-                            {{
-                              getReactionId(reactionKnockin.id, design.method)
-                            }}
+                            <a
+                              :href="
+                                reactionLink(
+                                  reactionKnockin.id,
+                                  design.method,
+                                  true
+                                )
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{
+                                getReactionId(reactionKnockin.id, design.method)
+                              }}
+                            </a>
+                          </div>
+                        </div>
+                        <div v-if="design.design.reactionKnockins.length > 10">
+                          <a
+                            @click="showAllReactionKnockins = true"
+                            :hidden="showAllReactionKnockins"
+                          >
+                            ...
                           </a>
                         </div>
                       </div>
-                      <div v-if="design.design.reactionKnockins.length > 10">
-                        <a
-                          @click="showAllReactionKnockins = true"
-                          :hidden="showAllReactionKnockins"
-                        >
-                          ...
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                  <td width="15%">
-                    <div class="link-list">
-                      <div
-                        v-for="(reactionKnockout, index) in design.design
-                          .reactionKnockouts"
-                        :key="index"
-                      >
-                        <div v-if="index < 10">
-                          <a
-                            :href="
-                              reactionLink(
-                                reactionKnockout.id,
-                                design.method,
-                                false
-                              )
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{ reactionKnockout.id }}
-                          </a>
-                        </div>
+                    </td>
+                    <td width="15%">
+                      <div class="link-list">
                         <div
-                          v-if="index >= 10"
-                          :hidden="!showAllReactionKnockouts"
+                          v-for="(reactionKnockout, index) in design.design
+                            .reactionKnockouts"
+                          :key="index"
                         >
-                          <a
-                            :href="
-                              reactionLink(
-                                reactionKnockout.id,
-                                design.method,
-                                false
-                              )
-                            "
-                            class="link"
-                            target="_blank"
+                          <div v-if="index < 10">
+                            <a
+                              :href="
+                                reactionLink(
+                                  reactionKnockout.id,
+                                  design.method,
+                                  false
+                                )
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{ reactionKnockout.id }}
+                            </a>
+                          </div>
+                          <div
+                            v-if="index >= 10"
+                            :hidden="!showAllReactionKnockouts"
                           >
-                            {{ reactionKnockout.id }}
+                            <a
+                              :href="
+                                reactionLink(
+                                  reactionKnockout.id,
+                                  design.method,
+                                  false
+                                )
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{ reactionKnockout.id }}
+                            </a>
+                          </div>
+                        </div>
+                        <div v-if="design.design.reactionKnockouts.length > 10">
+                          <a
+                            @click="showAllReactionKnockouts = true"
+                            :hidden="showAllReactionKnockouts"
+                          >
+                            ...
                           </a>
                         </div>
                       </div>
-                      <div v-if="design.design.reactionKnockouts.length > 10">
-                        <a
-                          @click="showAllReactionKnockouts = true"
-                          :hidden="showAllReactionKnockouts"
+                    </td>
+                    <td width="15%">
+                      <div class="link-list">
+                        <div
+                          v-for="(geneKnockout, index) in design.design
+                            .geneKnockouts"
+                          :key="index"
                         >
-                          ...
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                  <td width="15%">
-                    <div class="link-list">
-                      <div
-                        v-for="(geneKnockout, index) in design.design
-                          .geneKnockouts"
-                        :key="index"
-                      >
-                        <div v-if="index < 10">
+                          <div v-if="index < 10">
+                            <a
+                              :href="
+                                `http://bigg.ucsd.edu/search?query=${
+                                  geneKnockout.id
+                                }`
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{ geneKnockout.id }}
+                            </a>
+                          </div>
+                          <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
+                            <a
+                              :href="
+                                `http://bigg.ucsd.edu/search?query=${
+                                  geneKnockout.id
+                                }`
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{ geneKnockout.id }}
+                            </a>
+                          </div>
+                        </div>
+                        <div v-if="design.design.geneKnockouts.length > 10">
                           <a
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                geneKnockout.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
+                            @click="showAllGeneKnockouts = true"
+                            :hidden="showAllGeneKnockouts"
                           >
-                            {{ geneKnockout.id }}
+                            ...
                           </a>
                         </div>
-                        <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
-                          <a
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                geneKnockout.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{ geneKnockout.id }}
-                          </a>
-                        </div>
                       </div>
-                      <div v-if="design.design.geneKnockouts.length > 10">
-                        <a
-                          @click="showAllGeneKnockouts = true"
-                          :hidden="showAllGeneKnockouts"
-                        >
-                          ...
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                </template>
-              </v-data-table>
-            </template>
-          </v-data-table>
-        </div>
-      </v-flex>
-    </v-layout>
-  </v-container>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
+            </v-data-table>
+          </div>
+        </v-flex>
+      </v-layout>
+    </v-container>
+    <v-container fluid fill-height class="overlay" v-if="isVisualizing">
+      <v-layout align-center justify-center>
+        <v-progress-circular
+          indeterminate
+          size="40"
+          :width="2"
+          class="mr-2"
+          color="white"
+        ></v-progress-circular>
+        <p class="display-1 white--text mb-0">Visualizing...</p>
+      </v-layout>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -381,7 +395,8 @@ export default Vue.extend({
       { value: "reactionKnockins", align: "left" },
       { value: "reactionKnockouts", align: "left" },
       { value: "geneKnockouts", align: "left" }
-    ]
+    ],
+    isVisualizing: false
   }),
   methods: {
     customSort(items, index, isDesc) {
@@ -450,6 +465,7 @@ export default Vue.extend({
       }
     },
     visualize() {
+      this.isVisualizing = true;
       this.selected.forEach(design => {
         // TODO: Associate design id with the card
         const card = {
@@ -523,5 +539,12 @@ export default Vue.extend({
 }
 .expandable-row {
   cursor: pointer;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.15);
 }
 </style>
