@@ -48,8 +48,7 @@
                   label="Organism"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isOrganismCreationDialogVisible = true"
@@ -57,6 +56,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Organism
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -71,8 +71,7 @@
                   label="Project"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isProjectCreationDialogVisible = true"
@@ -80,6 +79,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -94,8 +94,7 @@
                   label="Preferred Map"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isMapCreationDialogVisible = true"
@@ -103,6 +102,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Map
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <FileUpload

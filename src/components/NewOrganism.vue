@@ -38,8 +38,7 @@
                   label="Project"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed=""
                       @click.stop="isProjectCreationDialogVisible = true"
@@ -47,6 +46,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
               </v-form>
