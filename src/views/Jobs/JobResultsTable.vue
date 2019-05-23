@@ -25,21 +25,11 @@
               <v-btn
                 flat
                 color="primary"
-                :disabled="selected.length < 1 || isVisualizing"
+                :disabled="selected.length < 1"
                 class="mt-3"
                 @click="visualize()"
+                ><v-icon>share</v-icon>VISUALIZE</v-btn
               >
-                <v-icon v-if="!isVisualizing">share</v-icon>
-                <v-progress-circular
-                  v-else
-                  indeterminate
-                  color="primary"
-                  class="mr-1"
-                  :width="2"
-                  :size="15"
-                ></v-progress-circular>
-                Visualize
-              </v-btn>
             </v-list-tile>
           </v-list>
           <v-data-table
@@ -562,10 +552,7 @@ export default Vue.extend({
       down: "↓"
     },
     showAllManipulations: false,
-    showAllKnockouts: false,
-    // True when user clicked visualize, and we're waiting mapping and/or model
-    // to load before routing them to the interactive map.
-    isVisualizing: false
+    showAllKnockouts: false
   }),
   filters: {
     round: value => {
@@ -766,7 +753,6 @@ export default Vue.extend({
       }
     },
     visualize() {
-      this.isVisualizing = true;
       const predictions = this.selected.map(jobPrediction => {
         const addedReactionIds = [
           ...jobPrediction.heterologous_reactions,
