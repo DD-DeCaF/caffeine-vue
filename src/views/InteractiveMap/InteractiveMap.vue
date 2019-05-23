@@ -131,7 +131,6 @@ export default Vue.extend({
   data: () => ({
     isSidepanelOpen: true,
     escherBuilder: null,
-    currentMapId: null,
     mapData: null,
     selectedCardId: null,
     playingInterval: null,
@@ -140,6 +139,14 @@ export default Vue.extend({
     hasLoadDataError: false
   }),
   computed: {
+    currentMapId: {
+      get() {
+        return this.$store.state.interactiveMap.currentMapId;
+      },
+      set(currentMapId) {
+        this.$store.commit("interactiveMap/setCurrentMapId", currentMapId);
+      }
+    },
     cards() {
       return this.$store.state.interactiveMap.cards;
     },
@@ -471,16 +478,22 @@ export default Vue.extend({
     })
   },
   mounted() {
-    // Set the chosen map to the preferred default. Wait for a potential fetch
-    // request (important if the user navigates directly to this view).
-    this.$store.state.maps.mapsPromise.then(() => {
-      this.$store.state.maps.maps.forEach(map => {
-        if (map.model_id === 15 && map.name === "Core metabolism") {
-          this.currentMapId = map.id;
-          this.changeMap();
-        }
+    // Set the preferred default map.
+    if (this.currentMapId) {
+      // The user has already chosen a map - just make sure it's loaded.
+      this.changeMap();
+    } else {
+      // Wait for a potential fetch request (important if the user navigates
+      // directly to this view).
+      this.$store.state.maps.mapsPromise.then(() => {
+        this.$store.state.maps.maps.forEach(map => {
+          if (map.model_id === 15 && map.name === "Core metabolism") {
+            this.currentMapId = map.id;
+            this.changeMap();
+          }
+        });
       });
-    });
+    }
   }
 });
 </script>

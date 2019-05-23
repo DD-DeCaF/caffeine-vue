@@ -59,9 +59,13 @@ export interface Card {
 export default {
   namespaced: true,
   state: {
+    currentMapId: null,
     cards: [] as Card[]
   },
   mutations: {
+    setCurrentMapId(state, currentMapId) {
+      state.currentMapId = currentMapId;
+    },
     addCard(state, card) {
       state.cards.push(card);
     },
