@@ -38,18 +38,6 @@
       </v-alert>
     </div>
 
-    <div v-for="warning in card.conditionWarnings" :key="warning" class="mb-2">
-      <v-alert :value="true" type="warning">
-        {{ warning }}
-      </v-alert>
-    </div>
-
-    <div v-for="error in card.conditionErrors" :key="error" class="mb-2">
-      <v-alert :value="true" type="error">
-        {{ error }}
-      </v-alert>
-    </div>
-
     <v-layout v-if="card.conditionData">
       <v-flex class="mr-2">
         <v-card>
@@ -107,6 +95,19 @@
         </v-card>
       </v-flex>
     </v-layout>
+
+    <div v-for="warning in card.conditionWarnings" :key="warning" class="mt-2">
+      <v-alert :value="true" type="warning">
+        {{ warning }}
+      </v-alert>
+    </div>
+
+    <div v-for="error in card.conditionErrors" :key="error" class="mt-2">
+      <v-alert :value="true" type="error">
+        {{ error }}
+      </v-alert>
+    </div>
+
   </div>
 </template>
 
