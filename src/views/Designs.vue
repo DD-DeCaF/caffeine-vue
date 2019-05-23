@@ -7,9 +7,14 @@
           <v-list class="table-buttons">
             <v-list-tile>
               <v-layout justify-end>
-                <v-btn flat color="primary" :disabled="selected.length < 1"
-                  ><v-icon>share</v-icon>VISUALIZE</v-btn
+                <v-btn
+                  flat
+                  color="primary"
+                  :disabled="selected.length < 1"
+                  @click="visualize"
                 >
+                  <v-icon>share</v-icon> Visualize
+                </v-btn>
                 <v-btn
                   flat
                   color="primary"
@@ -21,8 +26,9 @@
                     :items="selected"
                     itemsType="designs"
                     @toggleLoader="toggleLoader()"
-                  /><v-icon>delete</v-icon>DELETE</v-btn
-                >
+                  />
+                  <v-icon>delete</v-icon> Delete
+                </v-btn>
               </v-layout>
             </v-list-tile>
           </v-list>
@@ -70,7 +76,7 @@
                   :class="[
                     'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
-                    'organism_id' === pagination.sortBy ? 'active' : ''
+                    'organismId' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
                   <span @click="changeSort('organism_id')" class="pointer"
@@ -83,10 +89,10 @@
                   :class="[
                     'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
-                    'model_id' === pagination.sortBy ? 'active' : ''
+                    'modelId' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('model_id')" class="pointer"
+                  <span @click="changeSort('modelId')" class="pointer"
                     >Model <v-icon>arrow_upward</v-icon> <br
                   /></span>
                 </th>
@@ -96,10 +102,10 @@
                   :class="[
                     'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
-                    'reaction_knockins' === pagination.sortBy ? 'active' : ''
+                    'reactionKnockins' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('reaction_knockins')" class="pointer"
+                  <span @click="changeSort('reactionKnockins')" class="pointer"
                     >Added Reactions <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -109,12 +115,10 @@
                   :class="[
                     'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
-                    'reaction_knockouts' === pagination.sortBy ? 'active' : ''
+                    'reactionKnockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span
-                    @click="changeSort('reaction_knockouts')"
-                    class="pointer"
+                  <span @click="changeSort('reactionKnockouts')" class="pointer"
                     >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -124,10 +128,10 @@
                   :class="[
                     'column sortable default-cursor text-xs-left',
                     pagination.descending ? 'desc' : 'asc',
-                    'gene_knockouts' === pagination.sortBy ? 'active' : ''
+                    'geneKnockouts' === pagination.sortBy ? 'active' : ''
                   ]"
                 >
-                  <span @click="changeSort('gene_knockouts')" class="pointer"
+                  <span @click="changeSort('geneKnockouts')" class="pointer"
                     >Gene Knockouts <v-icon>arrow_upward</v-icon><br
                   /></span>
                 </th>
@@ -174,9 +178,9 @@
                     :size="15"
                   ></v-progress-circular>
                 </td>
-                <td>{{ props.item.design.reaction_knockins.length }}</td>
-                <td>{{ props.item.design.reaction_knockouts.length }}</td>
-                <td>{{ props.item.design.gene_knockouts.length }}</td>
+                <td>{{ props.item.design.reactionKnockins.length }}</td>
+                <td>{{ props.item.design.reactionKnockouts.length }}</td>
+                <td>{{ props.item.design.geneKnockouts.length }}</td>
               </tr>
             </template>
             <template v-slot:expand="{ item: design }">
@@ -194,7 +198,7 @@
                     <div class="link-list">
                       <div
                         v-for="(reactionKnockin, index) in design.design
-                          .reaction_knockins"
+                          .reactionKnockins"
                         :key="index"
                       >
                         <div v-if="index < 10">
@@ -223,7 +227,7 @@
                           </a>
                         </div>
                       </div>
-                      <div v-if="design.design.reaction_knockins.length > 10">
+                      <div v-if="design.design.reactionKnockins.length > 10">
                         <a
                           @click="showAllReactionKnockins = true"
                           :hidden="showAllReactionKnockins"
@@ -237,7 +241,7 @@
                     <div class="link-list">
                       <div
                         v-for="(reactionKnockout, index) in design.design
-                          .reaction_knockouts"
+                          .reactionKnockouts"
                         :key="index"
                       >
                         <div v-if="index < 10">
@@ -274,7 +278,7 @@
                           </a>
                         </div>
                       </div>
-                      <div v-if="design.design.reaction_knockouts.length > 10">
+                      <div v-if="design.design.reactionKnockouts.length > 10">
                         <a
                           @click="showAllReactionKnockouts = true"
                           :hidden="showAllReactionKnockouts"
@@ -288,7 +292,7 @@
                     <div class="link-list">
                       <div
                         v-for="(geneKnockout, index) in design.design
-                          .gene_knockouts"
+                          .geneKnockouts"
                         :key="index"
                       >
                         <div v-if="index < 10">
@@ -314,7 +318,7 @@
                           </a>
                         </div>
                       </div>
-                      <div v-if="design.design.gene_knockouts.length > 10">
+                      <div v-if="design.design.geneKnockouts.length > 10">
                         <a
                           @click="showAllGeneKnockouts = true"
                           :hidden="showAllGeneKnockouts"
@@ -337,6 +341,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import uuidv4 from "uuid/v4";
 
 export default Vue.extend({
   name: "Designs",
@@ -355,27 +360,27 @@ export default Vue.extend({
     },
     headers: [
       { value: "name", align: "left" },
-      { value: "organism_id", align: "left" },
-      { value: "model_id", align: "left" },
-      { value: "reaction_knockins", align: "left" },
-      { value: "reaction_knockouts", align: "left" },
-      { value: "gene_knockouts", align: "left" }
+      { value: "organismId", align: "left" },
+      { value: "modelId", align: "left" },
+      { value: "reactionKnockins", align: "left" },
+      { value: "reactionKnockouts", align: "left" },
+      { value: "geneKnockouts", align: "left" }
     ]
   }),
   methods: {
     customSort(items, index, isDesc) {
       items.sort((a, b) => {
         if (
-          index === "reaction_knockins" ||
-          index === "reaction_knockouts" ||
-          index === "gene_knockouts"
+          index === "reactionKnockins" ||
+          index === "reactionKnockouts" ||
+          index === "geneKnockouts"
         ) {
           if (!isDesc) {
             return a["design"][index].length - b["design"][index].length;
           }
           return b["design"][index].length - a["design"][index].length;
         }
-        if (index === "organism_id") {
+        if (index === "organismId") {
           if (!isDesc) {
             return this.organism(this.model(a.model_id).organism_id).name <
               this.organism(this.model(b.model_id).organism_id).name
@@ -427,6 +432,46 @@ export default Vue.extend({
         this.pagination.sortBy = column;
         this.pagination.descending = false;
       }
+    },
+    visualize() {
+      this.selected.forEach(design => {
+        // TODO: Associate design id with the card
+        const card = {
+          uuid: uuidv4(),
+          name: design.name,
+          organism: this.organism(this.model(design.model_id).organism_id),
+          modelId: design.model_id,
+          method: "pfba", // TODO - should this be default?
+          dataDriven: false,
+          // Design card fields
+          objective: {
+            reaction: null,
+            maximize: true
+          },
+          reactionAdditions: design.design.reactionKnockins,
+          reactionKnockouts: design.design.reactionKnockouts,
+          geneKnockouts: design.design.geneKnockouts,
+          editedBounds: design.design.constraints,
+          // Data-driven card fields
+          experiment: null,
+          condition: null,
+          conditionData: null,
+          conditionWarnings: [],
+          conditionErrors: [],
+          // General simulation fields
+          isSimulating: false,
+          hasSimulationError: false,
+          growthRate: null,
+          fluxes: null
+        };
+        // Make sure the full model is available before adding the card.
+        this.$store
+          .dispatch("models/withFullModel", design.model_id)
+          .then(() => {
+            this.$store.commit("interactiveMap/addCard", card);
+          });
+      });
+      this.$router.push({ name: "interactiveMap" });
     }
   },
   computed: {

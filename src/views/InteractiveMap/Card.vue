@@ -13,6 +13,7 @@
 
       <CardDialog
         :card="card"
+        :model="model"
         :modifications="modifications"
         @simulate-card="simulateCard"
         @open-method-help-dialog="showMethodHelpDialog = true"
@@ -44,7 +45,7 @@
         <v-layout>
           <v-flex>Model:</v-flex>
           <v-flex class="text-xs-right">
-            <span v-if="card.model">{{ card.model.name }}</span>
+            <span v-if="model">{{ model.name }}</span>
             <span v-else>
               <em>Not selected</em>
             </span>
@@ -178,59 +179,24 @@ export default Vue.extend({
     }
   },
   watch: {
-    "card.model": {
+    "card.modelId": {
       immediate: true,
       handler() {
-        // Reset all modifications when the selected model changes.
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: {
-            reactionAdditions: [],
-            reactionKnockouts: [],
-            geneKnockouts: [],
-            editedBounds: []
-          }
-        });
-
-        // Fetch and set the full model
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: { fullModel: null, hasLoadModelError: false }
-        });
-        if (this.card.model !== null) {
-          this.updateCard({
-            uuid: this.card.uuid,
-            props: { isLoadingModel: true }
-          });
-          axios
-            .get(`${settings.apis.modelStorage}/models/${this.card.model.id}`)
-            .then(response => {
-              this.updateCard({
-                uuid: this.card.uuid,
-                props: { fullModel: response.data }
-              });
-            })
-            .catch(error => {
-              this.updateCard({
-                uuid: this.card.uuid,
-                props: { hasLoadModelError: true }
-              });
-              this.$emit("load-model-error");
-            })
-            .then(() => {
-              this.updateCard({
-                uuid: this.card.uuid,
-                props: { isLoadingModel: false }
-              });
-            });
+        // Make sure that the full model is always available. There might be a
+        // delay before it arrives, but without triggering this, dependent code
+        // (for example the Escher logic to load the map) might end up waiting
+        // indefinitely for the full model.
+        if (!this.card.modelId) {
+          return;
         }
+        this.$store.dispatch("models/withFullModel", this.card.modelId);
       }
     }
   },
   computed: {
     titleColor() {
       if (this.isSelected) {
-        if (this.card.hasSimulationError || this.card.hasLoadModelError) {
+        if (this.card.hasSimulationError) {
           return "error";
         } else {
           return "primary";
@@ -279,6 +245,68 @@ export default Vue.extend({
         ...geneKnockouts,
         ...editedBounds
       ];
+    },
+    model() {
+      // Returns the modified model (original model + added reactions) for this
+      // card.
+      // TODO: This is duplicated logic, a very similar computed property exists
+      // in the Escher component.
+      const selectedModel = this.$store.getters["models/getModelById"](
+        this.card.modelId
+      );
+
+      if (!selectedModel || !selectedModel.model_serialized) {
+        return selectedModel;
+      }
+
+      // Create a copy of the model object to avoid references to the object in
+      // the store.
+      const model = {
+        ...selectedModel,
+        model_serialized: {
+          ...selectedModel.model_serialized
+        }
+      };
+      this.card.reactionAdditions.forEach(reaction => {
+        // Add the reaction to the model. (Take care to replace, not modify, the
+        // original array.)
+        model.model_serialized.reactions = [
+          ...model.model_serialized.reactions,
+          {
+            id: reaction.id,
+            name: reaction.name,
+            lower_bound: reaction.lowerBound,
+            upper_bound: reaction.upperBound,
+            gene_reaction_rule: "",
+            metabolites: Object.assign(
+              {},
+              ...reaction.metabolites.map(m => ({
+                [`${m.id}_${m.compartment}`]: m.stoichiometry
+              }))
+            )
+          }
+        ];
+
+        // Add any new metabolites from the reaction. (Take care to replace, not
+        // modify, the original array.)
+        const metabolites = reaction.metabolites
+          // Add the compartment postfix to the metabolite id
+          .map(metabolite => ({
+            ...metabolite,
+            id: `${metabolite.id}_${metabolite.compartment}`
+          }))
+          // Exclude metabolites that already exist in the model
+          .filter(metabolite => {
+            return !model.model_serialized.metabolites.some(
+              m => m.id === metabolite.id
+            );
+          });
+        model.model_serialized.metabolites = [
+          ...model.model_serialized.metabolites,
+          ...metabolites
+        ];
+      });
+      return model;
     }
   },
   methods: {
@@ -290,7 +318,7 @@ export default Vue.extend({
       this.$store.commit("interactiveMap/removeCard", this.card);
     },
     simulateCard() {
-      this.$emit("simulate-card", this.card);
+      this.$emit("simulate-card", this.card, this.model);
     },
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"

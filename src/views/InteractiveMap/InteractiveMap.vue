@@ -93,7 +93,6 @@
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
-          @load-model-error="hasLoadModelError = true"
           @load-data-error="hasLoadDataError = true"
         />
       </v-container>
@@ -104,10 +103,6 @@
     </v-snackbar>
     <v-snackbar color="error" v-model="hasLoadMapError" :timeout="6000">
       The map could not be loaded. Please try again in a few moments.
-    </v-snackbar>
-    <v-snackbar color="error" v-model="hasLoadModelError" :timeout="6000">
-      The model could not be loaded, please try updating the card's model.
-      Certain features will not work properly without the model.
     </v-snackbar>
     <v-snackbar color="error" v-model="hasLoadDataError" :timeout="6000">
       Experimental data could not be loaded. Please try again in a few moments,
@@ -138,16 +133,21 @@ export default Vue.extend({
     escherBuilder: null,
     currentMapId: null,
     mapData: null,
-    selectedCard: null,
+    selectedCardId: null,
     playingInterval: null,
     hasSimulationError: false,
     hasLoadMapError: false,
-    hasLoadModelError: false,
     hasLoadDataError: false
   }),
   computed: {
     cards() {
       return this.$store.state.interactiveMap.cards;
+    },
+    selectedCard() {
+      if (!this.selectedCardId) {
+        return null;
+      }
+      return this.cards.find(c => c.uuid === this.selectedCardId);
     },
     maps() {
       // Sort maps by model name, then map name
@@ -194,12 +194,29 @@ export default Vue.extend({
   },
   methods: {
     escherLoaded() {
-      // Add a default card. Chain promises to ensure that data is available.
-      this.$store.state.models.modelsPromise.then(() => {
-        this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard(false);
+      if (this.$store.state.interactiveMap.cards.length > 0) {
+        // There are already cards in the store - ensure they are all simulated
+        // (cards added from other components won't initially be simulated)
+        this.$store.state.interactiveMap.cards.forEach(card => {
+          const model = this.$store.getters["models/getModelById"](
+            card.modelId
+          );
+          this.simulate(card, model);
         });
-      });
+        // Select the last card in the list by default.
+        this.selectedCardId = this.$store.state.interactiveMap.cards[
+          this.$store.state.interactiveMap.cards.length - 1
+        ].uuid;
+      } else {
+        // No cards are added at this point, so add a default card to provide
+        // the user with some initial data. Chain promises to ensure that data
+        // is available.
+        this.$store.state.models.modelsPromise.then(() => {
+          this.$store.state.organisms.organismsPromise.then(() => {
+            this.addDefaultCard(false);
+          });
+        });
+      }
     },
     changeMap() {
       this.hasLoadMapError = false;
@@ -236,9 +253,7 @@ export default Vue.extend({
         uuid: uuidv4(),
         name: name,
         organism: organism,
-        model: model,
-        isLoadingModel: false,
-        fullModel: null,
+        modelId: model.id,
         method: method,
         dataDriven: dataDriven,
         // Design card fields
@@ -259,22 +274,21 @@ export default Vue.extend({
         // General simulation fields
         isSimulating: false,
         hasSimulationError: false,
-        hasLoadModelError: false,
         growthRate: null,
         fluxes: null
       };
       this.$store.commit("interactiveMap/addCard", card);
-      this.selectedCard = card;
-      this.simulate(card);
+      this.selectedCardId = card.uuid;
+      this.simulate(card, model);
     },
     removeCard(card) {
       if (card === this.selectedCard) {
         // Removing the current card - be sure to unset the reference.
-        this.selectedCard = null;
+        this.selectedCardId = null;
       }
     },
     selectCard(card) {
-      this.selectedCard = card;
+      this.selectedCardId = card.uuid;
     },
     selectPreviousCard() {
       const index = this.cards.indexOf(this.selectedCard);
@@ -302,8 +316,11 @@ export default Vue.extend({
         this.playingInterval = setInterval(this.selectNextCard, 1000);
       }
     },
-    simulate(card) {
-      if (card.model === null) {
+    simulate(card, model) {
+      // Note that the card and model objects are passed instead of using
+      // `selectedCard`, as the selected card could have
+      // been changed by the time this is called.
+      if (!model) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).
@@ -311,12 +328,12 @@ export default Vue.extend({
       }
 
       if (!card.dataDriven) {
-        this.simulateDesignCard(card);
+        this.simulateDesignCard(card, model);
       } else {
-        this.simulateDataDrivenCard(card);
+        this.simulateDataDrivenCard(card, model);
       }
     },
-    simulateDesignCard(card) {
+    simulateDesignCard(card, model) {
       // Collect card operations from modifications
       const reactionAdditions = card.reactionAdditions.map(reaction => ({
         operation: "add",
@@ -354,14 +371,14 @@ export default Vue.extend({
           upper_bound: reaction.upperBound
         }
       }));
-      this.postSimulation(card, [
+      this.postSimulation(card, model, [
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
       ]);
     },
-    simulateDataDrivenCard(card) {
+    simulateDataDrivenCard(card, model) {
       // Reset warnings and errors
       this.updateCard({
         uuid: card.uuid,
@@ -381,7 +398,7 @@ export default Vue.extend({
       });
       axios
         .post(
-          `${settings.apis.model}/models/${card.model.id}/modify`,
+          `${settings.apis.model}/models/${model.id}/modify`,
           card.conditionData
         )
         .then(response => {
@@ -391,7 +408,7 @@ export default Vue.extend({
             uuid: card.uuid,
             props: { conditionWarnings: response.data.warnings }
           });
-          this.postSimulation(card, response.data.operations);
+          this.postSimulation(card, model, response.data.operations);
         })
         .catch(error => {
           this.updateCard({
@@ -408,7 +425,7 @@ export default Vue.extend({
           }
         });
     },
-    postSimulation(card, operations) {
+    postSimulation(card, model, operations) {
       this.updateCard({
         uuid: card.uuid,
         props: {
@@ -418,7 +435,7 @@ export default Vue.extend({
       });
       axios
         .post(`${settings.apis.model}/simulate`, {
-          model_id: card.model.id,
+          model_id: model.id,
           method: card.method,
           operations: operations,
           objective_id: card.objective.reaction

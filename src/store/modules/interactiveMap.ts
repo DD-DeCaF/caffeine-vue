@@ -5,10 +5,16 @@ import * as settings from "@/utils/settings";
 import { OrganismItem } from "./organisms";
 import { ModelItem } from "./models";
 
+export interface Gene {
+  id: string;
+  name: string;
+  reactions: any[];
+}
+
 export interface Metabolite {
   id: string;
   name: string;
-  compartmentId: string;
+  compartment: string;
   stoichiometry: number;
 }
 
@@ -25,10 +31,9 @@ export interface Card {
   uuid: string;
   name: string;
   organism: OrganismItem;
-  model: ModelItem;
-  isLoadingModel: boolean;
-  fullModel: ModelItem;
+  modelId: number;
   method: string;
+  dataDriven: boolean;
   // Design card fields
   objective: {
     reaction: Reaction;
@@ -47,7 +52,6 @@ export interface Card {
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;
-  hasLoadModelError: boolean;
   growthRate: number;
   fluxes: number;
 }
@@ -79,36 +83,6 @@ export default {
     addReaction(state, { uuid, reaction }) {
       const card = state.cards.find(c => c.uuid === uuid);
       card.reactionAdditions.push(reaction);
-
-      // Add the reaction to the full model for Escher to find later.
-      // Update the structure for cobrapy format.
-      const model = card.fullModel.model_serialized;
-      model.reactions.push({
-        id: reaction.id,
-        name: reaction.name,
-        lower_bound: reaction.lowerBound,
-        upper_bound: reaction.upperBound,
-        gene_reaction_rule: "",
-        metabolites: Object.assign(
-          {},
-          ...reaction.metabolites.map(m => ({
-            [`${m.id}_${m.compartment}`]: m.stoichiometry
-          }))
-        )
-      });
-      // Also add any new metabolites.
-      reaction.metabolites.forEach(newMetabolite => {
-        // Add the compartment postfix to the metabolite id
-        const metabolite = {
-          ...newMetabolite,
-          id: `${newMetabolite.id}_${newMetabolite.compartment}`
-        };
-        // Skip it if the metabolite already exists in the model.
-        if (model.metabolites.some(m => m.id === metabolite.id)) {
-          return;
-        }
-        model.metabolites.push(metabolite);
-      });
     },
     undoAddReaction(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
@@ -185,7 +159,7 @@ export default {
               metabolites: response.data.metabolites.map(m => ({
                 id: m.bigg_id,
                 name: m.name,
-                compartmentId: m.compartment_bigg_id,
+                compartment: m.compartment_bigg_id,
                 stoichiometry: m.stoichiometry
               }))
             });
@@ -200,7 +174,11 @@ export default {
             resolve({
               id: response.data.bigg_id,
               name: response.data.name,
-              reactions: response.data.reactions
+              reactions: response.data.reactions.map(r => ({
+                id: r.bigg_id,
+                name: r.name,
+                geneReactionRule: r.gene_reaction_rule
+              }))
             });
           });
       });
@@ -222,13 +200,19 @@ export default {
     },
     knockoutGene({ state, commit, dispatch }, { uuid, geneId }) {
       commit("knockoutGene", { uuid: uuid, gene: { id: geneId } });
-      dispatch("getBiggGene", {
-        modelId: state.cards.find(c => c.uuid === uuid).fullModel
-          .model_serialized.id,
-        geneId: geneId
-      }).then(gene => {
-        commit("updateKnockoutGene", { uuid: uuid, gene: gene });
-      });
+      // Fetch the full model, because we need the BiGG ID of the model to
+      // retrieve gene information.
+      const card = state.cards.find(c => c.uuid === uuid);
+      dispatch("models/withFullModel", card.modelId, { root: true }).then(
+        model => {
+          dispatch("getBiggGene", {
+            modelId: model.model_serialized.id,
+            geneId: geneId
+          }).then(gene => {
+            commit("updateKnockoutGene", { uuid: uuid, gene: gene });
+          });
+        }
+      );
     },
     editBounds(
       { commit, dispatch },
