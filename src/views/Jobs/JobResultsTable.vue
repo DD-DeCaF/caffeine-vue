@@ -792,8 +792,32 @@ export default Vue.extend({
           this.$store
             .dispatch("models/withFullModel", this.model.id)
             .then(() => {
+              // Knockout genes or reactions depending on method
               this.$store.commit("interactiveMap/addCard", card);
+              if (jobPrediction.method === "PathwayPredictor+OptGene") {
+                jobPrediction.knockouts.forEach(geneId => {
+                  this.$store.dispatch("interactiveMap/knockoutGene", {
+                    uuid: card.uuid,
+                    geneId: geneId
+                  });
+                });
+              } else if (
+                jobPrediction.method === "PathwayPredictor+DifferentialFVA" ||
+                jobPrediction.method === "PathwayPredictor+CofactorSwap"
+              ) {
+                jobPrediction.knockouts.forEach(reactionId => {
+                  this.$store.dispatch("interactiveMap/knockoutReaction", {
+                    uuid: card.uuid,
+                    reactionId: reactionId
+                  });
+                });
+              } else {
+                throw new Error(
+                  `Method ${jobPrediction.method} is not recognized.`
+                );
+              }
             });
+
           this.$router.push({ name: "interactiveMap" });
         });
       });
