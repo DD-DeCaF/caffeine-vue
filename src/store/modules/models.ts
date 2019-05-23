@@ -95,6 +95,7 @@ export default {
             });
         });
         commit("setFullModelPromise", { modelId, promise });
+        return promise;
       }
     }
   },
