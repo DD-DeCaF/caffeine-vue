@@ -106,7 +106,9 @@
                       'reactionKnockins' === pagination.sortBy ? 'active' : ''
                     ]"
                   >
-                    <span @click="changeSort('reactionKnockins')" class="pointer"
+                    <span
+                      @click="changeSort('reactionKnockins')"
+                      class="pointer"
                       >Added Reactions <v-icon>arrow_upward</v-icon><br
                     /></span>
                   </th>
@@ -119,7 +121,9 @@
                       'reactionKnockouts' === pagination.sortBy ? 'active' : ''
                     ]"
                   >
-                    <span @click="changeSort('reactionKnockouts')" class="pointer"
+                    <span
+                      @click="changeSort('reactionKnockouts')"
+                      class="pointer"
                       >Reaction Knockouts <v-icon>arrow_upward</v-icon><br
                     /></span>
                   </th>
@@ -321,7 +325,10 @@
                               {{ geneKnockout.id }}
                             </a>
                           </div>
-                          <div v-if="index >= 10" :hidden="!showAllGeneKnockouts">
+                          <div
+                            v-if="index >= 10"
+                            :hidden="!showAllGeneKnockouts"
+                          >
                             <a
                               :href="
                                 `http://bigg.ucsd.edu/search?query=${
