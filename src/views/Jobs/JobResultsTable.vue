@@ -167,10 +167,10 @@
                   <v-range-slider
                     @click.stop
                     v-model="filters.fitness"
-                    :min="range.fitness[0]"
-                    :max="range.fitness[1]"
+                    :min="range.fitness[0] | round"
+                    :max="range.fitness[1] | round"
                     :disabled="range.fitness[1] - range.fitness[0] === 0"
-                    step="0.01"
+                    step="0.001"
                     thumb-label
                     thumb-size="28"
                     always-dirty
@@ -193,19 +193,33 @@
                       >[C-mol / C-mol]</span
                     ></span
                   >
+                   <v-flex shrink style="width: 60px">
+                    <v-text-field
+                      v-model="filters.yield[0]"
+                      class="mt-0"
+                      single-line
+                      type="number"
+                    ></v-text-field>
+                    </v-flex>
                   <v-range-slider
                     @click.stop
                     v-model="filters.yield"
-                    :min="range.yield[0]"
-                    :max="range.yield[1]"
+                    :min="range.yield[0] | round"
+                    :max="range.yield[1] | round"
                     :disabled="range.yield[1] - range.yield[0] === 0"
-                    step="0.01"
+                    step="0.1"
                     thumb-label
                     thumb-size="28"
                     always-dirty
                     color="primary"
                     class="mt-4"
                   ></v-range-slider>
+                              <v-text-field
+                      v-model="filters.yield[1]"
+                      class="mt-0"
+                      single-line
+                      type="number"
+                    ></v-text-field>
                 </th>
 
                 <th
@@ -225,8 +239,8 @@
                   <v-range-slider
                     @click.stop
                     v-model="filters.product"
-                    :min="range.product[0]"
-                    :max="range.product[1]"
+                    :min="range.product[0] | round"
+                    :max="range.product[1] | round"
                     :disabled="range.product[1] - range.product[0] === 0"
                     step="0.01"
                     thumb-label
@@ -254,8 +268,8 @@
                   <v-range-slider
                     @click.stop
                     v-model="filters.biomass"
-                    :min="range.biomass[0]"
-                    :max="range.biomass[1]"
+                    :min="range.biomass[0] | round"
+                    :max="range.biomass[1] | round"
                     :disabled="range.biomass[1] - range.biomass[0] === 0"
                     step="0.01"
                     thumb-label
@@ -683,7 +697,8 @@ export default Vue.extend({
         ],
         yield: [
           this.pathways.reduce(
-            (min, pathway) => (pathway.yield < min ? pathway.yield : min),
+            (min, pathway) => (
+              pathway.yield < min ? pathway.yield : min),
             this.pathways[0].yield
           ),
           this.pathways.reduce(
