@@ -830,9 +830,8 @@ export default Vue.extend({
                   `Method ${jobPrediction.method} is not recognized.`
                 );
               }
+              this.$router.push({ name: "interactiveMap" });
             });
-
-          this.$router.push({ name: "interactiveMap" });
         });
       });
     },

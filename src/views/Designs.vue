@@ -498,9 +498,9 @@ export default Vue.extend({
           .dispatch("models/withFullModel", design.model_id)
           .then(() => {
             this.$store.commit("interactiveMap/addCard", card);
+            this.$router.push({ name: "interactiveMap" });
           });
       });
-      this.$router.push({ name: "interactiveMap" });
     }
   },
   computed: {
