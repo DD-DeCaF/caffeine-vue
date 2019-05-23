@@ -520,6 +520,18 @@
         </div>
       </v-card>
     </template>
+    <v-container fluid fill-height class="overlay" v-if="isVisualizing">
+      <v-layout align-center justify-center>
+        <v-progress-circular
+          indeterminate
+          size="40"
+          :width="2"
+          class="mr-2"
+          color="white"
+        ></v-progress-circular>
+        <p class="display-1 white--text mb-0">Visualizing...</p>
+      </v-layout>
+    </v-container>
   </div>
 </template>
 
@@ -552,7 +564,8 @@ export default Vue.extend({
       down: "↓"
     },
     showAllManipulations: false,
-    showAllKnockouts: false
+    showAllKnockouts: false,
+    isVisualizing: false
   }),
   filters: {
     round: value => {
@@ -753,6 +766,7 @@ export default Vue.extend({
       }
     },
     visualize() {
+      this.isVisualizing = true;
       const predictions = this.selected.map(jobPrediction => {
         const addedReactionIds = [
           ...jobPrediction.heterologous_reactions,
@@ -817,6 +831,7 @@ export default Vue.extend({
                 );
               }
               this.$router.push({ name: "interactiveMap" });
+              this.isVisualizing = false;
             });
         });
       });
@@ -899,5 +914,12 @@ export default Vue.extend({
 }
 .expanded-cell {
   vertical-align: top;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.15);
 }
 </style>
