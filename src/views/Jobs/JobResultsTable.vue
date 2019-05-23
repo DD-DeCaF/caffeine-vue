@@ -879,7 +879,7 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style scoped>
 .default-cursor {
   cursor: default !important;
 }
