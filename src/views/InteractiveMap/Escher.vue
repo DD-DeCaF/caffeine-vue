@@ -56,7 +56,9 @@ export default Vue.extend({
           this.isLoadingMap = false;
           // Update the map state, since it will be reset whenever the map is
           // changed. Note that we don't need to update the model.
-          this.setReactionAdditions();
+          if (this.model && this.model.model_serialized) {
+            this.setReactionAdditions();
+          }
           this.setReactionKnockouts();
           this.setGeneKnockouts();
           this.setConditionData();
@@ -68,22 +70,26 @@ export default Vue.extend({
       this.onEscherReady.then(loadMap);
     },
     model: {
-      // Whenever the model (with local modifications) changes, update it in
-      // Escher.
-      // Important note: This watcher *must* be ordered before the
-      // `card.reactionAdditions` watcher below, because reactions added to the
-      // model must be available to Escher.
       deep: true,
       handler() {
+        // Whenever the model (with local modifications) changes, update it in
+        // Escher. Note: The model must be loaded before drawing the reactions
+        // on the map.
         this.onEscherReady.then(this.setModel);
+        // To make sure that added reactions are added correctly to the map, use
+        // this watcher (instead of watching `card.reactionAdditions`
+        // separately). This ensures that the full model is available, and since
+        // the property recomputes when either model or added reactions change,
+        // it will also handle the case of reactions being added first, then the
+        // model arrives later, then draw the added reactions
+        if (this.model && this.model.model_serialized) {
+          this.onEscherReady.then(this.setReactionAdditions);
+        }
       }
     },
     // Add separate watchers for the different properties on the card, instead
     // of a single deep watcher on the card, to be able to only update the
     // relevant portions of the map.
-    "card.reactionAdditions"() {
-      this.onEscherReady.then(this.setReactionAdditions);
-    },
     "card.reactionKnockouts"() {
       this.onEscherReady.then(this.setReactionKnockouts);
     },
@@ -174,8 +180,10 @@ export default Vue.extend({
       }
     },
     setReactionAdditions() {
-      if (!this.card || !this.model || !this.model.model_serialized) {
+      if (!this.card) {
         this.escherBuilder.set_added_reactions([]);
+      } else if (!this.model || !this.model.model_serialized) {
+        throw new Error("Cannot draw reactions when the model is not loaded.");
       } else {
         this.escherBuilder.set_added_reactions(
           this.card.reactionAdditions
