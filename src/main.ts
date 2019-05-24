@@ -16,17 +16,15 @@ import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
 
-if (process.env.NODE_ENV === "production") {
-  Sentry.init({
-    dsn: "https://44d530ac9cb14ad391a54689b2286a92@sentry.io/1460040",
-    integrations: [
-      new Integrations.Vue({
-        Vue,
-        attachProps: true
-      })
-    ]
-  });
-}
+Sentry.init({
+  dsn: process.env.VUE_APP_SENTRY_DSN,
+  integrations: [
+    new Integrations.Vue({
+      Vue,
+      attachProps: true
+    })
+  ]
+});
 
 Vue.use(require("vue-moment"));
 
