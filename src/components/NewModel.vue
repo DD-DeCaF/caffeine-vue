@@ -24,8 +24,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="createModel"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   required
@@ -147,7 +147,7 @@
           <v-btn
             color="primary"
             @click="createModel"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Create
           </v-btn>
@@ -159,7 +159,7 @@
       v-model="isModelCreationSuccess"
       :timeout="3000"
     >
-      {{ modelName }} successfully created.
+      {{ this.modelName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -175,7 +175,7 @@ export default Vue.extend({
   props: ["value"],
   data: () => ({
     filename: null,
-    valid: true,
+    isValid: false,
     isProjectCreationDialogVisible: false,
     isMapCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
@@ -185,7 +185,7 @@ export default Vue.extend({
     },
     modelName: null,
     model_serialized: null,
-    map: null,
+    map: {id: null},
     project: null,
     organism: null,
     default_biomass_reaction: null,
@@ -224,8 +224,17 @@ export default Vue.extend({
   },
   watch: {},
   methods: {
+    onEnter() {
+      console.log(this.isValid)
+      if (this.$refs.form.validate()) {
+        console.log("Is valid!")
+        this.createModel()
+      }
+    },
     createModel() {
       this.$store.commit("toggleDialog", "loader");
+      console.log("Testo")
+      console.log(this.map)
       const payload = {
         name: this.modelName,
         model_serialized: this.model_serialized,
@@ -241,13 +250,13 @@ export default Vue.extend({
           this.$store.commit("models/addModel", modelWithID);
           this.$emit("return-object", modelWithID);
           this.isVisible = false;
-          this.isModelCreationSuccess = true;
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
+          this.isModelCreationSuccess = true;
         });
     },
     // A great tutorial for the inner workings of the following function can be found at
