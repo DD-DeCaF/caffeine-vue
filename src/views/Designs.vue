@@ -446,6 +446,14 @@ export default Vue.extend({
     visualize() {
       this.isVisualizing = true;
       this.selected.forEach(design => {
+        // Remove any existing cards from the store that are related to the same
+        // design.
+        this.$store.state.interactiveMap.cards.forEach(card => {
+          if (card.designId === design.id) {
+            this.$store.commit("interactiveMap/removeCard", card);
+          }
+        });
+
         const card: Card = {
           uuid: uuidv4(),
           name: design.name,
