@@ -27,6 +27,7 @@
                       :items="selected"
                       itemsType="designs"
                       @toggleLoader="toggleLoader()"
+                      @delete-success="onDeletion"
                     />
                     <v-icon>delete</v-icon> Delete
                   </v-btn>
@@ -480,6 +481,15 @@ export default Vue.extend({
             this.$store.commit("interactiveMap/addCard", card);
             this.$router.push({ name: "interactiveMap" });
           });
+      });
+    },
+    onDeletion(ids) {
+      // Remove any cards from the store that belongs to any of the deleted
+      // designs. These cards will exist in the store if previously visualized.
+      this.$store.state.interactiveMap.cards.forEach(card => {
+        if (card.designId && ids.includes(card.designId)) {
+          this.$store.commit("interactiveMap/removeCard", card);
+        }
       });
     }
   },
