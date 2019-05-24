@@ -17,15 +17,17 @@ import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
 
-Sentry.init({
-  dsn: sentryDSN,
-  integrations: [
-    new Integrations.Vue({
-      Vue,
-      attachProps: true
-    })
-  ]
-});
+if (sentryDSN) {
+  Sentry.init({
+    dsn: sentryDSN,
+    integrations: [
+      new Integrations.Vue({
+        Vue,
+        attachProps: true
+      })
+    ]
+  });
+}
 
 Vue.use(require("vue-moment"));
 
