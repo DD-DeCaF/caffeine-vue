@@ -1,4 +1,4 @@
-export const environment = process.env.NODE_ENV;
+export const environment = process.env.VUE_APP_ENVIRONMENT;
 export const deploymentHash = process.env.VUE_APP_DEPLOYMENT_HASH;
 
 export const apis = {
