@@ -20,13 +20,13 @@
           :href="
             `https://github.com/DD-DeCaF/caffeine-vue/commit/${deploymentHash}`
           "
-          class="headline font-weight-black text-uppercase blue--text text--lighten-3"
+          class="headline font-weight-black text-uppercase primary--text text--lighten-3"
           style="text-decoration: none;"
           >Staging</a
         >
         <span
           v-else-if="environment === 'development'"
-          class="headline font-weight-black text-uppercase blue--text text--lighten-3"
+          class="headline font-weight-black text-uppercase primary--text text--lighten-3"
           >Development</span
         >
         <template>
