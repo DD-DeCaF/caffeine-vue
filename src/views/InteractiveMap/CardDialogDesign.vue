@@ -507,10 +507,6 @@ export default Vue.extend({
     },
     clearModification(modification) {
       if (modification.type === "added_reaction") {
-        // TODO: The reaction and any new metabolites should be removed from
-        // the full model here. Note that the user won't be able to add the same
-        // reaction again, because we're excluding reactions that already exist
-        // in the model.
         this.$store.commit("interactiveMap/undoAddReaction", {
           uuid: this.card.uuid,
           reactionId: modification.id
