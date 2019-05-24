@@ -453,6 +453,7 @@ export default Vue.extend({
           organism: this.organism(this.model(design.model_id).organism_id),
           modelId: design.model_id,
           method: "pfba",
+          modified: false,
           dataDriven: false,
           // Design card fields
           objective: {
