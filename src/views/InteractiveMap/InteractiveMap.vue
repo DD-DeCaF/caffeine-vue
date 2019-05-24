@@ -94,6 +94,8 @@
           @remove-card="removeCard"
           @simulate-card="simulate"
           @load-data-error="hasLoadDataError = true"
+          @design-saved="designSaved"
+          @design-save-error="hasSaveDesignError = true"
         />
       </v-container>
     </v-navigation-drawer>
@@ -107,6 +109,13 @@
     <v-snackbar color="error" v-model="hasLoadDataError" :timeout="6000">
       Experimental data could not be loaded. Please try again in a few moments,
       or contact us if the problem persists.
+    </v-snackbar>
+    <v-snackbar color="success" v-model="hasSaveDesignSuccess" :timeout="6000">
+      Saved design {{ savedDesignName }}.
+    </v-snackbar>
+    <v-snackbar color="success" v-model="hasSaveDesignError" :timeout="6000">
+      Sorry, we were not able to save the design. Please try again in a few
+      moments.
     </v-snackbar>
   </div>
 </template>
@@ -137,7 +146,10 @@ export default Vue.extend({
     playingInterval: null,
     hasSimulationError: false,
     hasLoadMapError: false,
-    hasLoadDataError: false
+    hasLoadDataError: false,
+    hasSaveDesignError: false,
+    hasSaveDesignSuccess: false,
+    savedDesignName: null
   }),
   computed: {
     currentMapId: {
@@ -260,6 +272,7 @@ export default Vue.extend({
       const card: CardType = {
         uuid: uuidv4(),
         name: name,
+        designId: null,
         organism: organism,
         modelId: model ? model.id : null,
         method: method,
@@ -474,6 +487,10 @@ export default Vue.extend({
             props: { isSimulating: false }
           });
         });
+    },
+    designSaved(design) {
+      this.hasSaveDesignSuccess = true;
+      this.savedDesignName = design.name;
     },
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"

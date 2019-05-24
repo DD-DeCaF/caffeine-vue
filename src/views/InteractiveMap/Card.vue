@@ -155,10 +155,40 @@
       </v-container>
 
       <v-container fluid class="pa-0" v-if="saveable">
-        <v-layout justify-end>
-          <v-btn v-if="card.modified && !card.dataDriven" class="mr-0 primary"
-            >Save</v-btn
-          >
+        <v-layout wrap justify-end>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <template v-slot:activator="{ on }">
+              <v-btn
+                v-if="card.modified && !card.dataDriven"
+                v-on="on"
+                class="mr-0 primary"
+                style="pointer-events: auto"
+                @click="saveCard"
+                :disabled="isSaving || !isAuthenticated"
+              >
+                <v-progress-circular
+                  v-if="isSaving"
+                  indeterminate
+                  color="primary"
+                  :width="2"
+                  :size="15"
+                  class="mr-2"
+                ></v-progress-circular>
+                Save</v-btn
+              >
+              <v-alert
+                v-model="promptToSelectProject"
+                dismissible
+                color="error"
+              >
+                Please select an active project in the left-hand-side sidebar.
+                The design will be saved in this project.
+              </v-alert>
+            </template>
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}</span
+            >
+          </v-tooltip>
         </v-layout>
       </v-container>
     </v-card-title>
@@ -180,7 +210,9 @@ export default Vue.extend({
     MethodHelpDialog
   },
   data: () => ({
-    showMethodHelpDialog: false
+    isSaving: false,
+    showMethodHelpDialog: false,
+    promptToSelectProject: false
   }),
   props: ["card", "isOnlyCard", "isSelected"],
   filters: {
@@ -320,6 +352,12 @@ export default Vue.extend({
     },
     saveable() {
       return !this.card.dataDriven && this.card.modified;
+    },
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    activeProject() {
+      return this.$store.state.projects.activeProject;
     }
   },
   methods: {
@@ -333,8 +371,118 @@ export default Vue.extend({
     simulateCard() {
       this.$emit("simulate-card", this.card, this.model);
     },
+    saveCard() {
+      if (!this.activeProject && !this.card.designId) {
+        // Since the design isn't previously saved, the user has to select an
+        // active project so that we know where to save the design.
+        this.promptToSelectProject = true;
+        return;
+      }
+
+      this.promptToSelectProject = false;
+      this.isSaving = true;
+
+      // The project id depends on whether this is a new or existing design.
+      let projectId;
+      if (this.card.designId) {
+        projectId = this.$store.getters["designs/getDesignById"](
+          this.card.designId
+        ).project_id;
+      } else {
+        projectId = this.activeProject.id;
+      }
+
+      // Create the payload, and map camelCase to snake_case for the API.
+      const design = {
+        id: null,
+        project_id: projectId,
+        method: "Manual", // TODO: This field is obsolete, remove it
+        name: this.card.name,
+        model_id: this.card.modelId,
+        design: {
+          reaction_knockins: this.card.reactionAdditions.map(r => ({
+            ...r,
+            lower_bound: r.lowerBound,
+            upper_bound: r.upperBound,
+            reaction_string: r.reactionString,
+            metabolites: r.metabolites.map(m => ({
+              ...m,
+              compartment_id: m.compartment
+            }))
+          })),
+          reaction_knockouts: this.card.reactionKnockouts.map(r => ({
+            ...r,
+            lower_bound: r.lowerBound,
+            upper_bound: r.upperBound,
+            reaction_string: r.reactionString,
+            metabolites: r.metabolites.map(m => ({
+              ...m,
+              compartment_id: m.compartment
+            }))
+          })),
+          gene_knockouts: this.card.geneKnockouts.map(g => ({
+            ...g,
+            reactions: g.reactions.map(r => ({
+              ...r,
+              gene_reaction_rule: r.geneReactionRule
+            }))
+          })),
+          constraints: this.card.editedBounds.map(c => ({
+            ...c,
+            lower_bound: c.lowerBound,
+            upper_bound: c.upperBound
+          }))
+        }
+      };
+
+      if (this.card.designId) {
+        // Update existing design
+        axios
+          .put(
+            `${settings.apis.designStorage}/designs/${this.card.designId}`,
+            design
+          )
+          .then(response => {
+            this.$store.dispatch("designs/fetchDesigns");
+            this.setModified({
+              uuid: this.card.uuid,
+              modified: false
+            });
+            this.$emit("design-saved", design);
+          })
+          .catch(error => {
+            this.$emit("design-save-error");
+          })
+          .then(() => {
+            this.isSaving = false;
+          });
+      } else {
+        // Create new design
+        axios
+          .post(`${settings.apis.designStorage}/designs`, design)
+          .then(response => {
+            this.$store.dispatch("designs/fetchDesigns");
+            this.updateCard({
+              uuid: this.card.uuid,
+              props: { designId: response.data.id }
+            });
+            this.setModified({
+              uuid: this.card.uuid,
+              modified: false
+            });
+            this.$emit("design-saved", design);
+          })
+          .catch(error => {
+            this.$emit("design-save-error");
+          })
+          .then(() => {
+            this.isSaving = false;
+          });
+      }
+    },
     ...mapMutations({
-      updateCard: "interactiveMap/updateCard"
+      updateCard: "interactiveMap/updateCard",
+      setModified: "interactiveMap/setModified"
     })
   }
 });

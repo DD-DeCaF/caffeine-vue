@@ -446,10 +446,10 @@ export default Vue.extend({
     visualize() {
       this.isVisualizing = true;
       this.selected.forEach(design => {
-        // TODO: Associate design id with the card
         const card: Card = {
           uuid: uuidv4(),
           name: design.name,
+          designId: design.id,
           organism: this.organism(this.model(design.model_id).organism_id),
           modelId: design.model_id,
           method: "pfba",

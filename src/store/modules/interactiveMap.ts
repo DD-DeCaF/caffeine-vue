@@ -30,6 +30,7 @@ export interface Reaction {
 export interface Card {
   uuid: string;
   name: string;
+  designId: number | null;
   organism: OrganismItem;
   modelId: number;
   method: string;

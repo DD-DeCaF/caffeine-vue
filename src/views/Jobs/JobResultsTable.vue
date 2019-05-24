@@ -796,6 +796,7 @@ export default Vue.extend({
           const card: Card = {
             uuid: uuidv4(),
             name: `Job #${this.prediction.id}`,
+            designId: null,
             organism: this.organism,
             modelId: this.model.id,
             method: "pfba",
