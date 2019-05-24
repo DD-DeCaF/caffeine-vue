@@ -20,9 +20,10 @@
           :href="
             `https://github.com/DD-DeCaF/caffeine-vue/commit/${deploymentHash}`
           "
-          class="headline font-weight-black text-uppercase primary--text text--lighten-3"
+          class="headline font-weight-black primary--text text--lighten-3"
           style="text-decoration: none;"
-          >Staging</a
+          ><span class="text-uppercase">Staging</span> @
+          {{ deploymentHash | truncateEight }}</a
         >
         <span
           v-else-if="environment === 'development'"
@@ -251,6 +252,11 @@ export default Vue.extend({
     isOrganismCreationDialogVisible: false,
     isExpanded: true
   }),
+  filters: {
+    truncateEight(value) {
+      return value.substring(0, 8);
+    }
+  },
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
