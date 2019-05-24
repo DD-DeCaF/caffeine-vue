@@ -1,11 +1,5 @@
 <template>
   <v-dialog v-model="showDialog" width="1200">
-    <template v-slot:activator="{ on }">
-      <v-btn flat icon v-on="on">
-        <v-icon color="white">edit</v-icon>
-      </v-btn>
-    </template>
-
     <v-card class="pa-2">
       <v-form>
         <v-container>
@@ -112,9 +106,8 @@ export default Vue.extend({
     CardDialogDesign,
     CardDialogDataDriven
   },
-  props: ["card", "model", "modifications"],
+  props: ["card", "model", "modifications", "value"],
   data: () => ({
-    showDialog: false,
     isLoadingOrganism: false,
     methods: [
       { id: "fba", name: "Flux Balance Analysis (FBA)" },
@@ -190,6 +183,14 @@ export default Vue.extend({
           uuid: this.card.uuid,
           props: { method: method }
         });
+      }
+    },
+    showDialog: {
+      get() {
+        return this.value;
+      },
+      set(value) {
+        this.$emit("input", value);
       }
     }
   },
