@@ -11,3 +11,4 @@ export const apis = {
 };
 
 export const trustedURLs = process.env.VUE_APP_TRUSTED_URLS.split(",");
+export const sentryDSN = process.env.sentryDSN;

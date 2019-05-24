@@ -2,6 +2,7 @@ import Vue from "vue";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
+import { sentryDSN } from "./utils/settings";
 import store from "./store/index";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
@@ -17,7 +18,7 @@ import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
 
 Sentry.init({
-  dsn: process.env.VUE_APP_SENTRY_DSN,
+  dsn: sentryDSN,
   integrations: [
     new Integrations.Vue({
       Vue,
