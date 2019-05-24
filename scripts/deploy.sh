@@ -42,7 +42,11 @@ sudo mv ./kubectl /usr/local/bin
 gcloud --quiet container clusters get-credentials dd-decaf
 
 # Build the static files
-npx vue-cli-service build --dest nginx/dist
+if [ "${TRAVIS_BRANCH}" = "master" ]; then
+  npx vue-cli-service build --mode production --dest nginx/dist
+elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
+  npx vue-cli-service build --mode staging --dest nginx/dist
+fi
 
 # Build the nginx image
 docker build -t ${IMAGE_REPO}:${TRAVIS_COMMIT::12} -t ${IMAGE_REPO}:${TRAVIS_BRANCH} nginx
