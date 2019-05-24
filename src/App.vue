@@ -15,6 +15,20 @@
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
+        <a
+          v-if="environment === 'staging'"
+          :href="
+            `https://github.com/DD-DeCaF/caffeine-vue/commit/${deploymentHash}`
+          "
+          class="headline font-weight-black text-uppercase blue--text text--lighten-3"
+          style="text-decoration: none;"
+          >Staging</a
+        >
+        <span
+          v-else-if="environment === 'development'"
+          class="headline font-weight-black text-uppercase blue--text text--lighten-3"
+          >Development</span
+        >
         <template>
           <LoginDialog />
         </template>
@@ -223,12 +237,15 @@ import Vue from "vue";
 import LoginDialog from "@/components/LoginDialog.vue";
 import colors from "vuetify/es5/util/colors";
 import { ColoredProjectItem } from "@/store/modules/projects";
+import { environment, deploymentHash } from "@/utils/settings";
 
 export default Vue.extend({
   components: {
     LoginDialog
   },
   data: () => ({
+    environment: environment,
+    deploymentHash: deploymentHash,
     drawer: false,
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,

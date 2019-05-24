@@ -1,3 +1,6 @@
+export const environment = process.env.NODE_ENV;
+export const deploymentHash = process.env.VUE_APP_DEPLOYMENT_HASH;
+
 export const apis = {
   model: `${process.env.VUE_APP_MODEL_API}`,
   modelStorage: `${process.env.VUE_APP_MODEL_STORAGE_API}`,
