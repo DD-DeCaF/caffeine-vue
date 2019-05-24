@@ -120,6 +120,7 @@ import * as settings from "@/utils/settings";
 import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
 import Legend from "@/views/InteractiveMap/Legend.vue";
+import { Card as CardType } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "InteractiveMap",
@@ -256,7 +257,7 @@ export default Vue.extend({
       }
     },
     addCard(name, organism, model, method, dataDriven) {
-      const card = {
+      const card: CardType = {
         uuid: uuidv4(),
         name: name,
         organism: organism,

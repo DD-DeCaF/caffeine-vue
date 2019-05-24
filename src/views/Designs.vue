@@ -360,6 +360,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import uuidv4 from "uuid/v4";
+import { Card } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "Designs",
@@ -446,7 +447,7 @@ export default Vue.extend({
       this.isVisualizing = true;
       this.selected.forEach(design => {
         // TODO: Associate design id with the card
-        const card = {
+        const card: Card = {
           uuid: uuidv4(),
           name: design.name,
           organism: this.organism(this.model(design.model_id).organism_id),

@@ -544,6 +544,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
+import { Card } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "JobResultsTable",
@@ -792,7 +793,7 @@ export default Vue.extend({
         ];
         const promises = this.getAddedReactions(addedReactionIds);
         Promise.all(promises).then(addedReactions => {
-          const card = {
+          const card: Card = {
             uuid: uuidv4(),
             name: `Job #${this.prediction.id}`,
             organism: this.organism,
