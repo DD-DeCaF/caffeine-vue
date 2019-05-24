@@ -107,7 +107,6 @@
         {{ error }}
       </v-alert>
     </div>
-
   </div>
 </template>
 
