@@ -39,7 +39,7 @@ export interface Card {
   dataDriven: boolean;
   // Design card fields
   objective: {
-    reaction: Reaction;
+    reaction: Reaction | null;
     maximize: boolean;
   };
   reactionAdditions: Reaction[];
@@ -55,8 +55,8 @@ export interface Card {
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;
-  growthRate: number;
-  fluxes: number;
+  growthRate: number | null;
+  fluxes: number | null;
 }
 
 export default {

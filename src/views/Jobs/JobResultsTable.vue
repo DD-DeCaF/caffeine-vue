@@ -792,7 +792,7 @@ export default Vue.extend({
           ...jobPrediction.synthetic_reactions
         ];
         const promises = this.getAddedReactions(addedReactionIds);
-        Promise.all(promises).then(addedReactions => {
+        Promise.all(promises).then((addedReactions: any[]) => {
           const card: Card = {
             uuid: uuidv4(),
             name: `Job #${this.prediction.id}`,
