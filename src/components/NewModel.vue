@@ -175,7 +175,7 @@ export default Vue.extend({
   props: ["value"],
   data: () => ({
     filename: null,
-    isValid: false,
+    isValid: true,
     isProjectCreationDialogVisible: false,
     isMapCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
@@ -225,9 +225,7 @@ export default Vue.extend({
   watch: {},
   methods: {
     onEnter() {
-      console.log(this.isValid)
       if (this.$refs.form.validate()) {
-        console.log("Is valid!")
         this.createModel()
       }
     },

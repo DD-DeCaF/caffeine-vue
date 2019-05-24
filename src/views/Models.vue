@@ -116,8 +116,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="editModel"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   required
@@ -205,7 +205,7 @@
           <v-btn
             color="primary"
             @click="editModel"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Edit
           </v-btn>
@@ -245,7 +245,7 @@ export default Vue.extend({
     // isProjectCreationDialogVisible: false,
     isModelEditDialogVisible: false,
     isDeletionDialogVisible: false,
-    valid: true,
+    isValid: true,
     isMapEditSuccess: false,
     isInvalidCredentials: false,
     isUnauthorized: false,
@@ -299,6 +299,11 @@ export default Vue.extend({
     });
   },
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.editModel()
+      }
+    },
     handler(item) {
       this.editItem(item);
       this.getReactions();

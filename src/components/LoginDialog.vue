@@ -66,7 +66,7 @@
                   provide you with credentials
                 </v-flex>
                 <v-flex>
-                  <v-form @keyup.native.enter="emailLogin">
+                  <v-form ref="form" @keyup.native.enter="onEnter">
                     <v-text-field
                       v-model="email.value"
                       :rules="email.rules"
@@ -189,6 +189,11 @@ export default Vue.extend({
     });
   },
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.emailLogin()
+      }
+    },
     emailLogin() {
       this.isInvalidCredentials = false;
       this.login(

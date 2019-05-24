@@ -10,8 +10,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="createProject"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   required
@@ -42,7 +42,7 @@
           <v-btn
             color="primary"
             @click="createProject"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Create
           </v-btn>
@@ -69,7 +69,7 @@ export default Vue.extend({
   name: "NewProject",
   props: ["value"],
   data: () => ({
-    valid: true,
+    isValid: true,
     isProjectCreationSuccess: false,
     projectName: null,
     test: null,
@@ -90,6 +90,11 @@ export default Vue.extend({
   },
   watch: {},
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.createProject()
+      }
+    },
     createProject() {
       this.$store.commit("toggleDialog", "loader");
       const payload = { name: this.projectName };
