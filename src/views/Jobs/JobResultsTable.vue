@@ -797,7 +797,7 @@ export default Vue.extend({
             name: `Job #${this.prediction.id}`,
             organism: this.organism,
             modelId: this.model.id,
-            method: "pfba", // TODO - should this be default?
+            method: "pfba",
             dataDriven: false,
             // Design card fields
             objective: {

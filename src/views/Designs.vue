@@ -450,7 +450,7 @@ export default Vue.extend({
           name: design.name,
           organism: this.organism(this.model(design.model_id).organism_id),
           modelId: design.model_id,
-          method: "pfba", // TODO - should this be default?
+          method: "pfba",
           dataDriven: false,
           // Design card fields
           objective: {
