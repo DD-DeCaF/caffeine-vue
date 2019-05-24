@@ -672,43 +672,61 @@ export default Vue.extend({
           )
         ],
         fitness: [
-          this.pathways.reduce(
-            (min, pathway) => (pathway.fitness < min ? pathway.fitness : min),
-            this.pathways[0].fitness
-          ),
-          this.pathways.reduce(
-            (max, pathway) => (pathway.fitness > max ? pathway.fitness : max),
-            this.pathways[0].fitness
-          )
+          Math.floor(
+            this.pathways.reduce(
+              (min, pathway) => (pathway.fitness < min ? pathway.fitness : min),
+              this.pathways[0].fitness
+            ) * 100
+          ) / 100,
+          Math.ceil(
+            this.pathways.reduce(
+              (max, pathway) => (pathway.fitness > max ? pathway.fitness : max),
+              this.pathways[0].fitness
+            ) * 100
+          ) / 100
         ],
         yield: [
-          this.pathways.reduce(
-            (min, pathway) => (pathway.yield < min ? pathway.yield : min),
-            this.pathways[0].yield
-          ),
-          this.pathways.reduce(
-            (max, pathway) => (pathway.yield > max ? pathway.yield : max),
-            this.pathways[0].yield
-          )
+          Math.floor(
+            this.pathways.reduce(
+              (min, pathway) => (pathway.yield < min ? pathway.yield : min),
+              this.pathways[0].yield
+            ) * 100
+          ) / 100,
+          Math.ceil(
+            this.pathways.reduce(
+              (max, pathway) => (pathway.yield > max ? pathway.yield : max),
+              this.pathways[0].yield
+            ) * 100
+          ) / 100
         ],
         product: [
-          this.pathways.reduce(
-            (min, pathway) => (pathway.product < min ? pathway.product : min),
-            this.pathways[0].product
-          ),
-          this.pathways.reduce(
-            (max, pathway) => (pathway.product > max ? pathway.product : max),
-            this.pathways[0].product
-          )
+          Math.floor(
+            this.pathways.reduce(
+              (min, pathway) => (pathway.product < min ? pathway.product : min),
+              this.pathways[0].product
+            ) * 100
+          ) / 100,
+          Math.ceil(
+            this.pathways.reduce(
+              (max, pathway) => (pathway.product > max ? pathway.product : max),
+              this.pathways[0].product
+            ) * 100
+          ) / 100
         ],
         biomass: [
-          this.pathways.reduce(
-            (min, pathway) => (pathway.biomass < min ? pathway.biomass : min),
-            this.pathways[0].biomass
-          ),
-          this.pathways.reduce(
-            (max, pathway) => (pathway.biomass > max ? pathway.biomass : max),
-            this.pathways[0].biomass
+          Math.floor(
+            this.pathways.reduce(
+              (min, pathway) => (pathway.biomass < min ? pathway.biomass : min),
+              this.pathways[0].biomass
+            ) * 100
+          ) / 100,
+          Math.ceil(
+            (this.pathways.reduce(
+              (max, pathway) => (pathway.biomass > max ? pathway.biomass : max),
+              this.pathways[0].biomass
+            ) *
+              100) /
+              100
           )
         ]
       };
