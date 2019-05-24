@@ -153,6 +153,10 @@ export default Vue.extend({
           uuid: this.card.uuid,
           props: { name: name }
         });
+        this.setModified({
+          uuid: this.card.uuid,
+          modified: true
+        });
       }
     },
     cardOrganism: {
@@ -223,13 +227,18 @@ export default Vue.extend({
           growthRate: null
         }
       });
+      this.setModified({
+        uuid: this.card.uuid,
+        modified: true
+      });
       this.$emit("simulate-card");
     },
     setLoadingOrganism(isLoading) {
       this.isLoadingOrganism = isLoading;
     },
     ...mapMutations({
-      updateCard: "interactiveMap/updateCard"
+      updateCard: "interactiveMap/updateCard",
+      setModified: "interactiveMap/setModified"
     })
   }
 });

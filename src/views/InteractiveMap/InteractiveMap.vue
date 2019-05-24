@@ -262,6 +262,7 @@ export default Vue.extend({
         organism: organism,
         modelId: model ? model.id : null,
         method: method,
+        modified: false,
         dataDriven: dataDriven,
         // Design card fields
         objective: {

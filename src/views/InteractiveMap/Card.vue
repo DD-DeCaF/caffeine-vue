@@ -8,7 +8,9 @@
       :class="{ clickable: !isSelected }"
       @click="selectCard"
     >
-      <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
+      <v-toolbar-title :class="{ 'body-2': 'true', 'font-italic': saveable }"
+        >{{ card.name }}<span v-if="saveable">*</span></v-toolbar-title
+      >
       <v-spacer></v-spacer>
 
       <CardDialog
@@ -149,6 +151,14 @@
               ></v-progress-circular>
             </div>
           </v-flex>
+        </v-layout>
+      </v-container>
+
+      <v-container fluid class="pa-0" v-if="saveable">
+        <v-layout justify-end>
+          <v-btn v-if="card.modified && !card.dataDriven" class="mr-0 primary"
+            >Save</v-btn
+          >
         </v-layout>
       </v-container>
     </v-card-title>
@@ -307,6 +317,9 @@ export default Vue.extend({
         ];
       });
       return model;
+    },
+    saveable() {
+      return !this.card.dataDriven && this.card.modified;
     }
   },
   methods: {

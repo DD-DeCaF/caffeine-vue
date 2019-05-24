@@ -33,6 +33,9 @@ export interface Card {
   organism: OrganismItem;
   modelId: number;
   method: string;
+  // `modified` is true when the user has made any change to the model, and it
+  // can be saved. Not relevant for data-driven cards.
+  modified: boolean;
   dataDriven: boolean;
   // Design card fields
   objective: {
@@ -78,6 +81,10 @@ export default {
         Vue.set(card, key, props[key]);
       });
     },
+    setModified(state, { uuid, modified }) {
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.modified = modified;
+    },
     setObjectiveReaction(state, { uuid, reaction }) {
       state.cards.find(c => c.uuid === uuid).objective.reaction = reaction;
     },
@@ -87,27 +94,37 @@ export default {
     addReaction(state, { uuid, reaction }) {
       const card = state.cards.find(c => c.uuid === uuid);
       card.reactionAdditions.push(reaction);
+      card.modified = true;
     },
     undoAddReaction(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
       const index = card.reactionAdditions.findIndex(r => r.id === reactionId);
       card.reactionAdditions.splice(index, 1);
+      card.modified = true;
     },
     knockoutReaction(state, { uuid, reaction }) {
-      state.cards.find(c => c.uuid === uuid).reactionKnockouts.push(reaction);
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.reactionKnockouts.push(reaction);
+      card.modified = true;
     },
     updateKnockoutReaction(state, { uuid, reaction }) {
       const card = state.cards.find(c => c.uuid === uuid);
       const index = card.reactionKnockouts.findIndex(r => r.id === reaction.id);
       Vue.set(card.reactionKnockouts, index, reaction);
+      card.modified = true;
     },
     undoKnockoutReaction(state, { uuid, reactionId }) {
-      const knockouts = state.cards.find(c => c.uuid === uuid)
-        .reactionKnockouts;
-      knockouts.splice(knockouts.findIndex(k => k.id === reactionId), 1);
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.reactionKnockouts.splice(
+        card.reactionKnockouts.findIndex(k => k.id === reactionId),
+        1
+      );
+      card.modified = true;
     },
     knockoutGene(state, { uuid, gene }) {
+      const card = state.cards.find(c => c.uuid === uuid);
       state.cards.find(c => c.uuid === uuid).geneKnockouts.push(gene);
+      card.modified = true;
     },
     updateKnockoutGene(state, { uuid, gene }) {
       const card = state.cards.find(c => c.uuid === uuid);
@@ -115,13 +132,18 @@ export default {
       Vue.set(card.geneKnockouts, index, gene);
     },
     undoKnockoutGene(state, { uuid, geneId }) {
-      const knockouts = state.cards.find(c => c.uuid === uuid).geneKnockouts;
-      knockouts.splice(knockouts.findIndex(k => k.id === geneId), 1);
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.geneKnockouts.splice(
+        card.geneKnockouts.findIndex(k => k.id === geneId),
+        1
+      );
+      card.modified = true;
     },
     editBounds(state, { uuid, reaction }) {
       // Add a reaction object with modified bounds.
       const card = state.cards.find(c => c.uuid === uuid);
       card.editedBounds.push(reaction);
+      card.modified = true;
     },
     updateEditedBoundsReaction(state, { uuid, reaction }) {
       // Update the reaction data for an edited reaction.
@@ -135,16 +157,18 @@ export default {
       });
     },
     updateEditedBounds(state, { uuid, reactionId, lowerBound, upperBound }) {
-      // Update the *bounds* for a reaction which was already  reaction data for an edited reaction.
+      // Update the *bounds* for an already added constraint
       const card = state.cards.find(c => c.uuid === uuid);
       const reaction = card.editedBounds.find(r => r.id === reactionId);
       reaction.lowerBound = lowerBound;
       reaction.upperBound = upperBound;
+      card.modified = true;
     },
     undoEditBounds(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
       const index = card.editedBounds.findIndex(r => r.id === reactionId);
       card.editedBounds.splice(index, 1);
+      card.modified = true;
     }
   },
   actions: {
