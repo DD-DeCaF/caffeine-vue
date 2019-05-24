@@ -7,7 +7,6 @@
       class="my-0"
     ></v-progress-linear>
     <Escher
-      @escher-loaded="escherLoaded"
       @simulate-card="simulate"
       @click="isSidepanelOpen = false"
       :card="selectedCard"
@@ -213,31 +212,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    escherLoaded() {
-      if (this.$store.state.interactiveMap.cards.length > 0) {
-        // There are already cards in the store - ensure they are all simulated
-        // (cards added from other components won't initially be simulated)
-        this.$store.state.interactiveMap.cards.forEach(card => {
-          const model = this.$store.getters["models/getModelById"](
-            card.modelId
-          );
-          this.simulate(card, model);
-        });
-        // Select the last card in the list by default.
-        this.selectedCardId = this.$store.state.interactiveMap.cards[
-          this.$store.state.interactiveMap.cards.length - 1
-        ].uuid;
-      } else {
-        // No cards are added at this point, so add a default card to provide
-        // the user with some initial data. Chain promises to ensure that data
-        // is available.
-        this.$store.state.models.modelsPromise.then(() => {
-          this.$store.state.organisms.organismsPromise.then(() => {
-            this.addDefaultCard(false);
-          });
-        });
-      }
-    },
     changeMap() {
       this.hasLoadMapError = false;
       axios
@@ -510,6 +484,28 @@ export default Vue.extend({
             this.currentMapId = map.id;
             this.changeMap();
           }
+        });
+      });
+    }
+
+    if (this.$store.state.interactiveMap.cards.length > 0) {
+      // There are already cards in the store - ensure they are all simulated
+      // (cards added from other components won't initially be simulated)
+      this.$store.state.interactiveMap.cards.forEach(card => {
+        const model = this.$store.getters["models/getModelById"](card.modelId);
+        this.simulate(card, model);
+      });
+      // Select the last card in the list by default.
+      this.selectedCardId = this.$store.state.interactiveMap.cards[
+        this.$store.state.interactiveMap.cards.length - 1
+      ].uuid;
+    } else {
+      // No cards are added at this point, so add a default card to provide
+      // the user with some initial data. Chain promises to ensure that data
+      // is available.
+      this.$store.state.models.modelsPromise.then(() => {
+        this.$store.state.organisms.organismsPromise.then(() => {
+          this.addDefaultCard(false);
         });
       });
     }
