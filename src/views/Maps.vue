@@ -133,8 +133,7 @@
                   label="Project"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-btn
                       depressed
@@ -143,6 +142,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -158,8 +158,7 @@
                   label="Model"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isModelCreationDialogVisible = true"
@@ -167,6 +166,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Model
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
               </v-form>

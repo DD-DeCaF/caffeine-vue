@@ -4,6 +4,10 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
+    <!--    <NewModel-->
+    <!--      v-model="isProjectModelDialogVisible"-->
+    <!--      @return-object="passModel"-->
+    <!--    />-->
     <v-dialog v-model="isVisible" width="650">
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
@@ -38,8 +42,7 @@
                   label="Project"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isProjectCreationDialogVisible = true"
@@ -47,6 +50,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -62,6 +66,16 @@
                   label="Model"
                   type="text"
                 >
+                  <!--                  <template v-slot:prepend-item>-->
+                  <!--                    <v-btn-->
+                  <!--                      depressed-->
+                  <!--                      @click.stop="isModelCreationDialogVisible = true"-->
+                  <!--                    >-->
+                  <!--                      <v-icon class="mr-4">add_circle</v-icon>-->
+                  <!--                      New model-->
+                  <!--                    </v-btn>-->
+                  <!--                    <v-divider class="my-2"></v-divider>-->
+                  <!--                  </template>-->
                 </v-autocomplete>
                 <FileUpload
                   v-model="filename"
@@ -115,6 +129,7 @@ export default Vue.extend({
   props: ["value"],
   data: () => ({
     isProjectCreationDialogVisible: false,
+    // isModelCreationDialogVisible: false,
     filename: null,
     valid: true,
     isMapCreationSuccess: false,
@@ -173,6 +188,9 @@ export default Vue.extend({
     passProject(project) {
       this.project = project;
     }
+    // passModel(model) {
+    //   this.model = model;
+    // }
   },
   computed: {
     availableProjects() {

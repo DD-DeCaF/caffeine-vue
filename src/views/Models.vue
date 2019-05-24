@@ -140,8 +140,7 @@
                   label="Organism"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isOrganismCreationDialogVisible = true"
@@ -149,6 +148,7 @@
                       <v-icon class="mr-4">add_circle</v-icon>
                       New organism
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -162,15 +162,15 @@
                   label="Preferred Map"
                   type="text"
                 >
-                  <template v-slot:append-item>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:prepend-item>
                     <v-btn
                       depressed
                       @click.stop="isMapCreationDialogVisible = true"
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
-                      New Map
+                      New map
                     </v-btn>
+                    <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
