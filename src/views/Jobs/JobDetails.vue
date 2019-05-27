@@ -174,9 +174,6 @@ export default Vue.extend({
       );
     }
   },
-  created() {
-    this.jobId = parseInt(this.$route.params.id);
-  },
   watch: {
     "job.status": {
       handler: function(newValue, oldValue) {
@@ -186,6 +183,9 @@ export default Vue.extend({
       },
       immediate: true
     }
+  },
+  created() {
+    this.jobId = parseInt(this.$route.params.id);
   },
   methods: {
     getPathwayPredictions() {

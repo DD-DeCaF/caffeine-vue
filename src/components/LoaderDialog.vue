@@ -22,7 +22,6 @@ export default Vue.extend({
   name: "LoaderDialog",
   props: ["isLoaderDialogVisible", "loadingMessage"],
   data: () => ({}),
-  methods: {},
   computed: {
     isVisible: {
       get: function() {
@@ -36,6 +35,7 @@ export default Vue.extend({
       }
     }
   },
-  watch: {}
+  watch: {},
+  methods: {}
 });
 </script>

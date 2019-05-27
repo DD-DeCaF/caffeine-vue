@@ -385,6 +385,20 @@ export default Vue.extend({
     ],
     isVisualizing: false
   }),
+  computed: {
+    designs() {
+      return this.$store.state.designs.designs;
+    },
+    ...mapGetters({
+      model: "models/getModelById",
+      organism: "organisms/getOrganismById"
+    })
+  },
+  created() {
+    this.$store.state.designs.designsPromise.then(() => {
+      this.isLoading = false;
+    });
+  },
   methods: {
     customSort(items, index, isDesc) {
       items.sort((a, b) => {
@@ -482,20 +496,6 @@ export default Vue.extend({
           });
       });
     }
-  },
-  computed: {
-    designs() {
-      return this.$store.state.designs.designs;
-    },
-    ...mapGetters({
-      model: "models/getModelById",
-      organism: "organisms/getOrganismById"
-    })
-  },
-  created() {
-    this.$store.state.designs.designsPromise.then(() => {
-      this.isLoading = false;
-    });
   }
 });
 </script>

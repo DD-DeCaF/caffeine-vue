@@ -297,6 +297,9 @@ export default Vue.extend({
       }
     }
   },
+  created() {
+    this.fetchProducts();
+  },
   methods: {
     onNewProject(project: ColoredProjectItem): void {
       this.project = project;
@@ -348,9 +351,6 @@ export default Vue.extend({
           this.hasSubmissionError = true;
         });
     }
-  },
-  created() {
-    this.fetchProducts();
   },
   beforeRouteLeave(to: Route, from: Route, next) {
     if (!this.isSubmitted && this.hasEdits) {

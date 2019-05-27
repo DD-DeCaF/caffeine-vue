@@ -171,6 +171,19 @@ export default Vue.extend({
       "pointer-events": "auto"
     }
   }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    }
+  },
+  created() {
+    this.$store.state.projects.projectsPromise.then(() => {
+      this.isLoading = false;
+    });
+  },
   methods: {
     editItem(item) {
       this.id = item.id;
@@ -220,19 +233,6 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     }
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    }
-  },
-  created() {
-    this.$store.state.projects.projectsPromise.then(() => {
-      this.isLoading = false;
-    });
   }
 });
 </script>

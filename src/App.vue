@@ -244,6 +244,11 @@ export default Vue.extend({
   components: {
     LoginDialog
   },
+  filters: {
+    truncateEight(value) {
+      return value.substring(0, 8);
+    }
+  },
   data: () => ({
     environment: environment,
     deploymentHash: deploymentHash,
@@ -252,11 +257,6 @@ export default Vue.extend({
     isOrganismCreationDialogVisible: false,
     isExpanded: true
   }),
-  filters: {
-    truncateEight(value) {
-      return value.substring(0, 8);
-    }
-  },
   computed: {
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
@@ -309,16 +309,6 @@ export default Vue.extend({
       return this.$store.state.projects.activeProject;
     }
   },
-  methods: {
-    setActiveProject(projectID: number) {
-      this.$store.commit("projects/setActiveProject", projectID);
-      this.$vuetify.theme.primary = this.project.color;
-    },
-    unsetActiveProject() {
-      this.$store.commit("projects/setActiveProject", null);
-      this.$vuetify.theme.primary = colors.blue.base;
-    }
-  },
   beforeCreate() {
     // Configure the HTTP interceptors before anything else, to make sure HTTP
     // requests behave as expected. (See the interceptors for details)
@@ -330,6 +320,16 @@ export default Vue.extend({
     // Now fetch the user data, as session/token logic is ready and will ensure
     // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
+  },
+  methods: {
+    setActiveProject(projectID: number) {
+      this.$store.commit("projects/setActiveProject", projectID);
+      this.$vuetify.theme.primary = this.project.color;
+    },
+    unsetActiveProject() {
+      this.$store.commit("projects/setActiveProject", null);
+      this.$vuetify.theme.primary = colors.blue.base;
+    }
   }
 });
 </script>

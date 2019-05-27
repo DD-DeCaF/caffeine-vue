@@ -547,6 +547,13 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "JobResultsTable",
+  filters: {
+    round: value => {
+      return value >= 0.005 || value === 0
+        ? +value.toFixed(2)
+        : value.toExponential(1);
+    }
+  },
   props: {
     prediction: Object as Prop<PathwayPredictionResponse>
   },
@@ -567,13 +574,6 @@ export default Vue.extend({
     showAllKnockouts: false,
     isVisualizing: false
   }),
-  filters: {
-    round: value => {
-      return value >= 0.005 || value === 0
-        ? +value.toFixed(2)
-        : value.toExponential(1);
-    }
-  },
   computed: {
     pathways() {
       return [
@@ -622,6 +622,12 @@ export default Vue.extend({
       return this.$store.getters["models/getModelById"](
         this.prediction.model_id
       );
+    }
+  },
+  created() {
+    if (this.pathways.length > 0) {
+      this.range = this.getRange();
+      this.filters = this.getFilters();
     }
   },
   methods: {
@@ -901,12 +907,6 @@ export default Vue.extend({
             this.$store.commit("setFetchError", error);
           });
       });
-    }
-  },
-  created() {
-    if (this.pathways.length > 0) {
-      this.range = this.getRange();
-      this.filters = this.getFilters();
     }
   }
 });

@@ -169,30 +169,15 @@ export default Vue.extend({
     CardDialog,
     MethodHelpDialog
   },
-  data: () => ({
-    showMethodHelpDialog: false
-  }),
-  props: ["card", "isOnlyCard", "isSelected"],
   filters: {
     round(value) {
       return value.toFixed(3);
     }
   },
-  watch: {
-    "card.modelId": {
-      immediate: true,
-      handler() {
-        // Make sure that the full model is always available. There might be a
-        // delay before it arrives, but without triggering this, dependent code
-        // (for example the Escher logic to load the map) might end up waiting
-        // indefinitely for the full model.
-        if (!this.card.modelId) {
-          return;
-        }
-        this.$store.dispatch("models/withFullModel", this.card.modelId);
-      }
-    }
-  },
+  props: ["card", "isOnlyCard", "isSelected"],
+  data: () => ({
+    showMethodHelpDialog: false
+  }),
   computed: {
     titleColor() {
       if (this.isSelected) {
@@ -307,6 +292,21 @@ export default Vue.extend({
         ];
       });
       return model;
+    }
+  },
+  watch: {
+    "card.modelId": {
+      immediate: true,
+      handler() {
+        // Make sure that the full model is always available. There might be a
+        // delay before it arrives, but without triggering this, dependent code
+        // (for example the Escher logic to load the map) might end up waiting
+        // indefinitely for the full model.
+        if (!this.card.modelId) {
+          return;
+        }
+        this.$store.dispatch("models/withFullModel", this.card.modelId);
+      }
     }
   },
   methods: {

@@ -43,66 +43,6 @@ export default Vue.extend({
     isLoadingMap: false,
     hasBoundsError: false
   }),
-  watch: {
-    mapData(value) {
-      const loadMap = () => {
-        this.isLoadingMap = true;
-        // Delay the actual loading of the map to give Vue time to update the
-        // interface (after setting isLoadingMap to true). Otherwise, Escher
-        // would freeze execution until it's complete and the user would never
-        // actually see the loading message.
-        setTimeout(() => {
-          this.escherBuilder.load_map(value);
-          this.isLoadingMap = false;
-          // Update the map state, since it will be reset whenever the map is
-          // changed. Note that we don't need to update the model.
-          if (this.model && this.model.model_serialized) {
-            this.setReactionAdditions();
-          }
-          this.setReactionKnockouts();
-          this.setGeneKnockouts();
-          this.setConditionData();
-          this.setFluxes();
-        }, 10);
-      };
-
-      // Wait for escher to initialize before loading the map.
-      this.onEscherReady.then(loadMap);
-    },
-    model: {
-      deep: true,
-      handler() {
-        // Whenever the model (with local modifications) changes, update it in
-        // Escher. Note: The model must be loaded before drawing the reactions
-        // on the map.
-        this.onEscherReady.then(this.setModel);
-        // To make sure that added reactions are added correctly to the map, use
-        // this watcher (instead of watching `card.reactionAdditions`
-        // separately). This ensures that the full model is available, and since
-        // the property recomputes when either model or added reactions change,
-        // it will also handle the case of reactions being added first, then the
-        // model arrives later, then draw the added reactions
-        if (this.model && this.model.model_serialized) {
-          this.onEscherReady.then(this.setReactionAdditions);
-        }
-      }
-    },
-    // Add separate watchers for the different properties on the card, instead
-    // of a single deep watcher on the card, to be able to only update the
-    // relevant portions of the map.
-    "card.reactionKnockouts"() {
-      this.onEscherReady.then(this.setReactionKnockouts);
-    },
-    "card.geneKnockouts"() {
-      this.onEscherReady.then(this.setGeneKnockouts);
-    },
-    "card.conditionData"() {
-      this.onEscherReady.then(this.setConditionData);
-    },
-    "card.fluxes"() {
-      this.onEscherReady.then(this.setFluxes);
-    }
-  },
   computed: {
     model() {
       // Returns the modified model (original model + added reactions) for the
@@ -170,6 +110,109 @@ export default Vue.extend({
       });
       return model;
     }
+  },
+  watch: {
+    mapData(value) {
+      const loadMap = () => {
+        this.isLoadingMap = true;
+        // Delay the actual loading of the map to give Vue time to update the
+        // interface (after setting isLoadingMap to true). Otherwise, Escher
+        // would freeze execution until it's complete and the user would never
+        // actually see the loading message.
+        setTimeout(() => {
+          this.escherBuilder.load_map(value);
+          this.isLoadingMap = false;
+          // Update the map state, since it will be reset whenever the map is
+          // changed. Note that we don't need to update the model.
+          if (this.model && this.model.model_serialized) {
+            this.setReactionAdditions();
+          }
+          this.setReactionKnockouts();
+          this.setGeneKnockouts();
+          this.setConditionData();
+          this.setFluxes();
+        }, 10);
+      };
+
+      // Wait for escher to initialize before loading the map.
+      this.onEscherReady.then(loadMap);
+    },
+    model: {
+      deep: true,
+      handler() {
+        // Whenever the model (with local modifications) changes, update it in
+        // Escher. Note: The model must be loaded before drawing the reactions
+        // on the map.
+        this.onEscherReady.then(this.setModel);
+        // To make sure that added reactions are added correctly to the map, use
+        // this watcher (instead of watching `card.reactionAdditions`
+        // separately). This ensures that the full model is available, and since
+        // the property recomputes when either model or added reactions change,
+        // it will also handle the case of reactions being added first, then the
+        // model arrives later, then draw the added reactions
+        if (this.model && this.model.model_serialized) {
+          this.onEscherReady.then(this.setReactionAdditions);
+        }
+      }
+    },
+    // Add separate watchers for the different properties on the card, instead
+    // of a single deep watcher on the card, to be able to only update the
+    // relevant portions of the map.
+    "card.reactionKnockouts"() {
+      this.onEscherReady.then(this.setReactionKnockouts);
+    },
+    "card.geneKnockouts"() {
+      this.onEscherReady.then(this.setGeneKnockouts);
+    },
+    "card.conditionData"() {
+      this.onEscherReady.then(this.setConditionData);
+    },
+    "card.fluxes"() {
+      this.onEscherReady.then(this.setFluxes);
+    }
+  },
+  mounted() {
+    this.onEscherReady = new Promise((resolve, reject) => {
+      this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
+        menu: "zoom",
+        scroll_behavior: "zoom",
+        fill_screen: false,
+        ignore_bootstrap: true,
+        never_ask_before_quit: true,
+        reaction_styles: ["color", "size", "text", "abs"],
+        identifiers_on_map: "bigg_id",
+        hide_all_labels: false,
+        hide_secondary_metabolites: false,
+        highlight_missing: true,
+        reaction_scale: [
+          { type: "min", color: "#A841D0", size: 20 },
+          { type: "Q1", color: "#868BB2", size: 20 },
+          { type: "Q3", color: "#6DBFB0", size: 20 },
+          { type: "max", color: "#54B151", size: 20 }
+        ],
+        reaction_no_data_color: "#CBCBCB",
+        reaction_no_data_size: 10,
+        tooltip: "custom",
+        enable_editing: false,
+        enable_fva_opacity: true,
+        show_gene_reaction_rules: true,
+        zoom_extent_canvas: true,
+        first_load_callback: () => {
+          resolve();
+          this.initializingEscher = false;
+          this.$emit("escher-loaded");
+        },
+        reaction_state: this.getObjectState,
+        tooltip_callbacks: {
+          knockout: this.knockoutReaction,
+          knockoutGenes: this.knockoutGene,
+          setAsObjective: this.setObjective,
+          objectiveDirection: this.setObjectiveDirection,
+          changeBounds: this.editBounds,
+          resetBounds: this.resetBounds
+        }
+      });
+    });
   },
   methods: {
     setModel() {
@@ -429,49 +472,6 @@ export default Vue.extend({
       });
       this.$emit("simulate-card", this.card, this.model);
     }
-  },
-  mounted() {
-    this.onEscherReady = new Promise((resolve, reject) => {
-      this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
-        menu: "zoom",
-        scroll_behavior: "zoom",
-        fill_screen: false,
-        ignore_bootstrap: true,
-        never_ask_before_quit: true,
-        reaction_styles: ["color", "size", "text", "abs"],
-        identifiers_on_map: "bigg_id",
-        hide_all_labels: false,
-        hide_secondary_metabolites: false,
-        highlight_missing: true,
-        reaction_scale: [
-          { type: "min", color: "#A841D0", size: 20 },
-          { type: "Q1", color: "#868BB2", size: 20 },
-          { type: "Q3", color: "#6DBFB0", size: 20 },
-          { type: "max", color: "#54B151", size: 20 }
-        ],
-        reaction_no_data_color: "#CBCBCB",
-        reaction_no_data_size: 10,
-        tooltip: "custom",
-        enable_editing: false,
-        enable_fva_opacity: true,
-        show_gene_reaction_rules: true,
-        zoom_extent_canvas: true,
-        first_load_callback: () => {
-          resolve();
-          this.initializingEscher = false;
-          this.$emit("escher-loaded");
-        },
-        reaction_state: this.getObjectState,
-        tooltip_callbacks: {
-          knockout: this.knockoutReaction,
-          knockoutGenes: this.knockoutGene,
-          setAsObjective: this.setObjective,
-          objectiveDirection: this.setObjectiveDirection,
-          changeBounds: this.editBounds,
-          resetBounds: this.resetBounds
-        }
-      });
-    });
   }
 });
 </script>

@@ -112,6 +112,7 @@ export default Vue.extend({
     CardDialogDesign,
     CardDialogDataDriven
   },
+  props: ["card", "model", "modifications"],
   data: () => ({
     showDialog: false,
     isLoadingOrganism: false,
@@ -122,7 +123,6 @@ export default Vue.extend({
       { id: "pfba-fva", name: "Parsimonious FVA" }
     ]
   }),
-  props: ["card", "model", "modifications"],
   computed: {
     organisms() {
       return this.$store.state.organisms.organisms;

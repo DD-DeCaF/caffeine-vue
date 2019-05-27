@@ -117,10 +117,10 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "MethodHelpDialog",
+  props: ["showMethodHelpDialog"],
   data: () => ({
     showMethodHelpDialogLocal: false
   }),
-  props: ["showMethodHelpDialog"],
   watch: {
     showMethodHelpDialog(value) {
       this.showMethodHelpDialogLocal = value;

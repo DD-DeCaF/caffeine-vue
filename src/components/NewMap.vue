@@ -141,6 +141,24 @@ export default Vue.extend({
     project: { id: null },
     map: null
   }),
+  computed: {
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableModels() {
+      return this.$store.state.models.models;
+    },
+    isVisible: {
+      get: function() {
+        return this.value;
+      },
+      set: function(value) {
+        this.$refs.form!.reset();
+        this.$emit("input", value);
+      }
+    }
+  },
+  watch: {},
   methods: {
     createMap() {
       this.$store.commit("toggleDialog", "loader");
@@ -191,24 +209,6 @@ export default Vue.extend({
     // passModel(model) {
     //   this.model = model;
     // }
-  },
-  computed: {
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    availableModels() {
-      return this.$store.state.models.models;
-    },
-    isVisible: {
-      get: function() {
-        return this.value;
-      },
-      set: function(value) {
-        this.$refs.form!.reset();
-        this.$emit("input", value);
-      }
-    }
-  },
-  watch: {}
+  }
 });
 </script>
