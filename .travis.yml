@@ -26,7 +26,7 @@ install:
   - npm ci
 
 script:
-  - npx vue-cli-service lint --no-fix --max-warnings 0
+  - npx vue-cli-service lint --mode production --no-fix --max-warnings 0
   - npx vue-cli-service test:unit
 
 deploy:
