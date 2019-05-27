@@ -43,6 +43,16 @@ export default {
   },
   actions: {
     interceptRequests({ commit, dispatch, state }) {
+      // Note that the intercepters apply in the reverse order of which they are
+      // added here, and the order is both intentional and important:
+      // 1. Dispatch a refresh request if the current token is about to expire.
+      // 2. Have the request wait for any existing refresh request (either
+      //    dispatched by the first interceptor, or the refreshTokenLoop action)
+      //    to resolve before continuing.
+      // 3. Add the (potentially refreshed) authorization token for API
+      //    requests.
+
+      // Interceptor 3/3: Add JWT token
       // Add authorization header to requests for trusted urls.
       axios.interceptors.request.use(config => {
         // If not authenticated, there's no token to add.
@@ -65,10 +75,8 @@ export default {
         return config;
       });
 
+      // Interceptor 2/3: Wait for refresh request
       // Chain all requests when waiting for a refresh request
-      // NOTE: This interceptor must be applied *after* the token interceptor
-      // above to make sure that the *refreshed* token is picked up when the
-      // request continues.
       axios.interceptors.request.use(
         config =>
           new Promise((resolve, reject) => {
@@ -90,6 +98,31 @@ export default {
             }
           })
       );
+
+      // Interceptor 1/3: Check expiry
+      // If the token is about to expire, trigger an extra refresh request. This
+      // will be mostly irrelevant since the token is regularly updated
+      // automatically, but it might catch some edge cases, for example if the
+      // user suspends the computed with the tab open, or similar.
+      axios.interceptors.request.use(config => {
+        if (state.refreshRequest) {
+          // Refresh request is in progress - no need to check expiry.
+          return config;
+        }
+        // Buffer is the number of seconds before *actual* expiry when the token
+        // will be considered expired, to account for clock skew and
+        // service-to-service requests delays.
+        const buffer = 60;
+        const jwt = JSON.parse(atob(state.jwt.jwt.split(".")[1]));
+        if (new Date((jwt.exp - buffer) * 1000) <= new Date()) {
+          // The token is expired, so dispatch a refresh request. Then let the
+          // request proceed - later interceptors will make sure API requests
+          // wait for the refresh request to finish, in order to use the renewed
+          // token.
+          dispatch("refreshToken");
+        }
+        return config;
+      });
     },
     refreshTokenLoop({ dispatch }) {
       dispatch("refreshToken");
