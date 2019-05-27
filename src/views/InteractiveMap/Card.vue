@@ -497,6 +497,14 @@ export default Vue.extend({
     if (this.withDialog) {
       this.isCardDialogVisible = true;
     }
+  },
+  destroyed() {
+    this.updateCard({
+      uuid: this.card.uuid,
+      props: {
+        withDialog: false
+      }
+    });
   }
 });
 </script>

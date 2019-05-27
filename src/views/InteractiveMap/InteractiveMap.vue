@@ -317,6 +317,8 @@ export default Vue.extend({
         hasSimulationError: false,
         growthRate: null,
         fluxes: null,
+        // When adding a card from the interactive map, the dialog should be opened
+        // Method always exists on the default card
         withDialog: method ? false : true
       };
       this.$store.commit("interactiveMap/addCard", card);
