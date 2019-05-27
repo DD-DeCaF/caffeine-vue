@@ -199,6 +199,24 @@ export default Vue.extend({
       return this.playingInterval !== null;
     }
   },
+  mounted() {
+    // Set the preferred default map.
+    if (this.currentMapId) {
+      // The user has already chosen a map - just make sure it's loaded.
+      this.changeMap();
+    } else {
+      // Wait for a potential fetch request (important if the user navigates
+      // directly to this view).
+      this.$store.state.maps.mapsPromise.then(() => {
+        this.$store.state.maps.maps.forEach(map => {
+          if (map.model_id === 15 && map.name === "Core metabolism") {
+            this.currentMapId = map.id;
+            this.changeMap();
+          }
+        });
+      });
+    }
+  },
   methods: {
     escherLoaded() {
       if (this.$store.state.interactiveMap.cards.length > 0) {
@@ -476,24 +494,6 @@ export default Vue.extend({
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"
     })
-  },
-  mounted() {
-    // Set the preferred default map.
-    if (this.currentMapId) {
-      // The user has already chosen a map - just make sure it's loaded.
-      this.changeMap();
-    } else {
-      // Wait for a potential fetch request (important if the user navigates
-      // directly to this view).
-      this.$store.state.maps.mapsPromise.then(() => {
-        this.$store.state.maps.maps.forEach(map => {
-          if (map.model_id === 15 && map.name === "Core metabolism") {
-            this.currentMapId = map.id;
-            this.changeMap();
-          }
-        });
-      });
-    }
   }
 });
 </script>

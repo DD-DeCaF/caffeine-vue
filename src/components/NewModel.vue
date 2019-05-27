@@ -192,6 +192,37 @@ export default Vue.extend({
     modelError: false,
     reactions: []
   }),
+  computed: {
+    errorMessage() {
+      if (this.modelError) {
+        return "The file is not valid.";
+      } else {
+        return [];
+      }
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableOrganisms() {
+      return this.$store.state.organisms.organisms;
+    },
+    availableMaps() {
+      return this.$store.state.maps.maps;
+    },
+    availableReactions() {
+      return [{ id: "Biomass1" }, { id: "Biomass2" }];
+    },
+    isVisible: {
+      get: function() {
+        return this.value;
+      },
+      set: function(value) {
+        this.$refs.form!.reset();
+        this.$emit("input", value);
+      }
+    }
+  },
+  watch: {},
   methods: {
     createModel() {
       this.$store.commit("toggleDialog", "loader");
@@ -255,37 +286,6 @@ export default Vue.extend({
     passOrganism(organism) {
       this.organism = organism;
     }
-  },
-  computed: {
-    errorMessage() {
-      if (this.modelError) {
-        return "The file is not valid.";
-      } else {
-        return [];
-      }
-    },
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    availableOrganisms() {
-      return this.$store.state.organisms.organisms;
-    },
-    availableMaps() {
-      return this.$store.state.maps.maps;
-    },
-    availableReactions() {
-      return [{ id: "Biomass1" }, { id: "Biomass2" }];
-    },
-    isVisible: {
-      get: function() {
-        return this.value;
-      },
-      set: function(value) {
-        this.$refs.form!.reset();
-        this.$emit("input", value);
-      }
-    }
-  },
-  watch: {}
+  }
 });
 </script>

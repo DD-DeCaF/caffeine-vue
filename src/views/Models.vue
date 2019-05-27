@@ -276,6 +276,28 @@ export default Vue.extend({
       "pointer-events": "auto"
     }
   }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    availableModels() {
+      return this.$store.state.models.models;
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableMaps() {
+      return this.$store.state.maps.maps;
+    },
+    availableOrganisms() {
+      return this.$store.state.organisms.organisms;
+    }
+  },
+  created() {
+    this.$store.state.models.modelsPromise.then(() => {
+      this.isLoading = false;
+    });
+  },
   methods: {
     handler(item) {
       this.editItem(item);
@@ -366,28 +388,6 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     }
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
-    availableModels() {
-      return this.$store.state.models.models;
-    },
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    availableMaps() {
-      return this.$store.state.maps.maps;
-    },
-    availableOrganisms() {
-      return this.$store.state.organisms.organisms;
-    }
-  },
-  created() {
-    this.$store.state.models.modelsPromise.then(() => {
-      this.isLoading = false;
-    });
   }
 });
 </script>

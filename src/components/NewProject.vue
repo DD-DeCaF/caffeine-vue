@@ -77,6 +77,18 @@ export default Vue.extend({
       required: value => !!value || "Required."
     }
   }),
+  computed: {
+    isVisible: {
+      get: function() {
+        return this.value;
+      },
+      set: function(value) {
+        this.$refs.form!.reset();
+        this.$emit("input", value);
+      }
+    }
+  },
+  watch: {},
   methods: {
     createProject() {
       this.$store.commit("toggleDialog", "loader");
@@ -100,18 +112,6 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
         });
     }
-  },
-  computed: {
-    isVisible: {
-      get: function() {
-        return this.value;
-      },
-      set: function(value) {
-        this.$refs.form!.reset();
-        this.$emit("input", value);
-      }
-    }
-  },
-  watch: {}
+  }
 });
 </script>

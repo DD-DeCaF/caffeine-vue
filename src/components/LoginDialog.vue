@@ -173,6 +173,21 @@ export default Vue.extend({
       twitter: new firebase.auth.TwitterAuthProvider()
     }
   }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    }
+  },
+  beforeCreate() {
+    firebase.initializeApp({
+      apiKey: "AIzaSyApbLMKp7TprhjH75lpcmJs514uI11fEIo",
+      authDomain: "dd-decaf-cfbf6.firebaseapp.com",
+      databaseURL: "https://dd-decaf-cfbf6.firebaseio.com",
+      projectId: "dd-decaf-cfbf6",
+      storageBucket: "dd-decaf-cfbf6.appspot.com",
+      messagingSenderId: "972933293195"
+    });
+  },
   methods: {
     emailLogin() {
       this.isInvalidCredentials = false;
@@ -232,21 +247,6 @@ export default Vue.extend({
           this.hasLoginError = true;
         });
     }
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    }
-  },
-  beforeCreate() {
-    firebase.initializeApp({
-      apiKey: "AIzaSyApbLMKp7TprhjH75lpcmJs514uI11fEIo",
-      authDomain: "dd-decaf-cfbf6.firebaseapp.com",
-      databaseURL: "https://dd-decaf-cfbf6.firebaseio.com",
-      projectId: "dd-decaf-cfbf6",
-      storageBucket: "dd-decaf-cfbf6.appspot.com",
-      messagingSenderId: "972933293195"
-    });
   }
 });
 </script>

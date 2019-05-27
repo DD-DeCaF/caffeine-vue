@@ -253,6 +253,7 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "CardDialogDesign",
+  props: ["card", "model", "modifications"],
   data: () => ({
     modificationsHeaders: [
       { text: "Type", value: "type", sortable: false },
@@ -289,7 +290,49 @@ export default Vue.extend({
     editBoundsLowerBound: null,
     editBoundsUpperBound: null
   }),
-  props: ["card", "model", "modifications"],
+  computed: {
+    objectiveHint() {
+      let objective = "growth";
+      if (this.model) {
+        objective = this.model.default_biomass_reaction;
+      }
+      return `When left empty, the objective is ${objective}.`;
+    },
+    reactions() {
+      if (!this.model || !this.model.model_serialized) {
+        return [];
+      }
+      return this.model.model_serialized.reactions;
+    },
+    genes() {
+      if (!this.model || !this.model.model_serialized) {
+        return [];
+      }
+      return this.model.model_serialized.genes;
+    },
+    objectiveReaction: {
+      get() {
+        return this.card.objective.reaction;
+      },
+      set(reaction) {
+        this.$store.commit("interactiveMap/setObjectiveReaction", {
+          uuid: this.card.uuid,
+          reaction: reaction
+        });
+      }
+    },
+    objectiveDirection: {
+      get() {
+        return this.card.objective.maximize;
+      },
+      set(maximize) {
+        this.$store.commit("interactiveMap/setObjectiveDirection", {
+          uuid: this.card.uuid,
+          maximize: maximize
+        });
+      }
+    }
+  },
   watch: {
     addReactionSearchQuery(query) {
       this.addReactionSearchResults = [];
@@ -342,49 +385,6 @@ export default Vue.extend({
         // Fill the default bounds from the reaction in the model for convenience
         this.editBoundsLowerBound = reaction.lower_bound;
         this.editBoundsUpperBound = reaction.upper_bound;
-      }
-    }
-  },
-  computed: {
-    objectiveHint() {
-      let objective = "growth";
-      if (this.model) {
-        objective = this.model.default_biomass_reaction;
-      }
-      return `When left empty, the objective is ${objective}.`;
-    },
-    reactions() {
-      if (!this.model || !this.model.model_serialized) {
-        return [];
-      }
-      return this.model.model_serialized.reactions;
-    },
-    genes() {
-      if (!this.model || !this.model.model_serialized) {
-        return [];
-      }
-      return this.model.model_serialized.genes;
-    },
-    objectiveReaction: {
-      get() {
-        return this.card.objective.reaction;
-      },
-      set(reaction) {
-        this.$store.commit("interactiveMap/setObjectiveReaction", {
-          uuid: this.card.uuid,
-          reaction: reaction
-        });
-      }
-    },
-    objectiveDirection: {
-      get() {
-        return this.card.objective.maximize;
-      },
-      set(maximize) {
-        this.$store.commit("interactiveMap/setObjectiveDirection", {
-          uuid: this.card.uuid,
-          maximize: maximize
-        });
       }
     }
   },

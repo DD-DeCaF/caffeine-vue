@@ -105,6 +105,21 @@ export default Vue.extend({
     organismName: null,
     project: { name: null, id: null }
   }),
+  computed: {
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    isVisible: {
+      get: function() {
+        return this.value;
+      },
+      set: function(value) {
+        this.$refs.form!.reset();
+        this.$emit("input", value);
+      }
+    }
+  },
+  watch: {},
   methods: {
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
@@ -127,21 +142,6 @@ export default Vue.extend({
     passProject(project) {
       this.project = project;
     }
-  },
-  computed: {
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    isVisible: {
-      get: function() {
-        return this.value;
-      },
-      set: function(value) {
-        this.$refs.form!.reset();
-        this.$emit("input", value);
-      }
-    }
-  },
-  watch: {}
+  }
 });
 </script>

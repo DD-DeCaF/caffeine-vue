@@ -118,13 +118,56 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "CardDialogDataDriven",
+  props: ["card", "modifications"],
   data: () => ({
     conditions: [],
     conditionOrganism: null,
     isLoadingConditions: false,
     isLoadingConditionData: false
   }),
-  props: ["card", "modifications"],
+  computed: {
+    experiments() {
+      return this.$store.state.experiments.experiments;
+    },
+    organismMismatch() {
+      if (!this.card.organism || !this.conditionOrganism) {
+        return false;
+      }
+      return this.card.organism.id != this.conditionOrganism.id;
+    },
+    genotypes() {
+      if (!this.card.conditionData) {
+        return [];
+      }
+      const genesFlattened: object[] = [];
+      this.card.conditionData.genotype.forEach(geneString => {
+        geneString.split(",").forEach(gene => genesFlattened.push(gene));
+      });
+      return genesFlattened;
+    },
+    cardExperiment: {
+      get() {
+        return this.card.experiment;
+      },
+      set(experiment) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { experiment: experiment }
+        });
+      }
+    },
+    cardCondition: {
+      get() {
+        return this.card.condition;
+      },
+      set(condition) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { condition: condition }
+        });
+      }
+    }
+  },
   watch: {
     "card.experiment"() {
       if (!this.card.experiment) {
@@ -202,49 +245,6 @@ export default Vue.extend({
         return;
       }
       this.$emit("simulate-card");
-    }
-  },
-  computed: {
-    experiments() {
-      return this.$store.state.experiments.experiments;
-    },
-    organismMismatch() {
-      if (!this.card.organism || !this.conditionOrganism) {
-        return false;
-      }
-      return this.card.organism.id != this.conditionOrganism.id;
-    },
-    genotypes() {
-      if (!this.card.conditionData) {
-        return [];
-      }
-      const genesFlattened: object[] = [];
-      this.card.conditionData.genotype.forEach(geneString => {
-        geneString.split(",").forEach(gene => genesFlattened.push(gene));
-      });
-      return genesFlattened;
-    },
-    cardExperiment: {
-      get() {
-        return this.card.experiment;
-      },
-      set(experiment) {
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: { experiment: experiment }
-        });
-      }
-    },
-    cardCondition: {
-      get() {
-        return this.card.condition;
-      },
-      set(condition) {
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: { condition: condition }
-        });
-      }
     }
   },
   methods: {

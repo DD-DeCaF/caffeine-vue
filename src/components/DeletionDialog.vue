@@ -43,9 +43,6 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "DeletionDialog",
-  data: () => ({
-    isItemDeletionSuccess: false
-  }),
   props: {
     value: {
       type: Boolean,
@@ -59,6 +56,19 @@ export default Vue.extend({
       required: true,
       validator: (value: string) =>
         ["designs", "maps", "models", "projects"].includes(value)
+    }
+  },
+  data: () => ({
+    isItemDeletionSuccess: false
+  }),
+  computed: {
+    isDialogVisible: {
+      get() {
+        return this.value;
+      },
+      set(value) {
+        this.$emit("input", value);
+      }
     }
   },
   methods: {
@@ -92,16 +102,6 @@ export default Vue.extend({
         .then(() => {
           this.$emit("toggleLoader");
         });
-    }
-  },
-  computed: {
-    isDialogVisible: {
-      get() {
-        return this.value;
-      },
-      set(value) {
-        this.$emit("input", value);
-      }
     }
   }
 });

@@ -257,6 +257,28 @@ export default Vue.extend({
       "pointer-events": "none"
     }
   }),
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    availableMaps() {
+      return this.$store.state.maps.maps;
+    },
+    ...mapGetters({
+      getModel: "models/getModelById"
+    }),
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableModels() {
+      return this.$store.state.models.models;
+    }
+  },
+  created() {
+    this.$store.state.maps.mapsPromise.then(() => {
+      this.isLoading = false;
+    });
+  },
   methods: {
     editItem(item) {
       this.id = item.id;
@@ -317,28 +339,6 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     }
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
-    availableMaps() {
-      return this.$store.state.maps.maps;
-    },
-    ...mapGetters({
-      getModel: "models/getModelById"
-    }),
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    availableModels() {
-      return this.$store.state.models.models;
-    }
-  },
-  created() {
-    this.$store.state.maps.mapsPromise.then(() => {
-      this.isLoading = false;
-    });
   }
 });
 </script>
