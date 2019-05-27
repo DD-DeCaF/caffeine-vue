@@ -58,6 +58,7 @@ export interface Card {
   hasSimulationError: boolean;
   growthRate: number | null;
   fluxes: number | null;
+  withDialog: boolean;
 }
 
 export default {

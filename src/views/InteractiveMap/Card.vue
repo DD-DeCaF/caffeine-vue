@@ -216,7 +216,7 @@ export default Vue.extend({
       return value.toFixed(3);
     }
   },
-  props: ["card", "isOnlyCard", "isSelected"],
+  props: ["card", "isOnlyCard", "isSelected", "withDialog"],
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
@@ -492,6 +492,11 @@ export default Vue.extend({
       updateCard: "interactiveMap/updateCard",
       setModified: "interactiveMap/setModified"
     })
+  },
+  mounted() {
+    if (this.withDialog) {
+      this.isCardDialogVisible = true;
+    }
   }
 });
 </script>

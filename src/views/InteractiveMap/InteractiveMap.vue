@@ -64,7 +64,7 @@
           <v-list>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(false)">
+                <v-list-tile @click="addEmptyCard(false)">
                   <v-list-tile-title v-on="on">Design</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -72,7 +72,7 @@
             </v-tooltip>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(true)">
+                <v-list-tile @click="addEmptyCard(true)">
                   <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -89,6 +89,7 @@
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
+          :withDialog="card.withDialog"
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
@@ -264,6 +265,10 @@ export default Vue.extend({
           this.hasLoadMapError = true;
         });
     },
+    addEmptyCard(dataDriven) {
+      const name = dataDriven ? "Data driven" : "Design";
+      this.addCard(name, null, null, "", dataDriven);
+    },
     addDefaultCard(dataDriven) {
       const name = dataDriven ? "Data driven" : "Design";
       // Select the default preferred organism and related model.
@@ -311,7 +316,8 @@ export default Vue.extend({
         isSimulating: false,
         hasSimulationError: false,
         growthRate: null,
-        fluxes: null
+        fluxes: null,
+        withDialog: method ? false : true
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
@@ -356,7 +362,7 @@ export default Vue.extend({
       // Note that the card and model objects are passed instead of using
       // `selectedCard`, as the selected card could have
       // been changed by the time this is called.
-      if (!model) {
+      if (!model || !card.method) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).
