@@ -123,7 +123,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.createOrganism()
+        this.createOrganism();
       }
     },
     createOrganism() {

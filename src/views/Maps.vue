@@ -111,7 +111,11 @@
               <h3>Edit {{ name }}</h3>
             </v-flex>
             <v-flex>
-              <v-form ref="form" v-model="isValid" @keyup.native.enter="onEnter">
+              <v-form
+                ref="form"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
+              >
                 <v-text-field
                   required
                   v-model="name"
@@ -282,7 +286,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.editMap()
+        this.editMap();
       }
     },
     editItem(item) {

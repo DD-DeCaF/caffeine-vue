@@ -169,6 +169,7 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { partitionedList } from "../utils/utility";
 
 export default Vue.extend({
   name: "NewModel",
@@ -185,7 +186,7 @@ export default Vue.extend({
     },
     modelName: null,
     model_serialized: null,
-    map: {id: null},
+    map: { id: null },
     project: null,
     organism: null,
     default_biomass_reaction: null,
@@ -226,13 +227,13 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.createModel()
+        this.createModel();
       }
     },
     createModel() {
       this.$store.commit("toggleDialog", "loader");
-      console.log("Testo")
-      console.log(this.map)
+      console.log("Testo");
+      console.log(this.map);
       const payload = {
         name: this.modelName,
         model_serialized: this.model_serialized,
@@ -293,6 +294,41 @@ export default Vue.extend({
     passOrganism(organism) {
       this.organism = organism;
     }
+<<<<<<< HEAD
   }
+=======
+  },
+  computed: {
+    errorMessage() {
+      if (this.modelError) {
+        return "The file is not valid.";
+      } else {
+        return [];
+      }
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableOrganisms() {
+      return this.$store.state.organisms.organisms;
+    },
+    availableMaps() {
+      return partitionedList("maps", "models");
+    },
+    availableReactions() {
+      return [{ id: "Biomass1" }, { id: "Biomass2" }];
+    },
+    isVisible: {
+      get: function() {
+        return this.value;
+      },
+      set: function(value) {
+        this.$refs.form!.reset();
+        this.$emit("input", value);
+      }
+    }
+  },
+  watch: {}
+>>>>>>> feat: segment list of maps by models
 });
 </script>

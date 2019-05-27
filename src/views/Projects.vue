@@ -187,7 +187,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.editProject()
+        this.editProject();
       }
     },
     editItem(item) {

@@ -230,6 +230,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
 import { mapGetters } from "vuex";
+import { partitionedList } from "@/utils/utility";
 
 export default Vue.extend({
   name: "Models",
@@ -301,7 +302,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.editModel()
+        this.editModel();
       }
     },
     handler(item) {
@@ -393,6 +394,31 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     }
+<<<<<<< HEAD
+=======
+  },
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    availableModels() {
+      return this.$store.state.models.models;
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
+    },
+    availableMaps() {
+      return partitionedList("maps", "models");
+    },
+    availableOrganisms() {
+      return this.$store.state.organisms.organisms;
+    }
+  },
+  created() {
+    this.$store.state.models.modelsPromise.then(() => {
+      this.isLoading = false;
+    });
+>>>>>>> feat: segment list of maps by models
   }
 });
 </script>

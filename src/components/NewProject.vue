@@ -92,7 +92,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.createProject()
+        this.createProject();
       }
     },
     createProject() {

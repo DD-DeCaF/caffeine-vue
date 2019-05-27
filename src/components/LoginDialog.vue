@@ -191,7 +191,7 @@ export default Vue.extend({
   methods: {
     onEnter() {
       if (this.$refs.form.validate()) {
-        this.emailLogin()
+        this.emailLogin();
       }
     },
     emailLogin() {
