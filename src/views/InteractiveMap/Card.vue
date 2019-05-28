@@ -163,7 +163,12 @@
                 class="mr-0 primary"
                 style="pointer-events: auto"
                 @click="saveCard"
-                :disabled="isSaving || !isAuthenticated || needsActiveProject"
+                :disabled="
+                  isSaving ||
+                    !isAuthenticated ||
+                    needsActiveProject ||
+                    !card.modelId
+                "
               >
                 <v-progress-circular
                   v-if="isSaving"
@@ -182,6 +187,9 @@
             <span v-else-if="needsActiveProject">
               Please select an active project in the left-hand-side sidebar. The
               design will be saved in this project.
+            </span>
+            <span v-else-if="!card.modelId">
+              Please select the metabolic model.
             </span>
           </v-tooltip>
         </v-layout>
