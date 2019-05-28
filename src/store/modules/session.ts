@@ -105,6 +105,11 @@ export default {
       // automatically, but it might catch some edge cases, for example if the
       // user suspends the computed with the tab open, or similar.
       axios.interceptors.request.use(config => {
+        if (!state.isAuthenticated) {
+          // Not authenticated; there's no token to check.
+          return config;
+        }
+
         if (state.refreshRequest) {
           // Refresh request is in progress - no need to check expiry.
           return config;
