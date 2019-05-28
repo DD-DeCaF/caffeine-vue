@@ -156,19 +156,14 @@
 
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
-          <v-tooltip bottom>
+          <v-tooltip bottom :disabled="!isSaveTooltipVisible">
             <template v-slot:activator="{ on }">
               <v-btn
                 v-on="on"
                 class="mr-0 primary"
                 style="pointer-events: auto"
                 @click="saveCard"
-                :disabled="
-                  isSaving ||
-                    !isAuthenticated ||
-                    needsActiveProject ||
-                    !card.modelId
-                "
+                :disabled="isSaveButtonDisabled"
               >
                 <v-progress-circular
                   v-if="isSaving"
@@ -354,6 +349,14 @@ export default Vue.extend({
     },
     isSaveable() {
       return !this.card.dataDriven && this.card.modified;
+    },
+    isSaveTooltipVisible() {
+      return (
+        !this.isAuthenticated || this.needsActiveProject || !this.card.modelId
+      );
+    },
+    isSaveButtonDisabled() {
+      return this.isSaveTooltipVisible || this.isSaving;
     },
     needsActiveProject() {
       // Returns true if the design isn't previously saved, and there is no
