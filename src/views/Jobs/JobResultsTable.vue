@@ -328,8 +328,10 @@
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">
                       <div
-                        v-for="(manipulation,
-                        index) in jobPrediction.manipulations"
+                        v-for="(manipulation, index) in sort(
+                          jobPrediction.manipulations,
+                          'value'
+                        )"
                         :key="index"
                       >
                         <div v-if="index < 10">
@@ -926,6 +928,11 @@ export default Vue.extend({
             this.$store.commit("setFetchError", error);
           });
       });
+    },
+    sort(items, value) {
+      return items
+        .slice()
+        .sort((a, b) => (Math.abs(a[value]) < Math.abs(b[value]) ? 1 : -1));
     }
   }
 });
