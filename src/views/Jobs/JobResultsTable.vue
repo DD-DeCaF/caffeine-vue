@@ -297,6 +297,7 @@
                     v-model="props.selected"
                     color="primary"
                     hide-details
+                    @change="onCheckboxChange(props.item.method)"
                   ></v-checkbox>
                 </td>
                 <td>{{ props.item.manipulations.length }}</td>
@@ -550,6 +551,16 @@
         <p class="display-1 white--text mb-0">Visualizing...</p>
       </v-layout>
     </v-container>
+    <v-snackbar
+      color="warning"
+      v-model="isDiffFvaChecked"
+      :timeout="12000"
+      auto-height
+    >
+      Visualizing DifferentialFVA designs is not completely supported yet.
+      Proceed with caution if you want to inspect the predicted pathways and
+      knockouts on the interactive map.
+    </v-snackbar>
   </div>
 </template>
 
@@ -591,7 +602,8 @@ export default Vue.extend({
     },
     showAllManipulations: false,
     showAllKnockouts: false,
-    isVisualizing: false
+    isVisualizing: false,
+    isDiffFvaChecked: false
   }),
   computed: {
     pathways() {
@@ -798,6 +810,14 @@ export default Vue.extend({
         this.selected = [];
       } else {
         this.selected = [...this.filteredPathways];
+        if (
+          this.selected.some(
+            jobPrediction =>
+              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+          )
+        ) {
+          this.isDiffFvaChecked = true;
+        }
       }
     },
     changeSort(column) {
@@ -933,6 +953,11 @@ export default Vue.extend({
       return items
         .slice()
         .sort((a, b) => (Math.abs(a[value]) < Math.abs(b[value]) ? 1 : -1));
+    },
+    onCheckboxChange(method) {
+      if (method === "PathwayPredictor+DifferentialFVA") {
+        this.isDiffFvaChecked = true;
+      }
     }
   }
 });
