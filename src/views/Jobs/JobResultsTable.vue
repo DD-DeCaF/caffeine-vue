@@ -333,46 +333,62 @@
                         :key="index"
                       >
                         <div v-if="index < 10">
-                          <a
-                            v-if="
-                              jobPrediction.method ===
-                                'PathwayPredictor+DifferentialFVA'
-                            "
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                manipulation.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{
-                              `${indicators[manipulation.direction]} ${
-                                manipulation.id
-                              }`
-                            }}
-                          </a>
+                          <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                              <a
+                                v-if="
+                                  jobPrediction.method ===
+                                    'PathwayPredictor+DifferentialFVA'
+                                "
+                                :href="
+                                  `http://bigg.ucsd.edu/search?query=${
+                                    manipulation.id
+                                  }`
+                                "
+                                class="link"
+                                target="_blank"
+                                v-on="on"
+                              >
+                                {{
+                                  `${indicators[manipulation.direction]} ${
+                                    manipulation.id
+                                  }`
+                                }}
+                              </a>
+                            </template>
+                            <span
+                              >Score: {{ manipulation.value.toFixed(2) }}</span
+                            >
+                          </v-tooltip>
                         </div>
                         <div v-if="index >= 10" :hidden="!showAllManipulations">
-                          <a
-                            v-if="
-                              jobPrediction.method ===
-                                'PathwayPredictor+DifferentialFVA'
-                            "
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                manipulation.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{
-                              `${indicators[manipulation.direction]} ${
-                                manipulation.id
-                              }`
-                            }}
-                          </a>
+                          <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                              <a
+                                v-if="
+                                  jobPrediction.method ===
+                                    'PathwayPredictor+DifferentialFVA'
+                                "
+                                :href="
+                                  `http://bigg.ucsd.edu/search?query=${
+                                    manipulation.id
+                                  }`
+                                "
+                                class="link"
+                                target="_blank"
+                                v-on="on"
+                              >
+                                {{
+                                  `${indicators[manipulation.direction]} ${
+                                    manipulation.id
+                                  }`
+                                }}
+                              </a>
+                            </template>
+                            <span
+                              >Score: {{ manipulation.value.toFixed(2) }}</span
+                            >
+                          </v-tooltip>
                         </div>
                       </div>
                       <div v-if="jobPrediction.manipulations.length > 10">
