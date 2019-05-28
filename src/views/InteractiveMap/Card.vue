@@ -376,6 +376,19 @@ export default Vue.extend({
       }
     }
   },
+  mounted() {
+    if (this.withDialog) {
+      this.isCardDialogVisible = true;
+    }
+  },
+  destroyed() {
+    this.updateCard({
+      uuid: this.card.uuid,
+      props: {
+        withDialog: false
+      }
+    });
+  },
   methods: {
     selectCard() {
       this.$emit("select-card", this.card);
@@ -492,19 +505,6 @@ export default Vue.extend({
       updateCard: "interactiveMap/updateCard",
       setModified: "interactiveMap/setModified"
     })
-  },
-  mounted() {
-    if (this.withDialog) {
-      this.isCardDialogVisible = true;
-    }
-  },
-  destroyed() {
-    this.updateCard({
-      uuid: this.card.uuid,
-      props: {
-        withDialog: false
-      }
-    });
   }
 });
 </script>
