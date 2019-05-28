@@ -40,7 +40,7 @@ export default {
     }
   },
   actions: {
-    fetchDesigns({ commit }) {
+    fetchDesigns({ commit, dispatch }) {
       const designsPromise = axios
         .get(`${settings.apis.designStorage}/designs`)
         .then((response: AxiosResponse<DesignItem[]>) => {
@@ -87,7 +87,7 @@ export default {
           );
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
       commit("setDesignsPromise", designsPromise);
     }

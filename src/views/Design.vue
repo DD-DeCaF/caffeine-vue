@@ -324,7 +324,7 @@ export default Vue.extend({
           this.productOptions = response.data;
         })
         .catch((error: Error) => {
-          this.$store.commit("setFetchError", error, { root: true });
+          this.$store.dispatch("setFetchError", error, { root: true });
         })
         .finally(() => {
           this.isLoadingProducts = false;

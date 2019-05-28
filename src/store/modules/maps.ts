@@ -34,14 +34,14 @@ export default {
     }
   },
   actions: {
-    fetchMaps({ commit }) {
+    fetchMaps({ commit, dispatch }) {
       const mapsPromise = axios
         .get(`${settings.apis.maps}/maps`)
         .then((response: AxiosResponse<MapItem[]>) => {
           commit("setMaps", response.data);
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
       commit("setMapsPromise", mapsPromise);
     }

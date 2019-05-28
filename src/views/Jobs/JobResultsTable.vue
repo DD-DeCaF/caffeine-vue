@@ -907,7 +907,7 @@ export default Vue.extend({
             };
           })
           .catch(error => {
-            this.$store.commit("setFetchError", error);
+            this.$store.dispatch("setFetchError", error);
           });
       });
     }

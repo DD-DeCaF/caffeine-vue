@@ -8,7 +8,7 @@ localVue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    fetchDataError: null,
+    fetchDataError: false,
     postDataError: null,
     deleteDataError: null,
     isDialogVisible: {

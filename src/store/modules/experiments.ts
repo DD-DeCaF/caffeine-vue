@@ -22,14 +22,14 @@ export default {
     }
   },
   actions: {
-    fetchExperiments({ commit }) {
+    fetchExperiments({ commit, dispatch }) {
       axios
         .get(`${settings.apis.warehouse}/experiments`)
         .then((response: AxiosResponse<ExperimentItem[]>) => {
           commit("setExperiments", response.data);
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
     }
   }

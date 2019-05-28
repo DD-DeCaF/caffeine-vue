@@ -55,7 +55,7 @@ export default {
     }
   },
   actions: {
-    fetchModels({ commit }) {
+    fetchModels({ commit, dispatch }) {
       const modelsPromise = axios
         .get(`${settings.apis.modelStorage}/models`)
         .then((response: AxiosResponse<ModelItem[]>) => {
@@ -70,11 +70,11 @@ export default {
           );
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
       commit("setModelsPromise", modelsPromise);
     },
-    withFullModel({ state, commit }, modelId) {
+    withFullModel({ state, commit, dispatch }, modelId) {
       // Use this action's returned promise to run logic which needs the full
       // model to be available. If requested for the first time it will be
       // retrieved, and from then on stay cached in the store and returned
@@ -90,7 +90,7 @@ export default {
               resolve(response.data);
             })
             .catch(error => {
-              commit("setFetchError", error, { root: true });
+              dispatch("setFetchError", error, { root: true });
               reject(error);
             });
         });
