@@ -879,6 +879,14 @@ export default Vue.extend({
                     uuid: card.uuid,
                     geneId: geneId
                   });
+                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                    uuid: card.uuid,
+                    gene: {
+                      id: geneId,
+                      name: geneId,
+                      reactions: []
+                    }
+                  });
                 });
               } else if (
                 jobPrediction.method === "PathwayPredictor+DifferentialFVA" ||
@@ -888,6 +896,14 @@ export default Vue.extend({
                   this.$store.dispatch("interactiveMap/knockoutReaction", {
                     uuid: card.uuid,
                     reactionId: reactionId
+                  });
+                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                    uuid: card.uuid,
+                    reaction: {
+                      id: reactionId,
+                      name: reactionId,
+                      reactionString: "N/A"
+                    }
                   });
                 });
               } else {
