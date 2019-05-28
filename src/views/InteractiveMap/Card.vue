@@ -8,8 +8,8 @@
       :class="{ clickable: !isSelected }"
       @click="selectCard"
     >
-      <v-toolbar-title :class="{ 'body-2': 'true', 'font-italic': saveable }"
-        >{{ card.name }}<span v-if="saveable">*</span></v-toolbar-title
+      <v-toolbar-title :class="{ 'body-2': 'true', 'font-italic': isSaveable }"
+        >{{ card.name }}<span v-if="isSaveable">*</span></v-toolbar-title
       >
       <v-spacer></v-spacer>
 
@@ -154,7 +154,7 @@
         </v-layout>
       </v-container>
 
-      <v-container fluid class="pa-0" v-if="saveable">
+      <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="isAuthenticated">
             <template v-slot:activator="{ on }">
@@ -349,7 +349,7 @@ export default Vue.extend({
       });
       return model;
     },
-    saveable() {
+    isSaveable() {
       return !this.card.dataDriven && this.card.modified;
     },
     isAuthenticated() {
