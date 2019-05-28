@@ -27,6 +27,7 @@
                       :items="selected"
                       itemsType="designs"
                       @toggleLoader="toggleLoader()"
+                      @delete-success="onDeletion"
                     />
                     <v-icon>delete</v-icon> Delete
                   </v-btn>
@@ -359,6 +360,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import uuidv4 from "uuid/v4";
+import { Card } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "Designs",
@@ -458,13 +460,22 @@ export default Vue.extend({
     visualize() {
       this.isVisualizing = true;
       this.selected.forEach(design => {
-        // TODO: Associate design id with the card
-        const card = {
+        // Remove any existing cards from the store that are related to the same
+        // design.
+        this.$store.state.interactiveMap.cards.forEach(card => {
+          if (card.designId === design.id) {
+            this.$store.commit("interactiveMap/removeCard", card);
+          }
+        });
+
+        const card: Card = {
           uuid: uuidv4(),
           name: design.name,
+          designId: design.id,
           organism: this.organism(this.model(design.model_id).organism_id),
           modelId: design.model_id,
-          method: "pfba", // TODO - should this be default?
+          method: "pfba",
+          modified: false,
           dataDriven: false,
           // Design card fields
           objective: {
@@ -494,6 +505,15 @@ export default Vue.extend({
             this.$store.commit("interactiveMap/addCard", card);
             this.$router.push({ name: "interactiveMap" });
           });
+      });
+    },
+    onDeletion(ids) {
+      // Remove any cards from the store that belongs to any of the deleted
+      // designs. These cards will exist in the store if previously visualized.
+      this.$store.state.interactiveMap.cards.forEach(card => {
+        if (card.designId && ids.includes(card.designId)) {
+          this.$store.commit("interactiveMap/removeCard", card);
+        }
       });
     }
   }

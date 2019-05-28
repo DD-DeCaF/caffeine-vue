@@ -95,6 +95,7 @@ export default Vue.extend({
         .then(response => {
           this.isItemDeletionSuccess = true;
           this.$store.commit(`${this.itemsType}/delete`, ids);
+          this.$emit("delete-success", ids);
         })
         .catch(error => {
           this.$store.commit("setDeleteError", error);

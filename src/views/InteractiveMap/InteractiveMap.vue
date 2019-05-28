@@ -7,7 +7,6 @@
       class="my-0"
     ></v-progress-linear>
     <Escher
-      @escher-loaded="escherLoaded"
       @simulate-card="simulate"
       @click="isSidepanelOpen = false"
       :card="selectedCard"
@@ -94,6 +93,8 @@
           @remove-card="removeCard"
           @simulate-card="simulate"
           @load-data-error="hasLoadDataError = true"
+          @design-saved="designSaved"
+          @design-save-error="hasSaveDesignError = true"
         />
       </v-container>
     </v-navigation-drawer>
@@ -108,6 +109,13 @@
       Experimental data could not be loaded. Please try again in a few moments,
       or contact us if the problem persists.
     </v-snackbar>
+    <v-snackbar color="success" v-model="hasSaveDesignSuccess" :timeout="6000">
+      Saved design {{ savedDesignName }}.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasSaveDesignError" :timeout="6000">
+      Sorry, we were not able to save the design. Please try again in a few
+      moments.
+    </v-snackbar>
   </div>
 </template>
 
@@ -120,6 +128,7 @@ import * as settings from "@/utils/settings";
 import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
 import Legend from "@/views/InteractiveMap/Legend.vue";
+import { Card as CardType } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "InteractiveMap",
@@ -136,7 +145,10 @@ export default Vue.extend({
     playingInterval: null,
     hasSimulationError: false,
     hasLoadMapError: false,
-    hasLoadDataError: false
+    hasLoadDataError: false,
+    hasSaveDesignError: false,
+    hasSaveDesignSuccess: false,
+    savedDesignName: null
   }),
   computed: {
     currentMapId: {
@@ -216,33 +228,30 @@ export default Vue.extend({
         });
       });
     }
+
+    if (this.$store.state.interactiveMap.cards.length > 0) {
+      // There are already cards in the store - ensure they are all simulated
+      // (cards added from other components won't initially be simulated)
+      this.$store.state.interactiveMap.cards.forEach(card => {
+        const model = this.$store.getters["models/getModelById"](card.modelId);
+        this.simulate(card, model);
+      });
+      // Select the last card in the list by default.
+      this.selectedCardId = this.$store.state.interactiveMap.cards[
+        this.$store.state.interactiveMap.cards.length - 1
+      ].uuid;
+    } else {
+      // No cards are added at this point, so add a default card to provide
+      // the user with some initial data. Chain promises to ensure that data
+      // is available.
+      this.$store.state.models.modelsPromise.then(() => {
+        this.$store.state.organisms.organismsPromise.then(() => {
+          this.addDefaultCard(false);
+        });
+      });
+    }
   },
   methods: {
-    escherLoaded() {
-      if (this.$store.state.interactiveMap.cards.length > 0) {
-        // There are already cards in the store - ensure they are all simulated
-        // (cards added from other components won't initially be simulated)
-        this.$store.state.interactiveMap.cards.forEach(card => {
-          const model = this.$store.getters["models/getModelById"](
-            card.modelId
-          );
-          this.simulate(card, model);
-        });
-        // Select the last card in the list by default.
-        this.selectedCardId = this.$store.state.interactiveMap.cards[
-          this.$store.state.interactiveMap.cards.length - 1
-        ].uuid;
-      } else {
-        // No cards are added at this point, so add a default card to provide
-        // the user with some initial data. Chain promises to ensure that data
-        // is available.
-        this.$store.state.models.modelsPromise.then(() => {
-          this.$store.state.organisms.organismsPromise.then(() => {
-            this.addDefaultCard(false);
-          });
-        });
-      }
-    },
     changeMap() {
       this.hasLoadMapError = false;
       axios
@@ -274,12 +283,14 @@ export default Vue.extend({
       }
     },
     addCard(name, organism, model, method, dataDriven) {
-      const card = {
+      const card: CardType = {
         uuid: uuidv4(),
         name: name,
+        designId: null,
         organism: organism,
         modelId: model ? model.id : null,
         method: method,
+        modified: false,
         dataDriven: dataDriven,
         // Design card fields
         objective: {
@@ -490,6 +501,10 @@ export default Vue.extend({
             props: { isSimulating: false }
           });
         });
+    },
+    designSaved(design) {
+      this.hasSaveDesignSuccess = true;
+      this.savedDesignName = design.name;
     },
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"

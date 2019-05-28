@@ -91,5 +91,10 @@ export default {
         });
       commit("setDesignsPromise", designsPromise);
     }
+  },
+  getters: {
+    getDesignById: state => (id: number) => {
+      return state.designs.find(design => design.id === id);
+    }
   }
 };

@@ -200,7 +200,6 @@ export default Vue.extend({
         first_load_callback: () => {
           resolve();
           this.initializingEscher = false;
-          this.$emit("escher-loaded");
         },
         reaction_state: this.getObjectState,
         tooltip_callbacks: {

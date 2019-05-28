@@ -8,7 +8,9 @@
       :class="{ clickable: !isSelected }"
       @click="selectCard"
     >
-      <v-toolbar-title class="body-2">{{ card.name }}</v-toolbar-title>
+      <v-toolbar-title :class="{ 'body-2': 'true', 'font-italic': isSaveable }"
+        >{{ card.name }}<span v-if="isSaveable">*</span></v-toolbar-title
+      >
       <v-spacer></v-spacer>
 
       <CardDialog
@@ -151,6 +153,42 @@
           </v-flex>
         </v-layout>
       </v-container>
+
+      <v-container fluid class="pa-0" v-if="isSaveable">
+        <v-layout wrap justify-end>
+          <v-tooltip bottom :disabled="!isSaveTooltipVisible">
+            <template v-slot:activator="{ on }">
+              <v-btn
+                v-on="on"
+                class="mr-0 primary"
+                style="pointer-events: auto"
+                @click="saveCard"
+                :disabled="isSaveButtonDisabled"
+              >
+                <v-progress-circular
+                  v-if="isSaving"
+                  indeterminate
+                  color="primary"
+                  :width="2"
+                  :size="15"
+                  class="mr-2"
+                ></v-progress-circular>
+                Save</v-btn
+              >
+            </template>
+            <span v-if="!isAuthenticated">
+              {{ $store.state.commonTooltipMessages.unauthenticated }}
+            </span>
+            <span v-else-if="needsActiveProject">
+              Please select an active project in the left-hand-side sidebar. The
+              design will be saved in this project.
+            </span>
+            <span v-else-if="!card.modelId">
+              Please select the metabolic model.
+            </span>
+          </v-tooltip>
+        </v-layout>
+      </v-container>
     </v-card-title>
   </v-card>
 </template>
@@ -176,6 +214,7 @@ export default Vue.extend({
   },
   props: ["card", "isOnlyCard", "isSelected"],
   data: () => ({
+    isSaving: false,
     showMethodHelpDialog: false
   }),
   computed: {
@@ -292,6 +331,29 @@ export default Vue.extend({
         ];
       });
       return model;
+    },
+    isSaveable() {
+      return !this.card.dataDriven && this.card.modified;
+    },
+    isSaveTooltipVisible() {
+      return (
+        !this.isAuthenticated || this.needsActiveProject || !this.card.modelId
+      );
+    },
+    isSaveButtonDisabled() {
+      return this.isSaveTooltipVisible || this.isSaving;
+    },
+    needsActiveProject() {
+      // Returns true if the design isn't previously saved, and there is no
+      // active project selected. Used to prompt the user to select an active
+      // project when attempting to save the card.
+      return !this.card.designId && !this.activeProject;
+    },
+    isAuthenticated() {
+      return this.$store.state.session.isAuthenticated;
+    },
+    activeProject() {
+      return this.$store.state.projects.activeProject;
     }
   },
   watch: {
@@ -320,8 +382,110 @@ export default Vue.extend({
     simulateCard() {
       this.$emit("simulate-card", this.card, this.model);
     },
+    saveCard() {
+      this.isSaving = true;
+
+      // The project id depends on whether this is a new or existing design.
+      let projectId;
+      if (this.card.designId) {
+        projectId = this.$store.getters["designs/getDesignById"](
+          this.card.designId
+        ).project_id;
+      } else {
+        projectId = this.activeProject.id;
+      }
+
+      // Create the payload, and map camelCase to snake_case for the API.
+      const design = {
+        id: null,
+        project_id: projectId,
+        method: "Manual", // TODO: This field is obsolete, remove it
+        name: this.card.name,
+        model_id: this.card.modelId,
+        design: {
+          reaction_knockins: this.card.reactionAdditions.map(r => ({
+            ...r,
+            lower_bound: r.lowerBound,
+            upper_bound: r.upperBound,
+            reaction_string: r.reactionString,
+            metabolites: r.metabolites.map(m => ({
+              ...m,
+              compartment_id: m.compartment
+            }))
+          })),
+          reaction_knockouts: this.card.reactionKnockouts.map(r => ({
+            ...r,
+            lower_bound: r.lowerBound,
+            upper_bound: r.upperBound,
+            reaction_string: r.reactionString,
+            metabolites: r.metabolites.map(m => ({
+              ...m,
+              compartment_id: m.compartment
+            }))
+          })),
+          gene_knockouts: this.card.geneKnockouts.map(g => ({
+            ...g,
+            reactions: g.reactions.map(r => ({
+              ...r,
+              gene_reaction_rule: r.geneReactionRule
+            }))
+          })),
+          constraints: this.card.editedBounds.map(c => ({
+            ...c,
+            lower_bound: c.lowerBound,
+            upper_bound: c.upperBound
+          }))
+        }
+      };
+
+      if (this.card.designId) {
+        // Update existing design
+        axios
+          .put(
+            `${settings.apis.designStorage}/designs/${this.card.designId}`,
+            design
+          )
+          .then(response => {
+            this.$store.dispatch("designs/fetchDesigns");
+            this.setModified({
+              uuid: this.card.uuid,
+              modified: false
+            });
+            this.$emit("design-saved", design);
+          })
+          .catch(error => {
+            this.$emit("design-save-error");
+          })
+          .then(() => {
+            this.isSaving = false;
+          });
+      } else {
+        // Create new design
+        axios
+          .post(`${settings.apis.designStorage}/designs`, design)
+          .then(response => {
+            this.$store.dispatch("designs/fetchDesigns");
+            this.updateCard({
+              uuid: this.card.uuid,
+              props: { designId: response.data.id }
+            });
+            this.setModified({
+              uuid: this.card.uuid,
+              modified: false
+            });
+            this.$emit("design-saved", design);
+          })
+          .catch(error => {
+            this.$emit("design-save-error");
+          })
+          .then(() => {
+            this.isSaving = false;
+          });
+      }
+    },
     ...mapMutations({
-      updateCard: "interactiveMap/updateCard"
+      updateCard: "interactiveMap/updateCard",
+      setModified: "interactiveMap/setModified"
     })
   }
 });

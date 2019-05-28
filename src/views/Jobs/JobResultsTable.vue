@@ -544,6 +544,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
+import { Card } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "JobResultsTable",
@@ -797,13 +798,15 @@ export default Vue.extend({
           ...jobPrediction.synthetic_reactions
         ];
         const promises = this.getAddedReactions(addedReactionIds);
-        Promise.all(promises).then(addedReactions => {
-          const card = {
+        Promise.all(promises).then((addedReactions: any[]) => {
+          const card: Card = {
             uuid: uuidv4(),
             name: `Job #${this.prediction.id}`,
+            designId: null,
             organism: this.organism,
             modelId: this.model.id,
-            method: "pfba", // TODO - should this be default?
+            method: "pfba",
+            modified: true,
             dataDriven: false,
             // Design card fields
             objective: {
