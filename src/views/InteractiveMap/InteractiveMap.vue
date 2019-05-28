@@ -112,7 +112,7 @@
     <v-snackbar color="success" v-model="hasSaveDesignSuccess" :timeout="6000">
       Saved design {{ savedDesignName }}.
     </v-snackbar>
-    <v-snackbar color="success" v-model="hasSaveDesignError" :timeout="6000">
+    <v-snackbar color="error" v-model="hasSaveDesignError" :timeout="6000">
       Sorry, we were not able to save the design. Please try again in a few
       moments.
     </v-snackbar>
