@@ -156,14 +156,14 @@
 
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
-          <v-tooltip bottom :disabled="isAuthenticated">
+          <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn
                 v-on="on"
                 class="mr-0 primary"
                 style="pointer-events: auto"
                 @click="saveCard"
-                :disabled="isSaving || !isAuthenticated"
+                :disabled="isSaving || !isAuthenticated || needsActiveProject"
               >
                 <v-progress-circular
                   v-if="isSaving"
@@ -175,18 +175,14 @@
                 ></v-progress-circular>
                 Save</v-btn
               >
-              <v-alert
-                v-model="promptToSelectProject"
-                dismissible
-                color="error"
-              >
-                Please select an active project in the left-hand-side sidebar.
-                The design will be saved in this project.
-              </v-alert>
             </template>
-            <span>
-              {{ $store.state.commonTooltipMessages.unauthenticated }}</span
-            >
+            <span v-if="!isAuthenticated">
+              {{ $store.state.commonTooltipMessages.unauthenticated }}
+            </span>
+            <span v-else-if="needsActiveProject">
+              Please select an active project in the left-hand-side sidebar. The
+              design will be saved in this project.
+            </span>
           </v-tooltip>
         </v-layout>
       </v-container>
@@ -210,8 +206,7 @@ export default Vue.extend({
   },
   data: () => ({
     isSaving: false,
-    showMethodHelpDialog: false,
-    promptToSelectProject: false
+    showMethodHelpDialog: false
   }),
   props: ["card", "isOnlyCard", "isSelected"],
   filters: {
@@ -352,6 +347,12 @@ export default Vue.extend({
     isSaveable() {
       return !this.card.dataDriven && this.card.modified;
     },
+    needsActiveProject() {
+      // Returns true if the design isn't previously saved, and there is no
+      // active project selected. Used to prompt the user to select an active
+      // project when attempting to save the card.
+      return !this.card.designId && !this.activeProject;
+    },
     isAuthenticated() {
       return this.$store.state.session.isAuthenticated;
     },
@@ -371,14 +372,6 @@ export default Vue.extend({
       this.$emit("simulate-card", this.card, this.model);
     },
     saveCard() {
-      if (!this.activeProject && !this.card.designId) {
-        // Since the design isn't previously saved, the user has to select an
-        // active project so that we know where to save the design.
-        this.promptToSelectProject = true;
-        return;
-      }
-
-      this.promptToSelectProject = false;
       this.isSaving = true;
 
       // The project id depends on whether this is a new or existing design.
