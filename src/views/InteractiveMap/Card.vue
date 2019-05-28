@@ -159,7 +159,6 @@
           <v-tooltip bottom :disabled="isAuthenticated">
             <template v-slot:activator="{ on }">
               <v-btn
-                v-if="card.modified && !card.dataDriven"
                 v-on="on"
                 class="mr-0 primary"
                 style="pointer-events: auto"
