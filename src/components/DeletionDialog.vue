@@ -79,7 +79,7 @@ export default Vue.extend({
       const storage = {
         designs: "designStorage",
         maps: "maps",
-        models: "modelsStorage",
+        models: "modelStorage",
         projects: "iam"
       }[this.itemsType];
 
