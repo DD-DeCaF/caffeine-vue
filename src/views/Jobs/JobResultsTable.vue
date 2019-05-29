@@ -810,14 +810,9 @@ export default Vue.extend({
         this.selected = [];
       } else {
         this.selected = [...this.filteredPathways];
-        if (
-          this.selected.some(
-            jobPrediction =>
-              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
-          )
-        ) {
-          this.isDiffFvaChecked = true;
-        }
+        this.selected.forEach(jobPrediction => {
+          this.onCheckboxChange(jobPrediction.method);
+        });
       }
     },
     changeSort(column) {
@@ -883,7 +878,7 @@ export default Vue.extend({
                     uuid: card.uuid,
                     gene: {
                       id: geneId,
-                      name: geneId,
+                      name: "N/A",
                       reactions: []
                     }
                   });
@@ -901,7 +896,7 @@ export default Vue.extend({
                     uuid: card.uuid,
                     reaction: {
                       id: reactionId,
-                      name: reactionId,
+                      name: "N/A",
                       reactionString: "N/A"
                     }
                   });
