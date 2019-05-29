@@ -64,7 +64,7 @@
           <v-list>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addEmptyCard(false)">
+                <v-list-tile @click="addDefaultCard(false, true)">
                   <v-list-tile-title v-on="on">Design</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -72,7 +72,7 @@
             </v-tooltip>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addEmptyCard(true)">
+                <v-list-tile @click="addDefaultCard(true, true)">
                   <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -89,7 +89,6 @@
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
-          :withDialog="card.withDialog"
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
@@ -247,7 +246,7 @@ export default Vue.extend({
       // is available.
       this.$store.state.models.modelsPromise.then(() => {
         this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard(false);
+          this.addDefaultCard(false, false);
         });
       });
     }
@@ -265,11 +264,7 @@ export default Vue.extend({
           this.hasLoadMapError = true;
         });
     },
-    addEmptyCard(dataDriven) {
-      const name = dataDriven ? "Data driven" : "Design";
-      this.addCard(name, null, null, "", dataDriven);
-    },
-    addDefaultCard(dataDriven) {
+    addDefaultCard(dataDriven, withDialog) {
       const name = dataDriven ? "Data driven" : "Design";
       // Select the default preferred organism and related model.
       // Note: Expecting organisms and models to be already loaded into state.
@@ -281,13 +276,13 @@ export default Vue.extend({
         return model.id === 15 && model.name === "e_coli_core";
       });
 
-      if (!organism || !model || dataDriven) {
-        this.addCard(name, null, null, "pfba", dataDriven);
+      if (!organism || !model || dataDriven || withDialog) {
+        this.addCard(name, null, null, "pfba", dataDriven, withDialog);
       } else {
-        this.addCard(name, organism, model, "pfba", dataDriven);
+        this.addCard(name, organism, model, "pfba", dataDriven, withDialog);
       }
     },
-    addCard(name, organism, model, method, dataDriven) {
+    addCard(name, organism, model, method, dataDriven, withDialog) {
       const card: CardType = {
         uuid: uuidv4(),
         name: name,
@@ -317,9 +312,7 @@ export default Vue.extend({
         hasSimulationError: false,
         growthRate: null,
         fluxes: null,
-        // When adding a card from the interactive map, the dialog should be opened
-        // Method always exists on the default card
-        withDialog: method ? false : true
+        withDialog: withDialog
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
@@ -364,7 +357,7 @@ export default Vue.extend({
       // Note that the card and model objects are passed instead of using
       // `selectedCard`, as the selected card could have
       // been changed by the time this is called.
-      if (!model || !card.method) {
+      if (!model) {
         // Cards are not guaranteed to have the model set (e.g. if the preferred
         // default model doesn't exist - that could be the case for local
         // installations of the platform).

@@ -49,7 +49,6 @@
                 v-model="cardMethod"
                 item-text="name"
                 item-value="id"
-                :rules="[v => !!v || 'Please choose the method.']"
                 prepend-icon="help"
                 @click:prepend="$emit('open-method-help-dialog')"
                 @change="$emit('simulate-card')"

@@ -216,7 +216,7 @@ export default Vue.extend({
       return value.toFixed(3);
     }
   },
-  props: ["card", "isOnlyCard", "isSelected", "withDialog"],
+  props: ["card", "isOnlyCard", "isSelected"],
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
@@ -377,7 +377,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    if (this.withDialog) {
+    if (this.card.withDialog) {
       this.isCardDialogVisible = true;
     }
   },
