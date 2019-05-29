@@ -14,7 +14,7 @@
               ></v-text-field>
             </v-flex>
             <v-flex xs12 md3>
-              <v-select
+              <v-select-auto
                 label="Organism"
                 :items="organisms"
                 v-model="cardOrganism"
@@ -26,10 +26,10 @@
                 :rules="[v => !!v || 'Please choose the organism.']"
                 return-object
                 @change="onOrganismChange"
-              ></v-select>
+              ></v-select-auto>
             </v-flex>
             <v-flex xs12 md3>
-              <v-select
+              <v-select-auto
                 label="Model"
                 :items="modelsByOrganism"
                 v-model="cardModel"
@@ -40,10 +40,10 @@
                 :rules="[v => !!v || 'Please choose the metabolic model.']"
                 return-object
                 @change="onModelChange"
-              ></v-select>
+              ></v-select-auto>
             </v-flex>
             <v-flex xs12 md3>
-              <v-select
+              <v-select-auto
                 label="Method"
                 :items="methods"
                 v-model="cardMethod"
@@ -52,7 +52,7 @@
                 prepend-icon="help"
                 @click:prepend="$emit('open-method-help-dialog')"
                 @change="$emit('simulate-card')"
-              ></v-select>
+              ></v-select-auto>
             </v-flex>
           </v-layout>
 
