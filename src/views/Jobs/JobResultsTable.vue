@@ -297,6 +297,7 @@
                     v-model="props.selected"
                     color="primary"
                     hide-details
+                    @change="onCheckboxChange(props.item.method)"
                   ></v-checkbox>
                 </td>
                 <td>{{ props.item.manipulations.length }}</td>
@@ -328,51 +329,69 @@
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">
                       <div
-                        v-for="(manipulation,
-                        index) in jobPrediction.manipulations"
+                        v-for="(manipulation, index) in sort(
+                          jobPrediction.manipulations,
+                          'value'
+                        )"
                         :key="index"
                       >
                         <div v-if="index < 10">
-                          <a
-                            v-if="
-                              jobPrediction.method ===
-                                'PathwayPredictor+DifferentialFVA'
-                            "
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                manipulation.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{
-                              `${indicators[manipulation.direction]} ${
-                                manipulation.id
-                              }`
-                            }}
-                          </a>
+                          <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                              <a
+                                v-if="
+                                  jobPrediction.method ===
+                                    'PathwayPredictor+DifferentialFVA'
+                                "
+                                :href="
+                                  `http://bigg.ucsd.edu/search?query=${
+                                    manipulation.id
+                                  }`
+                                "
+                                class="link"
+                                target="_blank"
+                                v-on="on"
+                              >
+                                {{
+                                  `${indicators[manipulation.direction]} ${
+                                    manipulation.id
+                                  }`
+                                }}
+                              </a>
+                            </template>
+                            <span
+                              >Score: {{ manipulation.value.toFixed(2) }}</span
+                            >
+                          </v-tooltip>
                         </div>
                         <div v-if="index >= 10" :hidden="!showAllManipulations">
-                          <a
-                            v-if="
-                              jobPrediction.method ===
-                                'PathwayPredictor+DifferentialFVA'
-                            "
-                            :href="
-                              `http://bigg.ucsd.edu/search?query=${
-                                manipulation.id
-                              }`
-                            "
-                            class="link"
-                            target="_blank"
-                          >
-                            {{
-                              `${indicators[manipulation.direction]} ${
-                                manipulation.id
-                              }`
-                            }}
-                          </a>
+                          <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                              <a
+                                v-if="
+                                  jobPrediction.method ===
+                                    'PathwayPredictor+DifferentialFVA'
+                                "
+                                :href="
+                                  `http://bigg.ucsd.edu/search?query=${
+                                    manipulation.id
+                                  }`
+                                "
+                                class="link"
+                                target="_blank"
+                                v-on="on"
+                              >
+                                {{
+                                  `${indicators[manipulation.direction]} ${
+                                    manipulation.id
+                                  }`
+                                }}
+                              </a>
+                            </template>
+                            <span
+                              >Score: {{ manipulation.value.toFixed(2) }}</span
+                            >
+                          </v-tooltip>
                         </div>
                       </div>
                       <div v-if="jobPrediction.manipulations.length > 10">
@@ -532,6 +551,16 @@
         <p class="display-1 white--text mb-0">Visualizing...</p>
       </v-layout>
     </v-container>
+    <v-snackbar
+      color="warning"
+      v-model="isDiffFvaChecked"
+      :timeout="12000"
+      auto-height
+    >
+      Visualizing DifferentialFVA designs is not completely supported yet.
+      Proceed with caution if you want to inspect the predicted pathways and
+      knockouts on the interactive map.
+    </v-snackbar>
   </div>
 </template>
 
@@ -573,7 +602,8 @@ export default Vue.extend({
     },
     showAllManipulations: false,
     showAllKnockouts: false,
-    isVisualizing: false
+    isVisualizing: false,
+    isDiffFvaChecked: false
   }),
   computed: {
     pathways() {
@@ -780,6 +810,9 @@ export default Vue.extend({
         this.selected = [];
       } else {
         this.selected = [...this.filteredPathways];
+        this.selected.forEach(jobPrediction => {
+          this.onCheckboxChange(jobPrediction.method);
+        });
       }
     },
     changeSort(column) {
@@ -841,6 +874,14 @@ export default Vue.extend({
                     uuid: card.uuid,
                     geneId: geneId
                   });
+                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                    uuid: card.uuid,
+                    gene: {
+                      id: geneId,
+                      name: "N/A",
+                      reactions: []
+                    }
+                  });
                 });
               } else if (
                 jobPrediction.method === "PathwayPredictor+DifferentialFVA" ||
@@ -850,6 +891,14 @@ export default Vue.extend({
                   this.$store.dispatch("interactiveMap/knockoutReaction", {
                     uuid: card.uuid,
                     reactionId: reactionId
+                  });
+                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                    uuid: card.uuid,
+                    reaction: {
+                      id: reactionId,
+                      name: "N/A",
+                      reactionString: "N/A"
+                    }
                   });
                 });
               } else {
@@ -910,6 +959,16 @@ export default Vue.extend({
             this.$store.commit("setFetchError", error);
           });
       });
+    },
+    sort(items, value) {
+      return items
+        .slice()
+        .sort((a, b) => (Math.abs(a[value]) < Math.abs(b[value]) ? 1 : -1));
+    },
+    onCheckboxChange(method) {
+      if (method === "PathwayPredictor+DifferentialFVA") {
+        this.isDiffFvaChecked = true;
+      }
     }
   }
 });
