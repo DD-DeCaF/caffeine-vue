@@ -195,7 +195,7 @@ export default Vue.extend({
           this.prediction = response.data;
         })
         .catch(error => {
-          this.$store.commit("setFetchError", error);
+          this.$store.dispatch("setFetchError", error);
         });
     }
   }

@@ -271,10 +271,10 @@ export default Vue.extend({
     },
     hasFetchDataError: {
       get() {
-        return this.$store.state.fetchDataError !== null;
+        return this.$store.state.fetchDataError;
       },
       set(newValue) {
-        this.$store.commit("setFetchError", null);
+        this.$store.commit("setFetchError", false);
       }
     },
     hasPostDataError: {

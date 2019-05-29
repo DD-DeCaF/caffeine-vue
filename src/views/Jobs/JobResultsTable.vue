@@ -834,7 +834,7 @@ export default Vue.extend({
         Promise.all(promises).then((addedReactions: any[]) => {
           const card: Card = {
             uuid: uuidv4(),
-            name: `Job #${this.prediction.id}`,
+            name: `Job #${this.prediction.id} design ${jobPrediction.id}`,
             designId: null,
             organism: this.organism,
             modelId: this.model.id,
@@ -956,7 +956,7 @@ export default Vue.extend({
             };
           })
           .catch(error => {
-            this.$store.commit("setFetchError", error);
+            this.$store.dispatch("setFetchError", error);
           });
       });
     },

@@ -28,14 +28,14 @@ export default {
     }
   },
   actions: {
-    fetchOrganisms({ commit }) {
+    fetchOrganisms({ commit, dispatch }) {
       const organismsPromise = axios
         .get(`${settings.apis.warehouse}/organisms`)
         .then((response: AxiosResponse<OrganismItem[]>) => {
           commit("setOrganisms", response.data);
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
       commit("setOrganismsPromise", organismsPromise);
     }

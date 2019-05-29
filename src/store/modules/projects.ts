@@ -64,7 +64,7 @@ export default {
     }
   },
   actions: {
-    fetchProjects({ commit }) {
+    fetchProjects({ commit, dispatch }) {
       const projectsPromise: Promise<void> = axios
         .get(`${settings.apis.iam}/projects`)
         .then((response: AxiosResponse<ProjectItem[]>) => {
@@ -81,7 +81,7 @@ export default {
           );
         })
         .catch(error => {
-          commit("setFetchError", error, { root: true });
+          dispatch("setFetchError", error, { root: true });
         });
       commit("setProjectsPromise", projectsPromise);
     }
