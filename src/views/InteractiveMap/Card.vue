@@ -13,14 +13,18 @@
       >
       <v-spacer></v-spacer>
 
-      <CardDialog
-        :card="card"
-        :model="model"
-        :modifications="modifications"
-        @simulate-card="simulateCard"
-        @open-method-help-dialog="showMethodHelpDialog = true"
-        @load-data-error="$emit('load-data-error')"
-      />
+      <v-btn flat icon @click.stop="isCardDialogVisible = true">
+        <CardDialog
+          v-model="isCardDialogVisible"
+          :card="card"
+          :model="model"
+          :modifications="modifications"
+          @simulate-card="simulateCard"
+          @open-method-help-dialog="showMethodHelpDialog = true"
+          @load-data-error="$emit('load-data-error')"
+        />
+        <v-icon color="white">edit</v-icon>
+      </v-btn>
       <!-- Define the method help dialog here to avoid nested dialogs. -->
       <MethodHelpDialog
         :showMethodHelpDialog="showMethodHelpDialog"
@@ -215,7 +219,8 @@ export default Vue.extend({
   props: ["card", "isOnlyCard", "isSelected"],
   data: () => ({
     isSaving: false,
-    showMethodHelpDialog: false
+    showMethodHelpDialog: false,
+    isCardDialogVisible: false
   }),
   computed: {
     titleColor() {
@@ -370,6 +375,19 @@ export default Vue.extend({
         this.$store.dispatch("models/withFullModel", this.card.modelId);
       }
     }
+  },
+  mounted() {
+    if (this.card.withDialog) {
+      this.isCardDialogVisible = true;
+    }
+  },
+  destroyed() {
+    this.updateCard({
+      uuid: this.card.uuid,
+      props: {
+        withDialog: false
+      }
+    });
   },
   methods: {
     selectCard() {

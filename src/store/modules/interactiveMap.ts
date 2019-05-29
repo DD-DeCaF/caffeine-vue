@@ -58,6 +58,8 @@ export interface Card {
   hasSimulationError: boolean;
   growthRate: number | null;
   fluxes: number | null;
+  // When adding a card from the interactive map, the dialog should be opened
+  withDialog: boolean;
 }
 
 export default {

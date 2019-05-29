@@ -860,7 +860,8 @@ export default Vue.extend({
             isSimulating: false,
             hasSimulationError: false,
             growthRate: null,
-            fluxes: null
+            fluxes: null,
+            withDialog: false
           };
           // Make sure the full model is available before adding the card.
           this.$store
