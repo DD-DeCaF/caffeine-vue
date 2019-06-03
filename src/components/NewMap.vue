@@ -18,8 +18,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="createMap"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   required
@@ -105,7 +105,7 @@
           <v-btn
             color="primary"
             @click="createMap"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Create
           </v-btn>
@@ -131,7 +131,7 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     // isModelCreationDialogVisible: false,
     filename: null,
-    valid: true,
+    isValid: true,
     isMapCreationSuccess: false,
     rules: {
       required: value => !!value || "Required."
@@ -160,6 +160,11 @@ export default Vue.extend({
   },
   watch: {},
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.createMap();
+      }
+    },
     createMap() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {

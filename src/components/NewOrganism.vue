@@ -14,8 +14,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="createOrganism"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   autofocus
@@ -69,7 +69,7 @@
           <v-btn
             color="primary"
             @click="createOrganism"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Create
           </v-btn>
@@ -96,7 +96,7 @@ export default Vue.extend({
   name: "NewOrganism",
   props: ["value"],
   data: () => ({
-    valid: true,
+    isValid: true,
     isProjectCreationDialogVisible: false,
     isOrganismCreationSuccess: false,
     rules: {
@@ -121,6 +121,11 @@ export default Vue.extend({
   },
   watch: {},
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.createOrganism();
+      }
+    },
     createOrganism() {
       this.$store.commit("toggleDialog", "loader");
       const payload = { name: this.organismName, project_id: this.project.id };

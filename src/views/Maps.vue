@@ -111,7 +111,11 @@
               <h3>Edit {{ name }}</h3>
             </v-flex>
             <v-flex>
-              <v-form ref="form" v-model="valid" @keyup.native.enter="editMap">
+              <v-form
+                ref="form"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
+              >
                 <v-text-field
                   required
                   v-model="name"
@@ -189,7 +193,7 @@
           <v-btn
             color="primary"
             @click="editMap"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Edit
           </v-btn>
@@ -218,7 +222,7 @@ import { mapGetters } from "vuex";
 export default Vue.extend({
   name: "Maps",
   data: () => ({
-    valid: false,
+    isValid: false,
     isDeleting: false,
     isLoading: true,
     isMapCreationDialogVisible: false,
@@ -280,6 +284,11 @@ export default Vue.extend({
     });
   },
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.editMap();
+      }
+    },
     editItem(item) {
       this.id = item.id;
       this.name = item.name;

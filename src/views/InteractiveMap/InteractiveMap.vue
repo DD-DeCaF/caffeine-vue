@@ -129,6 +129,7 @@ import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 import { Card as CardType } from "@/store/modules/interactiveMap";
+import { partitionedList } from "@/utils/utility";
 
 export default Vue.extend({
   name: "InteractiveMap",
@@ -169,43 +170,7 @@ export default Vue.extend({
       return this.cards.find(c => c.uuid === this.selectedCardId);
     },
     maps() {
-      // Sort maps by model name, then map name
-      const maps: any[] = [...this.$store.state.maps.maps];
-      maps.sort((map1, map2) => {
-        if (map1.model_id !== map2.model_id) {
-          const model1 = this.$store.getters["models/getModelById"](
-            map1.model_id
-          );
-          const model1Name = model1 ? model1.name : "Unknown model";
-          const model2 = this.$store.getters["models/getModelById"](
-            map2.model_id
-          );
-          const model2Name = model2 ? model2.name : "Unknown model";
-          return model1Name.localeCompare(model2Name);
-        } else {
-          return map1.name.localeCompare(map2.name);
-        }
-      });
-
-      // Build a data structure for the v-select, grouping maps by model with
-      // dividers and headers.
-      const mapsWithHeaders: object[] = [];
-      let previousModelId = null;
-      maps.forEach(map => {
-        if (map.model_id !== previousModelId) {
-          if (mapsWithHeaders.length !== 0) {
-            mapsWithHeaders.push({ divider: true });
-          }
-          const model = this.$store.getters["models/getModelById"](
-            map.model_id
-          );
-          const modelName = model ? model.name : "Unknown model";
-          mapsWithHeaders.push({ header: modelName });
-        }
-        mapsWithHeaders.push(map);
-        previousModelId = map.model_id;
-      });
-      return mapsWithHeaders;
+      return partitionedList("maps", "models");
     },
     playing() {
       return this.playingInterval !== null;

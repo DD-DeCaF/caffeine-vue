@@ -24,8 +24,8 @@
             <v-flex>
               <v-form
                 ref="form"
-                v-model="valid"
-                @keyup.native.enter="createModel"
+                v-model="isValid"
+                @keyup.native.enter="onEnter"
               >
                 <v-text-field
                   required
@@ -147,7 +147,7 @@
           <v-btn
             color="primary"
             @click="createModel"
-            :disabled="$store.state.isDialogVisible.loader || !valid"
+            :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Create
           </v-btn>
@@ -169,13 +169,14 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { partitionedList } from "../utils/utility";
 
 export default Vue.extend({
   name: "NewModel",
   props: ["value"],
   data: () => ({
     filename: null,
-    valid: true,
+    isValid: true,
     isProjectCreationDialogVisible: false,
     isMapCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
@@ -224,6 +225,11 @@ export default Vue.extend({
   },
   watch: {},
   methods: {
+    onEnter() {
+      if (this.$refs.form.validate()) {
+        this.createModel();
+      }
+    },
     createModel() {
       this.$store.commit("toggleDialog", "loader");
       const payload = {
