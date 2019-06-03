@@ -208,7 +208,7 @@ export default Vue.extend({
       return this.$store.state.organisms.organisms;
     },
     availableMaps() {
-      return this.$store.state.maps.maps;
+      return partitionedList("maps", "models");
     },
     availableReactions() {
       return [{ id: "Biomass1" }, { id: "Biomass2" }];
