@@ -78,7 +78,7 @@ export default new Vuex.Store({
       commit("setFetchError", true);
     }
   },
-  strict: process.env.NODE_ENV !== "production"
-  // Depends on https://github.com/vuejs/vuex/pull/1478 being released.
-  // devtools: process.env.NODE_ENV !== "production"
+  strict: process.env.NODE_ENV !== "production",
+  // Remove spread workaround after https://github.com/vuejs/vuex/pull/1478 is released.
+  ...{ devtools: process.env.NODE_ENV !== "production" }
 });
