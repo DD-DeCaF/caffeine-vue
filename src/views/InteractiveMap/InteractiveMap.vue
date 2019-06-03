@@ -128,11 +128,8 @@ import * as settings from "@/utils/settings";
 import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
 import Legend from "@/views/InteractiveMap/Legend.vue";
-<<<<<<< HEAD
 import { Card as CardType } from "@/store/modules/interactiveMap";
-=======
 import { partitionedList } from "@/utils/utility";
->>>>>>> feat: segment list of maps by models
 
 export default Vue.extend({
   name: "InteractiveMap",

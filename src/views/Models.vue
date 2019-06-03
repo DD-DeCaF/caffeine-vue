@@ -394,31 +394,6 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     }
-<<<<<<< HEAD
-=======
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.session.isAuthenticated;
-    },
-    availableModels() {
-      return this.$store.state.models.models;
-    },
-    availableProjects() {
-      return this.$store.state.projects.projects;
-    },
-    availableMaps() {
-      return partitionedList("maps", "models");
-    },
-    availableOrganisms() {
-      return this.$store.state.organisms.organisms;
-    }
-  },
-  created() {
-    this.$store.state.models.modelsPromise.then(() => {
-      this.isLoading = false;
-    });
->>>>>>> feat: segment list of maps by models
   }
 });
 </script>
