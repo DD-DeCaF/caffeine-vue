@@ -159,7 +159,7 @@
       v-model="isModelCreationSuccess"
       :timeout="3000"
     >
-      {{ this.modelName }} successfully created.
+      {{ modelName }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -186,7 +186,7 @@ export default Vue.extend({
     },
     modelName: null,
     model_serialized: null,
-    map: { id: null },
+    map: null,
     project: null,
     organism: null,
     default_biomass_reaction: null,
@@ -232,8 +232,6 @@ export default Vue.extend({
     },
     createModel() {
       this.$store.commit("toggleDialog", "loader");
-      console.log("Testo");
-      console.log(this.map);
       const payload = {
         name: this.modelName,
         model_serialized: this.model_serialized,
@@ -249,13 +247,13 @@ export default Vue.extend({
           this.$store.commit("models/addModel", modelWithID);
           this.$emit("return-object", modelWithID);
           this.isVisible = false;
+          this.isModelCreationSuccess = true;
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
         .then(() => {
           this.$store.commit("toggleDialog", "loader");
-          this.isModelCreationSuccess = true;
         });
     },
     // A great tutorial for the inner workings of the following function can be found at
