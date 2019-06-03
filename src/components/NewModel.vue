@@ -229,7 +229,7 @@ export default Vue.extend({
       const payload = {
         name: this.modelName,
         model_serialized: this.model_serialized,
-        preferred_map_id: this.map.id,
+        preferred_map_id: this.map ? this.map.id : null,
         project_id: this.project.id,
         organism_id: this.organism.id,
         default_biomass_reaction: this.default_biomass_reaction
