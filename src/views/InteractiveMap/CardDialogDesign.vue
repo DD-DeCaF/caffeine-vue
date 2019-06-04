@@ -163,6 +163,12 @@
       @change="addReaction"
     ></v-autocomplete>
 
+    <v-icon>add</v-icon>
+    <v-btn @click.stop="isReactionDialogVisible = true"
+      >Add arbitrary reaction
+      <ReactionDialog v-model="isReactionDialogVisible" :model="model"
+    /></v-btn>
+
     <v-autocomplete
       v-model="knockoutReactionItem"
       :items="reactions"
@@ -250,9 +256,13 @@
 import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
+import ReactionDialog from "@/views/InteractiveMap/ReactionDialog.vue";
 
 export default Vue.extend({
   name: "CardDialogDesign",
+  components: {
+    ReactionDialog
+  },
   props: ["card", "model", "modifications"],
   data: () => ({
     modificationsHeaders: [
@@ -274,6 +284,7 @@ export default Vue.extend({
     // Edit bounds
     editBoundsReaction: null,
     editBoundsValid: false,
+    isReactionDialogVisible: false,
     editBoundsReactionRule: value =>
       (value && value.id && value.id.length > 0) ||
       "Please specify the reaction",
