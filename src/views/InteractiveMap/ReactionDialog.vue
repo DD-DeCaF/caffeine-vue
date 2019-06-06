@@ -211,9 +211,8 @@ export default Vue.extend({
     },
     serializeMetabolites(metabolites) {
       return metabolites.filter(m => m.metabolite).map(metabolite => {
-        const stoichiometryNormalized = Math.abs(metabolite.stoichiometry);
         const stoichiometrySerialized =
-          stoichiometryNormalized === 1 ? "" : stoichiometryNormalized + " ";
+          metabolite.stoichiometry === 1 ? "" : metabolite.stoichiometry + " ";
         const id = metabolite.metabolite.id
           ? metabolite.metabolite.id.substring(0, metabolite.metabolite.id.length - 2)
             : "";
