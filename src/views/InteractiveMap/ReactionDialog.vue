@@ -1,106 +1,131 @@
 <template>
   <v-dialog v-model="showDialog" width="1000">
     <v-card class="pa-3">
-      <div class="body-2 mb-2">Reaction string:</div>
+      <div class="subheading mb-2">Reaction string:</div>
       <v-text-field :value="reactionString" solo readonly></v-text-field>
-      <div>
-        <div class="body-1 ml-3 mb-2">
-          Substrates:
-        </div>
-        <v-layout column mx-3>
-          <div
-            v-for="(metabolite, index) in substrates"
-            :key="metabolite.id + index"
-          >
-            <v-layout>
-              <v-flex xs1>
-                <v-text-field
-                  v-model="metabolite.stoichiometry"
-                  solo
-                  class="mx-2"
-                  type="number"
-                ></v-text-field></v-flex
-              ><v-flex xs7>
-                <v-autocomplete
-                  v-model="metabolite.id"
-                  label="Metabolite"
-                  :items="metaboliteItems"
-                  :item-text="metaboliteDisplay"
-                  item-value="id"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
-              <v-flex xs3
-                ><v-autocomplete
-                  v-model="metabolite.compartment"
-                  label="Compartment"
-                  :items="compartmentItems"
-                  :item-text="compartmentDisplay"
-                  item-value="id"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
-              <v-flex xs1
-                ><v-btn icon @click="addSubstrate">
-                  <v-icon color="primary">add_circle</v-icon></v-btn
-                ></v-flex
-              >
-            </v-layout>
-          </div>
-        </v-layout>
-        <div class="body-1 ml-3 mb-2">
-          Product:
-        </div>
-        <v-layout column mx-3>
-          <div
-            v-for="(metabolite, index) in products"
-            :key="metabolite.id + index"
-          >
-            <v-layout>
-              <v-flex xs1>
-                <v-text-field
-                  v-model="metabolite.stoichiometry"
-                  solo
-                  class="mx-2"
-                  type="number"
-                ></v-text-field></v-flex
-              ><v-flex xs7>
-                <v-autocomplete
-                  v-model="metabolite.id"
-                  label="Metabolite"
-                  :items="metaboliteItems"
-                  :item-text="metaboliteDisplay"
-                  item-value="id"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
-              <v-flex xs3
-                ><v-autocomplete
-                  v-model="metabolite.compartment"
-                  label="Compartment"
-                  :items="compartmentItems"
-                  :item-text="compartmentDisplay"
-                  item-value="id"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
-              <v-flex xs1
-                ><v-btn icon @click="addProduct">
-                  <v-icon color="primary">add_circle</v-icon></v-btn
-                ></v-flex
-              >
-            </v-layout>
-          </div>
-        </v-layout>
+      <v-layout align-center>
+        <v-flex xs2
+          ><div class="ml-3 body-2">Bounds of a reaction:</div></v-flex
+        >
+        <v-flex xs2 mx-2>
+          <v-text-field
+            v-model="lowerBound"
+            type="number"
+            label="Lower bound"
+            :rules="[boundRule]"
+          ></v-text-field>
+        </v-flex>
+        <v-flex xs2 mx-2>
+          <v-text-field
+            v-model="upperBound"
+            type="number"
+            label="Upper bound"
+            :rules="[boundRule]"
+          ></v-text-field>
+        </v-flex>
+        <v-flex
+          ><div v-if="hasInvalidBoundsError" class="red--text">
+            The lower bound cannot be larger than the upper bound.
+          </div></v-flex
+        >
+      </v-layout>
+      <div class="body-2 ml-3 mb-2">
+        Substrates:
       </div>
+      <v-layout column mx-3>
+        <div
+          v-for="(metabolite, index) in substrates"
+          :key="metabolite.id + index"
+        >
+          <v-layout>
+            <v-flex xs1>
+              <v-text-field
+                v-model="metabolite.stoichiometry"
+                solo
+                class="mx-2"
+                type="number"
+              ></v-text-field></v-flex
+            ><v-flex xs7>
+              <v-autocomplete
+                v-model="metabolite.id"
+                label="Metabolite"
+                :items="metaboliteItems"
+                :item-text="metaboliteDisplay"
+                item-value="id"
+                clearable
+                class="mx-2"
+              >
+              </v-autocomplete
+            ></v-flex>
+            <v-flex xs3
+              ><v-autocomplete
+                v-model="metabolite.compartment"
+                label="Compartment"
+                :items="compartmentItems"
+                :item-text="compartmentDisplay"
+                item-value="id"
+                clearable
+                class="mx-2"
+              >
+              </v-autocomplete
+            ></v-flex>
+            <v-flex xs1
+              ><v-btn icon @click="addSubstrate">
+                <v-icon color="primary">add_circle</v-icon></v-btn
+              ></v-flex
+            >
+          </v-layout>
+        </div>
+      </v-layout>
+      <div class="body-2 ml-3 mb-2">
+        Product:
+      </div>
+      <v-layout column mx-3>
+        <div
+          v-for="(metabolite, index) in products"
+          :key="metabolite.id + index"
+        >
+          <v-layout>
+            <v-flex xs1>
+              <v-text-field
+                v-model="metabolite.stoichiometry"
+                solo
+                class="mx-2"
+                type="number"
+              ></v-text-field></v-flex
+            ><v-flex xs7>
+              <v-autocomplete
+                v-model="metabolite.id"
+                label="Metabolite"
+                :items="metaboliteItems"
+                :item-text="metaboliteDisplay"
+                item-value="id"
+                clearable
+                class="mx-2"
+              >
+              </v-autocomplete
+            ></v-flex>
+            <v-flex xs3
+              ><v-autocomplete
+                v-model="metabolite.compartment"
+                label="Compartment"
+                :items="compartmentItems"
+                :item-text="compartmentDisplay"
+                item-value="id"
+                clearable
+                class="mx-2"
+              >
+              </v-autocomplete
+            ></v-flex>
+            <v-flex xs1
+              ><v-btn icon @click="addProduct">
+                <v-icon color="primary">add_circle</v-icon></v-btn
+              ></v-flex
+            >
+          </v-layout>
+        </div>
+      </v-layout>
+      <v-btn @click="addReaction" color="primary">Add reaction</v-btn>
     </v-card>
   </v-dialog>
 </template>
@@ -127,7 +152,19 @@ export default Vue.extend({
         compartment: "",
         stoichiometry: 1
       }
-    ]
+    ],
+    boundRule: value => {
+      if (isNaN(parseFloat(value))) {
+        return "Bounds must be a number.";
+      }
+      if (value < -1000 || value > 1000) {
+        return "Bounds must be in the range of -1000 to 1000.";
+      }
+      return true;
+    },
+    lowerBound: -1000,
+    upperBound: 1000,
+    hasInvalidBoundsError: false
   }),
   computed: {
     reactionString() {
@@ -199,6 +236,12 @@ export default Vue.extend({
         compartment: "",
         stoichiometry: 1
       });
+    },
+    addReaction() {
+      if (this.lowerBound > this.upperBound) {
+        this.hasInvalidBoundsError = true;
+        return;
+      }
     }
   }
 });
