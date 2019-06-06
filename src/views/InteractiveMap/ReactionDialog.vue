@@ -125,7 +125,7 @@
           </v-layout>
         </div>
       </v-layout>
-      <v-btn @click="addReaction" color="primary">Add reaction</v-btn>
+      <v-btn @click="addReaction" color="primary" :disabled="hasInvalidBoundsError">Add reaction</v-btn>
     </v-card>
   </v-dialog>
 </template>
@@ -163,8 +163,7 @@ export default Vue.extend({
       return true;
     },
     lowerBound: -1000,
-    upperBound: 1000,
-    hasInvalidBoundsError: false
+    upperBound: 1000
   }),
   computed: {
     reactionString() {
@@ -197,6 +196,9 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    },
+    hasInvalidBoundsError() {
+      return this.lowerBound > this.upperBound;
     }
   },
   methods: {
@@ -238,8 +240,7 @@ export default Vue.extend({
       });
     },
     addReaction() {
-      if (this.lowerBound > this.upperBound) {
-        this.hasInvalidBoundsError = true;
+      if (this.hasInvalidBoundsError) {
         return;
       }
     }
