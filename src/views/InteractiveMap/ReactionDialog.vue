@@ -8,7 +8,10 @@
           Substrates:
         </div>
         <v-layout column mx-3>
-          <div v-for="metabolite in substrates" :key="metabolite.id">
+          <div
+            v-for="(metabolite, index) in substrates"
+            :key="metabolite.id + index"
+          >
             <v-layout>
               <v-flex xs1>
                 <v-text-field
@@ -49,6 +52,54 @@
             </v-layout>
           </div>
         </v-layout>
+        <div class="body-1 ml-3 mb-2">
+          Product:
+        </div>
+        <v-layout column mx-3>
+          <div
+            v-for="(metabolite, index) in products"
+            :key="metabolite.id + index"
+          >
+            <v-layout>
+              <v-flex xs1>
+                <v-text-field
+                  v-model="metabolite.stoichiometry"
+                  solo
+                  class="mx-2"
+                  type="number"
+                ></v-text-field></v-flex
+              ><v-flex xs7>
+                <v-autocomplete
+                  v-model="metabolite.id"
+                  label="Metabolite"
+                  :items="metaboliteItems"
+                  :item-text="metaboliteDisplay"
+                  item-value="id"
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs3
+                ><v-autocomplete
+                  v-model="metabolite.compartment"
+                  label="Compartment"
+                  :items="compartmentItems"
+                  :item-text="compartmentDisplay"
+                  item-value="id"
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs1
+                ><v-btn icon @click="addProduct">
+                  <v-icon color="primary">add_circle</v-icon></v-btn
+                ></v-flex
+              >
+            </v-layout>
+          </div>
+        </v-layout>
       </div>
     </v-card>
   </v-dialog>
@@ -69,14 +120,25 @@ export default Vue.extend({
         stoichiometry: 1
       }
     ],
-    products: []
+    products: [
+      {
+        id: "",
+        name: "",
+        compartment: "",
+        stoichiometry: 1
+      }
+    ]
   }),
   computed: {
     reactionString() {
       const substratesSerialized = this.serializeMetabolites(
         this.substrates
       ).join(" + ");
-      return substratesSerialized;
+      const productsSerialized = this.serializeMetabolites(this.products).join(
+        " + "
+      );
+      if (!productsSerialized) return substratesSerialized;
+      return substratesSerialized + " ⇌ " + productsSerialized;
     },
     metaboliteItems() {
       return this.model.model_serialized
@@ -124,6 +186,14 @@ export default Vue.extend({
     },
     addSubstrate() {
       this.substrates.push({
+        id: "",
+        name: "",
+        compartment: "",
+        stoichiometry: 1
+      });
+    },
+    addProduct() {
+      this.products.push({
         id: "",
         name: "",
         compartment: "",
