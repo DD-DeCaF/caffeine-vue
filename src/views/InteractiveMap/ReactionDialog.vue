@@ -210,12 +210,18 @@ export default Vue.extend({
       return `${compartment.name} (${compartment.id})`;
     },
     serializeMetabolites(metabolites) {
-      return metabolites.filter(m => m.metabolite).map(metabolite => {
-        const stoichiometrySerialized =
-          metabolite.stoichiometry === 1 ? "" : metabolite.stoichiometry + " ";
-        const id = metabolite.metabolite.id
-          ? metabolite.metabolite.id.substring(0, metabolite.metabolite.id.length - 2)
-            : "";
+      return metabolites
+        .filter(m => m.metabolite)
+        .map(metabolite => {
+          const stoichiometrySerialized =
+            metabolite.stoichiometry === 1
+              ? ""
+              : metabolite.stoichiometry + " ";
+          const idWithCompartment = metabolite.metabolite.id;
+          const id = idWithCompartment.substring(
+            0,
+            idWithCompartment.length - 2
+          );
           const compartment = metabolite.compartment
             ? "_" + metabolite.compartment
             : "";
