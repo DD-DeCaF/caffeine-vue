@@ -33,10 +33,7 @@
         Substrates:
       </div>
       <v-layout column mx-3>
-        <div
-          v-for="(metabolite, index) in substrates"
-          :key="metabolite.id + index"
-        >
+        <div v-for="(metabolite, index) in substrates" :key="index">
           <v-layout>
             <v-flex xs1>
               <v-text-field
@@ -81,10 +78,7 @@
         Product:
       </div>
       <v-layout column mx-3>
-        <div
-          v-for="(metabolite, index) in products"
-          :key="metabolite.id + index"
-        >
+        <div v-for="(metabolite, index) in products" :key="index">
           <v-layout>
             <v-flex xs1>
               <v-text-field
