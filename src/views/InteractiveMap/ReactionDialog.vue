@@ -121,17 +121,23 @@
           </v-layout>
         </div>
       </v-layout>
-      <v-btn @click="addReaction" color="primary" :disabled="hasInvalidBoundsError">Add reaction</v-btn>
+      <v-btn
+        @click="addReaction"
+        color="primary"
+        :disabled="hasInvalidBoundsError"
+        >Add reaction</v-btn
+      >
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { Reaction } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "ReactionDialog",
-  props: ["model", "value"],
+  props: ["model", "value", "card"],
   data: () => ({
     substrates: [
       {
@@ -210,12 +216,12 @@ export default Vue.extend({
           stoichiometryNormalized === 1 ? "" : stoichiometryNormalized + " ";
         const id = metabolite.metabolite.id
           ? metabolite.metabolite.id.substring(0, metabolite.metabolite.id.length - 2)
-          : "";
-        const compartment = metabolite.compartment
-          ? "_" + metabolite.compartment
-          : "";
-        return stoichiometrySerialized + id + compartment;
-      });
+            : "";
+          const compartment = metabolite.compartment
+            ? "_" + metabolite.compartment
+            : "";
+          return stoichiometrySerialized + id + compartment;
+        });
     },
     addSubstrate() {
       this.substrates.push({
@@ -235,6 +241,41 @@ export default Vue.extend({
       if (this.hasInvalidBoundsError) {
         return;
       }
+
+      const negativeSubstrates = this.substrates.map(m => ({
+        ...m,
+        stoichiometry: -m.stoichiometry
+      }));
+
+      const reaction: Reaction = {
+        id: "customReaction",
+        name: "customReaction",
+        reactionString: this.reactionString,
+        // Note: Assuming all reactions in the universal model are
+        // reversible, but this might not be the case. Could potentially use
+        // the reaction string to check reversibility.
+        lowerBound: this.lowerBound,
+        upperBound: this.upperBound,
+        metabolites: [...negativeSubstrates, ...this.products]
+          .filter(m => m.metabolite)
+          .map(m => ({
+            id: m.metabolite.id,
+            name: m.metabolite.name,
+            compartment: m.compartment,
+            stoichiometry: m.stoichiometry
+            // formula: null,
+            // annotation: null
+          }))
+      };
+
+      // Add the reaction to the card.
+      this.$store.commit("interactiveMap/addReaction", {
+        uuid: this.card.uuid,
+        reaction: reaction
+      });
+
+      this.$emit("simulate-card");
+      this.showDialog = false;
     }
   }
 });

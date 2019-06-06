@@ -166,7 +166,11 @@
     <v-icon>add</v-icon>
     <v-btn @click.stop="isReactionDialogVisible = true"
       >Add arbitrary reaction
-      <ReactionDialog v-model="isReactionDialogVisible" :model="model"
+      <ReactionDialog
+        v-model="isReactionDialogVisible"
+        :model="model"
+        :card="card"
+        @simulate-card="$emit('simulate-card')"
     /></v-btn>
 
     <v-autocomplete
