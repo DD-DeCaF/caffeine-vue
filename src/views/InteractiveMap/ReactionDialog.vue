@@ -44,11 +44,12 @@
               ></v-text-field></v-flex
             ><v-flex xs7>
               <v-autocomplete
-                v-model="metabolite.id"
+                v-model="metabolite.metabolite"
                 label="Metabolite"
                 :items="metaboliteItems"
                 :item-text="metaboliteDisplay"
                 item-value="id"
+                return-object
                 clearable
                 class="mx-2"
               >
@@ -89,11 +90,12 @@
               ></v-text-field></v-flex
             ><v-flex xs7>
               <v-autocomplete
-                v-model="metabolite.id"
+                v-model="metabolite.metabolite"
                 label="Metabolite"
                 :items="metaboliteItems"
                 :item-text="metaboliteDisplay"
                 item-value="id"
+                return-object
                 clearable
                 class="mx-2"
               >
@@ -133,16 +135,14 @@ export default Vue.extend({
   data: () => ({
     substrates: [
       {
-        id: "",
-        name: "",
+        metabolite: null,
         compartment: "",
         stoichiometry: 1
       }
     ],
     products: [
       {
-        id: "",
-        name: "",
+        metabolite: null,
         compartment: "",
         stoichiometry: 1
       }
@@ -204,12 +204,12 @@ export default Vue.extend({
       return `${compartment.name} (${compartment.id})`;
     },
     serializeMetabolites(metabolites) {
-      return metabolites.map(metabolite => {
+      return metabolites.filter(m => m.metabolite).map(metabolite => {
         const stoichiometryNormalized = Math.abs(metabolite.stoichiometry);
         const stoichiometrySerialized =
           stoichiometryNormalized === 1 ? "" : stoichiometryNormalized + " ";
-        const id = metabolite.id
-          ? metabolite.id.substring(0, metabolite.id.length - 2)
+        const id = metabolite.metabolite.id
+          ? metabolite.metabolite.id.substring(0, metabolite.metabolite.id.length - 2)
           : "";
         const compartment = metabolite.compartment
           ? "_" + metabolite.compartment
@@ -219,16 +219,14 @@ export default Vue.extend({
     },
     addSubstrate() {
       this.substrates.push({
-        id: "",
-        name: "",
+        metabolite: null,
         compartment: "",
         stoichiometry: 1
       });
     },
     addProduct() {
       this.products.push({
-        id: "",
-        name: "",
+        metabolite: null,
         compartment: "",
         stoichiometry: 1
       });
