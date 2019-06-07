@@ -251,8 +251,10 @@ export default Vue.extend({
   },
   methods: {
     metaboliteDisplay(metabolite) {
-      const id = metabolite.id.substring(0, metabolite.id.length - 2);
-      return `${metabolite.name} (${id})`;
+      return `${metabolite.name} (${this.getMetaboliteId(
+        metabolite.id,
+        metabolite.compartment
+      )})`;
     },
     compartmentDisplay(compartment) {
       return `${compartment.name} (${compartment.id})`;
@@ -265,16 +267,31 @@ export default Vue.extend({
             metabolite.stoichiometry === 1
               ? ""
               : metabolite.stoichiometry + " ";
-          const idWithCompartment = metabolite.metabolite.id;
-          const id = idWithCompartment.substring(
-            0,
-            idWithCompartment.length - 2
-          );
           const compartment = metabolite.compartment
             ? "_" + metabolite.compartment
             : "";
-          return stoichiometrySerialized + id + compartment;
+          return (
+            stoichiometrySerialized +
+            this.getMetaboliteId(
+              metabolite.metabolite.id,
+              metabolite.metabolite.compartment
+            ) +
+            compartment
+          );
         });
+    },
+    getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
+      const compartmentInId = idWithCompartment.substring(
+        idWithCompartment.lastIndexOf("_") + 1
+      );
+      if (compartmentInId !== compartmentInMetabolite) {
+        return idWithCompartment;
+      } else {
+        return idWithCompartment.substring(
+          0,
+          idWithCompartment.lastIndexOf("_")
+        );
+      }
     },
     addSubstrate() {
       this.substrates.push({
@@ -328,7 +345,7 @@ export default Vue.extend({
       });
 
       this.$emit("simulate-card");
-      this.$refs.form.reset()
+      this.$refs.form.reset();
       this.showDialog = false;
     }
   }
