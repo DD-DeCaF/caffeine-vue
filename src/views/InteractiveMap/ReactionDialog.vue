@@ -328,6 +328,7 @@ export default Vue.extend({
       });
 
       this.$emit("simulate-card");
+      this.$refs.form.reset()
       this.showDialog = false;
     }
   }
