@@ -145,7 +145,7 @@
         <v-btn
           @click="addReaction"
           color="primary"
-          :disabled="!valid || hasInvalidBoundsError"
+          :disabled="!valid || hasInvalidBoundsError || !reactionString"
           >Add reaction</v-btn
         >
       </v-form>
