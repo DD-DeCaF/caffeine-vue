@@ -3,138 +3,152 @@
     <v-card class="pa-3">
       <div class="subheading mb-2">Reaction string:</div>
       <v-text-field :value="reactionString" solo readonly></v-text-field>
-      <v-layout align-center>
-        <div class="mx-3 body-2">Reaction name:</div>
+      <v-form ref="form" v-model="valid" lazy-validation>
+        <v-layout align-center>
+          <div class="mx-3 body-2">Reaction name:</div>
 
-        <v-text-field v-model="reactionName" class="mx-2"></v-text-field>
-      </v-layout>
-      <v-layout align-center>
-        <div class="mx-3 body-2">Reaction id:</div>
+          <v-text-field
+            v-model="reactionName"
+            :rules="reactionNameRules"
+            class="mx-2"
+          ></v-text-field>
+        </v-layout>
+        <v-layout align-center>
+          <div class="mx-3 body-2">Reaction id:</div>
 
-        <v-text-field v-model="reactionId" class="mx-2"></v-text-field
-      ></v-layout>
-      <v-layout align-center>
-        <div class="mx-3 body-2">Bounds:</div>
-        <v-flex xs2 mx-2>
           <v-text-field
-            v-model="lowerBound"
-            type="number"
-            label="Lower bound"
-            :rules="[boundRule]"
-          ></v-text-field>
-        </v-flex>
-        <v-flex xs2 mx-2>
-          <v-text-field
-            v-model="upperBound"
-            type="number"
-            label="Upper bound"
-            :rules="[boundRule]"
-          ></v-text-field>
-        </v-flex>
-        <v-flex
-          ><div v-if="hasInvalidBoundsError" class="red--text">
-            The lower bound cannot be larger than the upper bound.
-          </div></v-flex
+            v-model="reactionId"
+            :rules="reactionIdRules"
+            class="mx-2"
+          ></v-text-field
+        ></v-layout>
+        <v-layout align-center>
+          <div class="mx-3 body-2">Bounds:</div>
+          <v-flex xs2 mx-2>
+            <v-text-field
+              v-model="lowerBound"
+              type="number"
+              label="Lower bound"
+              :rules="[boundRules]"
+            ></v-text-field>
+          </v-flex>
+          <v-flex xs2 mx-2>
+            <v-text-field
+              v-model="upperBound"
+              type="number"
+              label="Upper bound"
+              :rules="[boundRules]"
+            ></v-text-field>
+          </v-flex>
+          <v-flex
+            ><div v-if="hasInvalidBoundsError" class="red--text">
+              The lower bound cannot be larger than the upper bound
+            </div></v-flex
+          >
+        </v-layout>
+        <div class="body-2 ml-3 mb-2">
+          Substrates:
+        </div>
+        <v-layout column mx-3>
+          <div v-for="(metabolite, index) in substrates" :key="index">
+            <v-layout>
+              <v-flex xs1>
+                <v-text-field
+                  v-model="metabolite.stoichiometry"
+                  :rules="[stoichiometryRules(metabolite)]"
+                  solo
+                  class="mx-2"
+                  type="number"
+                ></v-text-field></v-flex
+              ><v-flex xs7>
+                <v-autocomplete
+                  v-model="metabolite.metabolite"
+                  label="Metabolite"
+                  :items="metaboliteItems"
+                  :item-text="metaboliteDisplay"
+                  item-value="id"
+                  return-object
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs3
+                ><v-autocomplete
+                  v-model="metabolite.compartment"
+                  label="Compartment"
+                  :items="compartmentItems"
+                  :item-text="compartmentDisplay"
+                  item-value="id"
+                  :rules="[compartmentRules(metabolite)]"
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs1
+                ><v-btn icon @click="addSubstrate">
+                  <v-icon color="primary">add_circle</v-icon></v-btn
+                ></v-flex
+              >
+            </v-layout>
+          </div>
+        </v-layout>
+        <div class="body-2 ml-3 mb-2">
+          Product:
+        </div>
+        <v-layout column mx-3>
+          <div v-for="(metabolite, index) in products" :key="index">
+            <v-layout>
+              <v-flex xs1>
+                <v-text-field
+                  v-model="metabolite.stoichiometry"
+                  :rules="[stoichiometryRules(metabolite)]"
+                  solo
+                  class="mx-2"
+                  type="number"
+                ></v-text-field></v-flex
+              ><v-flex xs7>
+                <v-autocomplete
+                  v-model="metabolite.metabolite"
+                  label="Metabolite"
+                  :items="metaboliteItems"
+                  :item-text="metaboliteDisplay"
+                  item-value="id"
+                  return-object
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs3
+                ><v-autocomplete
+                  v-model="metabolite.compartment"
+                  label="Compartment"
+                  :items="compartmentItems"
+                  :item-text="compartmentDisplay"
+                  item-value="id"
+                  :rules="[compartmentRules(metabolite)]"
+                  clearable
+                  class="mx-2"
+                >
+                </v-autocomplete
+              ></v-flex>
+              <v-flex xs1
+                ><v-btn icon @click="addProduct">
+                  <v-icon color="primary">add_circle</v-icon></v-btn
+                ></v-flex
+              >
+            </v-layout>
+          </div>
+        </v-layout>
+        <v-btn
+          @click="addReaction"
+          color="primary"
+          :disabled="!valid || hasInvalidBoundsError"
+          >Add reaction</v-btn
         >
-      </v-layout>
-      <div class="body-2 ml-3 mb-2">
-        Substrates:
-      </div>
-      <v-layout column mx-3>
-        <div v-for="(metabolite, index) in substrates" :key="index">
-          <v-layout>
-            <v-flex xs1>
-              <v-text-field
-                v-model="metabolite.stoichiometry"
-                solo
-                class="mx-2"
-                type="number"
-              ></v-text-field></v-flex
-            ><v-flex xs7>
-              <v-autocomplete
-                v-model="metabolite.metabolite"
-                label="Metabolite"
-                :items="metaboliteItems"
-                :item-text="metaboliteDisplay"
-                item-value="id"
-                return-object
-                clearable
-                class="mx-2"
-              >
-              </v-autocomplete
-            ></v-flex>
-            <v-flex xs3
-              ><v-autocomplete
-                v-model="metabolite.compartment"
-                label="Compartment"
-                :items="compartmentItems"
-                :item-text="compartmentDisplay"
-                item-value="id"
-                clearable
-                class="mx-2"
-              >
-              </v-autocomplete
-            ></v-flex>
-            <v-flex xs1
-              ><v-btn icon @click="addSubstrate">
-                <v-icon color="primary">add_circle</v-icon></v-btn
-              ></v-flex
-            >
-          </v-layout>
-        </div>
-      </v-layout>
-      <div class="body-2 ml-3 mb-2">
-        Product:
-      </div>
-      <v-layout column mx-3>
-        <div v-for="(metabolite, index) in products" :key="index">
-          <v-layout>
-            <v-flex xs1>
-              <v-text-field
-                v-model="metabolite.stoichiometry"
-                solo
-                class="mx-2"
-                type="number"
-              ></v-text-field></v-flex
-            ><v-flex xs7>
-              <v-autocomplete
-                v-model="metabolite.metabolite"
-                label="Metabolite"
-                :items="metaboliteItems"
-                :item-text="metaboliteDisplay"
-                item-value="id"
-                return-object
-                clearable
-                class="mx-2"
-              >
-              </v-autocomplete
-            ></v-flex>
-            <v-flex xs3
-              ><v-autocomplete
-                v-model="metabolite.compartment"
-                label="Compartment"
-                :items="compartmentItems"
-                :item-text="compartmentDisplay"
-                item-value="id"
-                clearable
-                class="mx-2"
-              >
-              </v-autocomplete
-            ></v-flex>
-            <v-flex xs1
-              ><v-btn icon @click="addProduct">
-                <v-icon color="primary">add_circle</v-icon></v-btn
-              ></v-flex
-            >
-          </v-layout>
-        </div>
-      </v-layout>
-      <v-btn
-        @click="addReaction"
-        color="primary"
-        :disabled="hasInvalidBoundsError"
-        >Add reaction</v-btn
-      >
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
@@ -161,19 +175,43 @@ export default Vue.extend({
         stoichiometry: 1
       }
     ],
-    boundRule: value => {
+    boundRules: value => {
       if (isNaN(parseFloat(value))) {
-        return "Bounds must be a number.";
+        return "Bounds must be a number";
       }
       if (value < -1000 || value > 1000) {
-        return "Bounds must be in the range of -1000 to 1000.";
+        return "Bounds must be in the range of -1000 to 1000";
+      }
+      return true;
+    },
+    reactionNameRules: [v => !!v || "Reaction name is required"],
+    reactionIdRules: [
+      v => !!v || "Reaction id is required",
+      v => (v && !/\s/.test(v)) || "Id should not contain whitespaces"
+    ],
+    stoichiometryRules: metabolite => {
+      if (metabolite.metabolite && !metabolite.stoichiometry) {
+        return "Stoichiometry is required";
+      }
+      if (
+        metabolite.stoichiometry &&
+        parseFloat(metabolite.stoichiometry) === 0
+      ) {
+        return "Stoichiometry cannot be 0";
+      }
+      return true;
+    },
+    compartmentRules: metabolite => {
+      if (metabolite.metabolite && !metabolite.compartment) {
+        return "Compartment is required";
       }
       return true;
     },
     lowerBound: -1000,
     upperBound: 1000,
     reactionId: "",
-    reactionName: ""
+    reactionName: "",
+    valid: true
   }),
   computed: {
     reactionString() {
@@ -208,7 +246,7 @@ export default Vue.extend({
       }
     },
     hasInvalidBoundsError() {
-      return this.lowerBound > this.upperBound;
+      return parseFloat(this.lowerBound) > parseFloat(this.upperBound);
     }
   },
   methods: {
@@ -253,7 +291,7 @@ export default Vue.extend({
       });
     },
     addReaction() {
-      if (this.hasInvalidBoundsError) {
+      if (!this.$refs.form.validate()) {
         return;
       }
 
