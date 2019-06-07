@@ -18,6 +18,15 @@ import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
 
+// Temporarily remove old service workers until we re-introduce them.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const reg of registrations) {
+      reg.unregister();
+    }
+  });
+}
+
 if (sentryDSN) {
   Sentry.init({
     dsn: sentryDSN,
