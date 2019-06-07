@@ -4,9 +4,17 @@
       <div class="subheading mb-2">Reaction string:</div>
       <v-text-field :value="reactionString" solo readonly></v-text-field>
       <v-layout align-center>
-        <v-flex xs2
-          ><div class="ml-3 body-2">Bounds of a reaction:</div></v-flex
-        >
+        <div class="mx-3 body-2">Reaction name:</div>
+
+        <v-text-field v-model="reactionName" class="mx-2"></v-text-field>
+      </v-layout>
+      <v-layout align-center>
+        <div class="mx-3 body-2">Reaction id:</div>
+
+        <v-text-field v-model="reactionId" class="mx-2"></v-text-field
+      ></v-layout>
+      <v-layout align-center>
+        <div class="mx-3 body-2">Bounds:</div>
         <v-flex xs2 mx-2>
           <v-text-field
             v-model="lowerBound"
@@ -163,7 +171,9 @@ export default Vue.extend({
       return true;
     },
     lowerBound: -1000,
-    upperBound: 1000
+    upperBound: 1000,
+    reactionId: "",
+    reactionName: ""
   }),
   computed: {
     reactionString() {
@@ -253,8 +263,8 @@ export default Vue.extend({
       }));
 
       const reaction: Reaction = {
-        id: "customReaction",
-        name: "customReaction",
+        id: this.reactionId,
+        name: this.reactionName,
         reactionString: this.reactionString,
         // Note: Assuming all reactions in the universal model are
         // reversible, but this might not be the case. Could potentially use
