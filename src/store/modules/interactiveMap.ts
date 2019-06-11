@@ -37,7 +37,7 @@ export interface Card {
   // `modified` is true when the user has made any change to the model, and it
   // can be saved. Not relevant for data-driven cards.
   modified: boolean;
-  dataDriven: boolean;
+  type: string;
   // Design card fields
   objective: {
     reaction: Reaction | null;

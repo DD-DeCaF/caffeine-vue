@@ -57,14 +57,21 @@
           </v-layout>
 
           <CardDialogDesign
-            v-if="!card.dataDriven"
+            v-if="card.type == 'Design'"
             :card="card"
             :model="model"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
           />
           <CardDialogDataDriven
-            v-else
+            v-if="card.type == 'DataDriven'"
+            :card="card"
+            :modifications="modifications"
+            @simulate-card="$emit('simulate-card')"
+            @load-data-error="$emit('load-data-error')"
+          />
+          <CardDialogDiffFVA
+            v-if="card.type == 'DiffFVA'"
             :card="card"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"

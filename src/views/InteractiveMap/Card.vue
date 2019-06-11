@@ -66,7 +66,7 @@
       </v-container>
 
       <!-- Design cards -->
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout>
           <v-flex>Objective:</v-flex>
           <v-flex class="text-xs-right">
@@ -79,13 +79,13 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout wrap>
           <v-flex>Modifications:</v-flex>
           <v-flex class="text-xs-right">{{ modifications.length }}</v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout wrap>
           <v-flex v-if="card.objective.reaction"
             >{{ card.objective.reaction.id }} flux:</v-flex
@@ -113,7 +113,7 @@
       </v-container>
 
       <!-- Data driven cards -->
-      <v-container v-if="card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
         <v-layout>
           <v-flex>Experiment:</v-flex>
           <v-flex class="text-xs-right">
@@ -122,7 +122,7 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
         <v-layout>
           <v-flex>Conditions:</v-flex>
           <v-flex class="text-xs-right">
@@ -338,7 +338,7 @@ export default Vue.extend({
       return model;
     },
     isSaveable() {
-      return !this.card.dataDriven && this.card.modified;
+      return this.card.type == "DataDriven" && this.card.modified;
     },
     isSaveTooltipVisible() {
       return (

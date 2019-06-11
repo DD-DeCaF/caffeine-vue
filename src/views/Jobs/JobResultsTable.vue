@@ -840,7 +840,7 @@ export default Vue.extend({
             modelId: this.model.id,
             method: "pfba",
             modified: true,
-            dataDriven: false,
+            type: "Design",
             // Design card fields
             objective: {
               reaction: null,

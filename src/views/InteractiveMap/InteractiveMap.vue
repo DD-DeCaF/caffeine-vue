@@ -64,7 +64,7 @@
           <v-list>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(false, true)">
+                <v-list-tile @click="addDefaultCard('Design', true)">
                   <v-list-tile-title v-on="on">Design</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -72,7 +72,7 @@
             </v-tooltip>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(true, true)">
+                <v-list-tile @click="addDefaultCard('DataDriven', true)">
                   <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -211,7 +211,7 @@ export default Vue.extend({
       // is available.
       this.$store.state.models.modelsPromise.then(() => {
         this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard(false, false);
+          this.addDefaultCard("Design", false);
         });
       });
     }
@@ -229,8 +229,19 @@ export default Vue.extend({
           this.hasLoadMapError = true;
         });
     },
-    addDefaultCard(dataDriven, withDialog) {
-      const name = dataDriven ? "Data driven" : "Design";
+    addDefaultCard(cardType, withDialog) {
+      let name = "";
+      switch (cardType) {
+        case "Design":
+          name = "Design";
+          break;
+        case "DataDriven":
+          name = "Data driven";
+          break;
+        case "DiffFVA":
+          name = "Differential FVA";
+          break;
+      }
       // Select the default preferred organism and related model.
       // Note: Expecting organisms and models to be already loaded into state.
       // TODO: Use hardcoded list of preferred models for organisms
@@ -241,13 +252,13 @@ export default Vue.extend({
         return model.id === 15 && model.name === "e_coli_core";
       });
 
-      if (!organism || !model || dataDriven || withDialog) {
-        this.addCard(name, null, null, "pfba", dataDriven, withDialog);
+      if (!organism || !model || cardType || withDialog) {
+        this.addCard(name, null, null, "pfba", cardType, withDialog);
       } else {
-        this.addCard(name, organism, model, "pfba", dataDriven, withDialog);
+        this.addCard(name, organism, model, "pfba", cardType, withDialog);
       }
     },
-    addCard(name, organism, model, method, dataDriven, withDialog) {
+    addCard(name, organism, model, method, cardType, withDialog) {
       const card: CardType = {
         uuid: uuidv4(),
         name: name,
@@ -256,7 +267,7 @@ export default Vue.extend({
         modelId: model ? model.id : null,
         method: method,
         modified: false,
-        dataDriven: dataDriven,
+        type: cardType,
         // Design card fields
         objective: {
           reaction: null,
@@ -329,10 +340,16 @@ export default Vue.extend({
         return;
       }
 
-      if (!card.dataDriven) {
-        this.simulateDesignCard(card, model);
-      } else {
-        this.simulateDataDrivenCard(card, model);
+      switch (card.type) {
+        case "Design":
+          this.simulateDesignCard(card, model);
+          break;
+        case "DataDriven":
+          this.simulateDataDrivenCard(card, model);
+          break;
+        case "DiffFVA":
+          this.simulateDiffFVACard(card, model);
+          break;
       }
     },
     simulateDesignCard(card, model) {
@@ -426,6 +443,54 @@ export default Vue.extend({
             });
           }
         });
+    },
+    simulateDiffFVACard(card, model) {
+      console.log("Simulating the DiffFVA results. Bleep bloop.");
+      // // Reset warnings and errors
+      // this.updateCard({
+      //   uuid: card.uuid,
+      //   props: { conditionWarnings: [], conditionErrors: [] }
+      // });
+
+      // if (!card.conditionData) {
+      //   return;
+      // }
+
+      // // We'll be modifying the model before simulating, but just re-use the
+      // // loading flag for `isSimulating` to indicate that _something_ is going
+      // // on.
+      // this.updateCard({
+      //   uuid: card.uuid,
+      //   props: { isSimulating: true, hasSimulationError: false }
+      // });
+      // axios
+      //   .post(
+      //     `${settings.apis.model}/models/${model.id}/modify`,
+      //     card.conditionData
+      //   )
+      //   .then(response => {
+      //     // Note: Don't toggle `card.isSimulating`, because we're still
+      //     // waiting for the actual simulation to finish.
+      //     this.updateCard({
+      //       uuid: card.uuid,
+      //       props: { conditionWarnings: response.data.warnings }
+      //     });
+      //     this.postSimulation(card, model, response.data.operations);
+      //   })
+      //   .catch(error => {
+      //     this.updateCard({
+      //       uuid: card.uuid,
+      //       props: { isSimulating: false, hasSimulationError: true }
+      //     });
+      //     this.hasSimulationError = true;
+
+      //     if (error.response && error.response.data.errors) {
+      //       this.updateCard({
+      //         uuid: card.uuid,
+      //         props: { conditionErrors: error.response.data.errors }
+      //       });
+      //     }
+      //   });
     },
     postSimulation(card, model, operations) {
       this.updateCard({
