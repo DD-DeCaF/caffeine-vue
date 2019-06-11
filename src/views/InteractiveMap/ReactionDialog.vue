@@ -239,7 +239,10 @@ export default Vue.extend({
       const productsSerialized = this.serializeMetabolites(this.products).join(
         " + "
       );
-      return substratesSerialized + " ⇌ " + productsSerialized;
+      if (substratesSerialized || productsSerialized) {
+        return substratesSerialized + " ⇌ " + productsSerialized;
+      }
+      return "";
     },
     metaboliteItems() {
       return this.model.model_serialized
