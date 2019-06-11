@@ -10,7 +10,8 @@ export const apis = {
   metabolicNinja: `${process.env.VUE_APP_METABOLIC_NINJA_API}`,
   designStorage: `${process.env.VUE_APP_DESIGN_STORAGE_API}`,
   idMapper: `${process.env.VUE_APP_ID_MAPPER_API}`,
-  bigg: `${process.env.VUE_APP_BIGG_API}`
+  bigg: `${process.env.VUE_APP_BIGG_API}`,
+  metanetx: `${process.env.VUE_APP_METANETX_API}`
 };
 
 export const trustedURLs = process.env.VUE_APP_TRUSTED_URLS.split(",");
