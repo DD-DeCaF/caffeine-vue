@@ -17,6 +17,7 @@ spec:
       containers:
       - name: web
         image: gcr.io/dd-decaf-cfbf6/caffeine-vue:master
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:
@@ -46,6 +47,7 @@ spec:
       containers:
       - name: web
         image: gcr.io/dd-decaf-cfbf6/caffeine-vue:devel
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:
