@@ -49,11 +49,13 @@ elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
 fi
 
 # Build the nginx image
-docker build -t ${IMAGE_REPO}:${TRAVIS_COMMIT::12} -t ${IMAGE_REPO}:${TRAVIS_BRANCH} nginx
-docker push ${IMAGE_REPO}:${TRAVIS_COMMIT::12}
+# Include both branch and commit for the more specific image tag, since the
+# image could be build for different environments.
+docker build -t ${IMAGE_REPO}:${TRAVIS_BRANCH}-${TRAVIS_COMMIT::12} -t ${IMAGE_REPO}:${TRAVIS_BRANCH} nginx
+docker push ${IMAGE_REPO}:${TRAVIS_BRANCH}-${TRAVIS_COMMIT::12}
 docker push ${IMAGE_REPO}:${TRAVIS_BRANCH}
 
-kubectl set image deployment/${DEPLOYMENT} web=${IMAGE_REPO}:${TRAVIS_COMMIT::12}
+kubectl set image deployment/${DEPLOYMENT} web=${IMAGE_REPO}:${TRAVIS_BRANCH}-${TRAVIS_COMMIT::12}
 
 if [ "${TRAVIS_BRANCH}" = "master" ]; then
   curl -X POST --data-urlencode "payload={\"username\": \"Caffeine Production\", \"text\": \"Deployed <https://github.com/DD-DeCaF/caffeine-vue/commit/${TRAVIS_COMMIT}|*${TRAVIS_COMMIT::8}*> @ <https://caffeine.dd-decaf.eu|caffeine.dd-decaf.eu>\", \"icon_emoji\": \":dd-decaf:\"}" ${SLACK_WEBHOOK_URL}
