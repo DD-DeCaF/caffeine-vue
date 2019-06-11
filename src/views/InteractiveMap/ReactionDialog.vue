@@ -1,9 +1,14 @@
 <template>
   <v-dialog v-model="showDialog" width="1000">
     <v-card class="pa-3">
-      <div class="subheading mb-2">Reaction string:</div>
-      <v-text-field :value="reactionString" solo readonly></v-text-field>
       <v-form ref="form" v-model="valid" lazy-validation>
+        <div class="subheading mb-2">Reaction string:</div>
+        <v-text-field
+          :value="reactionString"
+          :rules="reactionStringRules"
+          solo
+          readonly
+        ></v-text-field>
         <v-layout align-center>
           <div class="mx-3 body-2">Reaction name:</div>
 
@@ -15,10 +20,9 @@
         </v-layout>
         <v-layout align-center>
           <div class="mx-3 body-2">Reaction id:</div>
-
           <v-text-field
             v-model="reactionId"
-            :rules="reactionIdRules"
+            :rules="[reactionIdRules]"
             class="mx-2"
           ></v-text-field
         ></v-layout>
@@ -26,25 +30,20 @@
           <div class="mx-3 body-2">Bounds:</div>
           <v-flex xs2 mx-2>
             <v-text-field
-              v-model="lowerBound"
+              v-model.number="lowerBound"
               type="number"
               label="Lower bound"
-              :rules="[boundRules]"
+              :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
             ></v-text-field>
           </v-flex>
           <v-flex xs2 mx-2>
             <v-text-field
-              v-model="upperBound"
+              v-model.number="upperBound"
               type="number"
               label="Upper bound"
-              :rules="[boundRules]"
+              :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
             ></v-text-field>
           </v-flex>
-          <v-flex
-            ><div v-if="hasInvalidBoundsError" class="red--text">
-              The lower bound cannot be larger than the upper bound
-            </div></v-flex
-          >
         </v-layout>
         <div class="body-2 ml-3 mb-2">
           Substrates:
@@ -54,7 +53,7 @@
             <v-layout>
               <v-flex xs1>
                 <v-text-field
-                  v-model="metabolite.stoichiometry"
+                  v-model.number="metabolite.stoichiometry"
                   :rules="[stoichiometryRules(metabolite)]"
                   solo
                   class="mx-2"
@@ -102,7 +101,7 @@
             <v-layout>
               <v-flex xs1>
                 <v-text-field
-                  v-model="metabolite.stoichiometry"
+                  v-model.number="metabolite.stoichiometry"
                   :rules="[stoichiometryRules(metabolite)]"
                   solo
                   class="mx-2"
@@ -142,10 +141,7 @@
             </v-layout>
           </div>
         </v-layout>
-        <v-btn
-          @click="addReaction"
-          color="primary"
-          :disabled="!valid || hasInvalidBoundsError || !reactionString"
+        <v-btn @click="addReaction" color="primary" :disabled="!valid"
           >Add reaction</v-btn
         >
       </v-form>
@@ -175,28 +171,25 @@ export default Vue.extend({
         stoichiometry: 1
       }
     ],
-    boundRules: value => {
-      if (isNaN(parseFloat(value))) {
+    reactionStringRules: [v => !!v || "Reaction string should not be empty"],
+    reactionNameRules: [v => !!v || "Reaction name is required"],
+    singleBoundRules: v => {
+      if (!v) {
+        return "Bounds are required";
+      }
+      if (isNaN(v)) {
         return "Bounds must be a number";
       }
-      if (value < -1000 || value > 1000) {
+      if (v < -1000 || v > 1000) {
         return "Bounds must be in the range of -1000 to 1000";
       }
       return true;
     },
-    reactionNameRules: [v => !!v || "Reaction name is required"],
-    reactionIdRules: [
-      v => !!v || "Reaction id is required",
-      v => (v && !/\s/.test(v)) || "Id should not contain whitespaces"
-    ],
     stoichiometryRules: metabolite => {
       if (metabolite.metabolite && !metabolite.stoichiometry) {
         return "Stoichiometry is required";
       }
-      if (
-        metabolite.stoichiometry &&
-        parseFloat(metabolite.stoichiometry) === 0
-      ) {
+      if (metabolite.stoichiometry && metabolite.stoichiometry === 0) {
         return "Stoichiometry cannot be 0";
       }
       return true;
@@ -244,9 +237,6 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
-    },
-    hasInvalidBoundsError() {
-      return parseFloat(this.lowerBound) > parseFloat(this.upperBound);
     }
   },
   methods: {
@@ -259,19 +249,40 @@ export default Vue.extend({
     compartmentDisplay(compartment) {
       return `${compartment.name} (${compartment.id})`;
     },
+    reactionIdRules(v) {
+      if (!v) {
+        return "Reaction id is required";
+      }
+      if (/\s/.test(v)) {
+        return "Id should not contain whitespaces";
+      }
+      if (
+        v &&
+        this.model.model_serialized &&
+        this.model.model_serialized.reactions.some(
+          reaction => reaction.id === v
+        )
+      ) {
+        return "Provided id already exists in the model";
+      }
+      return true;
+    },
+    boundRules(lowerBound, upperBound) {
+      if (lowerBound > upperBound) {
+        return "The lower bound cannot be larger than the upper bound";
+      }
+      return true;
+    },
     serializeMetabolites(metabolites) {
       return metabolites
         .filter(m => m.metabolite)
         .map(metabolite => {
-          const stoichiometrySerialized =
-            metabolite.stoichiometry === 1
-              ? ""
-              : metabolite.stoichiometry + " ";
           const compartment = metabolite.compartment
             ? "_" + metabolite.compartment
             : "";
           return (
-            stoichiometrySerialized +
+            metabolite.stoichiometry +
+            " " +
             this.getMetaboliteId(
               metabolite.metabolite.id,
               metabolite.metabolite.compartment
@@ -281,6 +292,8 @@ export default Vue.extend({
         });
     },
     getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
+      // getMetaboliteId('abc_c', 'c') => 'abc'
+      // getMetaboliteId('abc_1', 'c') => 'abc_1'
       const compartmentInId = idWithCompartment.substring(
         idWithCompartment.lastIndexOf("_") + 1
       );
