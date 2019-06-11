@@ -90,7 +90,11 @@
                   ><v-btn icon @click="addSubstrate">
                     <v-icon color="primary">add_circle</v-icon></v-btn
                   >
-                  <v-btn icon v-if="substrates.length > 1" @click="deleteSubstrate(index)">
+                  <v-btn
+                    icon
+                    v-if="substrates.length > 1"
+                    @click="deleteSubstrate(index)"
+                  >
                     <v-icon color="primary">delete</v-icon></v-btn
                   ></v-layout
                 ></v-flex
@@ -143,7 +147,11 @@
                   ><v-btn icon @click="addProduct">
                     <v-icon color="primary">add_circle</v-icon></v-btn
                   >
-                  <v-btn icon v-if="products.length > 1" @click="deleteProduct(index)">
+                  <v-btn
+                    icon
+                    v-if="products.length > 1"
+                    @click="deleteProduct(index)"
+                  >
                     <v-icon color="primary">delete</v-icon></v-btn
                   ></v-layout
                 ></v-flex
