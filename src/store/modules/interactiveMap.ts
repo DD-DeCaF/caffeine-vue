@@ -60,6 +60,8 @@ export interface Card {
   fluxes: number | null;
   // When adding a card from the interactive map, the dialog should be opened
   withDialog: boolean;
+  // Specific fields for design prediction methods
+  manipulations: any[] | null;
 }
 
 export default {
