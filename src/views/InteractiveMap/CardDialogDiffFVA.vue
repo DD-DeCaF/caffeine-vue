@@ -14,26 +14,12 @@
     </v-radio-group>
     </v-layout>
 
-    <v-progress-linear
-      :indeterminate="true"
-      v-if="isLoadingConditionData"
-    ></v-progress-linear>
-
-    <div v-if="organismMismatch" class="mb-2">
-      <v-alert :value="true" type="warning">
-        You are applying experimental data for the strain
-        <em>{{ conditionOrganism.name }}</em> to a model based on a different
-        organism (<em>{{ card.organism.name }}</em
-        >). Some data points may not apply succesfully.
-      </v-alert>
-    </div>
-
     <v-layout v-if="card.manipulations">
       <v-flex class="mr-2">
         <v-card>
-          <v-subheader>Overexpression</v-subheader>
-          <v-list v-for="manipulation in card.manipulations" :key="manipulation.id">
-            <v-list-tile v-if="manipulation.direction === 'up'">
+          <v-subheader>Overexpression targets</v-subheader>
+          <v-list v-for="manipulation in overexpressionTargets" :key="manipulation.id">
+            <v-list-tile>
               <v-list-tile-content>
                 <v-list-tile-title>
                   {{ manipulation.id }} ↑
@@ -45,9 +31,9 @@
       </v-flex>
       <v-flex>
         <v-card class="mx-2">
-          <v-subheader>Knock-down</v-subheader>
-          <v-list v-for="manipulation in card.manipulations" :key="manipulation.id">
-            <v-list-tile v-if="manipulation.direction === 'down'">
+          <v-subheader>Knock-down targets</v-subheader>
+          <v-list v-for="manipulation in knockdownTargets" :key="manipulation.id">
+            <v-list-tile>
               <v-list-tile-content>
                 <v-list-tile-title>
                   {{ manipulation.id }} ↓
@@ -69,16 +55,22 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "CardDialogDataDriven",
-  props: ["card", "modifications"],
+  props: ["card"],
   data: () => ({
     showModulationTargets: false,
   }),
   computed: {
-    organismMismatch() {
-      if (!this.card.organism || !this.conditionOrganism) {
-        return false;
-      }
-      return this.card.organism.id != this.conditionOrganism.id;
+    overexpressionTargets() {
+       return [
+        ...this.card.manipulations
+      ]
+        .filter(manipulation => manipulation.direction === 'up')
+    },
+    knockdownTargets() {
+       return [
+        ...this.card.manipulations
+      ]
+        .filter(manipulation => manipulation.direction === 'down')
     },
   },
   watch: {
