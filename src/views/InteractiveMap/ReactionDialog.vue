@@ -141,8 +141,11 @@
             </v-layout>
           </div>
         </v-layout>
-        <v-btn @click="addReaction" color="primary" :disabled="!valid"
-          >Add reaction</v-btn
+        <v-layout justify-end>
+          <v-btn @click="clear" color="primary" flat>Clear</v-btn>
+          <v-btn @click="addReaction" color="primary" :disabled="!valid"
+            >Add reaction</v-btn
+          ></v-layout
         >
       </v-form>
     </v-card>
@@ -153,10 +156,8 @@
 import Vue from "vue";
 import { Reaction } from "@/store/modules/interactiveMap";
 
-export default Vue.extend({
-  name: "ReactionDialog",
-  props: ["model", "value", "card"],
-  data: () => ({
+function getInitialState() {
+  return {
     substrates: [
       {
         metabolite: null,
@@ -171,6 +172,11 @@ export default Vue.extend({
         stoichiometry: 1
       }
     ],
+    lowerBound: -1000,
+    upperBound: 1000,
+    reactionId: "",
+    reactionName: "",
+    valid: true,
     reactionStringRules: [v => !!v || "Reaction string should not be empty"],
     reactionNameRules: [v => !!v || "Reaction name is required"],
     singleBoundRules: v => {
@@ -199,13 +205,14 @@ export default Vue.extend({
         return "Compartment is required";
       }
       return true;
-    },
-    lowerBound: -1000,
-    upperBound: 1000,
-    reactionId: "",
-    reactionName: "",
-    valid: true
-  }),
+    }
+  };
+}
+
+export default Vue.extend({
+  name: "ReactionDialog",
+  props: ["model", "value", "card"],
+  data: () => getInitialState(),
   computed: {
     reactionString() {
       const substratesSerialized = this.serializeMetabolites(
@@ -360,6 +367,10 @@ export default Vue.extend({
       this.$emit("simulate-card");
       this.$refs.form.reset();
       this.showDialog = false;
+    },
+    clear() {
+      this.$refs.form.resetValidation();
+      Object.assign(this.$data, getInitialState());
     }
   }
 });
