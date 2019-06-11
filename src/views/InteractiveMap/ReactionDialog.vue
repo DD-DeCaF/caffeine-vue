@@ -373,7 +373,7 @@ export default Vue.extend({
         metabolites: [...negativeSubstrates, ...this.products]
           .filter(m => m.metabolite)
           .map(m => ({
-            id: m.metabolite.id,
+            id: this.getMetaboliteId(m.metabolite.id, m.metabolite.compartment),
             name: m.metabolite.name,
             compartment: m.compartment,
             stoichiometry: m.stoichiometry
