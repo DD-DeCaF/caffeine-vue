@@ -353,6 +353,9 @@ export default Vue.extend({
       }
     },
     simulateDesignCard(card, model) {
+      this.postSimulation(card, model, this.cardModifications(card));
+    },
+    cardModifications(card) {
       // Collect card operations from modifications
       const reactionAdditions = card.reactionAdditions.map(reaction => ({
         operation: "add",
@@ -390,12 +393,12 @@ export default Vue.extend({
           upper_bound: reaction.upperBound
         }
       }));
-      this.postSimulation(card, model, [
+      return [
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
-      ]);
+      ]
     },
     simulateDataDrivenCard(card, model) {
       // Reset warnings and errors
@@ -445,52 +448,71 @@ export default Vue.extend({
         });
     },
     simulateDiffFVACard(card, model) {
-      console.log("Simulating the DiffFVA results. Bleep bloop.");
-      // // Reset warnings and errors
-      // this.updateCard({
-      //   uuid: card.uuid,
-      //   props: { conditionWarnings: [], conditionErrors: [] }
-      // });
-
-      // if (!card.conditionData) {
-      //   return;
-      // }
-
-      // // We'll be modifying the model before simulating, but just re-use the
-      // // loading flag for `isSimulating` to indicate that _something_ is going
-      // // on.
-      // this.updateCard({
-      //   uuid: card.uuid,
-      //   props: { isSimulating: true, hasSimulationError: false }
-      // });
-      // axios
-      //   .post(
-      //     `${settings.apis.model}/models/${model.id}/modify`,
-      //     card.conditionData
-      //   )
-      //   .then(response => {
-      //     // Note: Don't toggle `card.isSimulating`, because we're still
-      //     // waiting for the actual simulation to finish.
-      //     this.updateCard({
-      //       uuid: card.uuid,
-      //       props: { conditionWarnings: response.data.warnings }
-      //     });
-      //     this.postSimulation(card, model, response.data.operations);
-      //   })
-      //   .catch(error => {
-      //     this.updateCard({
-      //       uuid: card.uuid,
-      //       props: { isSimulating: false, hasSimulationError: true }
-      //     });
-      //     this.hasSimulationError = true;
-
-      //     if (error.response && error.response.data.errors) {
-      //       this.updateCard({
-      //         uuid: card.uuid,
-      //         props: { conditionErrors: error.response.data.errors }
-      //       });
-      //     }
-      //   });
+      console.log("simulating DiffFVA 1")
+      const operations = this.cardModifications(card);
+      console.log("operations", operations)
+      this.updateCard({
+        uuid: card.uuid,
+        props: {
+          isSimulating: true,
+          hasSimulationError: false
+        }
+      });
+      axios
+        .post(`${settings.apis.model}/simulate`, {
+          model_id: model.id,
+          method: card.method,
+          operations: operations,
+          objective_id: card.objective.reaction
+            ? card.objective.reaction.id
+            : null,
+          objective_direction: card.objective.maximize ? "max" : "min"
+        })
+        .then(response => {
+          console.log("response received")
+          const wildtypeGrowthrate = response.data.growth_rate
+          const wildtypeFluxdistribution = response.data.flux_distribution
+          console.log("this is a flux distribution", wildtypeFluxdistribution)
+          // Calculate new bounds based on manipulation scores calculated by DiffFVA
+          // (Reference flux * score) / Reference growth
+          console.log("all groovy this far")
+          const editedBounds = card.manipulations.map(
+            function(manipulation){
+               const newBound = (wildtypeFluxdistribution[manipulation.id] * manipulation.value)/ wildtypeGrowthrate;
+              return {
+                  operation: "modify", 
+                  type: "reaction", 
+                  id: manipulation.id,
+                  data: {
+                    lower_bound: newBound,
+                    upper_bound: newBound
+                    }
+                  };
+              }
+          );
+          console.log("editedBounds", editedBounds)
+          // Re-simulate the model with the updated bounds
+          // after readding all previous modifications
+          console.log("simulating DiffFVA 2")
+          const filteredMods = this.cardModifications(card).filter( mod => mod.operation !== "modify");
+          console.log(filteredMods)
+          console.log(editedBounds)
+          this.postSimulation(card, model, [...filteredMods, ...editedBounds]);
+        })
+        .catch(error => {
+          this.updateCard({
+            uuid: card.uuid,
+            props: { hasSimulationError: true }
+          });
+          this.hasSimulationError = true;
+        })
+        .then(response => {
+          this.updateCard({
+            uuid: card.uuid,
+            props: { isSimulating: false }
+          });
+        });
+       
     },
     postSimulation(card, model, operations) {
       this.updateCard({
