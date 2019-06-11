@@ -205,8 +205,8 @@ function getInitialState() {
       if (metabolite.metabolite && !metabolite.stoichiometry) {
         return "Stoichiometry is required";
       }
-      if (metabolite.stoichiometry && metabolite.stoichiometry === 0) {
-        return "Stoichiometry cannot be 0";
+      if (metabolite.stoichiometry && metabolite.stoichiometry <= 0) {
+        return "Please provide positive value";
       }
       return true;
     },
