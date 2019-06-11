@@ -163,10 +163,11 @@
       @change="addReaction"
     ></v-autocomplete>
 
-    <v-icon>add</v-icon>
-    <v-btn @click.stop="isReactionDialogVisible = true"
+    <v-icon :disabled="!model">add</v-icon>
+    <v-btn @click.stop="isReactionDialogVisible = true" :disabled="!model"
       >Add arbitrary reaction
       <ReactionDialog
+        v-if="model"
         v-model="isReactionDialogVisible"
         :model="model"
         :card="card"
