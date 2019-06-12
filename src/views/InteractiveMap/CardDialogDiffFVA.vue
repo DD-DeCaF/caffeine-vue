@@ -4,12 +4,13 @@
       <v-flex class="mr-2">
         <v-card>
           <v-subheader>Overexpression targets</v-subheader>
-          <v-list v-for="manipulation in overexpressionTargets" :key="manipulation.id">
+          <v-list
+            v-for="manipulation in overexpressionTargets"
+            :key="manipulation.id"
+          >
             <v-list-tile>
               <v-list-tile-content>
-                <v-list-tile-title>
-                  {{ manipulation.id }} ↑
-                </v-list-tile-title>
+                <v-list-tile-title> {{ manipulation.id }} ↑ </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
@@ -18,12 +19,13 @@
       <v-flex>
         <v-card class="mx-2">
           <v-subheader>Knock-down targets</v-subheader>
-          <v-list v-for="manipulation in knockdownTargets" :key="manipulation.id">
+          <v-list
+            v-for="manipulation in knockdownTargets"
+            :key="manipulation.id"
+          >
             <v-list-tile>
               <v-list-tile-content>
-                <v-list-tile-title>
-                  {{ manipulation.id }} ↓
-                </v-list-tile-title>
+                <v-list-tile-title> {{ manipulation.id }} ↓ </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
@@ -42,24 +44,20 @@ import * as settings from "@/utils/settings";
 export default Vue.extend({
   name: "CardDialogDataDriven",
   props: ["card"],
-  data: () => ({
-  }),
+  data: () => ({}),
   computed: {
     overexpressionTargets() {
-       return [
-        ...this.card.manipulations
-      ]
-        .filter(manipulation => manipulation.direction === 'up')
+      return [...this.card.manipulations].filter(
+        manipulation => manipulation.direction === "up"
+      );
     },
     knockdownTargets() {
-       return [
-        ...this.card.manipulations
-      ]
-        .filter(manipulation => manipulation.direction === 'down')
-    },
+      return [...this.card.manipulations].filter(
+        manipulation => manipulation.direction === "down"
+      );
+    }
   },
-  watch: {
-  },
+  watch: {},
   methods: {
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"

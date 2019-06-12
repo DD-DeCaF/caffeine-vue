@@ -831,7 +831,10 @@ export default Vue.extend({
           ...jobPrediction.synthetic_reactions
         ];
         const promises = this.getAddedReactions(addedReactionIds);
-        const cardType = jobPrediction.method === "PathwayPredictor+DifferentialFVA" ? "DiffFVA" : "Design";
+        const cardType =
+          jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+            ? "DiffFVA"
+            : "Design";
         Promise.all(promises).then((addedReactions: any[]) => {
           const card: Card = {
             uuid: uuidv4(),

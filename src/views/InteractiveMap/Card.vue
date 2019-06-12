@@ -159,10 +159,10 @@
       </v-container>
 
       <!-- DiffFVA -->
-           <v-container v-if="card.type == 'DiffFVA'" fluid class="pa-0">
+      <v-container v-if="card.type == 'DiffFVA'" fluid class="pa-0">
         <v-layout row>
           <v-flex>
-          <v-switch
+            <v-switch
               input-value="showDiffFVAScore"
               :label="`Toggle diffFVA scores`"
               @change="toggleDiffFVAscore()"
@@ -233,7 +233,7 @@ export default Vue.extend({
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
-    isCardDialogVisible: false,
+    isCardDialogVisible: false
   }),
   computed: {
     titleColor() {

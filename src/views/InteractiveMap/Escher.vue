@@ -111,13 +111,15 @@ export default Vue.extend({
       return model;
     },
     diffFVAScores() {
-       if (this.card.type === "DiffFVA") {
-         let scores = {}
-         this.card.manipulations.forEach( manipulation => {
-           scores[manipulation.id] = manipulation.value
-         })
-         return scores;
-       } else {return null}
+      if (this.card.type === "DiffFVA") {
+        let scores = {};
+        this.card.manipulations.forEach(manipulation => {
+          scores[manipulation.id] = manipulation.value;
+        });
+        return scores;
+      } else {
+        return null;
+      }
     }
   },
   watch: {
@@ -179,7 +181,7 @@ export default Vue.extend({
     "card.fluxes"() {
       this.onEscherReady.then(this.setFluxes);
     },
-    "showDiffFVAScore"(){
+    showDiffFVAScore() {
       this.onEscherReady.then(this.setFluxes);
     }
   },
@@ -281,7 +283,10 @@ export default Vue.extend({
       if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (this.card.method === "fba" || this.card.method == "pfba" && !this.showDiffFVAScore) {
+        if (
+          this.card.method === "fba" ||
+          (this.card.method == "pfba" && !this.showDiffFVAScore)
+        ) {
           const fluxesFiltered = this.fluxFilter(this.card.fluxes);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
@@ -290,8 +295,7 @@ export default Vue.extend({
           this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         } else if (
           this.card.method === "fva" ||
-          this.card.method == "pfba-fva" && 
-          !this.showDiffFVAScore
+          (this.card.method == "pfba-fva" && !this.showDiffFVAScore)
         ) {
           // Render a flux distribution using the average values from the FVA
           // data.
@@ -305,7 +309,7 @@ export default Vue.extend({
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set the FVA data for transparency visualization.
           this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
-        } else if ( this.showDiffFVAScore ) {
+        } else if (this.showDiffFVAScore) {
           // Set the scores instead of the cards fluxes.
           // (calculated from a diffFVA card's manipulations)
           this.escherBuilder.set_reaction_data(this.diffFVAScores);

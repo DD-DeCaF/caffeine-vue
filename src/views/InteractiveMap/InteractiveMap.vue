@@ -153,7 +153,7 @@ export default Vue.extend({
     hasSaveDesignError: false,
     hasSaveDesignSuccess: false,
     savedDesignName: null,
-    showDiffFVAScore: false,
+    showDiffFVAScore: false
   }),
   computed: {
     currentMapId: {
@@ -402,7 +402,7 @@ export default Vue.extend({
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
-      ]
+      ];
     },
     simulateDataDrivenCard(card, model) {
       // Reset warnings and errors
@@ -452,9 +452,7 @@ export default Vue.extend({
         });
     },
     simulateDiffFVACard(card, model) {
-      console.log("simulating DiffFVA 1")
       const operations = this.cardModifications(card);
-      console.log("operations", operations)
       this.updateCard({
         uuid: card.uuid,
         props: {
@@ -462,8 +460,6 @@ export default Vue.extend({
           hasSimulationError: false
         }
       });
-      console.log("this is the objective", card.objective.reaction)
-      console.log("default biomass rxn", model.default_biomass_reaction)
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: model.id,
@@ -475,43 +471,38 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          console.log("response received")
-          const wildtypeGrowthrate = response.data.growth_rate
-          const wildtypeFluxdistribution = response.data.flux_distribution
-          console.log("this is a flux distribution", wildtypeFluxdistribution)
+          const wildtypeGrowthrate = response.data.growth_rate;
+          const wildtypeFluxdistribution = response.data.flux_distribution;
           // Calculate new bounds based on manipulation scores calculated by DiffFVA
           // (Reference flux * score) / Reference growth
-          console.log("all groovy this far")
           const editedBounds = card.manipulations
-          .map(
-            function(manipulation){
-               const newBound = Math.round((wildtypeFluxdistribution[manipulation.id] * manipulation.value)/ wildtypeGrowthrate);
-               console.log("rounded values", manipulation.id, newBound)
+            .map(function(manipulation) {
+              const newBound = Math.round(
+                (wildtypeFluxdistribution[manipulation.id] *
+                  manipulation.value) /
+                  wildtypeGrowthrate
+              );
               return {
-                  operation: "modify", 
-                  type: "reaction", 
-                  id: manipulation.id,
-                  data: {
-                    lower_bound: newBound,
-                    upper_bound: newBound
-                    }
-                  };
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: newBound
+                }
+              };
+            })
+            .filter(function(operation) {
+              if (operation.data.lower_bound === 0) {
+                return false;
               }
-          )
-          .filter( function(operation) {
-            if (operation.data.lower_bound === 0) {
-              return false;
-            }
-            return true;
-          }
-          );
-          console.log("editedBounds", editedBounds)
+              return true;
+            });
           // Re-simulate the model with the updated bounds
           // after readding all previous modifications
-          console.log("simulating DiffFVA 2")
-          const filteredMods = this.cardModifications(card).filter( mod => mod.operation !== "modify");
-          console.log(filteredMods)
-          console.log(editedBounds)
+          const filteredMods = this.cardModifications(card).filter(
+            mod => mod.operation !== "modify"
+          );
           this.postSimulation(card, model, [...filteredMods, ...editedBounds]);
         })
         .catch(error => {
@@ -527,7 +518,6 @@ export default Vue.extend({
             props: { isSimulating: false }
           });
         });
-       
     },
     postSimulation(card, model, operations) {
       this.updateCard({
