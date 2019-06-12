@@ -1,16 +1,13 @@
 <template>
   <v-dialog v-model="showDialog" width="1000">
-    <v-card class="pa-3">
-      <v-form ref="form" v-model="valid" lazy-validation>
-        <div class="subheading mb-2">Reaction string:</div>
-        <v-text-field
-          :value="reactionString"
-          :rules="reactionStringRules"
-          solo
-          readonly
-        ></v-text-field>
+    <MetaboliteDialog
+      v-model="isMetaboliteDialogVisible"
+      @return-object="passMetabolite"
+    />
+    <v-card class="pa-4">
+      <v-form ref="form" v-model="isValid" lazy-validation>
         <v-layout align-center>
-          <div class="mx-3 body-2">Reaction name:</div>
+          <div class="mr-3 body-2">Reaction name:</div>
 
           <v-text-field
             v-model="reactionName"
@@ -19,7 +16,7 @@
           ></v-text-field>
         </v-layout>
         <v-layout align-center>
-          <div class="mx-3 body-2">Reaction id:</div>
+          <div class="mr-3 body-2">Reaction id:</div>
           <v-text-field
             v-model="reactionId"
             :rules="[reactionIdRules]"
@@ -27,7 +24,7 @@
           ></v-text-field
         ></v-layout>
         <v-layout align-center>
-          <div class="mx-3 body-2">Bounds:</div>
+          <div class="mr-3 body-2">Bounds:</div>
           <v-flex xs2 mx-2>
             <v-text-field
               v-model.number="lowerBound"
@@ -45,7 +42,7 @@
             ></v-text-field>
           </v-flex>
         </v-layout>
-        <div class="body-2 ml-3 mb-2">
+        <div class="body-2 my-2">
           Substrates:
         </div>
         <v-layout column mx-3>
@@ -69,9 +66,24 @@
                   return-object
                   clearable
                   class="mx-2"
+                  @change="setCompartmentFromMetabolite(metabolite, $event)"
                 >
-                </v-autocomplete
-              ></v-flex>
+                  <template v-slot:prepend-item>
+                    <v-btn
+                      flat
+                      @click.stop="
+                        currentMetaboliteIndex = index;
+                        isSubstratesMetabolite = true;
+                        isMetaboliteDialogVisible = true;
+                      "
+                      class="pl-0"
+                    >
+                      <v-icon class="mr-2" color="primary">add_circle</v-icon>
+                      New metabolite
+                    </v-btn>
+                  </template>
+                </v-autocomplete></v-flex
+              >
               <v-flex xs3
                 ><v-autocomplete
                   v-model="metabolite.compartment"
@@ -102,8 +114,8 @@
             </v-layout>
           </div>
         </v-layout>
-        <div class="body-2 ml-3 mb-2">
-          Product:
+        <div class="body-2 mb-2">
+          Products:
         </div>
         <v-layout column mx-3>
           <div v-for="(metabolite, index) in products" :key="index">
@@ -126,9 +138,24 @@
                   return-object
                   clearable
                   class="mx-2"
+                  @change="setCompartmentFromMetabolite(metabolite, $event)"
                 >
-                </v-autocomplete
-              ></v-flex>
+                  <template v-slot:prepend-item>
+                    <v-btn
+                      flat
+                      @click.stop="
+                        currentMetaboliteIndex = index;
+                        isSubstratesMetabolite = false;
+                        isMetaboliteDialogVisible = true;
+                      "
+                      class="pl-0"
+                    >
+                      <v-icon class="mr-2" color="primary">add_circle</v-icon>
+                      New metabolite
+                    </v-btn>
+                  </template>
+                </v-autocomplete></v-flex
+              >
               <v-flex xs3
                 ><v-autocomplete
                   v-model="metabolite.compartment"
@@ -159,9 +186,16 @@
             </v-layout>
           </div>
         </v-layout>
+        <div class="subheading mb-2">Preview:</div>
+        <v-text-field
+          :value="reactionString"
+          :rules="reactionStringRules"
+          solo
+          readonly
+        ></v-text-field>
         <v-layout justify-end>
           <v-btn @click="clear" color="primary" flat>Clear</v-btn>
-          <v-btn @click="addReaction" color="primary" :disabled="!valid"
+          <v-btn @click="addReaction" color="primary" :disabled="!isValid"
             >Add reaction</v-btn
           ></v-layout
         >
@@ -173,6 +207,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Reaction } from "@/store/modules/interactiveMap";
+import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
 
 function getInitialState() {
   return {
@@ -194,9 +229,13 @@ function getInitialState() {
     upperBound: 1000,
     reactionId: "",
     reactionName: "",
-    valid: true,
+    isValid: true,
     reactionStringRules: [v => !!v || "Reaction string should not be empty"],
     reactionNameRules: [v => !!v || "Reaction name is required"],
+    isMetaboliteDialogVisible: false,
+    currentMetaboliteIndex: 0,
+    isSubstratesMetabolite: false,
+    customMetabolites: [],
     singleBoundRules: v => {
       if (!v) {
         return "Bounds are required";
@@ -229,6 +268,9 @@ function getInitialState() {
 
 export default Vue.extend({
   name: "ReactionDialog",
+  components: {
+    MetaboliteDialog
+  },
   props: ["model", "value", "card"],
   data: () => getInitialState(),
   computed: {
@@ -246,8 +288,11 @@ export default Vue.extend({
     },
     metaboliteItems() {
       return this.model.model_serialized
-        ? this.model.model_serialized.metabolites
-        : [];
+        ? [
+            ...this.customMetabolites,
+            ...this.model.model_serialized.metabolites
+          ]
+        : this.customMetabolites;
     },
     compartmentItems() {
       return this.model.model_serialized
@@ -367,9 +412,6 @@ export default Vue.extend({
         id: this.reactionId,
         name: this.reactionName,
         reactionString: this.reactionString,
-        // Note: Assuming all reactions in the universal model are
-        // reversible, but this might not be the case. Could potentially use
-        // the reaction string to check reversibility.
         lowerBound: this.lowerBound,
         upperBound: this.upperBound,
         metabolites: [...negativeSubstrates, ...this.products]
@@ -379,8 +421,6 @@ export default Vue.extend({
             name: m.metabolite.name,
             compartment: m.compartment,
             stoichiometry: m.stoichiometry
-            // formula: null,
-            // annotation: null
           }))
       };
 
@@ -393,6 +433,20 @@ export default Vue.extend({
       this.$emit("simulate-card");
       this.clear();
       this.showDialog = false;
+    },
+    setCompartmentFromMetabolite(metabolite, value) {
+      metabolite.compartment = value.compartment;
+    },
+    passMetabolite(metabolite) {
+      this.customMetabolites.push(metabolite);
+      const target = this.isSubstratesMetabolite
+        ? this.substrates
+        : this.products;
+      Vue.set(target[this.currentMetaboliteIndex], "metabolite", {
+        ...target[this.currentMetaboliteIndex].metabolite,
+        id: metabolite.id,
+        name: metabolite.name
+      });
     },
     clear() {
       this.$refs.form.resetValidation();

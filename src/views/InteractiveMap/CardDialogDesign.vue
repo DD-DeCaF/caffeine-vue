@@ -165,7 +165,7 @@
 
     <v-icon :disabled="!model">add</v-icon>
     <v-btn @click.stop="isReactionDialogVisible = true" :disabled="!model"
-      >Add arbitrary reaction
+      >Define your own reaction
       <ReactionDialog
         v-if="model"
         v-model="isReactionDialogVisible"
