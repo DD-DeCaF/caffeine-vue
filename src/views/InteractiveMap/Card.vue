@@ -158,6 +158,19 @@
         </v-layout>
       </v-container>
 
+      <!-- DiffFVA -->
+           <v-container v-if="card.type == 'DiffFVA'" fluid class="pa-0">
+        <v-layout row>
+          <v-flex>
+          <v-switch
+              input-value="showDiffFVAScore"
+              :label="`Toggle diffFVA scores`"
+              @change="toggleDiffFVAscore()"
+            ></v-switch>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="!isSaveTooltipVisible">
@@ -216,11 +229,11 @@ export default Vue.extend({
       return value.toFixed(3);
     }
   },
-  props: ["card", "isOnlyCard", "isSelected"],
+  props: ["card", "isOnlyCard", "isSelected", "showDiffFVAScore"],
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
-    isCardDialogVisible: false
+    isCardDialogVisible: false,
   }),
   computed: {
     titleColor() {
@@ -390,6 +403,9 @@ export default Vue.extend({
     });
   },
   methods: {
+    toggleDiffFVAscore() {
+      this.$emit("toggle-score", this.card);
+    },
     selectCard() {
       this.$emit("select-card", this.card);
     },

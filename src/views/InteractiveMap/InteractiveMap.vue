@@ -11,6 +11,7 @@
       @click="isSidepanelOpen = false"
       :card="selectedCard"
       :mapData="mapData"
+      :showDiffFVAScore="showDiffFVAScore"
     />
     <Legend />
     <v-btn
@@ -89,12 +90,14 @@
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
+          :showDiffFVAScore="showDiffFVAScore"
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
           @load-data-error="hasLoadDataError = true"
           @design-saved="designSaved"
           @design-save-error="hasSaveDesignError = true"
+          @toggle-score="showDiffFVAScore = !showDiffFVAScore"
         />
       </v-container>
     </v-navigation-drawer>
@@ -149,7 +152,8 @@ export default Vue.extend({
     hasLoadDataError: false,
     hasSaveDesignError: false,
     hasSaveDesignSuccess: false,
-    savedDesignName: null
+    savedDesignName: null,
+    showDiffFVAScore: false,
   }),
   computed: {
     currentMapId: {
@@ -458,6 +462,8 @@ export default Vue.extend({
           hasSimulationError: false
         }
       });
+      console.log("this is the objective", card.objective.reaction)
+      console.log("default biomass rxn", model.default_biomass_reaction)
       axios
         .post(`${settings.apis.model}/simulate`, {
           model_id: model.id,
@@ -465,7 +471,7 @@ export default Vue.extend({
           operations: operations,
           objective_id: card.objective.reaction
             ? card.objective.reaction.id
-            : null,
+            : model.default_biomass_reaction,
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
@@ -476,9 +482,11 @@ export default Vue.extend({
           // Calculate new bounds based on manipulation scores calculated by DiffFVA
           // (Reference flux * score) / Reference growth
           console.log("all groovy this far")
-          const editedBounds = card.manipulations.map(
+          const editedBounds = card.manipulations
+          .map(
             function(manipulation){
-               const newBound = (wildtypeFluxdistribution[manipulation.id] * manipulation.value)/ wildtypeGrowthrate;
+               const newBound = Math.round((wildtypeFluxdistribution[manipulation.id] * manipulation.value)/ wildtypeGrowthrate);
+               console.log("rounded values", manipulation.id, newBound)
               return {
                   operation: "modify", 
                   type: "reaction", 
@@ -489,6 +497,13 @@ export default Vue.extend({
                     }
                   };
               }
+          )
+          .filter( function(operation) {
+            if (operation.data.lower_bound === 0) {
+              return false;
+            }
+            return true;
+          }
           );
           console.log("editedBounds", editedBounds)
           // Re-simulate the model with the updated bounds

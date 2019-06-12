@@ -1,19 +1,5 @@
 <template>
   <div>
-    <v-layout>
-      <v-radio-group v-model="showModulationTargets">
-      Toggle flux modulation targets
-      <v-radio
-        label="Show targets and scores"
-        value="True"
-      ></v-radio>
-      <v-radio
-        label="Show flux distribution"
-        value=False
-      ></v-radio>
-    </v-radio-group>
-    </v-layout>
-
     <v-layout v-if="card.manipulations">
       <v-flex class="mr-2">
         <v-card>
@@ -57,7 +43,6 @@ export default Vue.extend({
   name: "CardDialogDataDriven",
   props: ["card"],
   data: () => ({
-    showModulationTargets: false,
   }),
   computed: {
     overexpressionTargets() {
