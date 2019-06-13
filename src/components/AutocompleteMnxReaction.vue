@@ -21,6 +21,47 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
 
+interface MetaNetXReaction {
+  compartments: {
+    annotation: Annotation;
+    mnx_id: string;
+    name: string;
+    xref: string;
+  }[];
+  metabolites: {
+    annotation: Annotation;
+    name: string;
+    mnx_id: string;
+  }[];
+  reaction: {
+    mnx_id: string;
+    name: string | undefined;
+    ec: string;
+    equation_string: string;
+    equation_parsed: {
+      coefficient: number;
+      compartment_id: string;
+      metabolite_id: string;
+    }[];
+    annotation: Annotation;
+  };
+}
+
+interface Annotation {
+  bigg: string[];
+  chebi: string[];
+  deprecated: string[];
+  hmdb: string[];
+  kegg: string[];
+  metacyc: string[];
+  seed: string[];
+  reactome: string[];
+  sabiork: string[];
+  envipath: string[];
+  lipidmaps: string[];
+  slm: string[];
+}
+
 export default Vue.extend({
   name: "AutocompleteMnxReaction",
   inheritAttrs: false,
@@ -58,16 +99,40 @@ export default Vue.extend({
     }
   },
   methods: {
-    reactionDisplay(reaction): string {
+    reactionDisplay(reaction: MetaNetXReaction): string {
       const { name, mnx_id, ec } = reaction.reaction;
       return `${name || "N/A"} (${mnx_id}) ${ec ? `EC:${ec}` : ""}`;
     },
-    onChange(selectedReaction): void {
+    onChange(selectedReaction: MetaNetXReaction): void {
       this.addReactionSearchQuery = null;
       this.$nextTick(() => {
         this.addReactionItem = null;
       });
-      this.$emit("change", selectedReaction);
+
+      const reaction: Reaction = {
+        id: selectedReaction.reaction.mnx_id,
+        name: selectedReaction.reaction.name || "",
+        // TODO: rebuild reaction string more consistently, from equation_parsed
+        reactionString: selectedReaction.reaction.equation_string,
+        // Note: Assuming all reactions in the universal model are
+        // reversible, but this might not be the case. Could potentially use
+        // the reaction string to check reversibility.
+        lowerBound: -1000,
+        upperBound: 1000,
+        metabolites: selectedReaction.reaction.equation_parsed.map(m => {
+          const fullMetabolite = selectedReaction.metabolites.find(
+            obj => obj.mnx_id === m.metabolite_id
+          );
+          return {
+            id: m.metabolite_id,
+            name: fullMetabolite ? fullMetabolite.name : "",
+            // TODO: use m.compartment_id, mapped through selectedReaction.annotations
+            compartment: "",
+            stoichiometry: m.coefficient
+          };
+        })
+      };
+      this.$emit("change", reaction);
     },
     dontFilterByDisplayedText() {
       return true;
