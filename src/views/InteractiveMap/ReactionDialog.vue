@@ -62,6 +62,7 @@
                   label="Metabolite"
                   :items="metaboliteItems"
                   :item-text="metaboliteDisplay"
+                  :search-input.sync="substrateSearchQuery"
                   item-value="id"
                   return-object
                   clearable
@@ -127,13 +128,15 @@
                   solo
                   class="mx-2"
                   type="number"
-                ></v-text-field></v-flex
-              ><v-flex xs7>
+                ></v-text-field
+              ></v-flex>
+              <v-flex xs7>
                 <v-autocomplete
                   v-model="metabolite.metabolite"
                   label="Metabolite"
                   :items="metaboliteItems"
                   :item-text="metaboliteDisplay"
+                  :search-input.sync="productSearchQuery"
                   item-value="id"
                   return-object
                   clearable
@@ -201,6 +204,10 @@
         >
       </v-form>
     </v-card>
+    <v-snackbar color="error" v-model="mnxRequestError" :timeout="6000">
+      Could not search Metanetx for reactions, please check your internet
+      connection.
+    </v-snackbar>
   </v-dialog>
 </template>
 
@@ -208,6 +215,8 @@
 import Vue from "vue";
 import { Reaction } from "@/store/modules/interactiveMap";
 import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
+import * as settings from "@/utils/settings";
+import axios from "axios";
 
 function getInitialState() {
   return {
@@ -236,6 +245,10 @@ function getInitialState() {
     currentMetaboliteIndex: 0,
     isSubstratesMetabolite: false,
     customMetabolites: [],
+    substrateSearchQuery: null,
+    productSearchQuery: null,
+    mnxSearchResults: [],
+    mnxRequestError: false,
     singleBoundRules: v => {
       if (!v) {
         return "Bounds are required";
@@ -290,6 +303,7 @@ export default Vue.extend({
       return this.model.model_serialized
         ? [
             ...this.customMetabolites,
+            ...this.mnxSearchResults,
             ...this.model.model_serialized.metabolites
           ]
         : this.customMetabolites;
@@ -309,6 +323,14 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    }
+  },
+  watch: {
+    substrateSearchQuery(query) {
+      this.getMnxMetabolites(query);
+    },
+    productSearchQuery(query) {
+      this.getMnxMetabolites(query);
     }
   },
   methods: {
@@ -447,6 +469,24 @@ export default Vue.extend({
         id: metabolite.id,
         name: metabolite.name
       });
+    },
+    getMnxMetabolites(query) {
+      this.mnxSearchResults = [];
+      if (query === null || query.trim().length === 0) {
+        return;
+      }
+      axios
+        .get(`${settings.apis.metanetx}/metabolites?query=${query}`)
+        .then(response => {
+          this.mnxSearchResults = response.data.map(metabolite => ({
+            id: metabolite.mnx_id,
+            name: metabolite.name,
+            annotation: metabolite.annotation
+          }));
+        })
+        .catch(error => {
+          this.mnxRequestError = true;
+        });
     },
     clear() {
       this.$refs.form.resetValidation();
