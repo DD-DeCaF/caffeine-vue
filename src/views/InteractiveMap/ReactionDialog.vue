@@ -205,7 +205,7 @@
       </v-form>
     </v-card>
     <v-snackbar color="error" v-model="mnxRequestError" :timeout="6000">
-      Could not search Metanetx for reactions, please check your internet
+      Could not search Metanetx for metabolites, please check your internet
       connection.
     </v-snackbar>
   </v-dialog>
