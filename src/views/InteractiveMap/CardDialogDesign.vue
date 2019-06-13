@@ -150,6 +150,7 @@
     <v-autocomplete
       v-model="addReactionItem"
       :items="addReactionSearchResults"
+      :filter="dontFilterByDisplayedText"
       :loading="isLoadingAddReaction"
       :disabled="!model"
       :search-input.sync="addReactionSearchQuery"
@@ -410,6 +411,9 @@ export default Vue.extend({
     },
     geneDisplay(gene) {
       return `${gene.name} (${gene.id})`;
+    },
+    dontFilterByDisplayedText() {
+      return true;
     },
     addReaction(addedReaction) {
       // Skip if the reaction is already added.
