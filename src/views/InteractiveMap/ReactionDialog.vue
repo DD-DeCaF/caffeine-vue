@@ -262,10 +262,17 @@ function getInitialState() {
       return true;
     },
     stoichiometryRules: metabolite => {
-      if (metabolite.metabolite && !metabolite.stoichiometry && metabolite.stoichiometry !== 0) {
+      if (
+        metabolite.metabolite &&
+        !metabolite.stoichiometry &&
+        metabolite.stoichiometry !== 0
+      ) {
         return "Stoichiometry is required";
       }
-      if ((metabolite.stoichiometry && metabolite.stoichiometry < 0) || metabolite.stoichiometry === 0) {
+      if (
+        (metabolite.stoichiometry && metabolite.stoichiometry < 0) ||
+        metabolite.stoichiometry === 0
+      ) {
         return "Please provide positive value";
       }
       return true;
@@ -300,13 +307,13 @@ export default Vue.extend({
       return "";
     },
     metaboliteItems() {
-      return this.model.model_serialized
-        ? [
-            ...this.customMetabolites,
-            ...this.mnxSearchResults,
-            ...this.model.model_serialized.metabolites
-          ]
-        : this.customMetabolites;
+      return [
+        ...this.customMetabolites,
+        ...this.mnxSearchResults,
+        ...(this.model.model_serialized
+          ? this.model.model_serialized.metabolites
+          : [])
+      ];
     },
     compartmentItems() {
       return this.model.model_serialized
