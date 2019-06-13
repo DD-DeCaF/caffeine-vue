@@ -292,7 +292,9 @@ export default Vue.extend({
         hasSimulationError: false,
         growthRate: null,
         fluxes: null,
-        withDialog: withDialog
+        withDialog: withDialog,
+        // Specific fields for design prediction methods
+        manipulations: null
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
