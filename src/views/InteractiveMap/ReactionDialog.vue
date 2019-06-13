@@ -250,7 +250,7 @@ function getInitialState() {
     mnxSearchResults: [],
     mnxRequestError: false,
     singleBoundRules: v => {
-      if (!v) {
+      if (!v && v !== 0) {
         return "Bounds are required";
       }
       if (isNaN(v)) {
@@ -262,10 +262,10 @@ function getInitialState() {
       return true;
     },
     stoichiometryRules: metabolite => {
-      if (metabolite.metabolite && !metabolite.stoichiometry) {
+      if (metabolite.metabolite && !metabolite.stoichiometry && metabolite.stoichiometry !== 0) {
         return "Stoichiometry is required";
       }
-      if (metabolite.stoichiometry && metabolite.stoichiometry <= 0) {
+      if ((metabolite.stoichiometry && metabolite.stoichiometry < 0) || metabolite.stoichiometry === 0) {
         return "Please provide positive value";
       }
       return true;
