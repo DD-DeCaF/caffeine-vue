@@ -100,8 +100,41 @@ export default Vue.extend({
   },
   methods: {
     reactionDisplay(reaction: MetaNetXReaction): string {
-      const { name, mnx_id, ec } = reaction.reaction;
-      return `${name || "N/A"} (${mnx_id}) ${ec ? `EC:${ec}` : ""}`;
+      const { name, mnx_id, ec, equation_parsed } = reaction.reaction;
+      return `${name || "N/A"} (${mnx_id}) ${
+        ec ? `EC:${ec}` : ""
+      } – ${this.equationDisplay(reaction)}`;
+    },
+    equationDisplay(reaction: MetaNetXReaction): string {
+      const { equation_parsed } = reaction.reaction;
+
+      const substrates = equation_parsed
+        .filter(e => e.coefficient < 0)
+        .map(e => ({ ...e, coefficient: -e.coefficient }));
+      const products = equation_parsed.filter(e => e.coefficient > 0);
+
+      const substratesSerialized = substrates
+        .map(({ coefficient, metabolite_id }) => {
+          const fullMetabolite = reaction.metabolites.find(
+            ({ mnx_id }) => mnx_id === metabolite_id
+          );
+          // TODO: print compartment_id, mapped through annotations
+          return `${coefficient} \`${fullMetabolite!.name}\``;
+        })
+        .join(" + ");
+      const productsSerialized = products
+        .map(({ coefficient, metabolite_id }) => {
+          const fullMetabolite = reaction.metabolites.find(
+            ({ mnx_id }) => mnx_id === metabolite_id
+          );
+          // TODO: print compartment_id, mapped through annotations
+          return `${coefficient} \`${fullMetabolite!.name}\``;
+        })
+        .join(" + ");
+
+      return (
+        (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
+      );
     },
     onChange(selectedReaction: MetaNetXReaction): void {
       this.addReactionSearchQuery = null;
@@ -113,7 +146,7 @@ export default Vue.extend({
         id: selectedReaction.reaction.mnx_id,
         name: selectedReaction.reaction.name || "",
         // TODO: rebuild reaction string more consistently, from equation_parsed
-        reactionString: selectedReaction.reaction.equation_string,
+        reactionString: this.equationDisplay(selectedReaction),
         // Note: Assuming all reactions in the universal model are
         // reversible, but this might not be the case. Could potentially use
         // the reaction string to check reversibility.
@@ -121,7 +154,7 @@ export default Vue.extend({
         upperBound: 1000,
         metabolites: selectedReaction.reaction.equation_parsed.map(m => {
           const fullMetabolite = selectedReaction.metabolites.find(
-            obj => obj.mnx_id === m.metabolite_id
+            ({ mnx_id }) => mnx_id === m.metabolite_id
           );
           return {
             id: m.metabolite_id,
