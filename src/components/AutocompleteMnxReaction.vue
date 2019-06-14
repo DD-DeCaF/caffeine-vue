@@ -21,7 +21,7 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
 
-interface MetaNetXReaction {
+export interface MetaNetXReaction {
   compartments: {
     annotation: Annotation;
     mnx_id: string;
@@ -68,7 +68,7 @@ export default Vue.extend({
   props: ["rules"],
   data: () => ({
     addReactionItem: null,
-    addReactionSearchResults: [],
+    addReactionSearchResults: [] as MetaNetXReaction[],
     isLoadingAddReaction: false,
     addReactionSearchQuery: null,
     requestError: false,
@@ -165,7 +165,11 @@ export default Vue.extend({
           };
         })
       };
-      this.$emit("change", reaction);
+
+      this.$emit("change", {
+        reaction: reaction,
+        mnxReaction: selectedReaction
+      });
     },
     dontFilterByDisplayedText() {
       return true;

@@ -279,6 +279,8 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import ReactionDialog from "@/views/InteractiveMap/ReactionDialog.vue";
+import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
+import { Reaction, Metabolite } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "CardDialogDesign",
@@ -485,9 +487,42 @@ export default Vue.extend({
           this.biggRequestError = true;
         });
     },
-    addMnxReaction(addReaction) {
+    addMnxReaction(addReaction: {
+      reaction: Reaction;
+      mnxReaction: MetaNetXReaction;
+    }) {
+      // Try to use metabolites from model.
+      const reactionWithModelMetabolites = {
+        ...addReaction.reaction,
+        metabolites: addReaction.reaction.metabolites.map(m => {
+          const fullMetabolite = addReaction.mnxReaction.metabolites.find(
+            ({ mnx_id }) => mnx_id === m.id
+          );
+          if (!fullMetabolite) return m;
+          if (!fullMetabolite.annotation) return m;
+          if (!fullMetabolite.annotation.bigg) return m;
+
+          // TODO: optimize for performance
+          let matchingMetaboliteInModel = null as Metabolite | null | undefined;
+          fullMetabolite.annotation.bigg.find(biggId => {
+            matchingMetaboliteInModel = this.model.model_serialized.metabolites.find(
+              m => m.id === biggId + "_" + m.compartment
+            );
+            return !!matchingMetaboliteInModel;
+          });
+          if (!matchingMetaboliteInModel) return m;
+
+          return {
+            ...m,
+            id: matchingMetaboliteInModel.id,
+            name: matchingMetaboliteInModel.name,
+            compartment: matchingMetaboliteInModel.compartment
+          };
+        })
+      };
+
       this.mnxReaction.isReactionDialogVisible = true;
-      this.mnxReaction.reactionToOpen = addReaction;
+      this.mnxReaction.reactionToOpen = reactionWithModelMetabolites;
     },
     knockoutReaction() {
       // Add the reaction only if it's not already added.
