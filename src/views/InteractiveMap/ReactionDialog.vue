@@ -181,9 +181,22 @@ export default Vue.extend({
         " + "
       );
       if (substratesSerialized || productsSerialized) {
-        return (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø");
+        return (
+          (substratesSerialized || "Ø") +
+          this.direction +
+          (productsSerialized || "Ø")
+        );
       }
       return "";
+    },
+    direction() {
+      if (this.lowerBound >= 0) {
+        return " -> ";
+      }
+      if (this.upperBound <= 0) {
+        return " <- ";
+      }
+      return " ⇌ ";
     },
     showDialog: {
       get() {
