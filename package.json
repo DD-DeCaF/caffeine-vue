@@ -13,7 +13,7 @@
     "@dd-decaf/escher": "^1.8.6-decaf",
     "@sentry/browser": "^5.2.0",
     "@sentry/integrations": "^5.2.0",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "core-js": "^2.6.5",
     "firebase": "^6.0.2",
     "material-design-icons-iconfont": "^3.0.3",
