@@ -191,12 +191,12 @@ export default Vue.extend({
     },
     direction() {
       if (this.lowerBound >= 0) {
-        return " -> ";
+        return " 🠖 ";
       }
       if (this.upperBound <= 0) {
-        return " <- ";
+        return " 🠔 ";
       }
-      return " ⇌ ";
+      return " ⇄ ";
     },
     showDialog: {
       get() {
