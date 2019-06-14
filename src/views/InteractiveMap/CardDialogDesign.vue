@@ -164,6 +164,22 @@
       @change="addReaction"
     ></v-autocomplete>
 
+    <AutocompleteMnxReaction
+      :disabled="!model"
+      label="Add a reaction from MetaNetX..."
+      hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID or equation."
+      prepend-icon="add"
+      @change="addMnxReaction"
+    ></AutocompleteMnxReaction>
+    <ReactionDialog
+      v-if="model"
+      v-model="mnxReaction.isReactionDialogVisible"
+      :input-reaction="mnxReaction.reactionToOpen"
+      :model="model"
+      :card="card"
+      @simulate-card="$emit('simulate-card')"
+    />
+
     <v-icon :disabled="!model">add</v-icon>
     <v-btn @click.stop="isReactionDialogVisible = true" :disabled="!model"
       >Define your own reaction
@@ -291,6 +307,10 @@ export default Vue.extend({
     editBoundsReaction: null,
     editBoundsValid: false,
     isReactionDialogVisible: false,
+    mnxReaction: {
+      isReactionDialogVisible: false,
+      reactionToOpen: null
+    },
     editBoundsReactionRule: value =>
       (value && value.id && value.id.length > 0) ||
       "Please specify the reaction",
@@ -464,6 +484,10 @@ export default Vue.extend({
         .catch(error => {
           this.biggRequestError = true;
         });
+    },
+    addMnxReaction(addReaction) {
+      this.mnxReaction.isReactionDialogVisible = true;
+      this.mnxReaction.reactionToOpen = addReaction;
     },
     knockoutReaction() {
       // Add the reaction only if it's not already added.
