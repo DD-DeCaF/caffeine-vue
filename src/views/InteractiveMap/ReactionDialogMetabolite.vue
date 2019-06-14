@@ -64,7 +64,7 @@ export default Vue.extend({
   components: {
     MetaboliteDialog
   },
-  props: ["model", "customMetabolites", "metabolite", "index"],
+  props: ["model", "customMetabolites", "metabolite"],
   data: () => ({
     isMetaboliteDialogVisible: false,
     mnxSearchResults: [],
