@@ -181,7 +181,7 @@ export default Vue.extend({
         " + "
       );
       if (substratesSerialized || productsSerialized) {
-        return substratesSerialized + " ⇌ " + productsSerialized;
+        return (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø");
       }
       return "";
     },
