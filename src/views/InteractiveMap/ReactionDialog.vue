@@ -67,7 +67,8 @@
                   return-object
                   clearable
                   class="mx-2"
-                  @change="setCompartmentFromMetabolite(metabolite, $event)"
+                  hide-selected
+                  @change="onMetaboliteChange(metabolite, $event)"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
@@ -141,7 +142,8 @@
                   return-object
                   clearable
                   class="mx-2"
-                  @change="setCompartmentFromMetabolite(metabolite, $event)"
+                  hide-selected
+                  @change="onMetaboliteChange(metabolite, $event)"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
@@ -248,6 +250,7 @@ function getInitialState() {
     substrateSearchQuery: null,
     productSearchQuery: null,
     mnxSearchResults: [],
+    mnxMetabolites: [],
     mnxRequestError: false,
     singleBoundRules: v => {
       if (!v && v !== 0) {
@@ -310,6 +313,7 @@ export default Vue.extend({
       return [
         ...this.customMetabolites,
         ...this.mnxSearchResults,
+        ...this.mnxMetabolites,
         ...(this.model.model_serialized
           ? this.model.model_serialized.metabolites
           : [])
@@ -334,10 +338,14 @@ export default Vue.extend({
   },
   watch: {
     substrateSearchQuery(query) {
-      this.getMnxMetabolites(query);
+      if (query) {
+        this.getMnxMetabolites(query);
+      }
     },
     productSearchQuery(query) {
-      this.getMnxMetabolites(query);
+      if (query) {
+        this.getMnxMetabolites(query);
+      }
     }
   },
   methods: {
@@ -463,8 +471,13 @@ export default Vue.extend({
       this.clear();
       this.showDialog = false;
     },
-    setCompartmentFromMetabolite(metabolite, value) {
-      metabolite.compartment = value.compartment;
+    onMetaboliteChange(metabolite, value) {
+      if (!value) return;
+      if (value.compartment) {
+        metabolite.compartment = value.compartment;
+      } else {
+        this.mnxMetabolites.push(value);
+      }
     },
     passMetabolite(metabolite) {
       this.customMetabolites.push(metabolite);
