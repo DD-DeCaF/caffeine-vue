@@ -78,7 +78,10 @@ export default Vue.extend({
         ...this.mnxSearchResults,
         ...this.mnxMetabolites,
         ...(this.model.model_serialized
-          ? this.model.model_serialized.metabolites
+          ? this.model.model_serialized.metabolites.map(metabolite => ({
+              ...metabolite,
+              model: true
+            }))
           : [])
       ];
     },
@@ -103,7 +106,7 @@ export default Vue.extend({
       return `${metabolite.name} (${this.getMetaboliteId(
         metabolite.id,
         metabolite.compartment
-      )})`;
+      )}) ${metabolite.model ? " [in the model]" : ""}`;
     },
     compartmentDisplay(compartment) {
       return `${compartment.name} (${compartment.id})`;
