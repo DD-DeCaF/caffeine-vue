@@ -1,9 +1,5 @@
 <template>
   <v-dialog v-model="showDialog" width="1000">
-    <MetaboliteDialog
-      v-model="isMetaboliteDialogVisible"
-      @return-object="passMetabolite"
-    />
     <v-card class="pa-4">
       <v-form ref="form" v-model="isValid" lazy-validation>
         <v-layout align-center>
@@ -48,55 +44,12 @@
         <v-layout column mx-3>
           <div v-for="(metabolite, index) in substrates" :key="index">
             <v-layout>
-              <v-flex xs1>
-                <v-text-field
-                  v-model.number="metabolite.stoichiometry"
-                  :rules="[stoichiometryRules(metabolite)]"
-                  solo
-                  class="mx-2"
-                  type="number"
-                ></v-text-field></v-flex
-              ><v-flex xs7>
-                <v-autocomplete
-                  v-model="metabolite.metabolite"
-                  label="Metabolite"
-                  :items="metaboliteItems"
-                  :item-text="metaboliteDisplay"
-                  item-value="id"
-                  return-object
-                  clearable
-                  class="mx-2"
-                  @change="setCompartmentFromMetabolite(metabolite, $event)"
-                >
-                  <template v-slot:prepend-item>
-                    <v-btn
-                      flat
-                      @click.stop="
-                        currentMetaboliteIndex = index;
-                        isSubstratesMetabolite = true;
-                        isMetaboliteDialogVisible = true;
-                      "
-                      class="pl-0"
-                    >
-                      <v-icon class="mr-2" color="primary">add_circle</v-icon>
-                      New metabolite
-                    </v-btn>
-                  </template>
-                </v-autocomplete></v-flex
-              >
-              <v-flex xs3
-                ><v-autocomplete
-                  v-model="metabolite.compartment"
-                  label="Compartment"
-                  :items="compartmentItems"
-                  :item-text="compartmentDisplay"
-                  item-value="id"
-                  :rules="[compartmentRules(metabolite)]"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
+              <v-flex xs11>
+                <ReactionDialogMetabolite
+                  :model="model"
+                  :customMetabolites="customMetabolites"
+                  :metabolite="metabolite"
+              /></v-flex>
               <v-flex xs1>
                 <v-layout
                   ><v-btn icon @click="addSubstrate">
@@ -120,55 +73,12 @@
         <v-layout column mx-3>
           <div v-for="(metabolite, index) in products" :key="index">
             <v-layout>
-              <v-flex xs1>
-                <v-text-field
-                  v-model.number="metabolite.stoichiometry"
-                  :rules="[stoichiometryRules(metabolite)]"
-                  solo
-                  class="mx-2"
-                  type="number"
-                ></v-text-field></v-flex
-              ><v-flex xs7>
-                <v-autocomplete
-                  v-model="metabolite.metabolite"
-                  label="Metabolite"
-                  :items="metaboliteItems"
-                  :item-text="metaboliteDisplay"
-                  item-value="id"
-                  return-object
-                  clearable
-                  class="mx-2"
-                  @change="setCompartmentFromMetabolite(metabolite, $event)"
-                >
-                  <template v-slot:prepend-item>
-                    <v-btn
-                      flat
-                      @click.stop="
-                        currentMetaboliteIndex = index;
-                        isSubstratesMetabolite = false;
-                        isMetaboliteDialogVisible = true;
-                      "
-                      class="pl-0"
-                    >
-                      <v-icon class="mr-2" color="primary">add_circle</v-icon>
-                      New metabolite
-                    </v-btn>
-                  </template>
-                </v-autocomplete></v-flex
-              >
-              <v-flex xs3
-                ><v-autocomplete
-                  v-model="metabolite.compartment"
-                  label="Compartment"
-                  :items="compartmentItems"
-                  :item-text="compartmentDisplay"
-                  item-value="id"
-                  :rules="[compartmentRules(metabolite)]"
-                  clearable
-                  class="mx-2"
-                >
-                </v-autocomplete
-              ></v-flex>
+              <v-flex xs11>
+                <ReactionDialogMetabolite
+                  :model="model"
+                  :customMetabolites="customMetabolites"
+                  :metabolite="metabolite"
+              /></v-flex>
               <v-flex xs1>
                 <v-layout
                   ><v-btn icon @click="addProduct">
@@ -182,8 +92,8 @@
                     <v-icon color="primary">delete</v-icon></v-btn
                   ></v-layout
                 ></v-flex
-              >
-            </v-layout>
+              ></v-layout
+            >
           </div>
         </v-layout>
         <div class="subheading mb-2">Preview:</div>
@@ -201,13 +111,19 @@
         >
       </v-form>
     </v-card>
+    <v-snackbar color="error" v-model="mnxRequestError" :timeout="6000">
+      Could not search Metanetx for metabolites, please check your internet
+      connection.
+    </v-snackbar>
   </v-dialog>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { Reaction } from "@/store/modules/interactiveMap";
-import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
+import ReactionDialogMetabolite from "@/views/InteractiveMap/ReactionDialogMetabolite.vue";
+import * as settings from "@/utils/settings";
+import axios from "axios";
 
 function getInitialState() {
   return {
@@ -232,12 +148,10 @@ function getInitialState() {
     isValid: true,
     reactionStringRules: [v => !!v || "Reaction string should not be empty"],
     reactionNameRules: [v => !!v || "Reaction name is required"],
-    isMetaboliteDialogVisible: false,
-    currentMetaboliteIndex: 0,
-    isSubstratesMetabolite: false,
     customMetabolites: [],
+    mnxRequestError: false,
     singleBoundRules: v => {
-      if (!v) {
+      if (!v && v !== 0) {
         return "Bounds are required";
       }
       if (isNaN(v)) {
@@ -247,21 +161,6 @@ function getInitialState() {
         return "Bounds must be in the range of -1000 to 1000";
       }
       return true;
-    },
-    stoichiometryRules: metabolite => {
-      if (metabolite.metabolite && !metabolite.stoichiometry) {
-        return "Stoichiometry is required";
-      }
-      if (metabolite.stoichiometry && metabolite.stoichiometry <= 0) {
-        return "Please provide positive value";
-      }
-      return true;
-    },
-    compartmentRules: metabolite => {
-      if (metabolite.metabolite && !metabolite.compartment) {
-        return "Compartment is required";
-      }
-      return true;
     }
   };
 }
@@ -269,7 +168,7 @@ function getInitialState() {
 export default Vue.extend({
   name: "ReactionDialog",
   components: {
-    MetaboliteDialog
+    ReactionDialogMetabolite
   },
   props: ["model", "value", "card"],
   data: () => getInitialState(),
@@ -282,25 +181,22 @@ export default Vue.extend({
         " + "
       );
       if (substratesSerialized || productsSerialized) {
-        return substratesSerialized + " ⇌ " + productsSerialized;
+        return (
+          (substratesSerialized || "Ø") +
+          this.direction +
+          (productsSerialized || "Ø")
+        );
       }
       return "";
     },
-    metaboliteItems() {
-      return this.model.model_serialized
-        ? [
-            ...this.customMetabolites,
-            ...this.model.model_serialized.metabolites
-          ]
-        : this.customMetabolites;
-    },
-    compartmentItems() {
-      return this.model.model_serialized
-        ? Object.keys(this.model.model_serialized.compartments).map(id => ({
-            id: id,
-            name: this.model.model_serialized.compartments[id]
-          }))
-        : [];
+    direction() {
+      if (this.lowerBound >= 0) {
+        return " ⟶ ";
+      }
+      if (this.upperBound <= 0) {
+        return " ⟵ ";
+      }
+      return " ⇌ ";
     },
     showDialog: {
       get() {
@@ -312,15 +208,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    metaboliteDisplay(metabolite) {
-      return `${metabolite.name} (${this.getMetaboliteId(
-        metabolite.id,
-        metabolite.compartment
-      )})`;
-    },
-    compartmentDisplay(compartment) {
-      return `${compartment.name} (${compartment.id})`;
-    },
     reactionIdRules(v) {
       if (!v) {
         return "Reaction id is required";
@@ -433,20 +320,6 @@ export default Vue.extend({
       this.$emit("simulate-card");
       this.clear();
       this.showDialog = false;
-    },
-    setCompartmentFromMetabolite(metabolite, value) {
-      metabolite.compartment = value.compartment;
-    },
-    passMetabolite(metabolite) {
-      this.customMetabolites.push(metabolite);
-      const target = this.isSubstratesMetabolite
-        ? this.substrates
-        : this.products;
-      Vue.set(target[this.currentMetaboliteIndex], "metabolite", {
-        ...target[this.currentMetaboliteIndex].metabolite,
-        id: metabolite.id,
-        name: metabolite.name
-      });
     },
     clear() {
       this.$refs.form.resetValidation();
