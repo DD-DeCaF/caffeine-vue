@@ -157,9 +157,6 @@ function getInitialState() {
       if (isNaN(v)) {
         return "Bounds must be a number";
       }
-      if (v < -1000 || v > 1000) {
-        return "Bounds must be in the range of -1000 to 1000";
-      }
       return true;
     }
   };

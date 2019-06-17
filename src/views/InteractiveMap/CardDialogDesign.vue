@@ -320,9 +320,6 @@ export default Vue.extend({
       if (isNaN(parseFloat(value))) {
         return "Bounds must be a number.";
       }
-      if (value < -1000 || value > 1000) {
-        return "Bounds must be in the range of -1000 to 1000.";
-      }
       return true;
     },
     hasInvalidBoundsError: false,
