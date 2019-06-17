@@ -512,9 +512,16 @@ export default Vue.extend({
           });
           if (!matchingMetaboliteInModel) return m;
 
+          // TODO: instead of removing the compartment here and adding it later,
+          // we should just pass the metabolite identifiers as they are.
+          const idWithoutCompartment = matchingMetaboliteInModel.id.substring(
+            0,
+            matchingMetaboliteInModel.id.length -
+              (matchingMetaboliteInModel.compartment.length + 1)
+          );
           return {
             ...m,
-            id: matchingMetaboliteInModel.id,
+            id: idWithoutCompartment,
             name: matchingMetaboliteInModel.name,
             compartment: matchingMetaboliteInModel.compartment
           };
