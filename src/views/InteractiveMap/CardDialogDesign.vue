@@ -470,8 +470,6 @@ export default Vue.extend({
               name: m.name,
               compartment: m.compartment_bigg_id,
               stoichiometry: m.stoichiometry
-              // formula: null,
-              // annotation: null
             }))
           };
 
