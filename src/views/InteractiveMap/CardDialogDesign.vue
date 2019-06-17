@@ -167,7 +167,7 @@
     <AutocompleteMnxReaction
       :disabled="!model"
       label="Add a reaction from MetaNetX..."
-      hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID or equation."
+      hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID, EC number or the reaction name."
       prepend-icon="add"
       @change="addMnxReaction"
     ></AutocompleteMnxReaction>
