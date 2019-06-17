@@ -170,7 +170,7 @@ export default Vue.extend({
   components: {
     ReactionDialogMetabolite
   },
-  props: ["model", "value", "card"],
+  props: ["model", "value", "card", "inputReaction"],
   data: () => getInitialState(),
   computed: {
     reactionString() {
@@ -205,6 +205,27 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    }
+  },
+  watch: {
+    inputReaction(inputReaction: Reaction) {
+      this.clear();
+      this.reactionId = inputReaction.id;
+      this.reactionName = inputReaction.name;
+      this.lowerBound = inputReaction.lowerBound;
+      this.upperBound = inputReaction.upperBound;
+
+      const metabolites = inputReaction.metabolites.map(m => ({
+        metabolite: { id: m.id, name: m.name },
+        compartment: m.compartment,
+        stoichiometry: m.stoichiometry
+      }));
+      this.substrates = metabolites
+        .filter(m => m.stoichiometry < 0)
+        .map(m => ({ ...m, stoichiometry: -m.stoichiometry }));
+      this.products = metabolites.filter(m => m.stoichiometry >= 0);
+
+      this.customMetabolites.push(...metabolites.map(m => m.metabolite));
     }
   },
   methods: {

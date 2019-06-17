@@ -150,6 +150,7 @@
     <v-autocomplete
       v-model="addReactionItem"
       :items="addReactionSearchResults"
+      :filter="dontFilterByDisplayedText"
       :loading="isLoadingAddReaction"
       :disabled="!model"
       :search-input.sync="addReactionSearchQuery"
@@ -162,6 +163,22 @@
       return-object
       @change="addReaction"
     ></v-autocomplete>
+
+    <AutocompleteMnxReaction
+      :disabled="!model"
+      label="Add a reaction from MetaNetX..."
+      hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID or equation."
+      prepend-icon="add"
+      @change="addMnxReaction"
+    ></AutocompleteMnxReaction>
+    <ReactionDialog
+      v-if="model"
+      v-model="mnxReaction.isReactionDialogVisible"
+      :input-reaction="mnxReaction.reactionToOpen"
+      :model="model"
+      :card="card"
+      @simulate-card="$emit('simulate-card')"
+    />
 
     <v-icon :disabled="!model">add</v-icon>
     <v-btn @click.stop="isReactionDialogVisible = true" :disabled="!model"
@@ -262,6 +279,8 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import ReactionDialog from "@/views/InteractiveMap/ReactionDialog.vue";
+import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
+import { Reaction, Metabolite } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "CardDialogDesign",
@@ -290,6 +309,10 @@ export default Vue.extend({
     editBoundsReaction: null,
     editBoundsValid: false,
     isReactionDialogVisible: false,
+    mnxReaction: {
+      isReactionDialogVisible: false,
+      reactionToOpen: null
+    },
     editBoundsReactionRule: value =>
       (value && value.id && value.id.length > 0) ||
       "Please specify the reaction",
@@ -411,6 +434,9 @@ export default Vue.extend({
     geneDisplay(gene) {
       return `${gene.name} (${gene.id})`;
     },
+    dontFilterByDisplayedText() {
+      return true;
+    },
     addReaction(addedReaction) {
       // Skip if the reaction is already added.
       if (this.card.reactionAdditions.some(r => r.id === addedReaction.id)) {
@@ -460,6 +486,43 @@ export default Vue.extend({
         .catch(error => {
           this.biggRequestError = true;
         });
+    },
+    addMnxReaction(addReaction: {
+      reaction: Reaction;
+      mnxReaction: MetaNetXReaction;
+    }) {
+      // Try to use metabolites from model.
+      const reactionWithModelMetabolites = {
+        ...addReaction.reaction,
+        metabolites: addReaction.reaction.metabolites.map(m => {
+          const fullMetabolite = addReaction.mnxReaction.metabolites.find(
+            ({ mnx_id }) => mnx_id === m.id
+          );
+          if (!fullMetabolite) return m;
+          if (!fullMetabolite.annotation) return m;
+          if (!fullMetabolite.annotation.bigg) return m;
+
+          // TODO: optimize for performance
+          let matchingMetaboliteInModel = null as Metabolite | null | undefined;
+          fullMetabolite.annotation.bigg.find(biggId => {
+            matchingMetaboliteInModel = this.model.model_serialized.metabolites.find(
+              m => m.id === biggId + "_" + m.compartment
+            );
+            return !!matchingMetaboliteInModel;
+          });
+          if (!matchingMetaboliteInModel) return m;
+
+          return {
+            ...m,
+            id: matchingMetaboliteInModel.id,
+            name: matchingMetaboliteInModel.name,
+            compartment: matchingMetaboliteInModel.compartment
+          };
+        })
+      };
+
+      this.mnxReaction.isReactionDialogVisible = true;
+      this.mnxReaction.reactionToOpen = reactionWithModelMetabolites;
     },
     knockoutReaction() {
       // Add the reaction only if it's not already added.
