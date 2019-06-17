@@ -11,7 +11,6 @@
       @click="isSidepanelOpen = false"
       :card="selectedCard"
       :mapData="mapData"
-      :showDiffFVAScore="showDiffFVAScore"
     />
     <Legend />
     <v-btn
@@ -90,14 +89,12 @@
           :card="card"
           :isSelected="card === selectedCard"
           :isOnlyCard="cards.length === 1"
-          :showDiffFVAScore="showDiffFVAScore"
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
           @load-data-error="hasLoadDataError = true"
           @design-saved="designSaved"
           @design-save-error="hasSaveDesignError = true"
-          @toggle-score="showDiffFVAScore = !showDiffFVAScore"
         />
       </v-container>
     </v-navigation-drawer>
@@ -153,7 +150,6 @@ export default Vue.extend({
     hasSaveDesignError: false,
     hasSaveDesignSuccess: false,
     savedDesignName: null,
-    showDiffFVAScore: false
   }),
   computed: {
     currentMapId: {
@@ -256,7 +252,7 @@ export default Vue.extend({
         return model.id === 15 && model.name === "e_coli_core";
       });
 
-      if (!organism || !model || cardType || withDialog) {
+      if (!organism || !model || cardType == "DataDriven" || withDialog) {
         this.addCard(name, null, null, "pfba", cardType, withDialog);
       } else {
         this.addCard(name, organism, model, "pfba", cardType, withDialog);
@@ -294,7 +290,9 @@ export default Vue.extend({
         fluxes: null,
         withDialog: withDialog,
         // Specific fields for design prediction methods
-        manipulations: null
+        manipulations: null,
+        productionGrowthRate: null,
+        showDiffFVAScore: false
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
@@ -473,7 +471,6 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          const wildtypeGrowthrate = response.data.growth_rate;
           const wildtypeFluxdistribution = response.data.flux_distribution;
           // Calculate new bounds based on manipulation scores calculated by DiffFVA
           // (Reference flux * score) / Reference growth
@@ -482,7 +479,7 @@ export default Vue.extend({
               const newBound = Math.round(
                 (wildtypeFluxdistribution[manipulation.id] *
                   manipulation.value) /
-                  wildtypeGrowthrate
+                  card.productionGrowthRate
               );
               return {
                 operation: "modify",
@@ -494,18 +491,12 @@ export default Vue.extend({
                 }
               };
             })
-            .filter(function(operation) {
-              if (operation.data.lower_bound === 0) {
-                return false;
-              }
-              return true;
-            });
+            .filter(operation => operation.data.lower_bound !== 0);
           // Re-simulate the model with the updated bounds
-          // after readding all previous modifications
-          const filteredMods = this.cardModifications(card).filter(
-            mod => mod.operation !== "modify"
-          );
-          this.postSimulation(card, model, [...filteredMods, ...editedBounds]);
+          // adding first all the modifications from the design 
+          // and then the modifications (edited bounds) computed above
+          console.log([...this.cardModifications(card), ...editedBounds])
+          this.postSimulation(card, model, [...this.cardModifications(card), ...editedBounds]);
         })
         .catch(error => {
           this.updateCard({

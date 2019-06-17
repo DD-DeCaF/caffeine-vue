@@ -62,6 +62,8 @@ export interface Card {
   withDialog: boolean;
   // Specific fields for design prediction methods
   manipulations: any[] | null;
+  productionGrowthRate: number | null;
+  showDiffFVAScore: boolean;
 }
 
 export default {

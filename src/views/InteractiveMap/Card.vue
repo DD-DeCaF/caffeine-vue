@@ -162,11 +162,23 @@
       <v-container v-if="card.type == 'DiffFVA'" fluid class="pa-0">
         <v-layout row>
           <v-flex>
+            <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
             <v-switch
-              input-value="showDiffFVAScore"
-              :label="`Toggle diffFVA scores`"
-              @change="toggleDiffFVAscore()"
-            ></v-switch>
+              color="primary"
+              v-model="showDiffFVAScore"
+            >
+            <template v-slot:label>
+              <div v-if="!showDiffFVAScore"> Show manipulation targets</div>
+              <div v-else> <div style="color:black">Show manipulation targets</div></div>
+            </template>
+            
+            </v-switch>
+            </template>
+            <span>
+              Show either the flux distribution calculated from differential FVA or just the scores.
+            </span>
+            </v-tooltip>
           </v-flex>
         </v-layout>
       </v-container>
@@ -229,11 +241,12 @@ export default Vue.extend({
       return value.toFixed(3);
     }
   },
-  props: ["card", "isOnlyCard", "isSelected", "showDiffFVAScore"],
+  props: ["card", "isOnlyCard", "isSelected"],
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
-    isCardDialogVisible: false
+    isCardDialogVisible: false,
+    showDiffFVAScore: false,
   }),
   computed: {
     titleColor() {
@@ -387,7 +400,13 @@ export default Vue.extend({
         }
         this.$store.dispatch("models/withFullModel", this.card.modelId);
       }
-    }
+    },
+    showDiffFVAScore() {
+      this.updateCard({
+              uuid: this.card.uuid,
+               props: { showDiffFVAScore: this.showDiffFVAScore }
+            });
+    },
   },
   mounted() {
     if (this.card.withDialog) {
@@ -403,9 +422,6 @@ export default Vue.extend({
     });
   },
   methods: {
-    toggleDiffFVAscore() {
-      this.$emit("toggle-score", this.card);
-    },
     selectCard() {
       this.$emit("select-card", this.card);
     },

@@ -499,7 +499,9 @@ export default Vue.extend({
           fluxes: null,
           withDialog: false,
           // Specific fields for design prediction methods
-          manipulations: null
+          manipulations: null,
+          productionGrowthRate: null,
+          showDiffFVAScore: false
         };
         // Make sure the full model is available before adding the card.
         this.$store

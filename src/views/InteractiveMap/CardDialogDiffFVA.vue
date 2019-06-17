@@ -42,9 +42,8 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
-  name: "CardDialogDataDriven",
+  name: "CardDialogDiffFVA",
   props: ["card"],
-  data: () => ({}),
   computed: {
     overexpressionTargets() {
       return [...this.card.manipulations].filter(

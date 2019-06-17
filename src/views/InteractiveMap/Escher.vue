@@ -35,7 +35,7 @@ import * as escher from "@dd-decaf/escher";
 
 export default Vue.extend({
   name: "Escher",
-  props: ["mapData", "card", "showDiffFVAScore"],
+  props: ["mapData", "card"],
   data: () => ({
     escherBuilder: null,
     initializingEscher: true,
@@ -120,6 +120,9 @@ export default Vue.extend({
       } else {
         return null;
       }
+    },
+    showDiffFVAScore(){
+      return this.card.showDiffFVAScore;
     }
   },
   watch: {
@@ -181,7 +184,7 @@ export default Vue.extend({
     "card.fluxes"() {
       this.onEscherReady.then(this.setFluxes);
     },
-    showDiffFVAScore() {
+    "card.showDiffFVAScore"() {
       this.onEscherReady.then(this.setFluxes);
     }
   },

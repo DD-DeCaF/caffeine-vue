@@ -867,7 +867,12 @@ export default Vue.extend({
             fluxes: null,
             withDialog: false,
             // Fields specific for prediction methods
-            manipulations: jobPrediction.manipulations
+            //diffFVA:
+            manipulations: jobPrediction.manipulations,           
+            productionGrowthRate: jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+            ? jobPrediction.biomass
+            : null,
+            showDiffFVAScore: false
           };
           // Make sure the full model is available before adding the card.
           this.$store
