@@ -41,7 +41,13 @@ export default Vue.extend({
     initializingEscher: true,
     onEscherReady: null,
     isLoadingMap: false,
-    hasBoundsError: false
+    hasBoundsError: false,
+    defaultColorScheme: [
+              { type: "min", color: "#A841D0", size: 20 },
+              { type: "Q1", color: "#868BB2", size: 20 },
+              { type: "Q3", color: "#6DBFB0", size: 20 },
+              { type: "max", color: "#54B151", size: 20 }
+            ],
   }),
   computed: {
     model() {
@@ -185,6 +191,7 @@ export default Vue.extend({
       this.onEscherReady.then(this.setFluxes);
     },
     "card.showDiffFVAScore"() {
+      this.onEscherReady.then(this.toggleColorScheme());
       this.onEscherReady.then(this.setFluxes);
     }
   },
@@ -201,12 +208,7 @@ export default Vue.extend({
         hide_all_labels: false,
         hide_secondary_metabolites: false,
         highlight_missing: true,
-        reaction_scale: [
-          { type: "min", color: "#A841D0", size: 20 },
-          { type: "Q1", color: "#868BB2", size: 20 },
-          { type: "Q3", color: "#6DBFB0", size: 20 },
-          { type: "max", color: "#54B151", size: 20 }
-        ],
+        reaction_scale: this.defaultColorScheme,
         reaction_no_data_color: "#CBCBCB",
         reaction_no_data_size: 10,
         tooltip: "custom",
@@ -496,6 +498,17 @@ export default Vue.extend({
         reactionId: reactionId
       });
       this.$emit("simulate-card", this.card, this.model);
+    },
+    toggleColorScheme(){
+      if (this.card.showDiffFVAScore) {
+        this.escherBuilder.options.reaction_scale = [
+          { type: "min", color: "#d01c8b", size: 20 },
+          { type: "value", color: "#f7f7f7", size: 5, value: 0 },
+          { type: "max", color: "#4dac26", size: 20 }
+        ];
+      } else {
+        this.escherBuilder.options.reaction_scale = this.defaultColorScheme;
+      }
     }
   }
 });
