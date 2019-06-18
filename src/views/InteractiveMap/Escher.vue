@@ -136,7 +136,7 @@ export default Vue.extend({
       }
     },
     showDiffFVAScore() {
-      return this.card.showDiffFVAScore;
+      return this.card ? this.card.showDiffFVAScore : false;
     }
   },
   watch: {
@@ -198,7 +198,7 @@ export default Vue.extend({
     "card.fluxes"() {
       this.onEscherReady.then(this.setFluxes);
     },
-    "card.showDiffFVAScore"() {
+    showDiffFVAScore() {
       this.onEscherReady.then(this.toggleColorScheme());
       this.onEscherReady.then(this.setFluxes);
     }
