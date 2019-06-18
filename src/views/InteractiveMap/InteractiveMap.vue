@@ -492,7 +492,6 @@ export default Vue.extend({
           // Re-simulate the model with the updated bounds
           // adding first all the modifications from the design 
           // and then the modifications (edited bounds) computed above
-          console.log([...this.cardModifications(card), ...editedBounds])
           this.postSimulation(card, model, [...this.cardModifications(card), ...editedBounds]);
         })
         .catch(error => {

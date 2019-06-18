@@ -75,7 +75,7 @@ export default Vue.extend({
   }),
   computed: {
     showScoreLegend () {
-      return this.card ? false : this.card.showDiffFVAScore;
+      return this.card ? this.card.showDiffFVAScore : false;
     }
   }
 });
