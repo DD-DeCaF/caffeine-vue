@@ -9,6 +9,7 @@
           <v-icon color="white" v-else>expand_less</v-icon>
         </v-btn>
       </v-toolbar>
+      <div v-if="!showScoreLegend">
       <v-card-text v-if="isExpanded">
         <p class="mb-0">Flux</p>
         <div class="flux-gradient"></div>
@@ -48,6 +49,17 @@
           </p>
         </v-layout>
       </v-card-text>
+      </div>
+      <div v-else>
+        <v-card-text v-if="isExpanded">
+        <p class="mb-0">Change expression</p>
+        <div class="score-gradient"></div>
+        <p>
+          down
+          <span style="float: right;">up</span>
+        </p>
+      </v-card-text>
+      </div>
     </v-card>
   </div>
 </template>
@@ -57,9 +69,15 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "Legend",
+  props: ["card"],
   data: () => ({
     isExpanded: true
-  })
+  }),
+  computed: {
+    showScoreLegend () {
+      return this.card ? false : this.card.showDiffFVAScore;
+    }
+  }
 });
 </script>
 
@@ -74,6 +92,12 @@ export default Vue.extend({
 
 .flux-gradient {
   background: linear-gradient(90deg, #a841d0, #868bb2, #6dbfb0, #54b151);
+  height: 30px;
+  width: 100%;
+}
+
+.score-gradient {
+  background: linear-gradient(90deg, #a841d0, #f7f7f7, #54b151);
   height: 30px;
   width: 100%;
 }

@@ -1,4 +1,5 @@
 <template>
+<div class="fill-height">
   <div class="escher-container fill-height" @click="$emit('click')">
     <v-container
       fluid
@@ -21,10 +22,13 @@
       </v-layout>
     </v-container>
     <div ref="escher" class="fill-height"></div>
+    <!-- <Legend /> -->
     <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
       Invalid bounds. Please make sure that the upper bound is larger than or
       equal to the lower bound.
     </v-snackbar>
+  </div>
+  <Legend :card="card" />
   </div>
 </template>
 
@@ -32,9 +36,13 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
+import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
   name: "Escher",
+  components: {
+    Legend
+  },
   props: ["mapData", "card"],
   data: () => ({
     escherBuilder: null,
@@ -502,9 +510,9 @@ export default Vue.extend({
     toggleColorScheme(){
       if (this.card.showDiffFVAScore) {
         this.escherBuilder.options.reaction_scale = [
-          { type: "min", color: "#d01c8b", size: 20 },
+          { type: "min", color: "#a841d0", size: 20 },
           { type: "value", color: "#f7f7f7", size: 5, value: 0 },
-          { type: "max", color: "#4dac26", size: 20 }
+          { type: "max", color: "#54b151", size: 20 }
         ];
       } else {
         this.escherBuilder.options.reaction_scale = this.defaultColorScheme;

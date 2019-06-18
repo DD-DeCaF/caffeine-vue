@@ -12,7 +12,6 @@
       :card="selectedCard"
       :mapData="mapData"
     />
-    <Legend />
     <v-btn
       color="primary"
       small
@@ -127,7 +126,6 @@ import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
-import Legend from "@/views/InteractiveMap/Legend.vue";
 import { Card as CardType } from "@/store/modules/interactiveMap";
 import { partitionedList } from "@/utils/utility";
 
@@ -135,8 +133,7 @@ export default Vue.extend({
   name: "InteractiveMap",
   components: {
     Escher,
-    Card,
-    Legend
+    Card
   },
   data: () => ({
     isSidepanelOpen: true,
