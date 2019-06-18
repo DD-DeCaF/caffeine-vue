@@ -1,34 +1,34 @@
 <template>
-<div class="fill-height">
-  <div class="escher-container fill-height" @click="$emit('click')">
-    <v-container
-      fluid
-      fill-height
-      class="overlay"
-      v-if="initializingEscher || isLoadingMap"
-    >
-      <v-layout align-center justify-center>
-        <v-progress-circular
-          indeterminate
-          size="40"
-          :width="2"
-          class="mr-2"
-          color="white"
-        ></v-progress-circular>
-        <p class="display-1 white--text mb-0">
-          <span v-if="initializingEscher">Initializing Escher...</span>
-          <span v-else-if="isLoadingMap">Loading map...</span>
-        </p>
-      </v-layout>
-    </v-container>
-    <div ref="escher" class="fill-height"></div>
-    <!-- <Legend /> -->
-    <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
-      Invalid bounds. Please make sure that the upper bound is larger than or
-      equal to the lower bound.
-    </v-snackbar>
-  </div>
-  <Legend :card="card" />
+  <div class="fill-height">
+    <div class="escher-container fill-height" @click="$emit('click')">
+      <v-container
+        fluid
+        fill-height
+        class="overlay"
+        v-if="initializingEscher || isLoadingMap"
+      >
+        <v-layout align-center justify-center>
+          <v-progress-circular
+            indeterminate
+            size="40"
+            :width="2"
+            class="mr-2"
+            color="white"
+          ></v-progress-circular>
+          <p class="display-1 white--text mb-0">
+            <span v-if="initializingEscher">Initializing Escher...</span>
+            <span v-else-if="isLoadingMap">Loading map...</span>
+          </p>
+        </v-layout>
+      </v-container>
+      <div ref="escher" class="fill-height"></div>
+      <!-- <Legend /> -->
+      <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
+        Invalid bounds. Please make sure that the upper bound is larger than or
+        equal to the lower bound.
+      </v-snackbar>
+    </div>
+    <Legend :card="card" />
   </div>
 </template>
 
@@ -51,11 +51,11 @@ export default Vue.extend({
     isLoadingMap: false,
     hasBoundsError: false,
     defaultColorScheme: [
-              { type: "min", color: "#A841D0", size: 20 },
-              { type: "Q1", color: "#868BB2", size: 20 },
-              { type: "Q3", color: "#6DBFB0", size: 20 },
-              { type: "max", color: "#54B151", size: 20 }
-            ],
+      { type: "min", color: "#A841D0", size: 20 },
+      { type: "Q1", color: "#868BB2", size: 20 },
+      { type: "Q3", color: "#6DBFB0", size: 20 },
+      { type: "max", color: "#54B151", size: 20 }
+    ]
   }),
   computed: {
     model() {
@@ -135,7 +135,7 @@ export default Vue.extend({
         return null;
       }
     },
-    showDiffFVAScore(){
+    showDiffFVAScore() {
       return this.card.showDiffFVAScore;
     }
   },
@@ -507,7 +507,7 @@ export default Vue.extend({
       });
       this.$emit("simulate-card", this.card, this.model);
     },
-    toggleColorScheme(){
+    toggleColorScheme() {
       if (this.card.showDiffFVAScore) {
         this.escherBuilder.options.reaction_scale = [
           { type: "min", color: "#a841d0", size: 20 },

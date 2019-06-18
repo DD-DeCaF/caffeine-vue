@@ -10,55 +10,55 @@
         </v-btn>
       </v-toolbar>
       <div v-if="!showScoreLegend">
-      <v-card-text v-if="isExpanded">
-        <p class="mb-0">Flux</p>
-        <div class="flux-gradient"></div>
-        <p>
-          min
-          <span style="float: right;">max</span>
-        </p>
-        <v-layout align-center class="mb-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 50 50"
-            version="1.1"
-          >
-            <path
-              class="segment"
-              d="M0.0,20.0 L100.0,20.0"
-              stroke-dasharray="10, 10"
-              style="opacity: 0.75; stroke: rgb(165, 165, 165); stroke-width: 5;"
-            ></path>
-          </svg>
-          <p class="mb-0 ml-3">
-            No flux
+        <v-card-text v-if="isExpanded">
+          <p class="mb-0">Flux</p>
+          <div class="flux-gradient"></div>
+          <p>
+            min
+            <span style="float: right;">max</span>
           </p>
-        </v-layout>
-        <v-layout align-center class="mb-4">
-          <div class="not-in-model"></div>
-          <p class="mb-0 ml-3">
-            Not in the model
-          </p>
-        </v-layout>
-        <v-layout align-center>
-          <div class="measured-flux"></div>
-          <p class="mb-0 ml-3">
-            Measured flux
-          </p>
-        </v-layout>
-      </v-card-text>
+          <v-layout align-center class="mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 50 50"
+              version="1.1"
+            >
+              <path
+                class="segment"
+                d="M0.0,20.0 L100.0,20.0"
+                stroke-dasharray="10, 10"
+                style="opacity: 0.75; stroke: rgb(165, 165, 165); stroke-width: 5;"
+              ></path>
+            </svg>
+            <p class="mb-0 ml-3">
+              No flux
+            </p>
+          </v-layout>
+          <v-layout align-center class="mb-4">
+            <div class="not-in-model"></div>
+            <p class="mb-0 ml-3">
+              Not in the model
+            </p>
+          </v-layout>
+          <v-layout align-center>
+            <div class="measured-flux"></div>
+            <p class="mb-0 ml-3">
+              Measured flux
+            </p>
+          </v-layout>
+        </v-card-text>
       </div>
       <div v-else>
         <v-card-text v-if="isExpanded">
-        <p class="mb-0">Change expression</p>
-        <div class="score-gradient"></div>
-        <p>
-          down
-          <span style="float: right;">up</span>
-        </p>
-      </v-card-text>
+          <p class="mb-0">Change expression</p>
+          <div class="score-gradient"></div>
+          <p>
+            down
+            <span style="float: right;">up</span>
+          </p>
+        </v-card-text>
       </div>
     </v-card>
   </div>
@@ -74,7 +74,7 @@ export default Vue.extend({
     isExpanded: true
   }),
   computed: {
-    showScoreLegend () {
+    showScoreLegend() {
       return this.card ? this.card.showDiffFVAScore : false;
     }
   }

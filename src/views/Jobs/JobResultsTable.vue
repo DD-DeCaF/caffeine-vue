@@ -868,10 +868,11 @@ export default Vue.extend({
             withDialog: false,
             // Fields specific for prediction methods
             //diffFVA:
-            manipulations: jobPrediction.manipulations,           
-            productionGrowthRate: jobPrediction.method === "PathwayPredictor+DifferentialFVA"
-            ? jobPrediction.biomass
-            : null,
+            manipulations: jobPrediction.manipulations,
+            productionGrowthRate:
+              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+                ? jobPrediction.biomass
+                : null,
             showDiffFVAScore: false
           };
           // Make sure the full model is available before adding the card.

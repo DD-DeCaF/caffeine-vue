@@ -146,7 +146,7 @@ export default Vue.extend({
     hasLoadDataError: false,
     hasSaveDesignError: false,
     hasSaveDesignSuccess: false,
-    savedDesignName: null,
+    savedDesignName: null
   }),
   computed: {
     currentMapId: {
@@ -490,9 +490,12 @@ export default Vue.extend({
             })
             .filter(operation => operation.data.lower_bound !== 0);
           // Re-simulate the model with the updated bounds
-          // adding first all the modifications from the design 
+          // adding first all the modifications from the design
           // and then the modifications (edited bounds) computed above
-          this.postSimulation(card, model, [...this.cardModifications(card), ...editedBounds]);
+          this.postSimulation(card, model, [
+            ...this.cardModifications(card),
+            ...editedBounds
+          ]);
         })
         .catch(error => {
           this.updateCard({
