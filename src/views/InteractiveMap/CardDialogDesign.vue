@@ -367,9 +367,6 @@ export default Vue.extend({
     geneDisplay(gene) {
       return `${gene.name} (${gene.id})`;
     },
-    dontFilterByDisplayedText() {
-      return true;
-    },
     addReaction(addReaction: {
       reaction: Reaction;
       mnxReaction: MetaNetXReaction;
