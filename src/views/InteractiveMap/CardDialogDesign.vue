@@ -147,23 +147,6 @@
       </v-flex>
     </v-layout>
 
-    <v-autocomplete
-      v-model="addReactionItem"
-      :items="addReactionSearchResults"
-      :filter="dontFilterByDisplayedText"
-      :loading="isLoadingAddReaction"
-      :disabled="!model"
-      :search-input.sync="addReactionSearchQuery"
-      hide-no-data
-      :item-text="reactionDisplay"
-      item-value="id"
-      label="Add a reaction from BiGG..."
-      hint="Searches the entire <a href='http://bigg.ucsd.edu/'>BiGG</a> database for known reactions. Search by name or BiGG ID."
-      prepend-icon="add"
-      return-object
-      @change="addReaction"
-    ></v-autocomplete>
-
     <AutocompleteMnxReaction
       :disabled="!model"
       label="Add a reaction from MetaNetX..."
@@ -264,10 +247,6 @@
       </v-layout>
     </v-form>
 
-    <v-snackbar color="error" v-model="biggRequestError" :timeout="6000">
-      Could not search BiGG for reactions, please check your internet
-      connection.
-    </v-snackbar>
     <v-snackbar color="error" v-model="hasInvalidBoundsError" :timeout="6000">
       The lower bound cannot be larger than the upper bound.
     </v-snackbar>
@@ -295,12 +274,6 @@ export default Vue.extend({
       { text: "Details", value: "details", sortable: false },
       { text: "Remove", value: "remove", sortable: false }
     ],
-    // Add reaction
-    addReactionItem: null,
-    addReactionSearchQuery: null,
-    addReactionSearchResults: [],
-    isLoadingAddReaction: false,
-    biggRequestError: false,
     // Knockout reaction
     knockoutReactionItem: null,
     // Knockout gene
@@ -370,43 +343,6 @@ export default Vue.extend({
     }
   },
   watch: {
-    addReactionSearchQuery(query) {
-      this.addReactionSearchResults = [];
-      if (query === null || query.trim().length === 0) {
-        return;
-      }
-
-      this.isLoadingAddReaction = true;
-      axios
-        .get(
-          `${settings.apis.bigg}/search?query=${query}&search_type=reactions`
-        )
-        .then(response => {
-          // Wait for the full model to be able to filter out results that
-          // already exist in the model.
-          this.$store
-            .dispatch("models/withFullModel", this.model.id)
-            .then(model => {
-              this.addReactionSearchResults = response.data.results
-                .map(reaction => ({
-                  id: reaction.bigg_id,
-                  name: reaction.name
-                }))
-                // Exclude results that already exist in the current model
-                .filter(reaction =>
-                  model.model_serialized.reactions.every(
-                    r => r.id !== reaction.id
-                  )
-                );
-            });
-        })
-        .catch(error => {
-          this.biggRequestError = true;
-        })
-        .then(() => {
-          this.isLoadingAddReaction = false;
-        });
-    },
     editBoundsReaction(reaction) {
       if (reaction === undefined) {
         return;
@@ -433,54 +369,6 @@ export default Vue.extend({
     },
     dontFilterByDisplayedText() {
       return true;
-    },
-    addReaction(addedReaction) {
-      // Skip if the reaction is already added.
-      if (this.card.reactionAdditions.some(r => r.id === addedReaction.id)) {
-        return;
-      }
-
-      // Reset the autocomplete form to signal that the reaction will be added.
-      this.addReactionSearchQuery = null;
-      this.$nextTick(() => {
-        this.addReactionItem = null;
-      });
-
-      // Request full reaction information from BiGG. Only on success will the
-      // reaction actually be added.
-      axios
-        .get(
-          `${settings.apis.bigg}/models/universal/reactions/${addedReaction.id}`
-        )
-        .then(response => {
-          const reaction = {
-            id: response.data.bigg_id,
-            name: response.data.name,
-            reactionString: response.data.reaction_string,
-            // Note: Assuming all reactions in the universal model are
-            // reversible, but this might not be the case. Could potentially use
-            // the reaction string to check reversibility.
-            lowerBound: -1000,
-            upperBound: 1000,
-            metabolites: response.data.metabolites.map(m => ({
-              id: m.bigg_id,
-              name: m.name,
-              compartment: m.compartment_bigg_id,
-              stoichiometry: m.stoichiometry
-            }))
-          };
-
-          // Add the reaction to the card.
-          this.$store.commit("interactiveMap/addReaction", {
-            uuid: this.card.uuid,
-            reaction: reaction
-          });
-
-          this.$emit("simulate-card");
-        })
-        .catch(error => {
-          this.biggRequestError = true;
-        });
     },
     addMnxReaction(addReaction: {
       reaction: Reaction;
