@@ -149,10 +149,10 @@
 
     <AutocompleteMnxReaction
       :disabled="!model"
-      label="Add a reaction from MetaNetX..."
+      label="Add a reaction..."
       hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID, EC number or the reaction name."
       prepend-icon="add"
-      @change="addMnxReaction"
+      @change="addReaction"
     ></AutocompleteMnxReaction>
     <ReactionDialog
       v-if="model"
@@ -370,7 +370,7 @@ export default Vue.extend({
     dontFilterByDisplayedText() {
       return true;
     },
-    addMnxReaction(addReaction: {
+    addReaction(addReaction: {
       reaction: Reaction;
       mnxReaction: MetaNetXReaction;
     }) {
