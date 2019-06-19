@@ -529,4 +529,8 @@ export default Vue.extend({
   z-index: 10;
   background-color: rgba(0, 0, 0, 0.15);
 }
+
+.menuBar {
+  visibility: hidden;
+}
 </style>
