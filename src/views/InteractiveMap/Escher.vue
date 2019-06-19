@@ -205,7 +205,7 @@ export default Vue.extend({
   mounted() {
     this.onEscherReady = new Promise((resolve, reject) => {
       this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
-        menu: "zoom",
+        menu: "all",
         scroll_behavior: "zoom",
         fill_screen: false,
         ignore_bootstrap: true,
@@ -219,7 +219,7 @@ export default Vue.extend({
         reaction_no_data_color: "#CBCBCB",
         reaction_no_data_size: 10,
         tooltip: "custom",
-        enable_editing: false,
+        enable_editing: true,
         enable_fva_opacity: true,
         show_gene_reaction_rules: true,
         zoom_extent_canvas: true,
