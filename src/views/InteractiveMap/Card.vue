@@ -163,8 +163,11 @@
         <v-layout row>
           <v-flex>
             <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-switch color="primary" v-model="showDiffFVAScore">
+              <span>
+                Show either the flux distribution calculated from differential
+                FVA or the direction of required expression changes.
+              </span>
+                <v-switch color="primary" v-model="showDiffFVAScore" slot="activator">
                   <template v-slot:label>
                     <div v-if="!showDiffFVAScore">
                       Show manipulation targets
@@ -174,11 +177,6 @@
                     </div>
                   </template>
                 </v-switch>
-              </template>
-              <span>
-                Show either the flux distribution calculated from differential
-                FVA or just the scores.
-              </span>
             </v-tooltip>
           </v-flex>
         </v-layout>
@@ -247,7 +245,10 @@ export default Vue.extend({
     isSaving: false,
     showMethodHelpDialog: false,
     isCardDialogVisible: false,
-    showDiffFVAScore: false
+    showDiffFVAScore: false,
+    styleObject: {
+      "pointer-events": "auto"
+    },
   }),
   computed: {
     titleColor() {
