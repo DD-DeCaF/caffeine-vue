@@ -66,7 +66,7 @@
       </v-container>
 
       <!-- Design cards -->
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout>
           <v-flex>Objective:</v-flex>
           <v-flex class="text-xs-right">
@@ -79,13 +79,13 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout wrap>
           <v-flex>Modifications:</v-flex>
           <v-flex class="text-xs-right">{{ modifications.length }}</v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="!card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'Design'" fluid class="pa-0">
         <v-layout wrap>
           <v-flex v-if="card.objective.reaction"
             >{{ card.objective.reaction.id }} flux:</v-flex
@@ -113,7 +113,7 @@
       </v-container>
 
       <!-- Data driven cards -->
-      <v-container v-if="card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
         <v-layout>
           <v-flex>Experiment:</v-flex>
           <v-flex class="text-xs-right">
@@ -122,7 +122,7 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container v-if="card.dataDriven" fluid class="pa-0">
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
         <v-layout>
           <v-flex>Conditions:</v-flex>
           <v-flex class="text-xs-right">
@@ -154,6 +154,34 @@
                 :width="1"
               ></v-progress-circular>
             </div>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <!-- DiffFVA -->
+      <v-container v-if="card.type == 'DiffFVA'" fluid class="pa-0">
+        <v-layout row>
+          <v-flex>
+            <v-tooltip bottom>
+              <span>
+                Show either the flux distribution calculated from differential
+                FVA or the direction of required expression changes.
+              </span>
+              <v-switch
+                color="primary"
+                v-model="showDiffFVAScore"
+                slot="activator"
+              >
+                <template v-slot:label>
+                  <div v-if="!showDiffFVAScore">
+                    Show manipulation targets
+                  </div>
+                  <div v-else>
+                    <div style="color:black">Show manipulation targets</div>
+                  </div>
+                </template>
+              </v-switch>
+            </v-tooltip>
           </v-flex>
         </v-layout>
       </v-container>
@@ -220,7 +248,11 @@ export default Vue.extend({
   data: () => ({
     isSaving: false,
     showMethodHelpDialog: false,
-    isCardDialogVisible: false
+    isCardDialogVisible: false,
+    showDiffFVAScore: false,
+    styleObject: {
+      "pointer-events": "auto"
+    }
   }),
   computed: {
     titleColor() {
@@ -338,7 +370,7 @@ export default Vue.extend({
       return model;
     },
     isSaveable() {
-      return !this.card.dataDriven && this.card.modified;
+      return this.card.type == "DataDriven" && this.card.modified;
     },
     isSaveTooltipVisible() {
       return (
@@ -374,6 +406,12 @@ export default Vue.extend({
         }
         this.$store.dispatch("models/withFullModel", this.card.modelId);
       }
+    },
+    showDiffFVAScore() {
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: { showDiffFVAScore: this.showDiffFVAScore }
+      });
     }
   },
   mounted() {

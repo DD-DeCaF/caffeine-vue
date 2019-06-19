@@ -1,30 +1,33 @@
 <template>
-  <div class="escher-container fill-height" @click="$emit('click')">
-    <v-container
-      fluid
-      fill-height
-      class="overlay"
-      v-if="initializingEscher || isLoadingMap"
-    >
-      <v-layout align-center justify-center>
-        <v-progress-circular
-          indeterminate
-          size="40"
-          :width="2"
-          class="mr-2"
-          color="white"
-        ></v-progress-circular>
-        <p class="display-1 white--text mb-0">
-          <span v-if="initializingEscher">Initializing Escher...</span>
-          <span v-else-if="isLoadingMap">Loading map...</span>
-        </p>
-      </v-layout>
-    </v-container>
-    <div ref="escher" class="fill-height"></div>
-    <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
-      Invalid bounds. Please make sure that the upper bound is larger than or
-      equal to the lower bound.
-    </v-snackbar>
+  <div class="fill-height">
+    <div class="escher-container fill-height" @click="$emit('click')">
+      <v-container
+        fluid
+        fill-height
+        class="overlay"
+        v-if="initializingEscher || isLoadingMap"
+      >
+        <v-layout align-center justify-center>
+          <v-progress-circular
+            indeterminate
+            size="40"
+            :width="2"
+            class="mr-2"
+            color="white"
+          ></v-progress-circular>
+          <p class="display-1 white--text mb-0">
+            <span v-if="initializingEscher">Initializing Escher...</span>
+            <span v-else-if="isLoadingMap">Loading map...</span>
+          </p>
+        </v-layout>
+      </v-container>
+      <div ref="escher" class="fill-height"></div>
+      <v-snackbar color="error" v-model="hasBoundsError" :timeout="6000">
+        Invalid bounds. Please make sure that the upper bound is larger than or
+        equal to the lower bound.
+      </v-snackbar>
+    </div>
+    <Legend :card="card" />
   </div>
 </template>
 
@@ -32,16 +35,26 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
+import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
   name: "Escher",
+  components: {
+    Legend
+  },
   props: ["mapData", "card"],
   data: () => ({
     escherBuilder: null,
     initializingEscher: true,
     onEscherReady: null,
     isLoadingMap: false,
-    hasBoundsError: false
+    hasBoundsError: false,
+    defaultColorScheme: [
+      { type: "min", color: "#A841D0", size: 20 },
+      { type: "Q1", color: "#868BB2", size: 20 },
+      { type: "Q3", color: "#6DBFB0", size: 20 },
+      { type: "max", color: "#54B151", size: 20 }
+    ]
   }),
   computed: {
     model() {
@@ -109,6 +122,20 @@ export default Vue.extend({
         ];
       });
       return model;
+    },
+    diffFVAScores() {
+      if (this.card.type === "DiffFVA") {
+        let scores = {};
+        this.card.manipulations.forEach(manipulation => {
+          scores[manipulation.id] = manipulation.value;
+        });
+        return scores;
+      } else {
+        return null;
+      }
+    },
+    showDiffFVAScore() {
+      return this.card ? this.card.showDiffFVAScore : false;
     }
   },
   watch: {
@@ -169,6 +196,10 @@ export default Vue.extend({
     },
     "card.fluxes"() {
       this.onEscherReady.then(this.setFluxes);
+    },
+    showDiffFVAScore() {
+      this.onEscherReady.then(this.toggleColorScheme());
+      this.onEscherReady.then(this.setFluxes);
     }
   },
   mounted() {
@@ -184,12 +215,7 @@ export default Vue.extend({
         hide_all_labels: false,
         hide_secondary_metabolites: false,
         highlight_missing: true,
-        reaction_scale: [
-          { type: "min", color: "#A841D0", size: 20 },
-          { type: "Q1", color: "#868BB2", size: 20 },
-          { type: "Q3", color: "#6DBFB0", size: 20 },
-          { type: "max", color: "#54B151", size: 20 }
-        ],
+        reaction_scale: this.defaultColorScheme,
         reaction_no_data_color: "#CBCBCB",
         reaction_no_data_size: 10,
         tooltip: "custom",
@@ -269,7 +295,10 @@ export default Vue.extend({
       if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (this.card.method === "fba" || this.card.method == "pfba") {
+        if (
+          (this.card.method === "fba" || this.card.method == "pfba") &&
+          !this.showDiffFVAScore
+        ) {
           const fluxesFiltered = this.fluxFilter(this.card.fluxes);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
@@ -277,8 +306,8 @@ export default Vue.extend({
           // TODO: We should improve the escher API here.
           this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         } else if (
-          this.card.method === "fva" ||
-          this.card.method == "pfba-fva"
+          (this.card.method === "fva" || this.card.method == "pfba-fva") &&
+          !this.showDiffFVAScore
         ) {
           // Render a flux distribution using the average values from the FVA
           // data.
@@ -292,6 +321,12 @@ export default Vue.extend({
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set the FVA data for transparency visualization.
           this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
+        } else if (this.showDiffFVAScore) {
+          // Set the scores instead of the cards fluxes.
+          // (calculated from a diffFVA card's manipulations)
+          this.escherBuilder.set_reaction_data(this.diffFVAScores);
+          // Set the FVA data for transparency visualization as above.
+          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
         }
       }
       this.escherBuilder._update_data(true, true);
@@ -470,6 +505,17 @@ export default Vue.extend({
         reactionId: reactionId
       });
       this.$emit("simulate-card", this.card, this.model);
+    },
+    toggleColorScheme() {
+      if (this.card.showDiffFVAScore) {
+        this.escherBuilder.options.reaction_scale = [
+          { type: "min", color: "#a841d0", size: 20 },
+          { type: "value", color: "#f7f7f7", size: 5, value: 0 },
+          { type: "max", color: "#54b151", size: 20 }
+        ];
+      } else {
+        this.escherBuilder.options.reaction_scale = this.defaultColorScheme;
+      }
     }
   }
 });

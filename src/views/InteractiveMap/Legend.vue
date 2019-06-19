@@ -10,12 +10,22 @@
         </v-btn>
       </v-toolbar>
       <v-card-text v-if="isExpanded">
-        <p class="mb-0">Flux</p>
-        <div class="flux-gradient"></div>
-        <p>
-          min
-          <span style="float: right;">max</span>
-        </p>
+        <div v-if="!showScoreLegend">
+          <p class="mb-0">Flux</p>
+          <div class="flux-gradient"></div>
+          <p>
+            min
+            <span style="float: right;">max</span>
+          </p>
+        </div>
+        <div v-else>
+          <p class="mb-0">Change expression</p>
+          <div class="score-gradient"></div>
+          <p>
+            down
+            <span style="float: right;">up</span>
+          </p>
+        </div>
         <v-layout align-center class="mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +51,7 @@
             Not in the model
           </p>
         </v-layout>
-        <v-layout align-center>
+        <v-layout align-center v-show="!showScoreLegend">
           <div class="measured-flux"></div>
           <p class="mb-0 ml-3">
             Measured flux
@@ -57,9 +67,15 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "Legend",
+  props: ["card"],
   data: () => ({
     isExpanded: true
-  })
+  }),
+  computed: {
+    showScoreLegend() {
+      return this.card ? this.card.showDiffFVAScore : false;
+    }
+  }
 });
 </script>
 
@@ -74,6 +90,12 @@ export default Vue.extend({
 
 .flux-gradient {
   background: linear-gradient(90deg, #a841d0, #868bb2, #6dbfb0, #54b151);
+  height: 30px;
+  width: 100%;
+}
+
+.score-gradient {
+  background: linear-gradient(90deg, #a841d0, #f7f7f7, #54b151);
   height: 30px;
   width: 100%;
 }

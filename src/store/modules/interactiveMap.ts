@@ -37,7 +37,7 @@ export interface Card {
   // `modified` is true when the user has made any change to the model, and it
   // can be saved. Not relevant for data-driven cards.
   modified: boolean;
-  dataDriven: boolean;
+  type: string;
   // Design card fields
   objective: {
     reaction: Reaction | null;
@@ -60,6 +60,10 @@ export interface Card {
   fluxes: number | null;
   // When adding a card from the interactive map, the dialog should be opened
   withDialog: boolean;
+  // Specific fields for design prediction methods
+  manipulations: any[] | null;
+  productionGrowthRate: number | null;
+  showDiffFVAScore: boolean;
 }
 
 export default {

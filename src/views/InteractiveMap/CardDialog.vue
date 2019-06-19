@@ -57,14 +57,21 @@
           </v-layout>
 
           <CardDialogDesign
-            v-if="!card.dataDriven"
+            v-if="card.type == 'Design'"
             :card="card"
             :model="model"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
           />
           <CardDialogDataDriven
-            v-else
+            v-if="card.type == 'DataDriven'"
+            :card="card"
+            :modifications="modifications"
+            @simulate-card="$emit('simulate-card')"
+            @load-data-error="$emit('load-data-error')"
+          />
+          <CardDialogDiffFVA
+            v-if="card.type == 'DiffFVA'"
             :card="card"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
@@ -99,13 +106,15 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialogDesign from "@/views/InteractiveMap/CardDialogDesign.vue";
 import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
+import CardDialogDiffFVA from "@/views/InteractiveMap/CardDialogDiffFVA.vue";
 import { ModelItem } from "@/store/modules/models";
 
 export default Vue.extend({
   name: "CardDialog",
   components: {
     CardDialogDesign,
-    CardDialogDataDriven
+    CardDialogDataDriven,
+    CardDialogDiffFVA
   },
   props: ["card", "model", "modifications", "value"],
   data: () => ({

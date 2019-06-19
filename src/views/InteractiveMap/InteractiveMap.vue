@@ -12,7 +12,6 @@
       :card="selectedCard"
       :mapData="mapData"
     />
-    <Legend />
     <v-btn
       color="primary"
       small
@@ -64,7 +63,7 @@
           <v-list>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(false, true)">
+                <v-list-tile @click="addDefaultCard('Design', true)">
                   <v-list-tile-title v-on="on">Design</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -72,7 +71,7 @@
             </v-tooltip>
             <v-tooltip left>
               <template v-slot:activator="{ on }">
-                <v-list-tile @click="addDefaultCard(true, true)">
+                <v-list-tile @click="addDefaultCard('DataDriven', true)">
                   <v-list-tile-title v-on="on">Data driven</v-list-tile-title>
                 </v-list-tile>
               </template>
@@ -127,7 +126,6 @@ import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import Escher from "@/views/InteractiveMap/Escher.vue";
 import Card from "@/views/InteractiveMap/Card.vue";
-import Legend from "@/views/InteractiveMap/Legend.vue";
 import { Card as CardType } from "@/store/modules/interactiveMap";
 import { partitionedList } from "@/utils/utility";
 
@@ -135,8 +133,7 @@ export default Vue.extend({
   name: "InteractiveMap",
   components: {
     Escher,
-    Card,
-    Legend
+    Card
   },
   data: () => ({
     isSidepanelOpen: true,
@@ -211,7 +208,7 @@ export default Vue.extend({
       // is available.
       this.$store.state.models.modelsPromise.then(() => {
         this.$store.state.organisms.organismsPromise.then(() => {
-          this.addDefaultCard(false, false);
+          this.addDefaultCard("Design", false);
         });
       });
     }
@@ -229,8 +226,19 @@ export default Vue.extend({
           this.hasLoadMapError = true;
         });
     },
-    addDefaultCard(dataDriven, withDialog) {
-      const name = dataDriven ? "Data driven" : "Design";
+    addDefaultCard(cardType, withDialog) {
+      let name = "";
+      switch (cardType) {
+        case "Design":
+          name = "Design";
+          break;
+        case "DataDriven":
+          name = "Data driven";
+          break;
+        case "DiffFVA":
+          name = "Differential FVA";
+          break;
+      }
       // Select the default preferred organism and related model.
       // Note: Expecting organisms and models to be already loaded into state.
       // TODO: Use hardcoded list of preferred models for organisms
@@ -241,13 +249,13 @@ export default Vue.extend({
         return model.id === 15 && model.name === "e_coli_core";
       });
 
-      if (!organism || !model || dataDriven || withDialog) {
-        this.addCard(name, null, null, "pfba", dataDriven, withDialog);
+      if (!organism || !model || cardType == "DataDriven" || withDialog) {
+        this.addCard(name, null, null, "pfba", cardType, withDialog);
       } else {
-        this.addCard(name, organism, model, "pfba", dataDriven, withDialog);
+        this.addCard(name, organism, model, "pfba", cardType, withDialog);
       }
     },
-    addCard(name, organism, model, method, dataDriven, withDialog) {
+    addCard(name, organism, model, method, cardType, withDialog) {
       const card: CardType = {
         uuid: uuidv4(),
         name: name,
@@ -256,7 +264,7 @@ export default Vue.extend({
         modelId: model ? model.id : null,
         method: method,
         modified: false,
-        dataDriven: dataDriven,
+        type: cardType,
         // Design card fields
         objective: {
           reaction: null,
@@ -277,7 +285,11 @@ export default Vue.extend({
         hasSimulationError: false,
         growthRate: null,
         fluxes: null,
-        withDialog: withDialog
+        withDialog: withDialog,
+        // Specific fields for design prediction methods
+        manipulations: null,
+        productionGrowthRate: null,
+        showDiffFVAScore: false
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
@@ -329,13 +341,22 @@ export default Vue.extend({
         return;
       }
 
-      if (!card.dataDriven) {
-        this.simulateDesignCard(card, model);
-      } else {
-        this.simulateDataDrivenCard(card, model);
+      switch (card.type) {
+        case "Design":
+          this.simulateDesignCard(card, model);
+          break;
+        case "DataDriven":
+          this.simulateDataDrivenCard(card, model);
+          break;
+        case "DiffFVA":
+          this.simulateDiffFVACard(card, model);
+          break;
       }
     },
     simulateDesignCard(card, model) {
+      this.postSimulation(card, model, this.cardModifications(card));
+    },
+    cardModifications(card) {
       // Collect card operations from modifications
       const reactionAdditions = card.reactionAdditions.map(reaction => ({
         operation: "add",
@@ -373,12 +394,12 @@ export default Vue.extend({
           upper_bound: reaction.upperBound
         }
       }));
-      this.postSimulation(card, model, [
+      return [
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
-      ]);
+      ];
     },
     simulateDataDrivenCard(card, model) {
       // Reset warnings and errors
@@ -425,6 +446,69 @@ export default Vue.extend({
               props: { conditionErrors: error.response.data.errors }
             });
           }
+        });
+    },
+    simulateDiffFVACard(card, model) {
+      const operations = this.cardModifications(card);
+      this.updateCard({
+        uuid: card.uuid,
+        props: {
+          isSimulating: true,
+          hasSimulationError: false
+        }
+      });
+      axios
+        .post(`${settings.apis.model}/simulate`, {
+          model_id: model.id,
+          method: card.method,
+          operations: operations,
+          objective_id: card.objective.reaction
+            ? card.objective.reaction.id
+            : model.default_biomass_reaction,
+          objective_direction: card.objective.maximize ? "max" : "min"
+        })
+        .then(response => {
+          const wildtypeFluxdistribution = response.data.flux_distribution;
+          // Calculate new bounds based on manipulation scores calculated by DiffFVA
+          // (reference flux * score) / production growth
+          const editedBounds = card.manipulations
+            .map(function(manipulation) {
+              const newBound = Math.round(
+                (wildtypeFluxdistribution[manipulation.id] *
+                  manipulation.value) /
+                  card.productionGrowthRate
+              );
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: newBound
+                }
+              };
+            })
+            .filter(operation => operation.data.lower_bound !== 0);
+          // Re-simulate the model with the updated bounds
+          // adding first all the modifications from the design
+          // and then the modifications (edited bounds) computed above
+          this.postSimulation(card, model, [
+            ...this.cardModifications(card),
+            ...editedBounds
+          ]);
+        })
+        .catch(error => {
+          this.updateCard({
+            uuid: card.uuid,
+            props: { hasSimulationError: true }
+          });
+          this.hasSimulationError = true;
+        })
+        .then(response => {
+          this.updateCard({
+            uuid: card.uuid,
+            props: { isSimulating: false }
+          });
         });
     },
     postSimulation(card, model, operations) {

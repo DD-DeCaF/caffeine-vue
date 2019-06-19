@@ -831,6 +831,10 @@ export default Vue.extend({
           ...jobPrediction.synthetic_reactions
         ];
         const promises = this.getAddedReactions(addedReactionIds);
+        const cardType =
+          jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+            ? "DiffFVA"
+            : "Design";
         Promise.all(promises).then((addedReactions: any[]) => {
           const card: Card = {
             uuid: uuidv4(),
@@ -840,7 +844,7 @@ export default Vue.extend({
             modelId: this.model.id,
             method: "pfba",
             modified: true,
-            dataDriven: false,
+            type: cardType,
             // Design card fields
             objective: {
               reaction: null,
@@ -861,7 +865,15 @@ export default Vue.extend({
             hasSimulationError: false,
             growthRate: null,
             fluxes: null,
-            withDialog: false
+            withDialog: false,
+            // Fields specific for prediction methods
+            //diffFVA:
+            manipulations: jobPrediction.manipulations,
+            productionGrowthRate:
+              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+                ? jobPrediction.biomass
+                : null,
+            showDiffFVAScore: false
           };
           // Make sure the full model is available before adding the card.
           this.$store
