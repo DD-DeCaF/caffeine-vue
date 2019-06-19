@@ -9,14 +9,23 @@
           <v-icon color="white" v-else>expand_less</v-icon>
         </v-btn>
       </v-toolbar>
-      <div v-if="!showScoreLegend">
         <v-card-text v-if="isExpanded">
+          <div v-if="!showScoreLegend">
           <p class="mb-0">Flux</p>
           <div class="flux-gradient"></div>
           <p>
             min
             <span style="float: right;">max</span>
           </p>
+          </div>
+          <div v-else>
+          <p class="mb-0">Change expression</p>
+                    <div class="score-gradient"></div>
+                    <p>
+                      down
+                      <span style="float: right;">up</span>
+                    </p>
+          </div>
           <v-layout align-center class="mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -42,24 +51,13 @@
               Not in the model
             </p>
           </v-layout>
-          <v-layout align-center>
+          <v-layout align-center v-show="!showScoreLegend">
             <div class="measured-flux"></div>
             <p class="mb-0 ml-3">
               Measured flux
             </p>
           </v-layout>
         </v-card-text>
-      </div>
-      <div v-else>
-        <v-card-text v-if="isExpanded">
-          <p class="mb-0">Change expression</p>
-          <div class="score-gradient"></div>
-          <p>
-            down
-            <span style="float: right;">up</span>
-          </p>
-        </v-card-text>
-      </div>
     </v-card>
   </div>
 </template>

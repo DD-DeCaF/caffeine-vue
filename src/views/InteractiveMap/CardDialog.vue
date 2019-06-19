@@ -57,7 +57,7 @@
           </v-layout>
 
           <CardDialogDesign
-            v-if="card.type == 'Design' || 'DiffFVA'"
+            v-if="card.type == 'Design'"
             :card="card"
             :model="model"
             :modifications="modifications"

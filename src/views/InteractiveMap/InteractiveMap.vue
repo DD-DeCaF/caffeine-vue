@@ -470,7 +470,7 @@ export default Vue.extend({
         .then(response => {
           const wildtypeFluxdistribution = response.data.flux_distribution;
           // Calculate new bounds based on manipulation scores calculated by DiffFVA
-          // (Reference flux * score) / Reference growth
+          // (reference flux * score) / production growth
           const editedBounds = card.manipulations
             .map(function(manipulation) {
               const newBound = Math.round(
