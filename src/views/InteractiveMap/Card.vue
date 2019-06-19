@@ -167,16 +167,20 @@
                 Show either the flux distribution calculated from differential
                 FVA or the direction of required expression changes.
               </span>
-                <v-switch color="primary" v-model="showDiffFVAScore" slot="activator">
-                  <template v-slot:label>
-                    <div v-if="!showDiffFVAScore">
-                      Show manipulation targets
-                    </div>
-                    <div v-else>
-                      <div style="color:black">Show manipulation targets</div>
-                    </div>
-                  </template>
-                </v-switch>
+              <v-switch
+                color="primary"
+                v-model="showDiffFVAScore"
+                slot="activator"
+              >
+                <template v-slot:label>
+                  <div v-if="!showDiffFVAScore">
+                    Show manipulation targets
+                  </div>
+                  <div v-else>
+                    <div style="color:black">Show manipulation targets</div>
+                  </div>
+                </template>
+              </v-switch>
             </v-tooltip>
           </v-flex>
         </v-layout>
@@ -248,7 +252,7 @@ export default Vue.extend({
     showDiffFVAScore: false,
     styleObject: {
       "pointer-events": "auto"
-    },
+    }
   }),
   computed: {
     titleColor() {

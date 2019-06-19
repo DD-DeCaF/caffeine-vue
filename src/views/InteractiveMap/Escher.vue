@@ -296,8 +296,8 @@ export default Vue.extend({
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (
-          (this.card.method === "fba" ||
-          this.card.method == "pfba") && !this.showDiffFVAScore
+          (this.card.method === "fba" || this.card.method == "pfba") &&
+          !this.showDiffFVAScore
         ) {
           const fluxesFiltered = this.fluxFilter(this.card.fluxes);
           this.escherBuilder.set_reaction_data(fluxesFiltered);
@@ -306,8 +306,8 @@ export default Vue.extend({
           // TODO: We should improve the escher API here.
           this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
         } else if (
-          (this.card.method === "fva" ||
-          this.card.method == "pfba-fva") && !this.showDiffFVAScore
+          (this.card.method === "fva" || this.card.method == "pfba-fva") &&
+          !this.showDiffFVAScore
         ) {
           // Render a flux distribution using the average values from the FVA
           // data.
