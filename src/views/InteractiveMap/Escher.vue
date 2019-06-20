@@ -259,7 +259,7 @@ export default Vue.extend({
             .map(r => r.id)
         );
       }
-      this.escherBuilder._update_data(true, true);
+      this.escherBuilder._updateData(true, true);
     },
     setReactionKnockouts() {
       if (this.card === null) {
@@ -269,7 +269,7 @@ export default Vue.extend({
           this.card.reactionKnockouts.map(r => r.id)
         );
       }
-      this.escherBuilder._update_data(true, true);
+      this.escherBuilder._updateData(true, true);
     },
     setGeneKnockouts() {
       if (this.card === null) {
@@ -279,7 +279,7 @@ export default Vue.extend({
           this.card.geneKnockouts.map(g => g.id)
         );
       }
-      this.escherBuilder._update_data(true, true);
+      this.escherBuilder._updateData(true, true);
     },
     setConditionData() {
       if (!this.card || !this.card.conditionData) {
@@ -329,7 +329,7 @@ export default Vue.extend({
           this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
         }
       }
-      this.escherBuilder._update_data(true, true);
+      this.escherBuilder._updateData(true, true);
     },
     fluxFilter(fluxes) {
       // Exclude fluxes with very low non-zero values, in order to not shift
@@ -530,7 +530,7 @@ export default Vue.extend({
   background-color: rgba(0, 0, 0, 0.15);
 }
 
-.menuBar {
+.menu-bar {
   visibility: hidden;
 }
 </style>

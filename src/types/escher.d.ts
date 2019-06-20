@@ -36,14 +36,13 @@ declare module "@dd-decaf/escher" {
     load_map(map_data: PathwayMap): void;
     load_model(model: any): void;
     set_gene_data(gene_data: GeneDataArray): void;
-    renderSearchBar(hide?: boolean, searchItem?: string): void;
     set_reaction_data(flux: any): void;
     set_knockout_reactions(reactions: string[]): void;
     set_reaction_fva_data(flux: any): void;
     set_added_reactions(reactions: string[]): void;
     set_highlight_reactions(reactions: string[]): void;
     set_knockout_genes(genes: string[]): void;
-    _update_data(
+    _updateData(
       update_model: boolean,
       update_map: boolean,
       kind?: string,
