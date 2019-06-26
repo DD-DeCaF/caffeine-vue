@@ -59,8 +59,9 @@ import Vue from "vue";
 import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
 import * as settings from "@/utils/settings";
 import axios from "axios";
+
 export default Vue.extend({
-  name: "ReactionDialog",
+  name: "ReactionDialogMetabolite",
   components: {
     MetaboliteDialog
   },
@@ -155,6 +156,7 @@ export default Vue.extend({
           this.mnxSearchResults = response.data.map(metabolite => ({
             id: metabolite.mnx_id,
             name: metabolite.name,
+            formula: metabolite.formula,
             annotation: metabolite.annotation
           }));
         })

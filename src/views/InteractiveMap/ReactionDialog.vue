@@ -213,7 +213,7 @@ export default Vue.extend({
       this.upperBound = inputReaction.upperBound;
 
       const metabolites = inputReaction.metabolites.map(m => ({
-        metabolite: { id: m.id, name: m.name },
+        metabolite: { id: m.id, name: m.name, formula: m.formula },
         compartment: m.compartment,
         stoichiometry: m.stoichiometry
       }));
@@ -324,6 +324,7 @@ export default Vue.extend({
           .map(m => ({
             id: this.getMetaboliteId(m.metabolite.id, m.metabolite.compartment),
             name: m.metabolite.name,
+            formula: m.metabolite.formula,
             compartment: m.compartment,
             stoichiometry: m.stoichiometry
           }))
