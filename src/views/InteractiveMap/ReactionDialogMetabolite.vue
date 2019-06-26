@@ -59,6 +59,7 @@ import Vue from "vue";
 import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
 import * as settings from "@/utils/settings";
 import axios from "axios";
+
 export default Vue.extend({
   name: "ReactionDialog",
   components: {
