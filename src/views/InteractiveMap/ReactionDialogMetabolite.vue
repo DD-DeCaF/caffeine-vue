@@ -61,7 +61,7 @@ import * as settings from "@/utils/settings";
 import axios from "axios";
 
 export default Vue.extend({
-  name: "ReactionDialog",
+  name: "ReactionDialogMetabolite",
   components: {
     MetaboliteDialog
   },
