@@ -156,6 +156,7 @@ export default Vue.extend({
           this.mnxSearchResults = response.data.map(metabolite => ({
             id: metabolite.mnx_id,
             name: metabolite.name,
+            formula: metabolite.formula,
             annotation: metabolite.annotation
           }));
         })

@@ -32,6 +32,7 @@ export interface MetaNetXReaction {
     annotation: Annotation;
     name: string;
     mnx_id: string;
+    formula: string;
   }[];
   reaction: {
     mnx_id: string;
@@ -159,6 +160,7 @@ export default Vue.extend({
           return {
             id: m.metabolite_id,
             name: fullMetabolite ? fullMetabolite.name : "",
+            formula: fullMetabolite ? fullMetabolite.formula : "",
             // TODO: use m.compartment_id, mapped through selectedReaction.annotations
             compartment: "",
             stoichiometry: m.coefficient
