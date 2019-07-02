@@ -221,7 +221,7 @@
         Sorry, we were unable to delete data. Please check if you are logged in.
       </v-snackbar>
 
-      <v-snackbar color="error" v-model="hasRefreshError" :timeout="6000">
+      <v-snackbar color="warning" v-model="hasRefreshError" :timeout="6000">
         Your session has expired and you have been logged out. Please log in
         again.
       </v-snackbar>
