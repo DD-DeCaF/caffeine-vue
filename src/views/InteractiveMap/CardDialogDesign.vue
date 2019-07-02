@@ -378,9 +378,15 @@ export default Vue.extend({
           const fullMetabolite = addReaction.mnxReaction.metabolites.find(
             ({ mnx_id }) => mnx_id === m.id
           );
-          if (!fullMetabolite) return m;
-          if (!fullMetabolite.annotation) return m;
-          if (!fullMetabolite.annotation.bigg) return m;
+          if (!fullMetabolite) {
+            return m;
+          }
+          if (!fullMetabolite.annotation) {
+            return m;
+          }
+          if (!fullMetabolite.annotation.bigg) {
+            return m;
+          }
 
           // TODO: optimize for performance
           let matchingMetaboliteInModel = null as Metabolite | null | undefined;
@@ -390,7 +396,9 @@ export default Vue.extend({
             );
             return !!matchingMetaboliteInModel;
           });
-          if (!matchingMetaboliteInModel) return m;
+          if (!matchingMetaboliteInModel) {
+            return m;
+          }
 
           // TODO: instead of removing the compartment here and adding it later,
           // we should just pass the metabolite identifiers as they are.

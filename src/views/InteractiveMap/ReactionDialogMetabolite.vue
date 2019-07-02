@@ -130,7 +130,9 @@ export default Vue.extend({
       }
     },
     onMetaboliteChange(metabolite, value) {
-      if (!value) return;
+      if (!value) {
+        return;
+      }
       if (value.compartment) {
         metabolite.compartment = value.compartment;
       } else {
