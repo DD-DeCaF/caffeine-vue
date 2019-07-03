@@ -1010,31 +1010,40 @@ export default Vue.extend({
                   // needed for reaction string
                   const substrates: string[] = [];
                   const products: string[] = [];
+                  Object.keys(reactionToAdd.metabolites).forEach(
+                    metaboliteId => {
+                      const stoichiometry =
+                        reactionToAdd.metabolites[metaboliteId];
+                      if (stoichiometry < 0) {
+                        substrates.push(
+                          Math.abs(stoichiometry) + " " + metaboliteId
+                        );
+                      } else {
+                        products.push(stoichiometry + " " + metaboliteId);
+                      }
+                    }
+                  );
                   // metabolites should be array of objects
                   const metabolites = Object.keys(
                     reactionToAdd.metabolites
-                  ).map(metaboliteId => {
-                    const stoichiometry =
-                      reactionToAdd.metabolites[metaboliteId];
-                    stoichiometry < 0
-                      ? substrates.push(
-                          Math.abs(stoichiometry) + " " + metaboliteId
-                        )
-                      : products.push(stoichiometry + " " + metaboliteId);
-                    return {
-                      id: metaboliteId,
-                      // assuming that compartment is always "c"
-                      compartment: "c"
-                    };
-                  });
+                  ).map(metaboliteId => ({
+                    id: metaboliteId,
+                    // compartment is always "c" for now
+                    // should be reconsidered later
+                    compartment: "c"
+                  }));
                   const substratesSerialized = substrates.join(" + ");
                   const productsSerialized = products.join(" + ");
                   const lowerBound = reactionToAdd.lower_bound;
                   const upperBound = reactionToAdd.upper_bound;
                   let direction;
-                  if (lowerBound >= 0) direction = " ⟶ ";
-                  else if (upperBound <= 0) direction = " ⟵ ";
-                  else direction = " ⇌ ";
+                  if (lowerBound >= 0) {
+                    direction = " ⟶ ";
+                  } else if (upperBound <= 0) {
+                    direction = " ⟵ ";
+                  } else {
+                    direction = " ⇌ ";
+                  }
                   const reactionString =
                     (substratesSerialized || "Ø") +
                     direction +
