@@ -329,69 +329,136 @@
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">
                       <div
-                        v-for="(manipulation, index) in sort(
-                          jobPrediction.manipulations,
-                          'value'
-                        )"
-                        :key="index"
+                        v-if="
+                          jobPrediction.method ===
+                            'PathwayPredictor+DifferentialFVA'
+                        "
                       >
-                        <div v-if="index < 10">
-                          <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                              <a
-                                v-if="
-                                  jobPrediction.method ===
-                                    'PathwayPredictor+DifferentialFVA'
-                                "
-                                :href="
-                                  `http://bigg.ucsd.edu/search?query=${
-                                    manipulation.id
-                                  }`
-                                "
-                                class="link"
-                                target="_blank"
-                                v-on="on"
+                        <div
+                          v-for="(manipulation, index) in sort(
+                            jobPrediction.manipulations,
+                            'value'
+                          )"
+                          :key="index"
+                        >
+                          <div v-if="index < 10">
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on }">
+                                <a
+                                  :href="
+                                    `http://bigg.ucsd.edu/search?query=${
+                                      manipulation.id
+                                    }`
+                                  "
+                                  class="link"
+                                  target="_blank"
+                                  v-on="on"
+                                >
+                                  {{
+                                    `${indicators[manipulation.direction]} ${
+                                      manipulation.id
+                                    }`
+                                  }}
+                                </a>
+                              </template>
+                              <span
+                                >Score:
+                                {{ manipulation.value.toFixed(2) }}</span
                               >
-                                {{
-                                  `${indicators[manipulation.direction]} ${
-                                    manipulation.id
-                                  }`
-                                }}
-                              </a>
-                            </template>
-                            <span
-                              >Score: {{ manipulation.value.toFixed(2) }}</span
-                            >
-                          </v-tooltip>
+                            </v-tooltip>
+                          </div>
+                          <div
+                            v-if="index >= 10"
+                            :hidden="!showAllManipulations"
+                          >
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on }">
+                                <a
+                                  :href="
+                                    `http://bigg.ucsd.edu/search?query=${
+                                      manipulation.id
+                                    }`
+                                  "
+                                  class="link"
+                                  target="_blank"
+                                  v-on="on"
+                                >
+                                  {{
+                                    `${indicators[manipulation.direction]} ${
+                                      manipulation.id
+                                    }`
+                                  }}
+                                </a>
+                              </template>
+                              <span
+                                >Score:
+                                {{ manipulation.value.toFixed(2) }}</span
+                              >
+                            </v-tooltip>
+                          </div>
                         </div>
-                        <div v-if="index >= 10" :hidden="!showAllManipulations">
-                          <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                              <a
-                                v-if="
-                                  jobPrediction.method ===
-                                    'PathwayPredictor+DifferentialFVA'
-                                "
-                                :href="
-                                  `http://bigg.ucsd.edu/search?query=${
-                                    manipulation.id
-                                  }`
-                                "
-                                class="link"
-                                target="_blank"
-                                v-on="on"
-                              >
-                                {{
-                                  `${indicators[manipulation.direction]} ${
-                                    manipulation.id
-                                  }`
-                                }}
-                              </a>
-                            </template>
-                            <span
-                              >Score: {{ manipulation.value.toFixed(2) }}</span
+                      </div>
+                      <div
+                        v-if="
+                          jobPrediction.method ===
+                            'PathwayPredictor+CofactorSwap'
+                        "
+                      >
+                        <div
+                          v-for="(manipulation,
+                          index) in jobPrediction.manipulations"
+                          :key="index"
+                          class="mb-2"
+                        >
+                          <div v-if="index < 10">
+                            <a
+                              :href="
+                                `http://bigg.ucsd.edu/search?query=${
+                                  manipulation.id
+                                }`
+                              "
+                              class="link"
+                              target="_blank"
                             >
-                          </v-tooltip>
+                              {{ manipulation.id }}
+                            </a>
+                            <div>
+                              <div
+                                v-for="(swap, index) in getSwapManipulation(
+                                  manipulation
+                                )"
+                                :key="index"
+                              >
+                                {{ swap }}
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            v-if="index >= 10"
+                            :hidden="!showAllManipulations"
+                          >
+                            <a
+                              :href="
+                                `http://bigg.ucsd.edu/search?query=${
+                                  manipulation.id
+                                }`
+                              "
+                              class="link"
+                              target="_blank"
+                            >
+                              {{ manipulation.id }}
+                            </a>
+                            <div>
+                              <div
+                                v-for="(swap, index) in getSwapManipulation(
+                                  manipulation
+                                )"
+                                :key="index"
+                              >
+                                {{ swap }}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div v-if="jobPrediction.manipulations.length > 10">
@@ -402,7 +469,13 @@
                           ...
                         </a>
                       </div>
-                      <div v-if="jobPrediction.manipulations.length > 0">
+                      <div
+                        v-if="
+                          jobPrediction.method ===
+                            'PathwayPredictor+DifferentialFVA' &&
+                            jobPrediction.manipulations.length > 0
+                        "
+                      >
                         <span class="caption grey--text"
                           >↑ up-regulation<br />↓ down-regulation</span
                         >
@@ -897,8 +970,7 @@ export default Vue.extend({
                   });
                 });
               } else if (
-                jobPrediction.method === "PathwayPredictor+DifferentialFVA" ||
-                jobPrediction.method === "PathwayPredictor+CofactorSwap"
+                jobPrediction.method === "PathwayPredictor+DifferentialFVA"
               ) {
                 jobPrediction.knockouts.forEach(reactionId => {
                   this.$store.dispatch("interactiveMap/knockoutReaction", {
@@ -912,6 +984,98 @@ export default Vue.extend({
                       name: "N/A",
                       reactionString: "N/A"
                     }
+                  });
+                });
+              } else if (
+                jobPrediction.method === "PathwayPredictor+CofactorSwap"
+              ) {
+                // ids of reactions which should be knocked out
+                // and then added with swapped cofactors
+                const knockoutIds: string[] = [];
+                const addedReactions: Object[] = [];
+                jobPrediction.manipulations.forEach(manipulation => {
+                  knockoutIds.push(manipulation.id);
+                  const reactionToAdd = Object.assign(
+                    {},
+                    this.model["model_serialized"]["reactions"].find(
+                      r => r.id === manipulation.id
+                    )
+                  );
+                  // swap cofactors
+                  for (let i = 0; i < manipulation.from.length; i++) {
+                    reactionToAdd.metabolites[manipulation.to[i]] =
+                      reactionToAdd.metabolites[manipulation.from[i]];
+                    delete reactionToAdd.metabolites[manipulation.from[i]];
+                  }
+                  // needed for reaction string
+                  const substrates: string[] = [];
+                  const products: string[] = [];
+                  Object.keys(reactionToAdd.metabolites).forEach(
+                    metaboliteId => {
+                      const stoichiometry =
+                        reactionToAdd.metabolites[metaboliteId];
+                      if (stoichiometry < 0) {
+                        substrates.push(
+                          Math.abs(stoichiometry) + " " + metaboliteId
+                        );
+                      } else {
+                        products.push(stoichiometry + " " + metaboliteId);
+                      }
+                    }
+                  );
+                  // metabolites should be array of objects
+                  const metabolites = Object.keys(
+                    reactionToAdd.metabolites
+                  ).map(metaboliteId => ({
+                    id: metaboliteId,
+                    // compartment is always "c" for now
+                    // should be reconsidered later
+                    compartment: "c"
+                  }));
+                  const substratesSerialized = substrates.join(" + ");
+                  const productsSerialized = products.join(" + ");
+                  const lowerBound = reactionToAdd.lower_bound;
+                  const upperBound = reactionToAdd.upper_bound;
+                  let direction;
+                  if (lowerBound >= 0) {
+                    direction = " ⟶ ";
+                  } else if (upperBound <= 0) {
+                    direction = " ⟵ ";
+                  } else {
+                    direction = " ⇌ ";
+                  }
+                  const reactionString =
+                    (substratesSerialized || "Ø") +
+                    direction +
+                    (productsSerialized || "Ø");
+
+                  addedReactions.push({
+                    id: reactionToAdd.id + "_swapped",
+                    name: reactionToAdd.name,
+                    lowerBound: lowerBound,
+                    upperBound: upperBound,
+                    reactionString: reactionString,
+                    metabolites: metabolites
+                  });
+                });
+                knockoutIds.forEach(reactionId => {
+                  this.$store.dispatch("interactiveMap/knockoutReaction", {
+                    uuid: card.uuid,
+                    reactionId: reactionId
+                  });
+                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                    uuid: card.uuid,
+                    reaction: {
+                      id: reactionId,
+                      name: "N/A",
+                      reactionString: "N/A"
+                    }
+                  });
+                });
+                addedReactions.forEach(reaction => {
+                  this.$store.commit("interactiveMap/addReaction", {
+                    uuid: card.uuid,
+                    reaction: reaction
                   });
                 });
               } else {
@@ -982,6 +1146,13 @@ export default Vue.extend({
       if (method === "PathwayPredictor+DifferentialFVA") {
         this.isDiffFvaChecked = true;
       }
+    },
+    getSwapManipulation(manipulation) {
+      const swaps: string[] = [];
+      for (let i = 0; i < manipulation.from.length; i++) {
+        swaps.push(`${manipulation.from[i]} ⟶ ${manipulation.to[i]}`);
+      }
+      return swaps;
     }
   }
 });
