@@ -422,9 +422,16 @@
                             >
                               {{ manipulation.id }}
                             </a>
-                            <div
-                              v-html="getSwapManipulation(manipulation)"
-                            ></div>
+                            <div>
+                              <div
+                                v-for="(swap, index) in getSwapManipulation(
+                                  manipulation
+                                )"
+                                :key="index"
+                              >
+                                {{ swap }}
+                              </div>
+                            </div>
                           </div>
                           <div
                             v-if="index >= 10"
@@ -442,7 +449,14 @@
                               {{ manipulation.id }}
                             </a>
                             <div>
-                              {{ getSwapManipulation(manipulation) }}
+                              <div
+                                v-for="(swap, index) in getSwapManipulation(
+                                  manipulation
+                                )"
+                                :key="index"
+                              >
+                                {{ swap }}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1129,7 +1143,7 @@ export default Vue.extend({
       for (let i = 0; i < manipulation.from.length; i++) {
         swaps.push(`${manipulation.from[i]} ⟶ ${manipulation.to[i]}`);
       }
-      return swaps.map(swap => "<div>" + swap + "</div>").join("");
+      return swaps;
     }
   }
 });
