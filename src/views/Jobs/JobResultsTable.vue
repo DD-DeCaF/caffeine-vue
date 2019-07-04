@@ -646,6 +646,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
+import { getMetaboliteId } from "@/utils/metabolite";
 import { Card } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
@@ -1051,10 +1052,7 @@ export default Vue.extend({
                   reactionString: reactionString,
                   metabolites: metabolites.map(metabolite => ({
                     ...metabolite,
-                    id: this.getMetaboliteId(
-                      metabolite.id,
-                      metabolite.compartment
-                    )
+                    id: getMetaboliteId(metabolite.id, metabolite.compartment)
                   }))
                 });
               });
@@ -1143,21 +1141,6 @@ export default Vue.extend({
             this.$store.dispatch("setFetchError", error);
           });
       });
-    },
-    getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
-      // getMetaboliteId('abc_c', 'c') => 'abc'
-      // getMetaboliteId('abc_1', 'c') => 'abc_1'
-      const compartmentInId = idWithCompartment.substring(
-        idWithCompartment.lastIndexOf("_") + 1
-      );
-      if (compartmentInId !== compartmentInMetabolite) {
-        return idWithCompartment;
-      } else {
-        return idWithCompartment.substring(
-          0,
-          idWithCompartment.lastIndexOf("_")
-        );
-      }
     },
     sort(items, value) {
       return items

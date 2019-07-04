@@ -58,6 +58,7 @@
 import Vue from "vue";
 import MetaboliteDialog from "@/views/InteractiveMap/MetaboliteDialog.vue";
 import * as settings from "@/utils/settings";
+import { getMetaboliteId } from "@/utils/metabolite";
 import axios from "axios";
 
 export default Vue.extend({
@@ -104,7 +105,7 @@ export default Vue.extend({
   },
   methods: {
     metaboliteDisplay(metabolite) {
-      return `${metabolite.name} (${this.getMetaboliteId(
+      return `${metabolite.name} (${getMetaboliteId(
         metabolite.id,
         metabolite.compartment
       )}${
@@ -113,21 +114,6 @@ export default Vue.extend({
     },
     compartmentDisplay(compartment) {
       return `${compartment.name} (${compartment.id})`;
-    },
-    getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
-      // getMetaboliteId('abc_c', 'c') => 'abc'
-      // getMetaboliteId('abc_1', 'c') => 'abc_1'
-      const compartmentInId = idWithCompartment.substring(
-        idWithCompartment.lastIndexOf("_") + 1
-      );
-      if (compartmentInId !== compartmentInMetabolite) {
-        return idWithCompartment;
-      } else {
-        return idWithCompartment.substring(
-          0,
-          idWithCompartment.lastIndexOf("_")
-        );
-      }
     },
     onMetaboliteChange(metabolite, value) {
       if (!value) {
