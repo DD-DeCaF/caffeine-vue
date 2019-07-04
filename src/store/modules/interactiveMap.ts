@@ -175,8 +175,10 @@ export default {
     undoEditBounds(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
       const index = card.editedBounds.findIndex(r => r.id === reactionId);
-      card.editedBounds.splice(index, 1);
-      card.modified = true;
+      if (index !== -1) {
+        card.editedBounds.splice(index, 1);
+        card.modified = true;
+      }
     }
   },
   actions: {
