@@ -898,205 +898,202 @@ export default Vue.extend({
     },
     visualize() {
       this.isVisualizing = true;
-      const predictions = this.selected.map(jobPrediction => {
-        const addedReactionIds = [
-          ...jobPrediction.heterologous_reactions,
-          ...jobPrediction.synthetic_reactions
-        ];
-        const promises = this.getAddedReactions(addedReactionIds);
-        const cardType =
-          jobPrediction.method === "PathwayPredictor+DifferentialFVA"
-            ? "DiffFVA"
-            : "Design";
-        Promise.all(promises).then((addedReactions: any[]) => {
-          const card: Card = {
-            uuid: uuidv4(),
-            name: `Job #${this.prediction.id} design ${jobPrediction.id}`,
-            designId: null,
-            organism: this.organism,
-            modelId: this.model.id,
-            method: "pfba",
-            modified: true,
-            type: cardType,
-            // Design card fields
-            objective: {
-              reaction: null,
-              maximize: true
-            },
-            reactionAdditions: addedReactions,
-            reactionKnockouts: [],
-            geneKnockouts: [],
-            editedBounds: [],
-            // Data-driven card fields
-            experiment: null,
-            condition: null,
-            conditionData: null,
-            conditionWarnings: [],
-            conditionErrors: [],
-            // General simulation fields
-            isSimulating: false,
-            hasSimulationError: false,
-            growthRate: null,
-            fluxes: null,
-            withDialog: false,
-            // Fields specific for prediction methods
-            //diffFVA:
-            manipulations: jobPrediction.manipulations,
-            productionGrowthRate:
-              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
-                ? jobPrediction.biomass
-                : null,
-            showDiffFVAScore: false
-          };
-          // Make sure the full model is available before adding the card.
-          this.$store
-            .dispatch("models/withFullModel", this.model.id)
-            .then(() => {
-              // Knockout genes or reactions depending on method
-              this.$store.commit("interactiveMap/addCard", card);
-              if (jobPrediction.method === "PathwayPredictor+OptGene") {
-                jobPrediction.knockouts.forEach(geneId => {
-                  this.$store.dispatch("interactiveMap/knockoutGene", {
-                    uuid: card.uuid,
-                    geneId: geneId
-                  });
-                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
-                    uuid: card.uuid,
-                    gene: {
-                      id: geneId,
-                      name: "N/A",
-                      reactions: []
-                    }
-                  });
-                });
-              } else if (
+      this.$store.dispatch("models/withFullModel", this.model.id).then(() => {
+        const predictions = this.selected.map(jobPrediction => {
+          const addedReactionIds = [
+            ...jobPrediction.heterologous_reactions,
+            ...jobPrediction.synthetic_reactions
+          ];
+          const promises = this.getAddedReactions(addedReactionIds);
+          const cardType =
+            jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+              ? "DiffFVA"
+              : "Design";
+          Promise.all(promises).then((addedReactions: any[]) => {
+            const card: Card = {
+              uuid: uuidv4(),
+              name: `Job #${this.prediction.id} design ${jobPrediction.id}`,
+              designId: null,
+              organism: this.organism,
+              modelId: this.model.id,
+              method: "pfba",
+              modified: true,
+              type: cardType,
+              // Design card fields
+              objective: {
+                reaction: null,
+                maximize: true
+              },
+              reactionAdditions: addedReactions,
+              reactionKnockouts: [],
+              geneKnockouts: [],
+              editedBounds: [],
+              // Data-driven card fields
+              experiment: null,
+              condition: null,
+              conditionData: null,
+              conditionWarnings: [],
+              conditionErrors: [],
+              // General simulation fields
+              isSimulating: false,
+              hasSimulationError: false,
+              growthRate: null,
+              fluxes: null,
+              withDialog: false,
+              // Fields specific for prediction methods
+              //diffFVA:
+              manipulations: jobPrediction.manipulations,
+              productionGrowthRate:
                 jobPrediction.method === "PathwayPredictor+DifferentialFVA"
-              ) {
-                jobPrediction.knockouts.forEach(reactionId => {
-                  this.$store.dispatch("interactiveMap/knockoutReaction", {
-                    uuid: card.uuid,
-                    reactionId: reactionId
-                  });
-                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
-                    uuid: card.uuid,
-                    reaction: {
-                      id: reactionId,
-                      name: "N/A",
-                      reactionString: "N/A"
-                    }
-                  });
+                  ? jobPrediction.biomass
+                  : null,
+              showDiffFVAScore: false
+            };
+            // Knockout genes or reactions depending on method
+            this.$store.commit("interactiveMap/addCard", card);
+            if (jobPrediction.method === "PathwayPredictor+OptGene") {
+              jobPrediction.knockouts.forEach(geneId => {
+                this.$store.dispatch("interactiveMap/knockoutGene", {
+                  uuid: card.uuid,
+                  geneId: geneId
                 });
-              } else if (
-                jobPrediction.method === "PathwayPredictor+CofactorSwap"
-              ) {
-                // ids of reactions which should be knocked out
-                // and then added with swapped cofactors
-                const knockoutIds: string[] = [];
-                const addedReactions: Object[] = [];
-                jobPrediction.manipulations.forEach(manipulation => {
-                  knockoutIds.push(manipulation.id);
-                  const reactionToAdd = Object.assign(
-                    {},
-                    this.model["model_serialized"]["reactions"].find(
-                      r => r.id === manipulation.id
-                    )
-                  );
-                  // swap cofactors
-                  for (let i = 0; i < manipulation.from.length; i++) {
-                    reactionToAdd.metabolites[manipulation.to[i]] =
-                      reactionToAdd.metabolites[manipulation.from[i]];
-                    delete reactionToAdd.metabolites[manipulation.from[i]];
+                this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                  uuid: card.uuid,
+                  gene: {
+                    id: geneId,
+                    name: "N/A",
+                    reactions: []
                   }
-                  // needed for reaction string
-                  const substrates: string[] = [];
-                  const products: string[] = [];
-                  Object.keys(reactionToAdd.metabolites).forEach(
-                    metaboliteId => {
-                      const stoichiometry =
-                        reactionToAdd.metabolites[metaboliteId];
-                      if (stoichiometry < 0) {
-                        substrates.push(
-                          Math.abs(stoichiometry) + " " + metaboliteId
-                        );
-                      } else {
-                        products.push(stoichiometry + " " + metaboliteId);
-                      }
-                    }
-                  );
-                  // metabolites should be array of objects
-                  const metabolites = Object.keys(
-                    reactionToAdd.metabolites
-                  ).map(metaboliteId => ({
+                });
+              });
+            } else if (
+              jobPrediction.method === "PathwayPredictor+DifferentialFVA"
+            ) {
+              jobPrediction.knockouts.forEach(reactionId => {
+                this.$store.dispatch("interactiveMap/knockoutReaction", {
+                  uuid: card.uuid,
+                  reactionId: reactionId
+                });
+                this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                  uuid: card.uuid,
+                  reaction: {
+                    id: reactionId,
+                    name: "N/A",
+                    reactionString: "N/A"
+                  }
+                });
+              });
+            } else if (
+              jobPrediction.method === "PathwayPredictor+CofactorSwap"
+            ) {
+              // ids of reactions which should be knocked out
+              // and then added with swapped cofactors
+              const knockoutIds: string[] = [];
+              const addedReactions: Object[] = [];
+              jobPrediction.manipulations.forEach(manipulation => {
+                knockoutIds.push(manipulation.id);
+                const reactionToAdd = Object.assign(
+                  {},
+                  this.model["model_serialized"]["reactions"].find(
+                    r => r.id === manipulation.id
+                  )
+                );
+                // swap cofactors
+                for (let i = 0; i < manipulation.from.length; i++) {
+                  reactionToAdd.metabolites[manipulation.to[i]] =
+                    reactionToAdd.metabolites[manipulation.from[i]];
+                  delete reactionToAdd.metabolites[manipulation.from[i]];
+                }
+                // needed for reaction string
+                const substrates: string[] = [];
+                const products: string[] = [];
+                Object.keys(reactionToAdd.metabolites).forEach(metaboliteId => {
+                  const stoichiometry = reactionToAdd.metabolites[metaboliteId];
+                  if (stoichiometry < 0) {
+                    substrates.push(
+                      Math.abs(stoichiometry) + " " + metaboliteId
+                    );
+                  } else {
+                    products.push(stoichiometry + " " + metaboliteId);
+                  }
+                });
+                // metabolites should be array of objects
+                const metabolites = Object.keys(reactionToAdd.metabolites).map(
+                  metaboliteId => ({
                     id: metaboliteId,
                     // compartment is always "c" for now
                     // should be reconsidered later
                     compartment: "c"
-                  }));
-                  const substratesSerialized = substrates.join(" + ");
-                  const productsSerialized = products.join(" + ");
-                  const lowerBound = reactionToAdd.lower_bound;
-                  const upperBound = reactionToAdd.upper_bound;
-                  let direction;
-                  if (lowerBound >= 0) {
-                    direction = " ⟶ ";
-                  } else if (upperBound <= 0) {
-                    direction = " ⟵ ";
-                  } else {
-                    direction = " ⇌ ";
-                  }
-                  const reactionString =
-                    (substratesSerialized || "Ø") +
-                    direction +
-                    (productsSerialized || "Ø");
-
-                  addedReactions.push({
-                    id: reactionToAdd.id + "_swapped",
-                    name: reactionToAdd.name,
-                    lowerBound: lowerBound,
-                    upperBound: upperBound,
-                    reactionString: reactionString,
-                    metabolites: metabolites
-                  });
-                });
-                knockoutIds.forEach(reactionId => {
-                  this.$store.dispatch("interactiveMap/knockoutReaction", {
-                    uuid: card.uuid,
-                    reactionId: reactionId
-                  });
-                  this.$store.commit("interactiveMap/updateKnockoutReaction", {
-                    uuid: card.uuid,
-                    reaction: {
-                      id: reactionId,
-                      name: "N/A",
-                      reactionString: "N/A"
-                    }
-                  });
-                });
-                addedReactions.forEach(reaction => {
-                  this.$store.commit("interactiveMap/addReaction", {
-                    uuid: card.uuid,
-                    reaction: reaction
-                  });
-                });
-              } else {
-                throw new Error(
-                  `Method ${jobPrediction.method} is not recognized.`
+                  })
                 );
-              }
-              this.$router.push({ name: "interactiveMap" });
-              this.isVisualizing = false;
-            });
+                const substratesSerialized = substrates.join(" + ");
+                const productsSerialized = products.join(" + ");
+                const lowerBound = reactionToAdd.lower_bound;
+                const upperBound = reactionToAdd.upper_bound;
+                let direction;
+                if (lowerBound >= 0) {
+                  direction = " ⟶ ";
+                } else if (upperBound <= 0) {
+                  direction = " ⟵ ";
+                } else {
+                  direction = " ⇌ ";
+                }
+                const reactionString =
+                  (substratesSerialized || "Ø") +
+                  direction +
+                  (productsSerialized || "Ø");
+
+                addedReactions.push({
+                  id: reactionToAdd.id + "_swapped",
+                  name: reactionToAdd.name,
+                  lowerBound: lowerBound,
+                  upperBound: upperBound,
+                  reactionString: reactionString,
+                  metabolites: metabolites
+                });
+              });
+              knockoutIds.forEach(reactionId => {
+                this.$store.dispatch("interactiveMap/knockoutReaction", {
+                  uuid: card.uuid,
+                  reactionId: reactionId
+                });
+                this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                  uuid: card.uuid,
+                  reaction: {
+                    id: reactionId,
+                    name: "N/A",
+                    reactionString: "N/A"
+                  }
+                });
+              });
+              addedReactions.forEach(reaction => {
+                this.$store.commit("interactiveMap/addReaction", {
+                  uuid: card.uuid,
+                  reaction: reaction
+                });
+              });
+            } else {
+              throw new Error(
+                `Method ${jobPrediction.method} is not recognized.`
+              );
+            }
+            this.$router.push({ name: "interactiveMap" });
+            this.isVisualizing = false;
+          });
         });
       });
     },
     getAddedReactions(addedReactionIds) {
+      const mnxMetabolites = this.prediction.result.metabolites;
+      const reactions = this.prediction.result.reactions;
+      const metabolitesInModel = new Set(
+        this.model.model_serialized.metabolites.map(metabolite => metabolite.id)
+      );
       return addedReactionIds.map(reactionId => {
         const mnxMetabolitesInReaction = this.prediction.result.reactions[
           reactionId
         ].metabolites;
-        const mnxMetabolites = this.prediction.result.metabolites;
         const mnxMetaboliteIds = Object.keys(mnxMetabolitesInReaction);
-        const reactions = this.prediction.result.reactions;
 
         const body = {
           ids: mnxMetaboliteIds,
@@ -1115,6 +1112,12 @@ export default Vue.extend({
               const metabolite = { id, name, compartment, stoichiometry };
               if (biggIds.hasOwnProperty(mnxId)) {
                 metabolite.id = biggIds[mnxId][0];
+                // if id-mapper returned more than 1 mapped bigg id, take the one that is in the model
+                biggIds[mnxId].forEach(id => {
+                  if (metabolitesInModel.has(id + "_c")) {
+                    metabolite.id = id;
+                  }
+                });
                 metabolite.compartment = "c";
               }
               metabolites.push(metabolite);
