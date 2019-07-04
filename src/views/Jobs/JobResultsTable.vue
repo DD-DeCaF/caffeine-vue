@@ -1049,7 +1049,10 @@ export default Vue.extend({
                   lowerBound: lowerBound,
                   upperBound: upperBound,
                   reactionString: reactionString,
-                  metabolites: metabolites
+                  metabolites: metabolites.map((metabolite) => ({
+                    ...metabolite,
+                    id: this.getMetaboliteId(metabolite.id, metabolite.compartment)
+                  }))
                 });
               });
               knockoutIds.forEach(reactionId => {
@@ -1139,6 +1142,21 @@ export default Vue.extend({
             this.$store.dispatch("setFetchError", error);
           });
       });
+    },
+    getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
+      // getMetaboliteId('abc_c', 'c') => 'abc'
+      // getMetaboliteId('abc_1', 'c') => 'abc_1'
+      const compartmentInId = idWithCompartment.substring(
+        idWithCompartment.lastIndexOf("_") + 1
+      );
+      if (compartmentInId !== compartmentInMetabolite) {
+        return idWithCompartment;
+      } else {
+        return idWithCompartment.substring(
+          0,
+          idWithCompartment.lastIndexOf("_")
+        );
+      }
     },
     sort(items, value) {
       return items
