@@ -1049,9 +1049,12 @@ export default Vue.extend({
                   lowerBound: lowerBound,
                   upperBound: upperBound,
                   reactionString: reactionString,
-                  metabolites: metabolites.map((metabolite) => ({
+                  metabolites: metabolites.map(metabolite => ({
                     ...metabolite,
-                    id: this.getMetaboliteId(metabolite.id, metabolite.compartment)
+                    id: this.getMetaboliteId(
+                      metabolite.id,
+                      metabolite.compartment
+                    )
                   }))
                 });
               });
@@ -1114,13 +1117,11 @@ export default Vue.extend({
               const stoichiometry = mnxMetabolitesInReaction[mnxId];
               const metabolite = { id, name, compartment, stoichiometry };
               if (biggIds.hasOwnProperty(mnxId)) {
-                metabolite.id = biggIds[mnxId][0];
                 // if id-mapper returned more than 1 mapped bigg id, take the one that is in the model
-                biggIds[mnxId].forEach(id => {
-                  if (metabolitesInModel.has(id + "_c")) {
-                    metabolite.id = id;
-                  }
-                });
+                metabolite.id =
+                  biggIds[mnxId].find(id =>
+                    metabolitesInModel.has(id + "_c")
+                  ) || biggIds[mnxId][0];
                 metabolite.compartment = "c";
               }
               metabolites.push(metabolite);
