@@ -491,10 +491,15 @@ export default Vue.extend({
           reactionId: modification.id
         });
         // If the objective was set to the added reaction, clear it.
-        this.$store.commit("interactiveMap/setObjectiveReaction", {
-          uuid: this.card.uuid,
-          reaction: null
-        });
+        if (
+          this.card.objective.reaction &&
+          this.card.objective.reaction.id === modification.id
+        ) {
+          this.$store.commit("interactiveMap/setObjectiveReaction", {
+            uuid: this.card.uuid,
+            reaction: null
+          });
+        }
         // Adding and then knocking out the same reaction makes little sense,
         // but is technically possible, so remove the knockouts too if that's
         // the case.

@@ -123,11 +123,11 @@ export default {
     },
     undoKnockoutReaction(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
-      card.reactionKnockouts.splice(
-        card.reactionKnockouts.findIndex(k => k.id === reactionId),
-        1
-      );
-      card.modified = true;
+      const index = card.reactionKnockouts.findIndex(k => k.id === reactionId);
+      if (index !== -1) {
+        card.reactionKnockouts.splice(index, 1);
+        card.modified = true;
+      }
     },
     knockoutGene(state, { uuid, gene }) {
       const card = state.cards.find(c => c.uuid === uuid);
@@ -175,8 +175,10 @@ export default {
     undoEditBounds(state, { uuid, reactionId }) {
       const card = state.cards.find(c => c.uuid === uuid);
       const index = card.editedBounds.findIndex(r => r.id === reactionId);
-      card.editedBounds.splice(index, 1);
-      card.modified = true;
+      if (index !== -1) {
+        card.editedBounds.splice(index, 1);
+        card.modified = true;
+      }
     }
   },
   actions: {
