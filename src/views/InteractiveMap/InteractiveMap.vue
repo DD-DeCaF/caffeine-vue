@@ -31,14 +31,14 @@
       class="elevation-6"
     >
       <v-container class="py-1">
-        <v-select
+        <v-select-extended
           label="Selected Map"
           :items="maps"
           item-text="name"
           item-value="id"
           v-model="currentMapId"
           @change="changeMap"
-        ></v-select>
+        ></v-select-extended>
       </v-container>
       <v-divider></v-divider>
       <v-container class="pa-0">
