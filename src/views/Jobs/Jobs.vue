@@ -13,10 +13,30 @@
         >
           <template v-slot:items="{ item: job }">
             <td>{{ job.product_name }}</td>
-            <td>
+            <td
+              v-if="
+                model(job.model_id) && organism(model(job.model_id).organism_id)
+              "
+            >
               {{ organism(model(job.model_id).organism_id).name }}
             </td>
-            <td>{{ model(job.model_id).name }}</td>
+            <td v-else>
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                :width="2"
+                :size="15"
+              ></v-progress-circular>
+            </td>
+            <td v-if="model(job.model_id)">{{ model(job.model_id).name }}</td>
+            <td v-else>
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                :width="2"
+                :size="15"
+              ></v-progress-circular>
+            </td>
             <td>
               <span v-if="job.aerobic">Aerobic</span>
               <span v-else>Anaerobic</span>
