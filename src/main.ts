@@ -14,6 +14,7 @@ import LoaderDialog from "@/components/LoaderDialog.vue";
 import DeletionDialog from "@/components/DeletionDialog.vue";
 import FileUpload from "@/components/FileUpload.vue";
 import VSelectExtended from "@/components/VSelectExtended";
+import VAutocompleteExtended from "@/components/VAutocompleteExtended";
 import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
 import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
@@ -53,6 +54,7 @@ Vue.component("DeletionDialog", DeletionDialog);
 Vue.component("FileUpload", FileUpload);
 Vue.component("AutocompleteMnxReaction", AutocompleteMnxReaction);
 Vue.component("v-select-extended", VSelectExtended);
+Vue.component("v-autocomplete-extended", VAutocompleteExtended);
 
 // Synchronously initialize values from local storage before the main Vue
 // instance is created.
