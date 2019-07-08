@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-layout justify-center>
       <v-flex md9>
         <h1 class="mb-2">Jobs</h1>
@@ -17,6 +17,10 @@
               {{ organism(model(job.model_id).organism_id).name }}
             </td>
             <td>{{ model(job.model_id).name }}</td>
+            <td>
+              <span v-if="job.aerobic">Aerobic</span>
+              <span v-else>Anaerobic</span>
+            </td>
             <td>
               {{ job.status }}
               <v-progress-circular
@@ -53,10 +57,11 @@ export default Vue.extend({
     isLoading: true,
     headers: [
       { text: "Product", value: "product_name", width: "15%" },
-      { text: "Organism", value: "organism_id", width: "20%" },
+      { text: "Organism", value: "organism_id", width: "15%" },
       { text: "Model", value: "model_id", width: "15%" },
+      { text: "Conditions", value: "aerobic", width: "10%" },
       { text: "State", value: "state", width: "20%" },
-      { text: "Started", value: "created", width: "25%" },
+      { text: "Started", value: "created", width: "20%" },
       { value: "details", width: "5%" }
     ],
     pagination: {
