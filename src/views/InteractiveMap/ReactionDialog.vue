@@ -123,6 +123,7 @@ import Vue from "vue";
 import { Reaction } from "@/store/modules/interactiveMap";
 import ReactionDialogMetabolite from "@/views/InteractiveMap/ReactionDialogMetabolite.vue";
 import * as settings from "@/utils/settings";
+import { getMetaboliteId } from "@/utils/metabolite";
 import axios from "axios";
 
 function getInitialState() {
@@ -260,28 +261,13 @@ export default Vue.extend({
           return (
             metabolite.stoichiometry +
             " " +
-            this.getMetaboliteId(
+            getMetaboliteId(
               metabolite.metabolite.id,
               metabolite.metabolite.compartment
             ) +
             compartment
           );
         });
-    },
-    getMetaboliteId(idWithCompartment, compartmentInMetabolite) {
-      // getMetaboliteId('abc_c', 'c') => 'abc'
-      // getMetaboliteId('abc_1', 'c') => 'abc_1'
-      const compartmentInId = idWithCompartment.substring(
-        idWithCompartment.lastIndexOf("_") + 1
-      );
-      if (compartmentInId !== compartmentInMetabolite) {
-        return idWithCompartment;
-      } else {
-        return idWithCompartment.substring(
-          0,
-          idWithCompartment.lastIndexOf("_")
-        );
-      }
     },
     addSubstrate() {
       this.substrates.push({
@@ -322,7 +308,7 @@ export default Vue.extend({
         metabolites: [...negativeSubstrates, ...this.products]
           .filter(m => m.metabolite)
           .map(m => ({
-            id: this.getMetaboliteId(m.metabolite.id, m.metabolite.compartment),
+            id: getMetaboliteId(m.metabolite.id, m.metabolite.compartment),
             name: m.metabolite.name,
             formula: m.metabolite.formula,
             compartment: m.compartment,
