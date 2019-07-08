@@ -6,6 +6,7 @@
         label="Experiment"
         :items="experiments"
         v-model="cardExperiment"
+        autoselectOnlyOption
         item-text="name"
         item-value="id"
         placeholder="Choose the experiment you wish to simulate..."
@@ -17,6 +18,7 @@
         label="Conditions"
         :items="conditions"
         v-model="cardCondition"
+        autoselectOnlyOption
         :loading="isLoadingConditions"
         :disabled="conditions === []"
         item-text="name"
