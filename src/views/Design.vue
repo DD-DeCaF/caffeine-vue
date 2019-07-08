@@ -21,6 +21,7 @@
             label="Organism"
             v-model="organism"
             :items="organismOptions"
+            autoselectOnlyOption
             item-text="name"
             item-value="id"
             return-object
@@ -54,6 +55,7 @@
             label="Product"
             v-model="product"
             :items="productOptions"
+            autoselectOnlyOption
             item-text="name"
             item-value="id"
             return-object
@@ -69,6 +71,7 @@
             label="Project"
             v-model="project"
             :items="projectOptions"
+            autoselectOnlyOption
             item-text="name"
             item-value="id"
             return-object
@@ -140,6 +143,7 @@
                   label="Model"
                   v-model="model"
                   :items="modelOptions"
+                  autoselectOnlyOption
                   item-text="name"
                   item-value="id"
                   return-object
