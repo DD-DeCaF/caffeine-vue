@@ -1,5 +1,5 @@
 <template>
-  <v-autocomplete
+  <v-autocomplete-extended
     v-bind="$attrs"
     v-model="addReactionItem"
     :items="addReactionSearchResults"
@@ -12,7 +12,7 @@
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
-  ></v-autocomplete>
+  ></v-autocomplete-extended>
 </template>
 
 <script lang="ts">

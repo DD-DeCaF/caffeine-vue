@@ -16,7 +16,7 @@
       <v-card-title></v-card-title>
       <v-card-text>
         <v-form v-model="isValid">
-          <v-autocomplete
+          <v-autocomplete-extended
             name="organism"
             label="Organism"
             v-model="organism"
@@ -48,8 +48,8 @@
                 class="font-italic"
               ></v-list-tile-content>
             </template>
-          </v-autocomplete>
-          <v-autocomplete
+          </v-autocomplete-extended>
+          <v-autocomplete-extended
             name="product"
             label="Product"
             v-model="product"
@@ -63,8 +63,8 @@
             placeholder="e.g., ethanol"
             required
           >
-          </v-autocomplete>
-          <v-autocomplete
+          </v-autocomplete-extended>
+          <v-autocomplete-extended
             name="project"
             label="Project"
             v-model="project"
@@ -86,7 +86,7 @@
               </v-btn>
               <v-divider></v-divider>
             </template>
-          </v-autocomplete>
+          </v-autocomplete-extended>
           <v-card>
             <v-card-actions
               @click="showAdvanced = !showAdvanced"
@@ -136,7 +136,7 @@
                     color="primary"
                   ></v-checkbox>
                 </v-layout>
-                <v-autocomplete
+                <v-autocomplete-extended
                   label="Model"
                   v-model="model"
                   :items="modelOptions"
@@ -158,7 +158,7 @@
                     </v-btn>
                     <v-divider></v-divider>
                   </template>
-                </v-autocomplete>
+                </v-autocomplete-extended>
                 <v-text-field
                   label="Maximum number of pathway predictions"
                   v-model="maxPredictions"

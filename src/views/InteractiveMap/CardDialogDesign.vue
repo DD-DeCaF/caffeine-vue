@@ -118,7 +118,7 @@
 
     <v-layout wrap>
       <v-flex grow>
-        <v-autocomplete
+        <v-autocomplete-extended
           label="Objective"
           :items="reactions"
           :loading="model && !model.model_serialized"
@@ -134,7 +134,7 @@
           clearable
           @change="$emit('simulate-card')"
           @click:clear="$nextTick(() => (objectiveReaction = null))"
-        ></v-autocomplete>
+        ></v-autocomplete-extended>
       </v-flex>
 
       <v-flex shrink>
@@ -174,7 +174,7 @@
         @simulate-card="$emit('simulate-card')"
     /></v-btn>
 
-    <v-autocomplete
+    <v-autocomplete-extended
       v-model="knockoutReactionItem"
       :items="reactions"
       :loading="model && !model.model_serialized"
@@ -187,9 +187,9 @@
       clearable
       return-object
       @change="knockoutReaction"
-    ></v-autocomplete>
+    ></v-autocomplete-extended>
 
-    <v-autocomplete
+    <v-autocomplete-extended
       v-model="knockoutGeneItem"
       :items="genes"
       :loading="model && !model.model_serialized"
@@ -201,12 +201,12 @@
       prepend-icon="remove"
       return-object
       @change="knockoutGene"
-    ></v-autocomplete>
+    ></v-autocomplete-extended>
 
     <v-form ref="editBoundsForm" v-model="editBoundsValid">
       <v-layout wrap>
         <v-flex grow mr-2>
-          <v-autocomplete
+          <v-autocomplete-extended
             v-model="editBoundsReaction"
             :items="reactions"
             :loading="model && !model.model_serialized"
@@ -218,7 +218,7 @@
             label="Edit the bounds of a reaction..."
             prepend-icon="vertical_align_center"
             return-object
-          ></v-autocomplete>
+          ></v-autocomplete-extended>
         </v-flex>
         <v-flex shrink mr-2>
           <v-text-field

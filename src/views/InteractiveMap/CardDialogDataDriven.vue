@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-layout>
-      <v-autocomplete
+      <v-autocomplete-extended
         class="mr-2"
         label="Experiment"
         :items="experiments"
@@ -10,9 +10,9 @@
         item-value="id"
         placeholder="Choose the experiment you wish to simulate..."
         return-object
-      ></v-autocomplete>
+      ></v-autocomplete-extended>
 
-      <v-autocomplete
+      <v-autocomplete-extended
         class="ml-2"
         label="Conditions"
         :items="conditions"
@@ -23,7 +23,7 @@
         item-value="id"
         placeholder="Choose the conditions you wish to simulate"
         return-object
-      ></v-autocomplete>
+      ></v-autocomplete-extended>
     </v-layout>
 
     <v-progress-linear

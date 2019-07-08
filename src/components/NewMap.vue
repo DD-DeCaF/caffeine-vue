@@ -30,7 +30,7 @@
                   type="text"
                   placeholder="e.g. My Favourite Map"
                 ></v-text-field>
-                <v-autocomplete
+                <v-autocomplete-extended
                   required
                   return-object
                   item-text="name"
@@ -52,8 +52,8 @@
                     </v-btn>
                     <v-divider class="my-2"></v-divider>
                   </template>
-                </v-autocomplete>
-                <v-autocomplete
+                </v-autocomplete-extended>
+                <v-autocomplete-extended
                   required
                   return-object
                   item-text="name"
@@ -76,7 +76,7 @@
                   <!--                    </v-btn>-->
                   <!--                    <v-divider class="my-2"></v-divider>-->
                   <!--                  </template>-->
-                </v-autocomplete>
+                </v-autocomplete-extended>
                 <FileUpload
                   v-model="filename"
                   @formData="loadFile"
