@@ -7,6 +7,7 @@
         :items="experiments"
         v-model="cardExperiment"
         item-text="name"
+        item-value="id"
         placeholder="Choose the experiment you wish to simulate..."
         return-object
       ></v-autocomplete>
@@ -19,6 +20,7 @@
         :loading="isLoadingConditions"
         :disabled="conditions === []"
         item-text="name"
+        item-value="id"
         placeholder="Choose the conditions you wish to simulate"
         return-object
       ></v-autocomplete>

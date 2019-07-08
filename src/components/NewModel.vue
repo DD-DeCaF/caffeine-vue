@@ -40,7 +40,7 @@
                   required
                   return-object
                   item-text="name"
-                  item-id="id"
+                  item-value="id"
                   v-model="organism"
                   :items="availableOrganisms"
                   :rules="[rules.required]"
@@ -63,7 +63,7 @@
                   required
                   return-object
                   item-text="name"
-                  item-id="id"
+                  item-value="id"
                   v-model="project"
                   :items="availableProjects"
                   :rules="[rules.required]"
@@ -85,7 +85,7 @@
                 <v-autocomplete
                   return-object
                   item-text="name"
-                  item-id="id"
+                  item-value="id"
                   v-model="map"
                   :items="availableMaps"
                   hint="The default map displayed on the Interactive Map, optional"
@@ -117,6 +117,7 @@
                 <v-autocomplete
                   required
                   item-text="id"
+                  item-value="id"
                   v-model="default_biomass_reaction"
                   :items="reactions"
                   :rules="[rules.required]"

@@ -30,6 +30,7 @@
                 <v-autocomplete
                   return-object
                   required
+                  item-value="id"
                   item-text="name"
                   v-model="project"
                   :items="availableProjects"
