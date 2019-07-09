@@ -12,6 +12,7 @@ export interface JobItem {
   status: string;
   updated: string;
   model_id: number;
+  aerobic: boolean;
 }
 
 export default {
