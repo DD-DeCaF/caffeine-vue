@@ -103,13 +103,22 @@
             <v-slide-y-transition>
               <v-card-text v-show="showAdvanced">
                 <v-layout column>
-                  <v-switch
-                    v-model="isAerobic"
-                    label="Aerobic conditions"
-                    color="primary"
-                    inverse-label
+                  <v-radio-group
+                    v-model="conditions"
+                    label="Conditions:"
+                    class="mt-0"
                   >
-                  </v-switch>
+                    <v-radio
+                      label="Aerobic"
+                      value="aerobic"
+                      color="primary"
+                    ></v-radio>
+                    <v-radio
+                      label="Anaerobic"
+                      value="anaerobic"
+                      color="primary"
+                    ></v-radio>
+                  </v-radio-group>
                   <v-flex xs4>Select a reaction source database</v-flex>
                   <v-checkbox
                     v-model="bigg"
@@ -197,7 +206,7 @@ interface DesignState {
   productRules: ReadonlyArray<RuleHandler>;
   productOptions: ProductItem[];
   isLoadingProducts: boolean;
-  isAerobic: boolean;
+  conditions: string;
   showAdvanced: boolean;
   bigg: boolean;
   rhea: boolean;
@@ -230,7 +239,7 @@ export default Vue.extend({
       productRules: [v => !!v || "Product is required"],
       productOptions: [],
       isLoadingProducts: true,
-      isAerobic: false,
+      conditions: "anaerobic",
       showAdvanced: false,
       bigg: true,
       rhea: true,
@@ -334,7 +343,7 @@ export default Vue.extend({
       this.isSubmitted = true;
       axios
         .post(`${settings.apis.metabolicNinja}/predictions`, {
-          aerobic: this.isAerobic,
+          aerobic: this.conditions === "aerobic" ? true : false,
           bigg: this.bigg,
           max_predictions: this.maxPredictions,
           model_id: this.model.id,
