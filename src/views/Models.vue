@@ -176,6 +176,7 @@
                 <v-autocomplete
                   required
                   item-text="id"
+                  item-value="id"
                   v-model="default_biomass_reaction"
                   :items="reactions"
                   hint="The reaction identifier of this model's default biomass reaction"
