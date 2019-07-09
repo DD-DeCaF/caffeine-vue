@@ -87,13 +87,6 @@
               <v-divider></v-divider>
             </template>
           </v-autocomplete>
-          <v-switch
-            v-model="isAerobic"
-            label="Aerobic conditions"
-            color="primary"
-            inverse-label
-          >
-          </v-switch>
           <v-card>
             <v-card-actions
               @click="showAdvanced = !showAdvanced"
@@ -110,6 +103,13 @@
             <v-slide-y-transition>
               <v-card-text v-show="showAdvanced">
                 <v-layout column>
+                  <v-switch
+                    v-model="isAerobic"
+                    label="Aerobic conditions"
+                    color="primary"
+                    inverse-label
+                  >
+                  </v-switch>
                   <v-flex xs4>Select a reaction source database</v-flex>
                   <v-checkbox
                     v-model="bigg"
