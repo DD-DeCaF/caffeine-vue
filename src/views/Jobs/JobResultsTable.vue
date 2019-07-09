@@ -952,15 +952,13 @@ export default Vue.extend({
             this.$store.commit("interactiveMap/addCard", card);
             // Apply anaerobic conditions if needed
             if (!jobPrediction.aerobic) {
-              {
-                const payload = {
-                  uuid: card.uuid,
-                  reactionId: "EX_o2_e",
-                  lowerBound: 0,
-                  upperBound: 1000
-                };
-                this.$store.dispatch("interactiveMap/editBounds", payload);
-              }
+              const payload = {
+                uuid: card.uuid,
+                reactionId: "EX_o2_e",
+                lowerBound: 0,
+                upperBound: 1000
+              };
+              this.$store.dispatch("interactiveMap/editBounds", payload);
             }
             // Knockout genes or reactions depending on method
             if (jobPrediction.method === "PathwayPredictor+OptGene") {
