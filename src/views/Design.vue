@@ -87,13 +87,6 @@
               <v-divider></v-divider>
             </template>
           </v-autocomplete>
-          <v-switch
-            v-model="isAerobic"
-            label="Aerobic conditions"
-            color="primary"
-            inverse-label
-          >
-          </v-switch>
           <v-card>
             <v-card-actions
               @click="showAdvanced = !showAdvanced"
@@ -110,6 +103,27 @@
             <v-slide-y-transition>
               <v-card-text v-show="showAdvanced">
                 <v-layout column>
+                  <v-radio-group
+                    v-model="conditions"
+                    label="Conditions:"
+                    class="mt-0"
+                  >
+                    <v-radio
+                      label="Aerobic"
+                      value="aerobic"
+                      color="primary"
+                    ></v-radio>
+                    <v-radio
+                      label="Anaerobic"
+                      value="anaerobic"
+                      color="primary"
+                    ></v-radio>
+                    <v-radio
+                      label="Both"
+                      value="both"
+                      color="primary"
+                    ></v-radio>
+                  </v-radio-group>
                   <v-flex xs4>Select a reaction source database</v-flex>
                   <v-checkbox
                     v-model="bigg"
@@ -197,7 +211,7 @@ interface DesignState {
   productRules: ReadonlyArray<RuleHandler>;
   productOptions: ProductItem[];
   isLoadingProducts: boolean;
-  isAerobic: boolean;
+  conditions: string;
   showAdvanced: boolean;
   bigg: boolean;
   rhea: boolean;
@@ -230,7 +244,7 @@ export default Vue.extend({
       productRules: [v => !!v || "Product is required"],
       productOptions: [],
       isLoadingProducts: true,
-      isAerobic: false,
+      conditions: "both",
       showAdvanced: false,
       bigg: true,
       rhea: true,
@@ -284,6 +298,15 @@ export default Vue.extend({
       return (
         !!this.project || !!this.organism || !!this.product || !!this.model
       );
+    },
+    aerobicConditions() {
+      if (this.conditions === "aerobic") {
+        return [true];
+      } else if (this.conditions === "anaerobic") {
+        return [false];
+      } else {
+        return [true, false];
+      }
     }
   },
   watch: {
@@ -333,23 +356,33 @@ export default Vue.extend({
     onSubmit(): void {
       this.isSubmitted = true;
       axios
-        .post(`${settings.apis.metabolicNinja}/predictions`, {
-          aerobic: this.isAerobic,
-          bigg: this.bigg,
-          max_predictions: this.maxPredictions,
-          model_id: this.model.id,
-          organism_id: this.organism.id,
-          product_name: this.product.name,
-          project_id: this.project.id,
-          rhea: this.rhea
-        })
-        .then((response: AxiosResponse) => {
+        .all(
+          this.aerobicConditions.map(aerobic =>
+            axios.post(
+              `${settings.apis.metabolicNinja}/predictions`,
+              this.getRequestBody(aerobic)
+            )
+          )
+        )
+        .then(response => {
           this.$store.dispatch("jobs/fetchJobs");
           this.$router.push({ name: "jobs" });
         })
         .catch((error: Error) => {
           this.hasSubmissionError = true;
         });
+    },
+    getRequestBody(aerobic) {
+      return {
+        aerobic: aerobic,
+        bigg: this.bigg,
+        max_predictions: this.maxPredictions,
+        model_id: this.model.id,
+        organism_id: this.organism.id,
+        product_name: this.product.name,
+        project_id: this.project.id,
+        rhea: this.rhea
+      };
     }
   },
   beforeRouteLeave(to: Route, from: Route, next) {
