@@ -1031,10 +1031,11 @@ export default Vue.extend({
                 // metabolites should be array of objects
                 const metabolites = Object.keys(reactionToAdd.metabolites).map(
                   metaboliteId => ({
-                    id: metaboliteId,
                     // compartment is always "c" for now
                     // should be reconsidered later
-                    compartment: "c"
+                    id: getMetaboliteId(metaboliteId, "c"),
+                    compartment: "c",
+                    stoichiometry: reactionToAdd.metabolites[metaboliteId]
                   })
                 );
                 const substratesSerialized = substrates.join(" + ");
@@ -1060,10 +1061,7 @@ export default Vue.extend({
                   lowerBound: lowerBound,
                   upperBound: upperBound,
                   reactionString: reactionString,
-                  metabolites: metabolites.map(metabolite => ({
-                    ...metabolite,
-                    id: getMetaboliteId(metabolite.id, metabolite.compartment)
-                  }))
+                  metabolites: metabolites
                 });
               });
               knockoutIds.forEach(reactionId => {
