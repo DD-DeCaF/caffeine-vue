@@ -41,6 +41,21 @@
                   </div>
                 </v-list-tile>
                 <v-list-tile class="ma-3">
+                  <v-icon class="mr-2">cached</v-icon>
+                  <div class="body-1">
+                    Conditions:<br /><strong v-if="prediction">{{
+                      prediction.aerobic ? "Aerobic" : "Anaerobic"
+                    }}</strong>
+                    <v-progress-circular
+                      v-else
+                      indeterminate
+                      color="primary"
+                      :width="2"
+                      :size="15"
+                    ></v-progress-circular>
+                  </div>
+                </v-list-tile>
+                <v-list-tile class="ma-3">
                   <v-icon class="mr-2">attach_money</v-icon>
                   <div class="body-1">
                     Product:<br /><strong>{{ job.product_name }}</strong>
