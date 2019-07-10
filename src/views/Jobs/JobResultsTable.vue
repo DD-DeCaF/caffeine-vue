@@ -952,7 +952,7 @@ export default Vue.extend({
             };
             this.$store.commit("interactiveMap/addCard", card);
             // Apply anaerobic conditions if needed
-            if (!jobPrediction.aerobic) {
+            if (!this.prediction.aerobic) {
               const payload = {
                 uuid: card.uuid,
                 reactionId: "EX_o2_e",
