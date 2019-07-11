@@ -1003,12 +1003,19 @@ export default Vue.extend({
               const addedReactions: Object[] = [];
               jobPrediction.manipulations.forEach(manipulation => {
                 knockoutIds.push(manipulation.id);
-                const reactionToAdd = Object.assign(
-                  {},
+
+                const originalReaction =
                   this.model["model_serialized"]["reactions"].find(
                     r => r.id === manipulation.id
-                  )
-                );
+                  );
+
+                // don't mutate metabolites of the original reaction
+                const reactionToAdd = {
+                  ...originalReaction,
+                  metabolites: {
+                    ...originalReaction.metabolites
+                  }
+                };
                 // swap cofactors
                 for (let i = 0; i < manipulation.from.length; i++) {
                   reactionToAdd.metabolites[manipulation.to[i]] =
