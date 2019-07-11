@@ -457,59 +457,94 @@ export default Vue.extend({
           hasSimulationError: false
         }
       });
-      axios
-        .post(`${settings.apis.model}/simulate`, {
-          model_id: model.id,
-          method: card.method,
-          operations: operations,
-          objective_id: card.objective.reaction
-            ? card.objective.reaction.id
-            : model.default_biomass_reaction,
-          objective_direction: card.objective.maximize ? "max" : "min"
-        })
-        .then(response => {
-          const wildtypeFluxdistribution = response.data.flux_distribution;
-          // Calculate new bounds based on manipulation scores calculated by DiffFVA
-          // (reference flux * score) / production growth
-          const editedBounds = card.manipulations
-            .map(function(manipulation) {
-              const newBound = Math.round(
-                (wildtypeFluxdistribution[manipulation.id] *
-                  manipulation.value) /
-                  card.productionGrowthRate
-              );
+      // Apply the values from diffFVA results as bounds for simulation
+      const editedBounds = card.manipulations
+        .map(function(manipulation) {
+          // do we need to filter out values that are zero or is this controlled on the backend?
+          const model_reaction =  model.model_serialized.reactions.find(rxn => rxn.id === manipulation.id)
+          const newBound = manipulation.value;
+          switch (manipulation.direction) {
+            case 'up':
+              if (newBound > 0) {
               return {
                 operation: "modify",
                 type: "reaction",
                 id: manipulation.id,
                 data: {
                   lower_bound: newBound,
-                  upper_bound: newBound
+                  upper_bound: model_reaction.upper_bound
                 }
               };
+              };
+              if (newBound < 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  upper_bound: newBound,
+                  lower_bound: model_reaction.lower_bound
+                }
+              };
+              };
+              break;
+              case 'down':
+              if (newBound > 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  upper_bound: newBound,
+                  lower_bound: model_reaction.lower_bound
+                }
+              };
+              };
+              if (newBound < 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: model_reaction.upper_bound
+                }
+              };
+              };
+              break;
+              case 'invert':
+              if (newBound > 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: model_reaction.upper_bound
+                }
+              };
+              };
+              if (newBound < 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  upper_bound: newBound,
+                  lower_bound: model_reaction.lower_bound
+                }
+              };
+              };
+              break;
+          }
             })
-            .filter(operation => operation.data.lower_bound !== 0);
-          // Re-simulate the model with the updated bounds
+          // Simulate the model with the updated bounds
           // adding first all the modifications from the design
           // and then the modifications (edited bounds) computed above
           this.postSimulation(card, model, [
             ...this.cardModifications(card),
             ...editedBounds
           ]);
-        })
-        .catch(error => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: { hasSimulationError: true }
-          });
-          this.hasSimulationError = true;
-        })
-        .then(response => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: { isSimulating: false }
-          });
-        });
     },
     postSimulation(card, model, operations) {
       this.updateCard({
