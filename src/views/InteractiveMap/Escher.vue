@@ -508,13 +508,13 @@ export default Vue.extend({
     },
     toggleColorScheme() {
       if (this.card.showDiffFVAScore) {
-        this.escherBuilder.options.reaction_scale = [
+        this.escherBuilder.settings.set('reaction_scale', [
           { type: "min", color: "#a841d0", size: 20 },
           { type: "value", color: "#f7f7f7", size: 5, value: 0 },
           { type: "max", color: "#54b151", size: 20 }
-        ];
+        ]);
       } else {
-        this.escherBuilder.options.reaction_scale = this.defaultColorScheme;
+        this.escherBuilder.settings.set('reaction_scale', this.defaultColorScheme);
       }
     }
   }
