@@ -13,7 +13,7 @@
         type="number"
       ></v-text-field></v-flex
     ><v-flex xs8>
-      <v-autocomplete
+      <v-autocomplete-extended
         v-model="metabolite.metabolite"
         label="Metabolite"
         :items="metaboliteItems"
@@ -36,10 +36,10 @@
             New metabolite
           </v-btn>
         </template>
-      </v-autocomplete></v-flex
+      </v-autocomplete-extended></v-flex
     >
     <v-flex xs3
-      ><v-autocomplete
+      ><v-autocomplete-extended
         v-model="metabolite.compartment"
         label="Compartment"
         :items="compartmentItems"
@@ -49,7 +49,7 @@
         clearable
         class="mx-2"
       >
-      </v-autocomplete
+      </v-autocomplete-extended
     ></v-flex>
   </v-layout>
 </template>

@@ -36,7 +36,7 @@
                   type="text"
                   placeholder="e.g. My Favourite Model"
                 ></v-text-field>
-                <v-autocomplete
+                <v-autocomplete-extended
                   required
                   return-object
                   item-text="name"
@@ -58,8 +58,8 @@
                     </v-btn>
                     <v-divider class="my-2"></v-divider>
                   </template>
-                </v-autocomplete>
-                <v-autocomplete
+                </v-autocomplete-extended>
+                <v-autocomplete-extended
                   required
                   return-object
                   item-text="name"
@@ -81,8 +81,8 @@
                     </v-btn>
                     <v-divider class="my-2"></v-divider>
                   </template>
-                </v-autocomplete>
-                <v-autocomplete
+                </v-autocomplete-extended>
+                <v-autocomplete-extended
                   return-object
                   item-text="name"
                   item-value="id"
@@ -104,7 +104,7 @@
                     </v-btn>
                     <v-divider class="my-2"></v-divider>
                   </template>
-                </v-autocomplete>
+                </v-autocomplete-extended>
                 <FileUpload
                   v-model="filename"
                   @formData="loadFile"
@@ -114,7 +114,7 @@
                   :rules="[rules.required]"
                   :error-messages="errorMessage"
                 />
-                <v-autocomplete
+                <v-autocomplete-extended
                   required
                   item-text="id"
                   item-value="id"
@@ -127,7 +127,7 @@
                   label="Default Biomass Reaction"
                   type="text"
                 >
-                </v-autocomplete>
+                </v-autocomplete-extended>
               </v-form>
             </v-flex>
           </v-layout>

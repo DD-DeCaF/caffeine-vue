@@ -27,7 +27,7 @@
                   type="text"
                   placeholder="e.g. My Cool Organism"
                 ></v-text-field>
-                <v-autocomplete
+                <v-autocomplete-extended
                   return-object
                   required
                   item-value="id"
@@ -49,7 +49,7 @@
                     </v-btn>
                     <v-divider class="my-2"></v-divider>
                   </template>
-                </v-autocomplete>
+                </v-autocomplete-extended>
               </v-form>
             </v-flex>
           </v-layout>
