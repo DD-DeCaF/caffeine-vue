@@ -49,6 +49,7 @@ export default Vue.extend({
     onEscherReady: null,
     isLoadingMap: false,
     hasBoundsError: false,
+    defaultReactionStyles: ["color", "size", "text", "abs"],
     defaultColorScheme: [
       { type: "min", color: "#A841D0", size: 20 },
       { type: "Q1", color: "#868BB2", size: 20 },
@@ -210,7 +211,7 @@ export default Vue.extend({
         fill_screen: false,
         ignore_bootstrap: true,
         never_ask_before_quit: true,
-        reaction_styles: ["color", "size", "text", "abs"],
+        reaction_styles: this.defaultReactionStyles,
         identifiers_on_map: "bigg_id",
         hide_all_labels: false,
         hide_secondary_metabolites: false,
@@ -513,10 +514,19 @@ export default Vue.extend({
           { type: "value", color: "#f7f7f7", size: 5, value: 0 },
           { type: "max", color: "#54b151", size: 20 }
         ]);
+        this.escherBuilder.settings.set("reaction_styles", [
+          "color",
+          "size",
+          "text"
+        ]);
       } else {
         this.escherBuilder.settings.set(
           "reaction_scale",
           this.defaultColorScheme
+        );
+        this.escherBuilder.settings.set(
+          "reaction_styles",
+          this.defaultReactionStyle
         );
       }
     }
