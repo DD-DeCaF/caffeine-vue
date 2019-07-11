@@ -1004,10 +1004,9 @@ export default Vue.extend({
               jobPrediction.manipulations.forEach(manipulation => {
                 knockoutIds.push(manipulation.id);
 
-                const originalReaction =
-                  this.model["model_serialized"]["reactions"].find(
-                    r => r.id === manipulation.id
-                  );
+                const originalReaction = this.model.model_serialized.reactions.find(
+                  r => r.id === manipulation.id
+                );
 
                 // don't mutate metabolites of the original reaction
                 const reactionToAdd = {
