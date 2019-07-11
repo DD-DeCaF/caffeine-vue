@@ -477,7 +477,8 @@
                         "
                       >
                         <span class="caption grey--text"
-                          >↑ up-regulation<br />↓ down-regulation</span
+                          >↑ up-regulation<br />↓ down-regulation<br />⇅
+                          inversion</span
                         >
                       </div>
                     </div>
@@ -672,7 +673,8 @@ export default Vue.extend({
     indicators: {
       delta: "Δ",
       up: "↑",
-      down: "↓"
+      down: "↓",
+      invert: "⇅"
     },
     showAllManipulations: false,
     showAllKnockouts: false,
