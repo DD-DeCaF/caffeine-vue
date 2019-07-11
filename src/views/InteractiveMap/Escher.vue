@@ -514,7 +514,7 @@ export default Vue.extend({
           { type: "value", color: "#f7f7f7", size: 5, value: 0 },
           { type: "max", color: "#54b151", size: 20 }
         ]);
-        this.escherBuilder.settings.set("reaction_style", [
+        this.escherBuilder.settings.set("reaction_styles", [
           "color",
           "size",
           "text"
@@ -525,7 +525,7 @@ export default Vue.extend({
           this.defaultColorScheme
         );
         this.escherBuilder.settings.set(
-          "reaction_style",
+          "reaction_styles",
           this.defaultReactionStyle
         );
       }
