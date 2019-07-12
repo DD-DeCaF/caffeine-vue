@@ -292,6 +292,7 @@ export default Vue.extend({
       );
     },
     setFluxes() {
+      console.log("setFluxes")
       // Update the flux distribution
       if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
@@ -301,6 +302,7 @@ export default Vue.extend({
           !this.showDiffFVAScore
         ) {
           const fluxesFiltered = this.fluxFilter(this.card.fluxes);
+          console.log("Back in setFluxes")
           this.escherBuilder.set_reaction_data(fluxesFiltered);
           // Set FVA data with the current fluxes. This resets opacity in case a
           // previous FVA simulation has been set on the map.
@@ -333,6 +335,7 @@ export default Vue.extend({
       this.escherBuilder._updateData(true, true);
     },
     fluxFilter(fluxes) {
+      console.log("fluxFilter")
       // Exclude fluxes with very low non-zero values, in order to not shift
       // the escher color scale.
       // Note that this is a method, not a computed property from the card
@@ -344,6 +347,7 @@ export default Vue.extend({
           fluxesFiltered[rxn] = fluxes[rxn];
         }
       });
+      console.log(fluxesFiltered)
       return fluxesFiltered;
     },
     getObjectState(id: string, type: string) {
@@ -508,6 +512,7 @@ export default Vue.extend({
       this.$emit("simulate-card", this.card, this.model);
     },
     toggleColorScheme() {
+      console.log("toggleColorScheme")
       if (this.card.showDiffFVAScore) {
         this.escherBuilder.settings.set("reaction_scale", [
           { type: "min", color: "#a841d0", size: 20 },
