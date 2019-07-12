@@ -459,13 +459,57 @@ export default Vue.extend({
       });
       // Apply the values from diffFVA results as bounds for simulation
       const editedBounds = card.manipulations.map(function(manipulation) {
-        // do we need to filter out values that are zero or is this controlled on the backend?
         const model_reaction = model.model_serialized.reactions.find(
           rxn => rxn.id === manipulation.id
         );
+        // manipulation.value can never be equal to zero hence we don't need to check for it.
         const newBound = manipulation.value;
-        switch (manipulation.direction) {
-          case "up":
+        if (manipulation.direction === "up") {
+            if (newBound > 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: model_reaction.upper_bound
+                }
+              };
+            }
+            if (newBound < 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  upper_bound: newBound,
+                  lower_bound: model_reaction.lower_bound
+                }
+              };
+            }} else if (manipulation.direction === "down") {
+            if (newBound > 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  upper_bound: newBound,
+                  lower_bound: model_reaction.lower_bound
+                }
+              };
+            }
+            if (newBound < 0) {
+              return {
+                operation: "modify",
+                type: "reaction",
+                id: manipulation.id,
+                data: {
+                  lower_bound: newBound,
+                  upper_bound: model_reaction.upper_bound
+                }
+              };
+            }
+            } else if (manipulation.direction === "invert") {
             if (newBound > 0) {
               return {
                 operation: "modify",
@@ -488,55 +532,7 @@ export default Vue.extend({
                 }
               };
             }
-            break;
-          case "down":
-            if (newBound > 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  upper_bound: newBound,
-                  lower_bound: model_reaction.lower_bound
-                }
-              };
             }
-            if (newBound < 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: model_reaction.upper_bound
-                }
-              };
-            }
-            break;
-          case "invert":
-            if (newBound > 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: model_reaction.upper_bound
-                }
-              };
-            }
-            if (newBound < 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  upper_bound: newBound,
-                  lower_bound: model_reaction.lower_bound
-                }
-              };
-            }
-            break;
         }
       });
       // Simulate the model with the updated bounds
