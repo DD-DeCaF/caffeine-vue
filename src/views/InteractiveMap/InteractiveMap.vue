@@ -458,7 +458,7 @@ export default Vue.extend({
         }
       });
       // Apply the values from diffFVA results as bounds for simulation
-      const editedBounds = card.manipulations.map(function(manipulation) {
+      const editedBounds = card.manipulations.map(manipulation => {
         const model_reaction = model.model_serialized.reactions.find(
           rxn => rxn.id === manipulation.id
         );
@@ -534,7 +534,7 @@ export default Vue.extend({
             }
             }
         }
-      });
+      );
       // Simulate the model with the updated bounds
       // adding first all the modifications from the design
       // and then the modifications (edited bounds) computed above
