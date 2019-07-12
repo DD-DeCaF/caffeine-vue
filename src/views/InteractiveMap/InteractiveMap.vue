@@ -458,14 +458,15 @@ export default Vue.extend({
         }
       });
       // Apply the values from diffFVA results as bounds for simulation
-      const editedBounds = card.manipulations
-        .map(function(manipulation) {
-          // do we need to filter out values that are zero or is this controlled on the backend?
-          const model_reaction =  model.model_serialized.reactions.find(rxn => rxn.id === manipulation.id)
-          const newBound = manipulation.value;
-          switch (manipulation.direction) {
-            case 'up':
-              if (newBound > 0) {
+      const editedBounds = card.manipulations.map(function(manipulation) {
+        // do we need to filter out values that are zero or is this controlled on the backend?
+        const model_reaction = model.model_serialized.reactions.find(
+          rxn => rxn.id === manipulation.id
+        );
+        const newBound = manipulation.value;
+        switch (manipulation.direction) {
+          case "up":
+            if (newBound > 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -475,8 +476,8 @@ export default Vue.extend({
                   upper_bound: model_reaction.upper_bound
                 }
               };
-              };
-              if (newBound < 0) {
+            }
+            if (newBound < 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -486,10 +487,10 @@ export default Vue.extend({
                   lower_bound: model_reaction.lower_bound
                 }
               };
-              };
-              break;
-              case 'down':
-              if (newBound > 0) {
+            }
+            break;
+          case "down":
+            if (newBound > 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -499,8 +500,8 @@ export default Vue.extend({
                   lower_bound: model_reaction.lower_bound
                 }
               };
-              };
-              if (newBound < 0) {
+            }
+            if (newBound < 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -510,10 +511,10 @@ export default Vue.extend({
                   upper_bound: model_reaction.upper_bound
                 }
               };
-              };
-              break;
-              case 'invert':
-              if (newBound > 0) {
+            }
+            break;
+          case "invert":
+            if (newBound > 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -523,8 +524,8 @@ export default Vue.extend({
                   upper_bound: model_reaction.upper_bound
                 }
               };
-              };
-              if (newBound < 0) {
+            }
+            if (newBound < 0) {
               return {
                 operation: "modify",
                 type: "reaction",
@@ -534,17 +535,17 @@ export default Vue.extend({
                   lower_bound: model_reaction.lower_bound
                 }
               };
-              };
-              break;
-          }
-            })
-          // Simulate the model with the updated bounds
-          // adding first all the modifications from the design
-          // and then the modifications (edited bounds) computed above
-          this.postSimulation(card, model, [
-            ...this.cardModifications(card),
-            ...editedBounds
-          ]);
+            }
+            break;
+        }
+      });
+      // Simulate the model with the updated bounds
+      // adding first all the modifications from the design
+      // and then the modifications (edited bounds) computed above
+      this.postSimulation(card, model, [
+        ...this.cardModifications(card),
+        ...editedBounds
+      ]);
     },
     postSimulation(card, model, operations) {
       this.updateCard({
