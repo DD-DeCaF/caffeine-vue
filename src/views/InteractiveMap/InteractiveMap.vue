@@ -449,7 +449,6 @@ export default Vue.extend({
         });
     },
     simulateDiffFVACard(card, model) {
-      const operations = this.cardModifications(card);
       this.updateCard({
         uuid: card.uuid,
         props: {
@@ -465,76 +464,76 @@ export default Vue.extend({
         // manipulation.value can never be equal to zero hence we don't need to check for it.
         const newBound = manipulation.value;
         if (manipulation.direction === "up") {
-            if (newBound > 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: model_reaction.upper_bound
-                }
-              };
-            }
-            if (newBound < 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  upper_bound: newBound,
-                  lower_bound: model_reaction.lower_bound
-                }
-              };
-            }} else if (manipulation.direction === "down") {
-            if (newBound > 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  upper_bound: newBound,
-                  lower_bound: model_reaction.lower_bound
-                }
-              };
-            }
-            if (newBound < 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: model_reaction.upper_bound
-                }
-              };
-            }
-            } else if (manipulation.direction === "invert") {
-            if (newBound > 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: model_reaction.upper_bound
-                }
-              };
-            }
-            if (newBound < 0) {
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  upper_bound: newBound,
-                  lower_bound: model_reaction.lower_bound
-                }
-              };
-            }
-            }
+          if (newBound > 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                lower_bound: newBound,
+                upper_bound: model_reaction.upper_bound
+              }
+            };
+          }
+          if (newBound < 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                upper_bound: newBound,
+                lower_bound: model_reaction.lower_bound
+              }
+            };
+          }
+        } else if (manipulation.direction === "down") {
+          if (newBound > 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                upper_bound: newBound,
+                lower_bound: model_reaction.lower_bound
+              }
+            };
+          }
+          if (newBound < 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                lower_bound: newBound,
+                upper_bound: model_reaction.upper_bound
+              }
+            };
+          }
+        } else if (manipulation.direction === "invert") {
+          if (newBound > 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                lower_bound: newBound,
+                upper_bound: model_reaction.upper_bound
+              }
+            };
+          }
+          if (newBound < 0) {
+            return {
+              operation: "modify",
+              type: "reaction",
+              id: manipulation.id,
+              data: {
+                upper_bound: newBound,
+                lower_bound: model_reaction.lower_bound
+              }
+            };
+          }
         }
-      );
+      });
       // Simulate the model with the updated bounds
       // adding first all the modifications from the design
       // and then the modifications (edited bounds) computed above
