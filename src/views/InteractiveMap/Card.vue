@@ -354,7 +354,9 @@ export default Vue.extend({
           // Add the compartment postfix to the metabolite id
           .map(metabolite => ({
             ...metabolite,
-            id: `${metabolite.id}_${metabolite.compartment}`
+            id: `${metabolite.id}_${metabolite.compartment}`,
+            // Mark metabolite to force Escher to make it primary
+            is_heterologous: true
           }))
           // Exclude metabolites that already exist in the model
           .filter(metabolite => {
