@@ -341,16 +341,10 @@ export default Vue.extend({
         return;
       }
 
-      switch (card.type) {
-        case "Design":
-          this.simulateDesignCard(card, model);
-          break;
-        case "DataDriven":
-          this.simulateDataDrivenCard(card, model);
-          break;
-        case "DiffFVA":
-          this.simulateDiffFVACard(card, model);
-          break;
+      if (["Design", "DiffFVA"].includes(card.type)) {
+        this.simulateDesignCard(card, model);
+      } else if (card.type === "DataDriven") {
+        this.simulateDataDrivenCard(card, model);
       }
     },
     simulateDesignCard(card, model) {
@@ -447,65 +441,6 @@ export default Vue.extend({
             });
           }
         });
-    },
-    simulateDiffFVACard(card, model) {
-      this.updateCard({
-        uuid: card.uuid,
-        props: {
-          isSimulating: true,
-          hasSimulationError: false
-        }
-      });
-      // Apply the values from diffFVA results as bounds for simulation
-      const editedBounds = card.manipulations.map(manipulation => {
-        const model_reaction = model.model_serialized.reactions.find(
-          rxn => rxn.id === manipulation.id
-        );
-        const oldLowerBound = model_reaction.lower_bound;
-        const oldUpperBound = model_reaction.upper_bound;
-
-        // manipulation.value can never be equal to zero hence we don't need to check for it.
-        const newBound = manipulation.value;
-
-        if (
-          (manipulation.direction === "up" && newBound > 0) ||
-          (manipulation.direction === "invert" && newBound > 0) ||
-          (manipulation.direction === "down" && newBound < 0)
-        ) {
-          return {
-            operation: "modify",
-            type: "reaction",
-            id: manipulation.id,
-            data: {
-              lower_bound: newBound,
-              upper_bound: oldUpperBound
-            }
-          };
-        }
-
-        if (
-          (manipulation.direction === "up" && newBound < 0) ||
-          (manipulation.direction === "invert" && newBound < 0) ||
-          (manipulation.direction === "down" && newBound > 0)
-        ) {
-          return {
-            operation: "modify",
-            type: "reaction",
-            id: manipulation.id,
-            data: {
-              lower_bound: oldLowerBound,
-              upper_bound: newBound
-            }
-          };
-        }
-      });
-      // Simulate the model with the updated bounds
-      // adding first all the modifications from the design
-      // and then the modifications (edited bounds) computed above
-      this.postSimulation(card, model, [
-        ...this.cardModifications(card),
-        ...editedBounds
-      ]);
     },
     postSimulation(card, model, operations) {
       this.updateCard({

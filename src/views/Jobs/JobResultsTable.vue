@@ -982,6 +982,7 @@ export default Vue.extend({
             } else if (
               jobPrediction.method === "PathwayPredictor+DifferentialFVA"
             ) {
+              // Apply the knockouts
               jobPrediction.knockouts.forEach(reactionId => {
                 this.$store.dispatch("interactiveMap/knockoutReaction", {
                   uuid: card.uuid,
@@ -995,6 +996,54 @@ export default Vue.extend({
                     reactionString: "N/A"
                   }
                 });
+              });
+
+              // Apply the values from diffFVA results as bounds for simulation
+              const editedBounds = jobPrediction.manipulations.map(
+                manipulation => {
+                  // First find the original bounds for the reaction, because one of them
+                  // will need to be part of the request to modify bounds.
+                  const model_reaction = this.model.model_serialized.reactions.find(
+                    rxn => rxn.id === manipulation.id
+                  );
+                  const oldLowerBound = model_reaction.lower_bound;
+                  const oldUpperBound = model_reaction.upper_bound;
+
+                  // manipulation.value can never be equal to zero hence we don't need to check for it.
+                  const newBound = manipulation.value;
+
+                  if (
+                    (manipulation.direction === "up" && newBound > 0) ||
+                    (manipulation.direction === "invert" && newBound > 0) ||
+                    (manipulation.direction === "down" && newBound < 0)
+                  ) {
+                    return {
+                      id: manipulation.id,
+                      lowerBound: newBound,
+                      upperBound: oldUpperBound
+                    };
+                  }
+
+                  if (
+                    (manipulation.direction === "up" && newBound < 0) ||
+                    (manipulation.direction === "invert" && newBound < 0) ||
+                    (manipulation.direction === "down" && newBound > 0)
+                  ) {
+                    return {
+                      id: manipulation.id,
+                      lowerBound: oldLowerBound,
+                      upperBound: newBound
+                    };
+                  }
+                }
+              );
+
+              // Commit all the resolved manipulations. Note that committing them all
+              // in a single mutation is much faster than committing each one
+              // individually.
+              this.$store.commit("interactiveMap/editMultipleBounds", {
+                uuid: card.uuid,
+                reactions: editedBounds
               });
             } else if (
               jobPrediction.method === "PathwayPredictor+CofactorSwap"
