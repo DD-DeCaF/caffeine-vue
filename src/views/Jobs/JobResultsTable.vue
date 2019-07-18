@@ -922,7 +922,9 @@ export default Vue.extend({
               type: cardType,
               // Design card fields
               objective: {
-                reaction: null,
+                reaction: this.prediction.result.reactions[
+                  this.prediction.result.target
+                ],
                 maximize: true
               },
               reactionAdditions: addedReactions,
