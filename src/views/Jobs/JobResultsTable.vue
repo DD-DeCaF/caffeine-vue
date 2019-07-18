@@ -1003,11 +1003,32 @@ export default Vue.extend({
                 manipulation => {
                   // First find the original bounds for the reaction, because one of them
                   // will need to be part of the request to modify bounds.
-                  const model_reaction = this.model.model_serialized.reactions.find(
+                  let oldLowerBound;
+                  let oldUpperBound;
+                  // Try to find the reaction among the card's added reactions, in case
+                  // it's a heterologous one.
+                  const reactionFromCard = card.reactionAdditions.find(
                     rxn => rxn.id === manipulation.id
                   );
-                  const oldLowerBound = model_reaction.lower_bound;
-                  const oldUpperBound = model_reaction.upper_bound;
+                  if (reactionFromCard) {
+                    oldLowerBound = reactionFromCard.lowerBound;
+                    oldUpperBound = reactionFromCard.upperBound;
+                  } else {
+                    // Not one of the added reactions - look in the model.
+                    const reactionFromModel = this.model.model_serialized.reactions.find(
+                      rxn => rxn.id === manipulation.id
+                    );
+                    if (reactionFromModel) {
+                      oldLowerBound = reactionFromModel.lower_bound;
+                      oldUpperBound = reactionFromModel.upper_bound;
+                    } else {
+                      throw new Error(
+                        `Reaction ${
+                          manipulation.id
+                        } is neither added or in the original model`
+                      );
+                    }
+                  }
 
                   // manipulation.value can never be equal to zero hence we don't need to check for it.
                   const newBound = manipulation.value;
