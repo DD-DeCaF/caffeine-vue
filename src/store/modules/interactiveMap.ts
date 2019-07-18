@@ -153,6 +153,12 @@ export default {
       card.editedBounds.push(reaction);
       card.modified = true;
     },
+    editMultipleBounds(state, { uuid, reactions }) {
+      // Add multiple reaction objects with modified bounds.
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.editedBounds.push(...reactions);
+      card.modified = true;
+    },
     updateEditedBoundsReaction(state, { uuid, reaction }) {
       // Update the reaction data for an edited reaction.
       const card = state.cards.find(c => c.uuid === uuid);
