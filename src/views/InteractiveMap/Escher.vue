@@ -163,7 +163,7 @@ export default Vue.extend({
           this.setGeneKnockouts();
           this.setConditionData();
           this.setFluxes();
-          this.toggleColorScheme();
+          this.setColorScheme();
         }, 10);
       };
 
@@ -204,7 +204,7 @@ export default Vue.extend({
       this.onEscherReady.then(this.setFluxes);
     },
     showDiffFVAScore() {
-      this.onEscherReady.then(this.toggleColorScheme());
+      this.onEscherReady.then(this.setColorScheme());
       this.onEscherReady.then(this.setFluxes);
     }
   },
@@ -512,7 +512,7 @@ export default Vue.extend({
       });
       this.$emit("simulate-card", this.card, this.model);
     },
-    toggleColorScheme() {
+    setColorScheme() {
       if (this.card.showDiffFVAScore) {
         this.escherBuilder.settings.set("reaction_scale", [
           { type: "min", color: "#a841d0", size: 20 },
