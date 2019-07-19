@@ -226,6 +226,7 @@ export default Vue.extend({
         enable_fva_opacity: true,
         show_gene_reaction_rules: true,
         zoom_extent_canvas: true,
+        use_3d_transform: true,
         first_load_callback: () => {
           resolve();
           this.initializingEscher = false;
