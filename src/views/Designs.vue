@@ -361,6 +361,8 @@ import Vue from "vue";
 import { mapGetters } from "vuex";
 import uuidv4 from "uuid/v4";
 import { Card } from "@/store/modules/interactiveMap";
+import { DesignItem } from "@/store/modules/designs";
+import { sortBy } from "@/utils/utility";
 
 export default Vue.extend({
   name: "Designs",
@@ -388,7 +390,7 @@ export default Vue.extend({
     isVisualizing: false
   }),
   computed: {
-    designs() {
+    designs(): DesignItem[] {
       return this.$store.state.designs.designs;
     },
     ...mapGetters({
@@ -402,36 +404,24 @@ export default Vue.extend({
     });
   },
   methods: {
-    customSort(items, index, isDesc) {
-      items.sort((a, b) => {
-        if (
-          index === "reactionKnockins" ||
-          index === "reactionKnockouts" ||
-          index === "geneKnockouts"
-        ) {
-          if (!isDesc) {
-            return a["design"][index].length - b["design"][index].length;
+    customSort(items: DesignItem[], index: string, isDesc: boolean) {
+      return sortBy(
+        items,
+        item => {
+          if (
+            index === "reactionKnockins" ||
+            index === "reactionKnockouts" ||
+            index === "geneKnockouts"
+          ) {
+            return item["design"][index].length;
           }
-          return b["design"][index].length - a["design"][index].length;
-        }
-        if (index === "organismId") {
-          if (!isDesc) {
-            return this.organism(this.model(a.model_id).organism_id).name <
-              this.organism(this.model(b.model_id).organism_id).name
-              ? -1
-              : 1;
+          if (index === "organismId") {
+            return this.organism(this.model(item.model_id).organism_id).name;
           }
-          return this.organism(this.model(b.model_id).organism_id).name <
-            this.organism(this.model(a.model_id).organism_id).name
-            ? -1
-            : 1;
-        }
-        if (!isDesc) {
-          return a[index] < b[index] ? -1 : 1;
-        }
-        return b[index] < a[index] ? -1 : 1;
-      });
-      return items;
+          return item[index];
+        },
+        isDesc
+      );
     },
     reactionLink(reactionId, method) {
       if (reactionId.startsWith("MNX")) {

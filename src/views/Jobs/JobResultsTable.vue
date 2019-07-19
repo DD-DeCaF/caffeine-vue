@@ -669,6 +669,7 @@ import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
 import { Card } from "@/store/modules/interactiveMap";
+import { sortBy } from "@/utils/utility";
 
 export default Vue.extend({
   name: "JobResultsTable",
@@ -886,23 +887,20 @@ export default Vue.extend({
       };
     },
     customSort(items, index, isDesc) {
-      items.sort((a, b) => {
-        if (
-          index === "manipulations" ||
-          index === "heterologous_reactions" ||
-          index === "knockouts"
-        ) {
-          if (!isDesc) {
-            return a[index].length - b[index].length;
+      return sortBy(
+        items,
+        item => {
+          if (
+            index === "manipulations" ||
+            index === "heterologous_reactions" ||
+            index === "knockouts"
+          ) {
+            return item[index].length;
           }
-          return b[index].length - a[index].length;
-        }
-        if (!isDesc) {
-          return a[index] < b[index] ? -1 : 1;
-        }
-        return b[index] < a[index] ? -1 : 1;
-      });
-      return items;
+          return item[index];
+        },
+        isDesc
+      );
     },
     toggleAll() {
       if (this.selected.length) {
@@ -1265,9 +1263,7 @@ export default Vue.extend({
       });
     },
     sort(items, value) {
-      return items
-        .slice()
-        .sort((a, b) => (Math.abs(a[value]) < Math.abs(b[value]) ? 1 : -1));
+      return sortBy(items, item => Math.abs(item[value]));
     },
     onCheckboxChange(method) {
       if (method === "PathwayPredictor+DifferentialFVA") {

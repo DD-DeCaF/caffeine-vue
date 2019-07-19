@@ -83,3 +83,28 @@ export function partitionedList(contentType, separatorType) {
   });
   return itemsWithHeaders;
 }
+
+export function sortBy<T>(
+  array: T[],
+  mapper: (item: T) => any,
+  isDescending = false
+): T[] {
+  let newArray = array.slice();
+
+  newArray.sort((a, b) => {
+    const mappedA = mapper(a);
+    const mappedB = mapper(b);
+    if (mappedA < mappedB) {
+      return -1;
+    }
+    if (mappedA > mappedB) {
+      return 1;
+    }
+    return 0;
+  });
+
+  if (isDescending) {
+    newArray.reverse();
+  }
+  return newArray;
+}
