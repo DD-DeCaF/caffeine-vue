@@ -154,6 +154,8 @@ export default Vue.extend({
           this.isLoadingMap = false;
           // Update the map state, since it will be reset whenever the map is
           // changed. Note that we don't need to update the model.
+          // Important: Any new logic to set map state that is added below, needs to be
+          // called here as well, otherwise it will reset when changing the map.
           if (this.model && this.model.model_serialized) {
             this.setReactionAdditions();
           }
@@ -161,6 +163,7 @@ export default Vue.extend({
           this.setGeneKnockouts();
           this.setConditionData();
           this.setFluxes();
+          this.toggleColorScheme();
         }, 10);
       };
 
