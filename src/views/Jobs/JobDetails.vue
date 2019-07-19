@@ -127,6 +127,7 @@ export interface PathwayPredictionResponse extends JobItem {
     opt_gene: PathwayPredictionMethod[];
     reactions: { [id: string]: Reaction };
     metabolites: { [id: string]: Object };
+    target: string;
   };
 }
 
@@ -137,14 +138,20 @@ export interface PathwayPredictionMethod {
   heterologous_reactions: string[];
   knockouts: string[];
   manipulations: {
-    from: string;
     id: string;
-    to: string;
+    // Cofactor swap
+    from?: string[];
+    to?: string[];
+    // Differential FVA
+    direction?: string;
+    score?: number;
+    value?: number;
   }[];
   method: string;
   product: number;
   synthetic_reactions: string[];
   yield: number;
+  id: string;
 }
 
 export interface Reaction {
