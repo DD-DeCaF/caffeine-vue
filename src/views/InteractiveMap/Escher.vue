@@ -130,7 +130,7 @@ export default Vue.extend({
       if (this.card.type === "DiffFVA") {
         let scores = {};
         this.card.manipulations.forEach(manipulation => {
-          scores[manipulation.id] = manipulation.value;
+          scores[manipulation.id] = manipulation.score;
         });
         return scores;
       } else {
@@ -528,7 +528,7 @@ export default Vue.extend({
         );
         this.escherBuilder.settings.set(
           "reaction_styles",
-          this.defaultReactionStyle
+          this.defaultReactionStyles
         );
       }
     }

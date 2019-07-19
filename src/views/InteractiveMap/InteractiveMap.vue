@@ -341,16 +341,10 @@ export default Vue.extend({
         return;
       }
 
-      switch (card.type) {
-        case "Design":
-          this.simulateDesignCard(card, model);
-          break;
-        case "DataDriven":
-          this.simulateDataDrivenCard(card, model);
-          break;
-        case "DiffFVA":
-          this.simulateDiffFVACard(card, model);
-          break;
+      if (["Design", "DiffFVA"].includes(card.type)) {
+        this.simulateDesignCard(card, model);
+      } else if (card.type === "DataDriven") {
+        this.simulateDataDrivenCard(card, model);
       }
     },
     simulateDesignCard(card, model) {
@@ -446,69 +440,6 @@ export default Vue.extend({
               props: { conditionErrors: error.response.data.errors }
             });
           }
-        });
-    },
-    simulateDiffFVACard(card, model) {
-      const operations = this.cardModifications(card);
-      this.updateCard({
-        uuid: card.uuid,
-        props: {
-          isSimulating: true,
-          hasSimulationError: false
-        }
-      });
-      axios
-        .post(`${settings.apis.model}/simulate`, {
-          model_id: model.id,
-          method: card.method,
-          operations: operations,
-          objective_id: card.objective.reaction
-            ? card.objective.reaction.id
-            : model.default_biomass_reaction,
-          objective_direction: card.objective.maximize ? "max" : "min"
-        })
-        .then(response => {
-          const wildtypeFluxdistribution = response.data.flux_distribution;
-          // Calculate new bounds based on manipulation scores calculated by DiffFVA
-          // (reference flux * score) / production growth
-          const editedBounds = card.manipulations
-            .map(function(manipulation) {
-              const newBound = Math.round(
-                (wildtypeFluxdistribution[manipulation.id] *
-                  manipulation.value) /
-                  card.productionGrowthRate
-              );
-              return {
-                operation: "modify",
-                type: "reaction",
-                id: manipulation.id,
-                data: {
-                  lower_bound: newBound,
-                  upper_bound: newBound
-                }
-              };
-            })
-            .filter(operation => operation.data.lower_bound !== 0);
-          // Re-simulate the model with the updated bounds
-          // adding first all the modifications from the design
-          // and then the modifications (edited bounds) computed above
-          this.postSimulation(card, model, [
-            ...this.cardModifications(card),
-            ...editedBounds
-          ]);
-        })
-        .catch(error => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: { hasSimulationError: true }
-          });
-          this.hasSimulationError = true;
-        })
-        .then(response => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: { isSimulating: false }
-          });
         });
     },
     postSimulation(card, model, operations) {
