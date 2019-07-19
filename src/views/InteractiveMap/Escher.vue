@@ -42,12 +42,10 @@ export default Vue.extend({
   components: {
     Legend
   },
-  props: ["mapData", "card"],
+  props: ["mapData", "card", "isLoadingMap"],
   data: () => ({
     escherBuilder: null,
-    initializingEscher: true,
-    onEscherReady: null,
-    isLoadingMap: false,
+    initializingEscher: false,
     hasBoundsError: false,
     defaultReactionStyles: ["color", "size", "text", "abs"],
     defaultColorScheme: [
@@ -142,33 +140,63 @@ export default Vue.extend({
     }
   },
   watch: {
-    mapData(value) {
-      const loadMap = () => {
-        this.isLoadingMap = true;
-        // Delay the actual loading of the map to give Vue time to update the
-        // interface (after setting isLoadingMap to true). Otherwise, Escher
-        // would freeze execution until it's complete and the user would never
-        // actually see the loading message.
-        setTimeout(() => {
-          this.escherBuilder.load_map(value);
-          this.isLoadingMap = false;
-          // Update the map state, since it will be reset whenever the map is
-          // changed. Note that we don't need to update the model.
-          // Important: Any new logic to set map state that is added below, needs to be
-          // called here as well, otherwise it will reset when changing the map.
-          if (this.model && this.model.model_serialized) {
-            this.setReactionAdditions();
-          }
-          this.setReactionKnockouts();
-          this.setGeneKnockouts();
-          this.setConditionData();
-          this.setFluxes();
-          this.setColorScheme();
-        }, 10);
-      };
+    mapData(mapData) {
+      this.initializingEscher = true;
+      // Recreating the Escher builder over an existing one doesn't work, so destroy
+      // it by simply clearing the DOM element.
+      this.$refs.escher.innerHTML = "";
+      this.escherBuilder = escher.Builder(
+        mapData,
+        null,
+        null,
+        this.$refs.escher,
+        {
+          menu: "all",
+          scroll_behavior: "zoom",
+          fill_screen: false,
+          ignore_bootstrap: true,
+          never_ask_before_quit: true,
+          reaction_styles: this.defaultReactionStyles,
+          identifiers_on_map: "bigg_id",
+          hide_all_labels: false,
+          hide_secondary_metabolites: false,
+          highlight_missing: true,
+          reaction_scale: this.defaultColorScheme,
+          reaction_no_data_color: "#CBCBCB",
+          reaction_no_data_size: 10,
+          tooltip: "custom",
+          enable_editing: true,
+          enable_fva_opacity: true,
+          show_gene_reaction_rules: true,
+          zoom_extent_canvas: true,
+          first_load_callback: () => {
+            this.initializingEscher = false;
 
-      // Wait for escher to initialize before loading the map.
-      this.onEscherReady.then(loadMap);
+            // Update the current map state.
+            // Important: Any new logic to set map state that is added below, needs to
+            // be called here as well, otherwise it will be undone when changing the
+            // map.
+            if (this.model && this.model.model_serialized) {
+              this.setModel();
+              this.setReactionAdditions();
+            }
+            this.setReactionKnockouts();
+            this.setGeneKnockouts();
+            this.setConditionData();
+            this.setFluxes();
+            this.setColorScheme();
+          },
+          reaction_state: this.getObjectState,
+          tooltip_callbacks: {
+            knockout: this.knockoutReaction,
+            knockoutGenes: this.knockoutGene,
+            setAsObjective: this.setObjective,
+            objectiveDirection: this.setObjectiveDirection,
+            changeBounds: this.editBounds,
+            resetBounds: this.resetBounds
+          }
+        }
+      );
     },
     model: {
       deep: true,
@@ -176,7 +204,13 @@ export default Vue.extend({
         // Whenever the model (with local modifications) changes, update it in
         // Escher. Note: The model must be loaded before drawing the reactions
         // on the map.
-        this.onEscherReady.then(this.setModel);
+        if (!this.escherBuilder) {
+          // Escher builder is not available if map data hasn't arrived yet. Ignore the
+          // watcher; the state will be set explicitly when map data arrives.
+          return;
+        }
+        this.setModel();
+
         // To make sure that added reactions are added correctly to the map, use
         // this watcher (instead of watching `card.reactionAdditions`
         // separately). This ensures that the full model is available, and since
@@ -184,7 +218,7 @@ export default Vue.extend({
         // it will also handle the case of reactions being added first, then the
         // model arrives later, then draw the added reactions
         if (this.model && this.model.model_serialized) {
-          this.onEscherReady.then(this.setReactionAdditions);
+          this.setReactionAdditions();
         }
       }
     },
@@ -192,58 +226,46 @@ export default Vue.extend({
     // of a single deep watcher on the card, to be able to only update the
     // relevant portions of the map.
     "card.reactionKnockouts"() {
-      this.onEscherReady.then(this.setReactionKnockouts);
+      if (!this.escherBuilder) {
+        // Escher builder is not available if map data hasn't arrived yet. Ignore the
+        // watcher; the state will be set explicitly when map data arrives.
+        return;
+      }
+      this.setReactionKnockouts();
     },
     "card.geneKnockouts"() {
-      this.onEscherReady.then(this.setGeneKnockouts);
+      if (!this.escherBuilder) {
+        // Escher builder is not available if map data hasn't arrived yet. Ignore the
+        // watcher; the state will be set explicitly when map data arrives.
+        return;
+      }
+      this.setGeneKnockouts();
     },
     "card.conditionData"() {
-      this.onEscherReady.then(this.setConditionData);
+      if (!this.escherBuilder) {
+        // Escher builder is not available if map data hasn't arrived yet. Ignore the
+        // watcher; the state will be set explicitly when map data arrives.
+        return;
+      }
+      this.setConditionData();
     },
     "card.fluxes"() {
-      this.onEscherReady.then(this.setFluxes);
+      if (!this.escherBuilder) {
+        // Escher builder is not available if map data hasn't arrived yet. Ignore the
+        // watcher; the state will be set explicitly when map data arrives.
+        return;
+      }
+      this.setFluxes();
     },
     showDiffFVAScore() {
-      this.onEscherReady.then(this.setColorScheme());
-      this.onEscherReady.then(this.setFluxes);
+      if (!this.escherBuilder) {
+        // Escher builder is not available if map data hasn't arrived yet. Ignore the
+        // watcher; the state will be set explicitly when map data arrives.
+        return;
+      }
+      this.setColorScheme();
+      this.setFluxes();
     }
-  },
-  mounted() {
-    this.onEscherReady = new Promise((resolve, reject) => {
-      this.escherBuilder = escher.Builder(null, null, null, this.$refs.escher, {
-        menu: "all",
-        scroll_behavior: "zoom",
-        fill_screen: false,
-        ignore_bootstrap: true,
-        never_ask_before_quit: true,
-        reaction_styles: this.defaultReactionStyles,
-        identifiers_on_map: "bigg_id",
-        hide_all_labels: false,
-        hide_secondary_metabolites: false,
-        highlight_missing: true,
-        reaction_scale: this.defaultColorScheme,
-        reaction_no_data_color: "#CBCBCB",
-        reaction_no_data_size: 10,
-        tooltip: "custom",
-        enable_editing: true,
-        enable_fva_opacity: true,
-        show_gene_reaction_rules: true,
-        zoom_extent_canvas: true,
-        first_load_callback: () => {
-          resolve();
-          this.initializingEscher = false;
-        },
-        reaction_state: this.getObjectState,
-        tooltip_callbacks: {
-          knockout: this.knockoutReaction,
-          knockoutGenes: this.knockoutGene,
-          setAsObjective: this.setObjective,
-          objectiveDirection: this.setObjectiveDirection,
-          changeBounds: this.editBounds,
-          resetBounds: this.resetBounds
-        }
-      });
-    });
   },
   methods: {
     setModel() {

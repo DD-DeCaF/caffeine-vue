@@ -10,6 +10,7 @@
       @simulate-card="simulate"
       @click="isSidepanelOpen = false"
       :card="selectedCard"
+      :isLoadingMap="isLoadingMap"
       :mapData="mapData"
     />
     <v-btn
@@ -138,6 +139,7 @@ export default Vue.extend({
   data: () => ({
     isSidepanelOpen: true,
     escherBuilder: null,
+    isLoadingMap: false,
     mapData: null,
     selectedCardId: null,
     playingInterval: null,
@@ -215,6 +217,7 @@ export default Vue.extend({
   },
   methods: {
     changeMap() {
+      this.isLoadingMap = true;
       this.hasLoadMapError = false;
       axios
         .get(`${settings.apis.maps}/maps/${this.currentMapId}`)
@@ -224,6 +227,9 @@ export default Vue.extend({
         .catch(error => {
           this.mapData = null;
           this.hasLoadMapError = true;
+        })
+        .then(() => {
+          this.isLoadingMap = false;
         });
     },
     addDefaultCard(cardType, withDialog) {
