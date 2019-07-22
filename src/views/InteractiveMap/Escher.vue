@@ -45,6 +45,9 @@ export default Vue.extend({
   props: ["mapData", "card", "isLoadingMap"],
   data: () => ({
     escherBuilder: null,
+    // The following flag will be false until Escher is ready. In that period,
+    // watchers that apply state to Escher should be ignored since the builder
+    // isn't ready. The state will be set explicitly when Escher is ready.
     escherReady: false,
     initializingEscher: false,
     hasBoundsError: false,
@@ -211,8 +214,6 @@ export default Vue.extend({
         // Escher. Note: The model must be loaded before drawing the reactions
         // on the map.
         if (!this.escherReady) {
-          // Escher builder is not available if map data hasn't arrived yet. Ignore the
-          // watcher; the state will be set explicitly when map data arrives.
           return;
         }
         this.setModel();
@@ -233,40 +234,30 @@ export default Vue.extend({
     // relevant portions of the map.
     "card.reactionKnockouts"() {
       if (!this.escherReady) {
-        // Escher builder is not available if map data hasn't arrived yet. Ignore the
-        // watcher; the state will be set explicitly when map data arrives.
         return;
       }
       this.setReactionKnockouts();
     },
     "card.geneKnockouts"() {
       if (!this.escherReady) {
-        // Escher builder is not available if map data hasn't arrived yet. Ignore the
-        // watcher; the state will be set explicitly when map data arrives.
         return;
       }
       this.setGeneKnockouts();
     },
     "card.conditionData"() {
       if (!this.escherReady) {
-        // Escher builder is not available if map data hasn't arrived yet. Ignore the
-        // watcher; the state will be set explicitly when map data arrives.
         return;
       }
       this.setConditionData();
     },
     "card.fluxes"() {
       if (!this.escherReady) {
-        // Escher builder is not available if map data hasn't arrived yet. Ignore the
-        // watcher; the state will be set explicitly when map data arrives.
         return;
       }
       this.setFluxes();
     },
     showDiffFVAScore() {
       if (!this.escherReady) {
-        // Escher builder is not available if map data hasn't arrived yet. Ignore the
-        // watcher; the state will be set explicitly when map data arrives.
         return;
       }
       this.setColorScheme();
