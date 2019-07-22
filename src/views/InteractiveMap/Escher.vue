@@ -141,6 +141,10 @@ export default Vue.extend({
   },
   watch: {
     mapData(mapData) {
+      // When the map is changed, recreate the Escher builder instead of simply
+      // calling `load_map`. We're doing this to work around a number of bugs
+      // where state in Escher is not properly retained after changing maps.
+      // See discussion in: https://github.com/DD-DeCaF/caffeine-vue/pull/118
       this.initializingEscher = true;
       // Recreating the Escher builder over an existing one doesn't work, so destroy
       // it by simply clearing the DOM element.
