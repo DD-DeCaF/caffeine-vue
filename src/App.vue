@@ -229,6 +229,10 @@
       <v-snackbar color="error" v-model="unauthorizedError" :timeout="6000">
         Sorry, you need to be logged in to access {{ unauthorizedError }}.
       </v-snackbar>
+
+      <v-snackbar v-model="hotreloadStatus" :timeout="6000" top right>
+        Hotreload status: {{ hotreloadStatus }}
+      </v-snackbar>
     </v-app>
   </div>
 </template>
@@ -255,7 +259,8 @@ export default Vue.extend({
     drawer: false,
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
-    isExpanded: true
+    isExpanded: true,
+    hotreloadStatus: null
   }),
   computed: {
     isAuthenticated() {
@@ -320,6 +325,13 @@ export default Vue.extend({
     // Now fetch the user data, as session/token logic is ready and will ensure
     // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
+  },
+  mounted() {
+    if (module.hot) {
+      module.hot.addStatusHandler(status => {
+        this.hotreloadStatus = status;
+      });
+    }
   },
   methods: {
     setActiveProject(projectID: number) {
