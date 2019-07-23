@@ -222,7 +222,7 @@
         </v-flex>
         <v-flex shrink mr-2>
           <v-text-field
-            v-model="editBoundsLowerBound"
+            v-model.number="editBoundsLowerBound"
             type="number"
             label="Lower bound"
             :rules="[editBoundsBoundRule]"
@@ -230,7 +230,7 @@
         </v-flex>
         <v-flex shrink mr-2>
           <v-text-field
-            v-model="editBoundsUpperBound"
+            v-model.number="editBoundsUpperBound"
             type="number"
             label="Upper bound"
             :rules="[editBoundsBoundRule]"
@@ -452,8 +452,8 @@ export default Vue.extend({
       this.$emit("simulate-card");
     },
     editBounds() {
-      const lowerBound = parseFloat(this.editBoundsLowerBound);
-      const upperBound = parseFloat(this.editBoundsUpperBound);
+      const lowerBound = this.editBoundsLowerBound;
+      const upperBound = this.editBoundsUpperBound;
 
       if (lowerBound > upperBound) {
         this.hasInvalidBoundsError = true;

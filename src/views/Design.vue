@@ -165,7 +165,7 @@
                 </v-autocomplete-extended>
                 <v-text-field
                   label="Maximum number of pathway predictions"
-                  v-model="maxPredictions"
+                  v-model.number="maxPredictions"
                   class="mt-0"
                   :rules="predictionRules"
                   type="number"
