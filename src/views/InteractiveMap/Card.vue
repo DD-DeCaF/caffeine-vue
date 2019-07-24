@@ -263,7 +263,7 @@ export default Vue.extend({
       if (this.isSelected) {
         if (this.card.hasSimulationError) {
           return "error";
-        } else if (this.isInfeasible()) {
+        } else if (this.isInfeasible) {
           return "warning";
         } else {
           return "primary";
