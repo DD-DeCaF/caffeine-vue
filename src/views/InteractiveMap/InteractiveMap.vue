@@ -283,6 +283,7 @@ export default Vue.extend({
         // General simulation fields
         isSimulating: false,
         hasSimulationError: false,
+        solverStatus: null,
         growthRate: null,
         fluxes: null,
         withDialog: withDialog,
@@ -461,13 +462,25 @@ export default Vue.extend({
           objective_direction: card.objective.maximize ? "max" : "min"
         })
         .then(response => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: {
-              growthRate: response.data.growth_rate,
-              fluxes: response.data.flux_distribution
-            }
-          });
+          if (response.data.status === "optimal") {
+            this.updateCard({
+              uuid: card.uuid,
+              props: {
+                solverStatus: response.data.status,
+                growthRate: response.data.growth_rate,
+                fluxes: response.data.flux_distribution
+              }
+            });
+          } else {
+            this.updateCard({
+              uuid: card.uuid,
+              props: {
+                solverStatus: response.data.status,
+                growthRate: null,
+                fluxes: null
+              }
+            });
+          }
         })
         .catch(error => {
           this.updateCard({

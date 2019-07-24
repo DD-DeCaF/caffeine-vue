@@ -36,6 +36,10 @@
       </v-btn>
     </v-toolbar>
     <v-card-title primary-title class="py-2" v-if="isSelected">
+      <v-alert :value="isInfeasible" color="error" class="mx-0 my-2 px-3 py-1">
+        Simulation failed. There is no valid solution with the current
+        constraints.
+      </v-alert>
       <v-container fluid class="pa-0">
         <v-layout>
           <v-flex>Organism:</v-flex>
@@ -259,6 +263,8 @@ export default Vue.extend({
       if (this.isSelected) {
         if (this.card.hasSimulationError) {
           return "error";
+        } else if (this.isInfeasible()) {
+          return "warning";
         } else {
           return "primary";
         }
@@ -393,6 +399,9 @@ export default Vue.extend({
     },
     activeProject() {
       return this.$store.state.projects.activeProject;
+    },
+    isInfeasible() {
+      return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
     }
   },
   watch: {
