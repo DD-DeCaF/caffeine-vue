@@ -57,6 +57,7 @@ export interface Card {
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;
+  solverStatus: string | null;
   growthRate: number | null;
   fluxes: number | null;
   // When adding a card from the interactive map, the dialog should be opened

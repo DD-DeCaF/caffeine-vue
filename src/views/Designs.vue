@@ -495,6 +495,7 @@ export default Vue.extend({
           // General simulation fields
           isSimulating: false,
           hasSimulationError: false,
+          solverStatus: null,
           growthRate: null,
           fluxes: null,
           withDialog: false,
