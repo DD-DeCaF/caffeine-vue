@@ -268,7 +268,7 @@ export default Vue.extend({
     },
     production() {
       // If the objective is growth, ignore production.
-      if (this.card.objective.reaction.id === null) {
+      if (this.card.objective.reaction === null) {
         return null;
       }
       if (this.card.method === "fba" || this.card.method == "pfba") {
