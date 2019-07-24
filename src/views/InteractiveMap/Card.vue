@@ -36,6 +36,19 @@
       </v-btn>
     </v-toolbar>
     <v-card-title primary-title class="py-2" v-if="isSelected">
+      <v-alert
+        :value="card.solverStatus && card.solverStatus !== 'optimal'"
+        color="error"
+        class="mx-0 my-2 px-3 py-1"
+      >
+        <span v-if="card.solverStatus === 'infeasible'">
+          Simulation failed. The current constraints make it impossible to find
+          an optimal solution.
+        </span>
+        <span v-else>
+          Simulation failed: Solver status is "{{ card.solverStatus }}".
+        </span>
+      </v-alert>
       <v-container fluid class="pa-0">
         <v-layout>
           <v-flex>Organism:</v-flex>
@@ -259,6 +272,11 @@ export default Vue.extend({
       if (this.isSelected) {
         if (this.card.hasSimulationError) {
           return "error";
+        } else if (
+          this.card.solverStatus &&
+          this.card.solverStatus !== "optimal"
+        ) {
+          return "warning";
         } else {
           return "primary";
         }
