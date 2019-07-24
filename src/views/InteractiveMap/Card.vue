@@ -41,13 +41,8 @@
         color="error"
         class="mx-0 my-2 px-3 py-1"
       >
-        <span v-if="card.solverStatus === 'infeasible'">
-          Simulation failed. The current constraints make it impossible to find
-          an optimal solution.
-        </span>
-        <span v-else>
-          Simulation failed: Solver status is "{{ card.solverStatus }}".
-        </span>
+        Simulation failed. There is no valid solution with the current
+        constraints.
       </v-alert>
       <v-container fluid class="pa-0">
         <v-layout>
