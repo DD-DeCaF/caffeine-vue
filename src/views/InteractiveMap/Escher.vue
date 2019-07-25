@@ -201,7 +201,7 @@ export default Vue.extend({
       this.onEscherReady.then(this.setFluxes);
     },
     showDiffFVAScore() {
-      this.onEscherReady.then(this.toggleColorScheme());
+      this.onEscherReady.then(this.toggleColorScheme);
       this.onEscherReady.then(this.setFluxes);
     }
   },
