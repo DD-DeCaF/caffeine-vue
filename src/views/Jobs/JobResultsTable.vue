@@ -688,7 +688,7 @@ export default Vue.extend({
         ...this.prediction.result.diff_fva,
         ...this.prediction.result.opt_gene
       ]
-        .filter(pathway => pathway.biomass > 0)
+        .filter(pathway => pathway.biomass || pathway.product)
         .map((pathway, index) => ({
           id: index,
           ...pathway
