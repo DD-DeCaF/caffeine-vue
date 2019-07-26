@@ -69,12 +69,8 @@
         </v-layout>
       </v-container>
 
-      <!-- Shared between Design cards and DiffFVA -->
-      <v-container
-        v-if="['Design', 'DiffFVA'].includes(card.type)"
-        fluid
-        class="pa-0"
-      >
+      <!-- Simulation results -->
+      <v-container v-if="showSimulationResults" fluid class="pa-0">
         <v-layout>
           <v-flex>Objective:</v-flex>
           <v-flex class="text-xs-right">
@@ -87,21 +83,13 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <v-container
-        v-if="['Design', 'DiffFVA'].includes(card.type)"
-        fluid
-        class="pa-0"
-      >
+      <v-container v-if="showSimulationResults" fluid class="pa-0">
         <v-layout wrap>
           <v-flex>Modifications:</v-flex>
           <v-flex class="text-xs-right">{{ modifications.length }}</v-flex>
         </v-layout>
       </v-container>
-      <v-container
-        v-if="['Design', 'DiffFVA'].includes(card.type)"
-        fluid
-        class="pa-0"
-      >
+      <v-container v-if="showSimulationResults" fluid class="pa-0">
         <v-layout wrap>
           <v-flex v-if="card.objective.reaction"
             >{{ card.objective.reaction.id }} flux:</v-flex
@@ -189,11 +177,8 @@
                 slot="activator"
               >
                 <template v-slot:label>
-                  <div v-if="!showDiffFVAScore">
+                  <div :style="{ color: showDiffFVAScore ? 'black' : null }">
                     Show manipulation targets
-                  </div>
-                  <div v-else>
-                    <div style="color:black">Show manipulation targets</div>
                   </div>
                 </template>
               </v-switch>
@@ -388,6 +373,12 @@ export default Vue.extend({
         ];
       });
       return model;
+    },
+    showSimulationResults() {
+      return (
+        this.card.type === "Design" ||
+        (this.card.type === "DiffFVA" && !this.showDiffFVAScore)
+      );
     },
     isSaveable() {
       return this.card.type == "DataDriven" && this.card.modified;
