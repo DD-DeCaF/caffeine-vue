@@ -1,6 +1,8 @@
 <template>
   <div>
-    <v-layout v-if="card.manipulations">
+    <ModificationsTable :modifications="modifications" readonly />
+
+    <v-layout class="mt-2" v-if="card.manipulations">
       <v-flex class="mr-2">
         <v-card>
           <v-subheader>Overexpression targets</v-subheader>
@@ -54,11 +56,15 @@
 import Vue from "vue";
 import { mapMutations } from "vuex";
 import axios from "axios";
+import ModificationsTable from "@/components/ModificationsTable.vue";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "CardDialogDiffFVA",
-  props: ["card"],
+  components: {
+    ModificationsTable
+  },
+  props: ["card", "modifications"],
   computed: {
     overexpressionTargets() {
       return [...this.card.manipulations].filter(

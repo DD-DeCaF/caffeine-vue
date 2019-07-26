@@ -107,7 +107,7 @@
         {{ modification.upperBound }}
       </td>
 
-      <td>
+      <td v-if="!readonly">
         <v-btn flat icon @click="$emit('clear-modification', modification)">
           <v-icon>delete</v-icon>
         </v-btn>
@@ -121,16 +121,21 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "CardDialogDesign",
-  props: ["modifications"],
-  data: () => ({
-    modificationsHeaders: [
-      { text: "Type", value: "type", sortable: false },
-      { text: "Identification", value: "id", sortable: false },
-      { text: "Details", value: "details", sortable: false },
-      { text: "Remove", value: "remove", sortable: false }
-    ]
-  }),
+  props: {
+    modifications: [Array, Object],
+    readonly: Boolean
+  },
   computed: {
+    modificationsHeaders() {
+      return [
+        { text: "Type", value: "type", sortable: false },
+        { text: "Identification", value: "id", sortable: false },
+        { text: "Details", value: "details", sortable: false },
+        ...(this.readonly
+          ? []
+          : [{ text: "Remove", value: "remove", sortable: false }])
+      ];
+    },
     modificationsWithTableKeys() {
       return this.modifications.map(modification => ({
         tableKey: modification.type + " " + modification.id,
