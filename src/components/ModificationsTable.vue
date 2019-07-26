@@ -2,10 +2,10 @@
   <v-data-table
     hide-actions
     :headers="modificationsHeaders"
-    :items="modifications"
-    item-key="type + id"
+    :items="modificationsWithTableKeys"
+    item-key="tableKey"
   >
-    <template v-slot:items="{ item: modification }">
+    <template v-slot:items="{ item: { modification } }">
       <!-- Added reaction -->
       <td v-if="modification.type === 'added_reaction'">
         Added reaction
@@ -129,6 +129,14 @@ export default Vue.extend({
       { text: "Details", value: "details", sortable: false },
       { text: "Remove", value: "remove", sortable: false }
     ]
-  })
+  }),
+  computed: {
+    modificationsWithTableKeys() {
+      return this.modifications.map(modification => ({
+        tableKey: modification.type + " " + modification.id,
+        modification
+      }));
+    }
+  }
 });
 </script>
