@@ -10,7 +10,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@dd-decaf/escher": "^1.9.1-decaf",
+    "@dd-decaf/escher": "^1.9.2-decaf",
     "@sentry/browser": "^5.2.0",
     "@sentry/integrations": "^5.2.0",
     "axios": "^0.19.0",

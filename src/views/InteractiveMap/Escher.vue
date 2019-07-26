@@ -152,15 +152,6 @@ export default Vue.extend({
         setTimeout(() => {
           this.escherBuilder.load_map(value);
           this.isLoadingMap = false;
-          // Update the map state, since it will be reset whenever the map is
-          // changed. Note that we don't need to update the model.
-          if (this.model && this.model.model_serialized) {
-            this.setReactionAdditions();
-          }
-          this.setReactionKnockouts();
-          this.setGeneKnockouts();
-          this.setConditionData();
-          this.setFluxes();
         }, 10);
       };
 
@@ -201,7 +192,7 @@ export default Vue.extend({
       this.onEscherReady.then(this.setFluxes);
     },
     showDiffFVAScore() {
-      this.onEscherReady.then(this.toggleColorScheme());
+      this.onEscherReady.then(this.toggleColorScheme);
       this.onEscherReady.then(this.setFluxes);
     }
   },
