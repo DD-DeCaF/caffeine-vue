@@ -27,6 +27,14 @@
                 color="primary"
                 :disabled="selected.length < 1"
                 class="mt-3"
+                @click="exportData()"
+                ><v-icon>import_export</v-icon>Export</v-btn
+              >
+              <v-btn
+                flat
+                color="primary"
+                :disabled="selected.length < 1"
+                class="mt-3"
                 @click="visualize()"
                 ><v-icon>share</v-icon>VISUALIZE</v-btn
               >
@@ -1254,6 +1262,32 @@ export default Vue.extend({
         swaps.push(`${manipulation.from[i]} ⟶ ${manipulation.to[i]}`);
       }
       return swaps;
+    },
+    exportData() {
+      const predictionIds = this.selected.map(
+        jobPrediction => jobPrediction.id
+      );
+      axios({
+        url: `${settings.apis.metabolicNinja}/predictions/export`,
+        method: "POST",
+        data: {
+          job_id: this.prediction.id,
+          prediction_ids: predictionIds
+        },
+        responseType: "blob"
+      }).then(response => {
+        // Force browser to download a file
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        const fileName = `Job${this.prediction.id}_${this.$moment().format(
+          "YYYY-MM-DD_HH-mm"
+        )}`;
+        link.setAttribute("download", `${fileName}.zip`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
     }
   }
 });
