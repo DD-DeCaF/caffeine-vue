@@ -23,7 +23,8 @@
           @open-method-help-dialog="showMethodHelpDialog = true"
           @load-data-error="$emit('load-data-error')"
         />
-        <v-icon color="white">edit</v-icon>
+        <v-icon v-if="card.type == 'DiffFVA'" color="white">info</v-icon>
+        <v-icon v-else color="white">edit</v-icon>
       </v-btn>
       <!-- Define the method help dialog here to avoid nested dialogs. -->
       <MethodHelpDialog
