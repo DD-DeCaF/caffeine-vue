@@ -1,120 +1,9 @@
 <template>
   <div>
-    <v-data-table
-      hide-actions
-      :headers="modificationsHeaders"
-      :items="modifications"
-      item-key="type + id"
-    >
-      <template v-slot:items="{ item: modification }">
-        <!-- Added reaction -->
-        <td v-if="modification.type === 'added_reaction'">
-          Added reaction
-        </td>
-        <td v-if="modification.type === 'added_reaction'">
-          <span v-if="modification.name">
-            {{ modification.name }} ({{ modification.id }})
-          </span>
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-        <td v-if="modification.type === 'added_reaction'">
-          <span
-            v-if="modification.reactionString"
-            v-html="modification.reactionString"
-          />
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-
-        <!-- Reaction knockout -->
-        <td v-if="modification.type === 'reaction_knockout'">
-          Reaction knockout
-        </td>
-        <td v-if="modification.type === 'reaction_knockout'">
-          <span v-if="modification.name">
-            {{ modification.name }} ({{ modification.id }})
-          </span>
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-        <td v-if="modification.type === 'reaction_knockout'">
-          <span
-            v-if="modification.reactionString"
-            v-html="modification.reactionString"
-          />
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-
-        <!-- Gene knockout -->
-        <td v-if="modification.type === 'gene_knockout'">
-          Gene knockout
-        </td>
-        <td v-if="modification.type === 'gene_knockout'">
-          <span v-if="modification.name">
-            {{ modification.name }} ({{ modification.id }})
-          </span>
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-        <td v-if="modification.type === 'gene_knockout'">
-          <span v-if="modification.reactions">
-            <p
-              class="mb-0"
-              v-for="reaction in modification.reactions"
-              :key="reaction.id"
-            >
-              {{ reaction.name }} ({{ reaction.id }})
-            </p>
-          </span>
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="12"
-            :width="1"
-          ></v-progress-circular>
-        </td>
-
-        <!-- Edited bounds -->
-        <td v-if="modification.type === 'edited_bounds'">
-          Modified bounds
-        </td>
-        <td v-if="modification.type === 'edited_bounds'">
-          {{ modification.name }} ({{ modification.id }})
-        </td>
-        <td v-if="modification.type === 'edited_bounds'">
-          Bounds set from {{ modification.lowerBound }} to
-          {{ modification.upperBound }}
-        </td>
-
-        <td>
-          <v-btn flat icon @click="clearModification(modification)">
-            <v-icon>delete</v-icon>
-          </v-btn>
-        </td>
-      </template>
-    </v-data-table>
+    <ModificationsTable
+      :modifications="modifications"
+      @clear-modification="clearModification"
+    />
 
     <v-layout wrap>
       <v-flex grow>
@@ -258,22 +147,18 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import ReactionDialog from "@/views/InteractiveMap/ReactionDialog.vue";
+import ModificationsTable from "@/components/ModificationsTable.vue";
 import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
 import { Reaction, Metabolite } from "@/store/modules/interactiveMap";
 
 export default Vue.extend({
   name: "CardDialogDesign",
   components: {
-    ReactionDialog
+    ReactionDialog,
+    ModificationsTable
   },
   props: ["card", "model", "modifications"],
   data: () => ({
-    modificationsHeaders: [
-      { text: "Type", value: "type", sortable: false },
-      { text: "Identification", value: "id", sortable: false },
-      { text: "Details", value: "details", sortable: false },
-      { text: "Remove", value: "remove", sortable: false }
-    ],
     // Knockout reaction
     knockoutReactionItem: null,
     // Knockout gene
