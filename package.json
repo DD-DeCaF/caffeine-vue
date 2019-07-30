@@ -19,6 +19,7 @@
     "material-design-icons-iconfont": "^3.0.3",
     "roboto-fontface": "*",
     "vue": "^2.6.6",
+    "vue-analytics": "^5.17.0",
     "vue-moment": "^4.0.0",
     "vue-router": "^3.0.6",
     "vuetify": "^1.5.14",
