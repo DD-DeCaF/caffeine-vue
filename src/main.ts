@@ -1,8 +1,9 @@
 import Vue from "vue";
+import VueAnalytics from "vue-analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
-import { sentryDSN } from "./utils/settings";
+import { gaTrackingID, sentryDSN } from "./utils/settings";
 import store from "./store/index";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
@@ -42,6 +43,13 @@ if (sentryDSN) {
 }
 
 Vue.use(require("vue-moment"));
+
+if (gaTrackingID) {
+  Vue.use(VueAnalytics, {
+    id: gaTrackingID,
+    router
+  });
+}
 
 Vue.config.productionTip = false;
 
