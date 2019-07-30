@@ -902,7 +902,7 @@ export default Vue.extend({
     visualize() {
       this.isVisualizing = true;
       this.$store.dispatch("models/withFullModel", this.model.id).then(() => {
-        const predictions = this.selected.map(jobPrediction => {
+        const addingPromises = this.selected.map(jobPrediction => {
           const addedReactionIds = [
             ...jobPrediction.heterologous_reactions,
             ...jobPrediction.synthetic_reactions
@@ -912,7 +912,7 @@ export default Vue.extend({
             jobPrediction.method === "PathwayPredictor+DifferentialFVA"
               ? "DiffFVA"
               : "Design";
-          Promise.all(promises).then((addedReactions: any[]) => {
+          return Promise.all(promises).then((addedReactions: any[]) => {
             const card: Card = {
               uuid: uuidv4(),
               name: `Job #${this.prediction.id} design ${jobPrediction.id}`,
@@ -1177,9 +1177,12 @@ export default Vue.extend({
                 `Method ${jobPrediction.method} is not recognized.`
               );
             }
-            this.$router.push({ name: "interactiveMap" });
-            this.isVisualizing = false;
           });
+        });
+
+        Promise.all(addingPromises).then(() => {
+          this.$router.push({ name: "interactiveMap" });
+          this.isVisualizing = false;
         });
       });
     },
