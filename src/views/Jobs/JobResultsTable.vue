@@ -28,7 +28,16 @@
                 :disabled="selected.length < 1"
                 class="mt-3"
                 @click="exportData()"
-                ><v-icon>import_export</v-icon>Export</v-btn
+                ><v-icon v-if="!isExporting">import_export</v-icon
+                ><v-progress-circular
+                  v-if="isExporting"
+                  class="mr-1"
+                  indeterminate
+                  color="primary"
+                  :width="2"
+                  :size="15"
+                ></v-progress-circular
+                >Export</v-btn
               >
               <v-btn
                 flat
@@ -691,6 +700,7 @@ export default Vue.extend({
     showAllKnockouts: false,
     isVisualizing: false,
     isDiffFvaChecked: false,
+    isExporting: false,
     hasExportError: false,
     exportErrorMessage: null
   }),
@@ -1269,6 +1279,7 @@ export default Vue.extend({
       return swaps;
     },
     exportData() {
+      this.isExporting = true;
       const predictionIds = this.selected.map(
         jobPrediction => jobPrediction.id
       );
@@ -1306,6 +1317,7 @@ export default Vue.extend({
           };
           reader.readAsText(error.response.data);
         })
+        .then(() => (this.isExporting = false));
     }
   }
 });
