@@ -1267,11 +1267,14 @@ export default Vue.extend({
       const predictionIds = this.selected.map(
         jobPrediction => jobPrediction.id
       );
+      // Sending HTTP request headers is not possible through links like <a href="...">
+      // This approach is used in order to send Authorization header
       axios({
-        url: `${settings.apis.metabolicNinja}/predictions/export`,
-        method: "POST",
-        data: {
-          job_id: this.prediction.id,
+        url: `${settings.apis.metabolicNinja}/predictions/export/${
+          this.prediction.id
+        }`,
+        method: "GET",
+        params: {
           prediction_ids: predictionIds
         },
         responseType: "blob"
