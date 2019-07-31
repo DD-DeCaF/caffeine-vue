@@ -643,6 +643,9 @@
       Proceed with caution if you want to inspect the predicted pathways and
       knockouts on the interactive map.
     </v-snackbar>
+    <v-snackbar color="error" v-model="hasExportError" bottom :timeout="7000">
+      {{ exportErrorMessage }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -687,7 +690,9 @@ export default Vue.extend({
     showAllManipulations: false,
     showAllKnockouts: false,
     isVisualizing: false,
-    isDiffFvaChecked: false
+    isDiffFvaChecked: false,
+    hasExportError: false,
+    exportErrorMessage: null
   }),
   computed: {
     pathways() {
@@ -1278,19 +1283,29 @@ export default Vue.extend({
           prediction_ids: predictionIds
         },
         responseType: "blob"
-      }).then(response => {
-        // Force browser to download a file
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        const fileName = `Job${this.prediction.id}_${this.$moment().format(
-          "YYYY-MM-DD_HH-mm"
-        )}`;
-        link.setAttribute("download", `${fileName}.zip`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
+      })
+        .then(response => {
+          // Force browser to download a file
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          const fileName = `Job${this.prediction.id}_${this.$moment().format(
+            "YYYY-MM-DD_HH-mm"
+          )}`;
+          link.setAttribute("download", `${fileName}.zip`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          this.isExporting = false;
+        })
+        .catch(error => {
+          let reader = new FileReader();
+          reader.onload = () => {
+            this.exportErrorMessage = reader.result;
+            this.hasExportError = true;
+          };
+          reader.readAsText(error.response.data);
+        })
     }
   }
 });
