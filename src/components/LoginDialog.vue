@@ -25,13 +25,11 @@
             size="80"
           ></v-progress-circular>
         </div>
-        <v-container grid-list-lg text-md-center v-if="!isLoading">
+        <v-container grid-list-lg text-md-center v-if="!isLoading" pb-2>
           <v-layout fill-height row wrap>
             <v-flex md6>
               <v-layout fill-height column>
-                <v-flex>
-                  Log in with your social account
-                </v-flex>
+                Log in with your social account
                 <v-flex>
                   <v-btn
                     color="black"
@@ -60,12 +58,7 @@
             </v-flex>
             <v-flex md6>
               <v-layout fill-height column>
-                <v-flex>
-                  Or you can
-                  <a href="mailto:niso@biosustain.dtu.dk">contact us</a> and we
-                  provide you with credentials
-                </v-flex>
-                <v-flex>
+                <v-flex mt-3>
                   <v-form ref="form" @keyup.native.enter="onEnter">
                     <v-text-field
                       v-model="email.value"
@@ -86,6 +79,15 @@
                     ></v-text-field>
                   </v-form>
                 </v-flex>
+                <v-btn
+                  @click.stop="isRegisterDialogVisible = true"
+                  flat
+                  small
+                  color="primary"
+                  >Create an account<RegisterDialog
+                    v-model="isRegisterDialogVisible"
+                    @register-success="onRegister"
+                /></v-btn>
               </v-layout>
             </v-flex>
           </v-layout>
@@ -136,6 +138,15 @@
     >
       You are now logged out.
     </v-snackbar>
+
+    <v-snackbar
+      color="success"
+      v-model="isRegisterSuccess"
+      bottom
+      :timeout="6000"
+    >
+      Yon have been successfully registered and logged in.
+    </v-snackbar>
   </div>
 </template>
 
@@ -147,9 +158,13 @@ import * as settings from "@/utils/settings";
 import { JWT } from "@/store/modules/session";
 import firebase from "firebase/app";
 import "firebase/auth";
+import RegisterDialog from "@/components/RegisterDialog.vue";
 
 export default Vue.extend({
   name: "LoginDialog",
+  components: {
+    RegisterDialog
+  },
   data: () => ({
     isLoginSuccess: false,
     isLogoutSuccess: false,
@@ -157,6 +172,8 @@ export default Vue.extend({
     isLoading: false,
     isLoginDialogVisible: false,
     hasLoginError: false,
+    isRegisterDialogVisible: false,
+    isRegisterSuccess: false,
     email: {
       value: null,
       rules: [
@@ -251,6 +268,10 @@ export default Vue.extend({
         .catch(error => {
           this.hasLoginError = true;
         });
+    },
+    onRegister() {
+      this.isLoginDialogVisible = false;
+      this.isRegisterSuccess = true;
     }
   }
 });
