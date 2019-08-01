@@ -49,7 +49,9 @@
                         ]"
                         prepend-icon="lock"
                         label="Password"
-                        type="password"
+                        :type="passwordFieldType"
+                        :append-icon="visibilityIcon"
+                        @click:append="switchVisibility()"
                       ></v-text-field>
                       <v-text-field
                         v-model="confirmedPassword.value"
@@ -62,7 +64,9 @@
                         ]"
                         prepend-icon="lock"
                         label="Confirm password"
-                        type="password"
+                        :type="passwordFieldType"
+                        :append-icon="visibilityIcon"
+                        @click:append="switchVisibility()"
                       ></v-text-field>
                     </v-form>
                   </v-flex>
@@ -93,7 +97,12 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar color="error" v-model="isUserRegisterError" bottom :timeout="10000">
+    <v-snackbar
+      color="error"
+      v-model="isUserRegisterError"
+      bottom
+      :timeout="10000"
+    >
       {{ userRegisterErrorMessage }}.
     </v-snackbar>
   </div>
@@ -115,6 +124,8 @@ export default Vue.extend({
     isUserRegisterError: false,
     isLoading: false,
     userRegisterErrorMessage: null,
+    passwordFieldType: "password",
+    visibilityIcon: "visibility_off",
     firstName: {
       value: null,
       rules: [(v: string) => !!v || "First name is required"]
@@ -136,7 +147,7 @@ export default Vue.extend({
           return "Enter your password";
         }
         if (v.length < 8) {
-          return "Password should be at least 8 characters long"
+          return "Password should be at least 8 characters long";
         }
         return true;
       }
@@ -189,6 +200,14 @@ export default Vue.extend({
         return "Passwords don't match";
       }
       return true;
+    },
+    switchVisibility() {
+      this.passwordFieldType =
+        this.passwordFieldType === "password" ? "text" : "password";
+      this.visibilityIcon =
+        this.visibilityIcon === "visibility_off"
+          ? "visibility"
+          : "visibility_off";
     }
   }
 });
