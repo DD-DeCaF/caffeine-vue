@@ -14,63 +14,59 @@
           <v-container grid-list-lg text-md-center>
             <v-layout fill-height row wrap>
               <v-flex>
-                <v-layout fill-height column>
-                  <v-flex>
-                    <v-form ref="form" v-model="isValid">
-                      <v-text-field
-                        v-model="firstName.value"
-                        :rules="firstName.rules"
-                        prepend-icon="perm_identity"
-                        label="First name"
-                        type="text"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="lastName.value"
-                        :rules="lastName.rules"
-                        prepend-icon="perm_identity"
-                        label="Last name"
-                        type="text"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="email.value"
-                        :rules="email.rules"
-                        prepend-icon="email"
-                        label="Email"
-                        type="text"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="password.value"
-                        :rules="[
-                          password.rules,
-                          passwordConfirmationRules(
-                            password.value,
-                            confirmedPassword.value
-                          )
-                        ]"
-                        prepend-icon="lock"
-                        label="Password"
-                        :type="passwordFieldType"
-                        :append-icon="visibilityIcon"
-                        @click:append="switchVisibility()"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="confirmedPassword.value"
-                        :rules="[
-                          confirmedPassword.rules,
-                          passwordConfirmationRules(
-                            password.value,
-                            confirmedPassword.value
-                          )
-                        ]"
-                        prepend-icon="lock"
-                        label="Confirm password"
-                        :type="passwordFieldType"
-                        :append-icon="visibilityIcon"
-                        @click:append="switchVisibility()"
-                      ></v-text-field>
-                    </v-form>
-                  </v-flex>
-                </v-layout>
+                <v-form ref="form" v-model="isValid">
+                  <v-text-field
+                    v-model="firstName.value"
+                    :rules="firstName.rules"
+                    prepend-icon="perm_identity"
+                    label="First name"
+                    type="text"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="lastName.value"
+                    :rules="lastName.rules"
+                    prepend-icon="perm_identity"
+                    label="Last name"
+                    type="text"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="email.value"
+                    :rules="email.rules"
+                    prepend-icon="email"
+                    label="Email"
+                    type="text"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="password.value"
+                    :rules="[
+                      password.rules,
+                      passwordConfirmationRules(
+                        password.value,
+                        confirmedPassword.value
+                      )
+                    ]"
+                    prepend-icon="lock"
+                    label="Password"
+                    :type="passwordFieldType"
+                    :append-icon="visibilityIcon"
+                    @click:append="switchVisibility()"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="confirmedPassword.value"
+                    :rules="[
+                      confirmedPassword.rules,
+                      passwordConfirmationRules(
+                        password.value,
+                        confirmedPassword.value
+                      )
+                    ]"
+                    prepend-icon="lock"
+                    label="Confirm password"
+                    :type="passwordFieldType"
+                    :append-icon="visibilityIcon"
+                    @click:append="switchVisibility()"
+                  ></v-text-field>
+                </v-form>
               </v-flex>
             </v-layout>
           </v-container>
@@ -125,7 +121,7 @@ export default Vue.extend({
     isLoading: false,
     userRegisterErrorMessage: null,
     passwordFieldType: "password",
-    visibilityIcon: "visibility_off",
+    visibilityIcon: "visibility",
     firstName: {
       value: null,
       rules: [(v: string) => !!v || "First name is required"]
@@ -143,7 +139,7 @@ export default Vue.extend({
     password: {
       value: null,
       rules: v => {
-        if (!v && v !== 0) {
+        if (!v) {
           return "Enter your password";
         }
         if (v.length < 8) {
@@ -155,7 +151,7 @@ export default Vue.extend({
     confirmedPassword: {
       value: null,
       rules: v => {
-        if (!v && v !== 0) {
+        if (!v) {
           return "Confirm your password";
         }
         return true;
