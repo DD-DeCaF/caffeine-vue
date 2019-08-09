@@ -30,6 +30,7 @@ export default new Vuex.Store({
     postDataError: null,
     deleteDataError: null,
     unauthorizedError: null,
+    passwordResetSuccess: false,
     isDialogVisible: {
       loader: false
     },
@@ -56,6 +57,9 @@ export default new Vuex.Store({
     },
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
+    },
+    setPasswordResetSuccess(state) {
+      state.passwordResetSuccess = true;
     }
   },
   actions: {
