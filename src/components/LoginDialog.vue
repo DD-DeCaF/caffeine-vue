@@ -79,6 +79,9 @@
                     ></v-text-field>
                   </v-form>
                 </v-flex>
+                <v-btn flat small color="primary" @click="forgotPassword()"
+                  >Forgot your password?</v-btn
+                >
                 <v-btn
                   @click.stop="isRegisterDialogVisible = true"
                   flat
@@ -159,6 +162,7 @@ import { JWT } from "@/store/modules/session";
 import firebase from "firebase/app";
 import "firebase/auth";
 import RegisterDialog from "@/components/RegisterDialog.vue";
+import ResetRequest from "@/views/ResetRequest.vue";
 
 export default Vue.extend({
   name: "LoginDialog",
@@ -272,6 +276,10 @@ export default Vue.extend({
     onRegister() {
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
+    },
+    forgotPassword() {
+      this.isLoginDialogVisible = false;
+      this.$router.push({ name: "resetRequest" });
     }
   }
 });
