@@ -11,6 +11,8 @@ import JobDetails from "./views/Jobs/JobDetails.vue";
 import Maps from "./views/Maps.vue";
 import Models from "./views/Models.vue";
 import Projects from "./views/Projects.vue";
+import ResetRequest from "./views/ResetRequest.vue";
+import PasswordReset from "./views/PasswordReset.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import TermsOfService from "./views/TermsOfService.vue";
 import NotFound from "./views/NotFound.vue";
@@ -83,6 +85,16 @@ export default new Router({
       name: "projects",
       component: Projects,
       beforeEnter: authGuard
+    },
+    {
+      path: "/password-reset",
+      name: "resetRequest",
+      component: ResetRequest
+    },
+    {
+      path: "/password-reset/:token",
+      name: "passwordReset",
+      component: PasswordReset
     },
     {
       path: "/privacy-policy",
