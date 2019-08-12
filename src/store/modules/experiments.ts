@@ -14,16 +14,20 @@ export interface ExperimentItem {
 export default {
   namespaced: true,
   state: {
-    experiments: []
+    experiments: [],
+    experimentsPromise: null
   },
   mutations: {
     setExperiments(state, experiments: ExperimentItem[]) {
       state.experiments = experiments;
+    },
+    setExperimentsPromise(state, experimentsPromise) {
+      state.experimentsPromise = experimentsPromise;
     }
   },
   actions: {
     fetchExperiments({ commit, dispatch }) {
-      axios
+      const experimentsPromise = axios
         .get(`${settings.apis.warehouse}/experiments`)
         .then((response: AxiosResponse<ExperimentItem[]>) => {
           commit("setExperiments", response.data);
@@ -31,6 +35,7 @@ export default {
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
         });
+      commit("setExperimentsPromise", experimentsPromise);
     }
   }
 };
