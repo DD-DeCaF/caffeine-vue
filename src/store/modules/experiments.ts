@@ -23,6 +23,11 @@ export default {
     },
     setExperimentsPromise(state, experimentsPromise) {
       state.experimentsPromise = experimentsPromise;
+    },
+    delete(state, ids) {
+      state.experiments = state.experiments.filter(
+        experiment => !ids.includes(experiment.id)
+      );
     }
   },
   actions: {
