@@ -320,7 +320,7 @@ export default Vue.extend({
         return this.$store.state.passwordResetSuccess;
       },
       set() {
-        this.$store.commit("setPasswordResetSuccess");
+        this.$store.commit("setPasswordResetSuccess", false);
       }
     },
     availableProjects(): ColoredProjectItem[] {

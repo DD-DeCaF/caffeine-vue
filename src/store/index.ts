@@ -58,8 +58,8 @@ export default new Vuex.Store({
     toggleDialog(state, dialog) {
       state.isDialogVisible[dialog] = !state.isDialogVisible[dialog];
     },
-    setPasswordResetSuccess(state) {
-      state.passwordResetSuccess = true;
+    setPasswordResetSuccess(state, value: boolean) {
+      state.passwordResetSuccess = value;
     }
   },
   actions: {

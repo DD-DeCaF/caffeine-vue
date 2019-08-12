@@ -138,7 +138,7 @@ export default Vue.extend({
         })
         .then((response: AxiosResponse) => {
           this.$router.push({ name: "home" });
-          this.$store.commit("setPasswordResetSuccess");
+          this.$store.commit("setPasswordResetSuccess", true);
         })
         .catch(error => {
           this.isTokenInvalid = true;
