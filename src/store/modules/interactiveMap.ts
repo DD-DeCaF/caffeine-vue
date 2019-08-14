@@ -1,5 +1,6 @@
 import Vue from "vue";
 import axios from "axios";
+import he from "he";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
 import { OrganismItem } from "./organisms";
@@ -197,10 +198,12 @@ export default {
         axios
           .get(`${settings.apis.bigg}/universal/reactions/${reactionId}`)
           .then(response => {
+            // Decode &#8652; into ⇌ instead of using risky `v-html`.
+            const reactionString = he.decode(response.data.reaction_string);
             resolve({
               id: response.data.bigg_id,
               name: response.data.name,
-              reactionString: response.data.reaction_string,
+              reactionString: reactionString,
               metabolites: response.data.metabolites.map(m => ({
                 id: m.bigg_id,
                 name: m.name,
