@@ -83,7 +83,9 @@ export default Vue.extend({
     requestResetLink() {
       this.isRequestingResetLink = true;
       axios
-        .post(`${settings.apis.iam}/reset_request`, { email: this.email.value })
+        .post(`${settings.apis.iam}/password/reset-request`, {
+          email: this.email.value
+        })
         .then((response: AxiosResponse) => {
           this.resetRequestSuccessMessage = response.data;
           this.isResetRequestSuccess = true;

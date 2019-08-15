@@ -110,7 +110,7 @@ export default Vue.extend({
     this.token = this.$route.params.token;
     // Verify token validity
     axios
-      .get(`${settings.apis.iam}/password_reset/${this.token}`)
+      .get(`${settings.apis.iam}/password/reset/${this.token}`)
       .catch(error => {
         this.isTokenInvalid = true;
       });
@@ -133,7 +133,7 @@ export default Vue.extend({
     changePassword() {
       this.isRequestingPasswordChange = true;
       axios
-        .post(`${settings.apis.iam}/password_reset/${this.token}`, {
+        .post(`${settings.apis.iam}/password/reset/${this.token}`, {
           password: this.password.value
         })
         .then((response: AxiosResponse) => {
