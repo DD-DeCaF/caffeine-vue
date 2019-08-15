@@ -55,7 +55,7 @@ export default Vue.extend({
       type: String,
       required: true,
       validator: (value: string) =>
-        ["designs", "maps", "models", "projects"].includes(value)
+        ["designs", "maps", "models", "projects", "experiments"].includes(value)
     }
   },
   data: () => ({
@@ -80,7 +80,8 @@ export default Vue.extend({
         designs: "designStorage",
         maps: "maps",
         models: "modelStorage",
-        projects: "iam"
+        projects: "iam",
+        experiments: "warehouse"
       }[this.itemsType];
 
       const ids = this.items.map(item => item.id);

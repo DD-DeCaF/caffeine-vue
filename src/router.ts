@@ -11,6 +11,7 @@ import JobDetails from "./views/Jobs/JobDetails.vue";
 import Maps from "./views/Maps.vue";
 import Models from "./views/Models.vue";
 import Projects from "./views/Projects.vue";
+import Experiments from "./views/Experiments.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import TermsOfService from "./views/TermsOfService.vue";
 import NotFound from "./views/NotFound.vue";
@@ -83,6 +84,11 @@ export default new Router({
       name: "projects",
       component: Projects,
       beforeEnter: authGuard
+    },
+    {
+      path: "/experiments",
+      name: "experiments",
+      component: Experiments
     },
     {
       path: "/privacy-policy",
