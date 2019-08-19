@@ -20,6 +20,7 @@ import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
 import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
+import "tabulator-tables/dist/css/bootstrap/tabulator_bootstrap4.min.css";
 
 // Temporarily remove old service workers until we re-introduce them.
 if ("serviceWorker" in navigator) {
