@@ -23,7 +23,8 @@
                 :type="passwordFieldType"
                 :append-icon="visibilityIcon"
                 @click:append="switchVisibility()"
-              ></v-text-field>
+              >
+              </v-text-field>
               <v-text-field
                 label="Confirm password"
                 v-model="confirmedPassword.value"
@@ -39,8 +40,10 @@
                 :type="passwordFieldType"
                 :append-icon="visibilityIcon"
                 @click:append="switchVisibility()"
-              ></v-text-field></v-form
-            ><v-layout column align-center>
+              >
+              </v-text-field>
+            </v-form>
+            <v-layout column align-center>
               <v-flex>
                 <v-btn
                   color="primary"
@@ -49,8 +52,8 @@
                   @click="changePassword()"
                   >Change password</v-btn
                 >
-              </v-flex></v-layout
-            >
+              </v-flex>
+            </v-layout>
           </div>
           <v-layout column align-center
             ><v-flex
@@ -58,9 +61,13 @@
                 v-if="isRequestingPasswordChange"
                 indeterminate
                 color="primary"
-                size="170"
-              ></v-progress-circular></v-flex></v-layout></v-card
-      ></v-flex>
+                size="80"
+              >
+              </v-progress-circular>
+            </v-flex>
+          </v-layout>
+        </v-card>
+      </v-flex>
       <v-snackbar color="error" v-model="isTokenInvalid" :timeout="9000" bottom>
         This link is no longer valid. Please request another password reset
         email.

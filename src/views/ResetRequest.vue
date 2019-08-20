@@ -91,7 +91,12 @@ export default Vue.extend({
           this.isResetRequestSuccess = true;
         })
         .catch(error => {
-          this.resetRequestErrorMessage = error.response.data;
+          if (error.response) {
+            this.resetRequestErrorMessage = error.response.data;
+          } else {
+            this.resetRequestErrorMessage = `We were unable to send the email. 
+              Please check your internet connection, or try again in a few minutes.`;
+          }
           this.hasResetRequestError = true;
         })
         .then(() => (this.isRequestingResetLink = false));
