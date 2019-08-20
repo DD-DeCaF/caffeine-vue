@@ -243,6 +243,14 @@
       <v-snackbar v-model="hotreloadStatus" :timeout="6000" top right>
         Hotreload status: {{ hotreloadStatus }}
       </v-snackbar>
+
+      <v-snackbar
+        color="success"
+        v-model="isPasswordResetSuccess"
+        :timeout="9000"
+      >
+        Your password has been successfully changed.
+      </v-snackbar>
     </v-app>
   </div>
 </template>
@@ -315,6 +323,14 @@ export default Vue.extend({
       set() {
         // Ignore passed value argument.
         this.$store.commit("setUnauthorizedError", null);
+      }
+    },
+    isPasswordResetSuccess: {
+      get() {
+        return this.$store.state.passwordResetSuccess;
+      },
+      set() {
+        this.$store.commit("setPasswordResetSuccess", false);
       }
     },
     availableProjects(): ColoredProjectItem[] {

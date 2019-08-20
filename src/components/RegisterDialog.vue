@@ -10,7 +10,7 @@
           ></v-progress-circular>
         </div>
         <div v-if="!isLoading">
-          <div class="pl-4 pt-4 title">Register form</div>
+          <div class="pl-4 pt-4 title">Registration</div>
           <v-container grid-list-lg text-md-center>
             <v-layout fill-height row wrap>
               <v-flex>
