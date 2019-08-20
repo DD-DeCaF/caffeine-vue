@@ -24,7 +24,7 @@ export default {
       state.strains = strains;
     },
     addStrain(state, strain: StrainItem) {
-      state.strain.push(strain);
+      state.strains.push(strain);
     },
     setStrainsPromise(state, strainsPromise) {
       state.organismsPromise = strainsPromise;

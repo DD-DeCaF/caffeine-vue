@@ -1,23 +1,27 @@
 <template>
-  <v-dialog v-model="isDialogVisible" full-width>
-    <v-card class="pa-3">
-      <v-btn color="primary" @click="addRow()">
-        Add row
-      </v-btn>
-      <div ref="table"></div>
-      <v-card-actions>
-        <v-spacer></v-spacer>
+  <div>
+    <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
+    <v-dialog v-model="isDialogVisible" full-width>
+      <v-card class="pa-4">
+        <div class="display-1 mb-2">Conditions</div>
+        <v-navigation-drawer absolute permanent right> </v-navigation-drawer>
+        <v-btn color="primary" small @click="addRow()">
+          Add row
+        </v-btn>
+        <div ref="table"></div>
+        <!-- <v-card-actions> -->
+        <!-- <v-spacer></v-spacer> -->
         <v-btn color="secondary" flat @click="isDialogVisible = false">
           Cancel
         </v-btn>
         <v-btn color="primary">
           Submit
         </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+        <!-- </v-card-actions> -->
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
-
 
 <script lang="ts">
 import Vue from "vue";
@@ -33,11 +37,23 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    tabulator: null
-    // data for table to display
-    // tableData: [{}]
+    tabulator: null,
+    tableData: [{ name: "name", strain: "strain", medium: "medium" }],
+    isNewStrainDialogVisible: false,
+    selectedRow: null,
+    selectedCell: null
   }),
   computed: {
+    availableStrains() {
+      return this.$store.state.strains.strains;
+    },
+    strains() {
+      const result = { "New Strain": "New Strain" };
+      this.availableStrains.forEach(
+        strain => (result[strain.id] = strain.name)
+      );
+      return result;
+    },
     isDialogVisible: {
       get() {
         return this.value;
@@ -47,30 +63,47 @@ export default Vue.extend({
       }
     }
   },
-  // watch: {
-  //   // Update table if data changes
-  //   tableData: {
-  //     handler: function(newData) {
-  //       this.tabulator.replaceData(newData);
-  //     },
-  //     deep: true
-  //   }
-  // },
+  watch: {
+    // Update table if data changes
+    tableData: {
+      handler: function(newData) {
+        this.tabulator.replaceData(newData);
+      },
+      deep: true
+    }
+  },
   mounted() {
     this.tabulator = new Tabulator(this.$refs.table, {
-      // data: this.tableData,
+      data: this.tableData,
       reactiveData: true,
       clipboard: true,
       clipboardPasteAction: "replace",
+      height: 500,
       columns: [
-        { title: "Name", field: "name", editor: "input" },
-        { title: "Protocol", field: "protocol", editor: true },
+        { title: "Name", field: "name" },
         {
-          title: "Temperature",
-          field: "temperature",
-          editor: true
+          title: "Strain",
+          field: "strain",
+          editor: "autocomplete",
+          editorParams: {
+            showListOnEmpty: true,
+            allowEmpty: true,
+            values: this.strains,
+            sortValuesList: "asc"
+          },
+          formatter: "lookup",
+          formatterParams: this.strains,
+          cellEdited: cell => {
+            if (cell.getValue() === "New Strain") {
+              cell.setValue("");
+              this.selectedRow = cell.getRow();
+              this.selectedCell = cell;
+              this.isNewStrainDialogVisible = true;
+            }
+          }
         },
-        { title: "Aerobic", field: "aerobic", editor: true }
+        { title: "Medium", field: "medium" },
+        { title: "Date", field: "date" }
       ]
     });
   },
@@ -78,6 +111,12 @@ export default Vue.extend({
     addRow() {
       this.tabulator.addRow({});
       console.log(this.tabulator.getData());
+    },
+    passStrain(strain) {
+      const strainToAdd = {};
+      strainToAdd[strain.id] = strain.name;
+      Object.assign(this.strains, strainToAdd);
+      this.selectedCell.setValue(strain.id);
     }
   }
 });
