@@ -13,6 +13,7 @@ import Models from "./views/Models.vue";
 import Projects from "./views/Projects.vue";
 import ResetRequest from "./views/ResetRequest.vue";
 import PasswordReset from "./views/PasswordReset.vue";
+import Experiments from "./views/Experiments.vue";
 import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 import TermsOfService from "./views/TermsOfService.vue";
 import NotFound from "./views/NotFound.vue";
@@ -95,6 +96,11 @@ export default new Router({
       path: "/password-reset/:token",
       name: "passwordReset",
       component: PasswordReset
+    },
+    {
+      path: "/experiments",
+      name: "experiments",
+      component: Experiments
     },
     {
       path: "/privacy-policy",

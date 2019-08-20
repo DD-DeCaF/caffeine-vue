@@ -190,6 +190,16 @@
                 <v-list-tile-title>Models</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
+
+            <v-list-tile to="/experiments">
+              <v-list-tile-action>
+                <v-icon>highlight</v-icon>
+              </v-list-tile-action>
+
+              <v-list-tile-content>
+                <v-list-tile-title>Experiments</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
           </v-list>
           <v-spacer></v-spacer>
           <div>

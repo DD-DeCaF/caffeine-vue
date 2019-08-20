@@ -22,10 +22,9 @@
         ></v-progress-circular>
       </td>
       <td v-if="modification.type === 'added_reaction'">
-        <span
-          v-if="modification.reactionString"
-          v-html="modification.reactionString"
-        />
+        <span v-if="modification.reactionString">
+          {{ modification.reactionString }}
+        </span>
         <v-progress-circular
           v-else
           indeterminate
@@ -50,10 +49,9 @@
         ></v-progress-circular>
       </td>
       <td v-if="modification.type === 'reaction_knockout'">
-        <span
-          v-if="modification.reactionString"
-          v-html="modification.reactionString"
-        />
+        <span v-if="modification.reactionString">
+          {{ modification.reactionString }}
+        </span>
         <v-progress-circular
           v-else
           indeterminate
