@@ -41,7 +41,6 @@ export default Vue.extend({
     tableData: [{ name: "name", strain: "strain", medium: "medium" }],
     isNewStrainDialogVisible: false,
     selectedRow: null,
-    selectedCell: null
   }),
   computed: {
     availableStrains() {
@@ -101,7 +100,6 @@ export default Vue.extend({
             if (cell.getValue() === "New Strain") {
               cell.setValue("");
               this.selectedRow = cell.getRow();
-              this.selectedCell = cell;
               this.isNewStrainDialogVisible = true;
             }
           }
@@ -117,10 +115,9 @@ export default Vue.extend({
       console.log(this.tabulator.getData());
     },
     passStrain(strain) {
-      const strainToAdd = {};
-      strainToAdd[strain.id] = strain.name;
-      Object.assign(this.strains, strainToAdd);
-      this.selectedCell.setValue(strain.id);
+      this.selectedRow.update({
+        strain: strain.id,
+      });
     }
   }
 });
