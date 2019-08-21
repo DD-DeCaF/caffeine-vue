@@ -282,7 +282,9 @@ export default Vue.extend({
         return;
       }
       this.escherBuilder.set_highlight_reactions(
-        this.card.conditionData.measurements.map(m => m.id)
+        this.card.conditionData.measurements
+          .filter(m => m.type === "reaction")
+          .map(m => m.id)
       );
     },
     setFluxes() {
