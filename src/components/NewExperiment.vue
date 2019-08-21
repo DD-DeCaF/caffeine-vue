@@ -4,11 +4,23 @@
     <v-dialog v-model="isDialogVisible" full-width>
       <v-card class="pa-4">
         <div class="display-1 mb-2">Conditions</div>
-        <v-navigation-drawer absolute permanent right> </v-navigation-drawer>
+        <v-navigation-drawer absolute permanent right>
+          <v-layout column>
+            <v-flex>
+              <div class="body-2">Experiment name:</div>
+            </v-flex>
+            <v-flex>
+              <v-text-field
+                v-model="experimentName"
+                class="mx-2"
+              ></v-text-field>
+            </v-flex>
+          </v-layout>
+        </v-navigation-drawer>
         <v-btn color="primary" small @click="addRow()">
           Add row
         </v-btn>
-        <div ref="table"></div>
+        <div ref="table" class="custom-tabulator"></div>
         <!-- <v-card-actions> -->
         <!-- <v-spacer></v-spacer> -->
         <v-btn color="secondary" flat @click="isDialogVisible = false">
@@ -25,6 +37,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import VDatePicker from "vuetify/lib/components/VDatePicker/VDatePicker";
 
 var Tabulator = require("tabulator-tables");
 
@@ -38,9 +51,10 @@ export default Vue.extend({
   },
   data: () => ({
     tabulator: null,
-    tableData: [{ name: "name", strain: {id: "strain", name: "strain"}, medium: "medium" }],
+    tableData: [{ name: null, strain: { id: null, name: null }, medium: null }],
     isNewStrainDialogVisible: false,
     selectedRow: null,
+    experimentName: null
   }),
   computed: {
     availableStrains() {
@@ -81,7 +95,7 @@ export default Vue.extend({
       clipboardPasteAction: "replace",
       height: 500,
       columns: [
-        { title: "Name", field: "name" },
+        { title: "Name", field: "name", editor: true },
         {
           title: "Strain",
           field: "strain",
@@ -106,7 +120,8 @@ export default Vue.extend({
               }
             }
           }),
-          formatter: cell => this.tabulator.modules.format.sanitizeHTML(cell.getValue().name),
+          formatter: cell =>
+            this.tabulator.modules.format.sanitizeHTML(cell.getValue().name),
           cellEditing: cell => {
             // Clear input without committing empty value.
             cell._cell.value = "";
@@ -118,19 +133,38 @@ export default Vue.extend({
             }
           }
         },
-        { title: "Medium", field: "medium" },
-        { title: "Date", field: "date" }
+        { title: "Medium", field: "medium", editor: true },
+        {
+          title: "Date",
+          field: "date",
+          editor: (cell, onRendered, success, cancel, editorParams) => {
+            const DatePickerComponentClass = Vue.extend(VDatePicker);
+            const instance = new DatePickerComponentClass({
+              propsData: { color: "purple",
+              class: "vue-date-picker" },
+              listeners: {
+                'input': success
+              }
+            });
+            // instance.$slots["prepend-item"] = [`<v-btn>New project</v-btn>`];
+            return instance.$mount().$el;
+          }
+        }
       ]
     });
   },
   methods: {
     addRow() {
-      this.tabulator.addRow({});
+      this.tabulator.addRow({
+        name: null,
+        strain: { id: null, name: null },
+        medium: null
+      });
       console.log(this.tabulator.getData());
     },
     passStrain(strain) {
       this.selectedRow.update({
-        strain: strain,
+        strain: strain
       });
     }
   }
@@ -138,6 +172,12 @@ export default Vue.extend({
 </script>
 
 <style>
+.custom-tabulator .tabulator-cell[tabulator-field='date'] {
+  overflow: visible;
+}
+.vue-date-picker {
+  z-index: 9000;
+}
 .autocomplete--new-strain {
   min-height: 33px;
   min-width: 120px;
