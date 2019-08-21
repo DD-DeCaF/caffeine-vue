@@ -91,10 +91,9 @@ export default Vue.extend({
             allowEmpty: true,
             values: this.strains,
             sortValuesList: "asc",
-            listItemFormatter: value => value.name
+            listItemFormatter: value => this.tabulator.modules.format.sanitizeHTML(value.name)
           }),
-          // TODO: XSS vulnerability
-          formatter: cell => cell.getValue().name,
+          formatter: cell => this.tabulator.modules.format.sanitizeHTML(cell.getValue().name),
           cellEditing: cell => {
             // Clear input without committing empty value.
             cell._cell.value = "";
