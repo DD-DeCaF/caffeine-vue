@@ -50,7 +50,7 @@ export default Vue.extend({
       return [
         {
           id: "New Strain",
-          name: "New Strain"
+          name: ""
         },
         ...this.availableStrains
       ];
@@ -91,7 +91,20 @@ export default Vue.extend({
             allowEmpty: true,
             values: this.strains,
             sortValuesList: "asc",
-            listItemFormatter: value => this.tabulator.modules.format.sanitizeHTML(value.name)
+            listItemFormatter: value => {
+              if (value.id === "New Strain") {
+                return `
+                  <div class="autocomplete--new-strain">
+                    <i class="v-icon material-icons theme--light primary--text">
+                      add_circle
+                    </i>
+                    New Strain
+                  </div>
+                `;
+              } else {
+                return this.tabulator.modules.format.sanitizeHTML(value.name);
+              }
+            }
           }),
           formatter: cell => this.tabulator.modules.format.sanitizeHTML(cell.getValue().name),
           cellEditing: cell => {
@@ -123,3 +136,15 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style>
+.autocomplete--new-strain {
+  min-height: 33px;
+  min-width: 120px;
+  border-bottom: 1px #000 solid;
+}
+.autocomplete--new-strain .v-icon {
+  padding-right: 3px;
+  margin-bottom: -2px;
+}
+</style>
