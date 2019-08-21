@@ -382,7 +382,7 @@ export default Vue.extend({
       );
     },
     isSaveable() {
-      return this.card.type == "DataDriven" && this.card.modified;
+      return this.card.type !== "DataDriven" && this.card.modified;
     },
     isSaveTooltipVisible() {
       return (
