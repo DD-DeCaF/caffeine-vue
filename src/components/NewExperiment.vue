@@ -38,7 +38,7 @@ export default Vue.extend({
   },
   data: () => ({
     tabulator: null,
-    tableData: [{ name: "name", strain: "strain", medium: "medium" }],
+    tableData: [{ name: "name", strain: {id: "strain", name: "strain"}, medium: "medium" }],
     isNewStrainDialogVisible: false,
     selectedRow: null,
   }),
@@ -47,11 +47,13 @@ export default Vue.extend({
       return this.$store.state.strains.strains;
     },
     strains() {
-      const result = { "New Strain": "New Strain" };
-      this.availableStrains.forEach(
-        strain => (result[strain.id] = strain.name)
-      );
-      return result;
+      return [
+        {
+          id: "New Strain",
+          name: "New Strain"
+        },
+        ...this.availableStrains
+      ];
     },
     isDialogVisible: {
       get() {
@@ -88,17 +90,17 @@ export default Vue.extend({
             showListOnEmpty: true,
             allowEmpty: true,
             values: this.strains,
-            sortValuesList: "asc"
+            sortValuesList: "asc",
+            listItemFormatter: value => value.name
           }),
-          formatter: "lookup",
-          formatterParams: () => this.strains,
+          // TODO: XSS vulnerability
+          formatter: cell => cell.getValue().name,
           cellEditing: cell => {
             // Clear input without committing empty value.
             cell._cell.value = "";
           },
           cellEdited: cell => {
-            if (cell.getValue() === "New Strain") {
-              cell.setValue("");
+            if (cell.getValue().id === "New Strain") {
               this.selectedRow = cell.getRow();
               this.isNewStrainDialogVisible = true;
             }
@@ -116,7 +118,7 @@ export default Vue.extend({
     },
     passStrain(strain) {
       this.selectedRow.update({
-        strain: strain.id,
+        strain: strain,
       });
     }
   }
