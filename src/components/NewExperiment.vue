@@ -85,14 +85,14 @@ export default Vue.extend({
           title: "Strain",
           field: "strain",
           editor: "autocomplete",
-          editorParams: {
+          editorParams: () => ({
             showListOnEmpty: true,
             allowEmpty: true,
             values: this.strains,
             sortValuesList: "asc"
-          },
+          }),
           formatter: "lookup",
-          formatterParams: this.strains,
+          formatterParams: () => this.strains,
           cellEdited: cell => {
             if (cell.getValue() === "New Strain") {
               cell.setValue("");
