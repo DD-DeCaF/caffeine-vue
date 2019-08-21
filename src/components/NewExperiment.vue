@@ -93,6 +93,10 @@ export default Vue.extend({
           }),
           formatter: "lookup",
           formatterParams: () => this.strains,
+          cellEditing: cell => {
+            // Clear input without committing empty value.
+            cell._cell.value = "";
+          },
           cellEdited: cell => {
             if (cell.getValue() === "New Strain") {
               cell.setValue("");
