@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
     <v-dialog v-model="isDialogVisible" full-width>
       <v-card class="pa-4">
         <div class="display-1 mb-2">Conditions</div>
@@ -11,7 +12,7 @@
           :items="conditions"
           :pagination.sync="pagination"
         >
-          <template v-slot:items="{ item: condition }">
+          <template v-slot:items="{ item: condition, index: index }">
             <td>
               <v-edit-dialog :return-value.sync="condition.name">
                 {{ condition.name }}
@@ -34,7 +35,10 @@
                 <template v-slot:prepend-item>
                   <v-btn
                     flat
-                    @click.stop="isNewStrainDialogVisible = true"
+                    @click.stop="
+                      isNewStrainDialogVisible = true;
+                      currentRowIndex = index;
+                    "
                     class="pl-0"
                   >
                     <v-icon class="mr-4" color="primary">add_circle</v-icon>
@@ -76,6 +80,7 @@ export default Vue.extend({
   data: () => ({
     conditions: [{}],
     isNewStrainDialogVisible: false,
+    currentRowIndex: null,
     headers: [
       { text: "Name", value: "name" },
       { text: "Strain", value: "strain" },
@@ -97,6 +102,11 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    }
+  },
+  methods: {
+    passStrain(strain) {
+      this.conditions[this.currentRowIndex].strain = strain;
     }
   }
 });
