@@ -140,10 +140,9 @@ export default Vue.extend({
           editor: (cell, onRendered, success, cancel, editorParams) => {
             const DatePickerComponentClass = Vue.extend(VDatePicker);
             const instance = new DatePickerComponentClass({
-              propsData: { color: "purple",
-              class: "vue-date-picker" },
-              listeners: {
-                'input': success
+              propsData: { color: "purple" },
+              _parentListeners: {
+                input: success
               }
             });
             // instance.$slots["prepend-item"] = [`<v-btn>New project</v-btn>`];
@@ -175,7 +174,7 @@ export default Vue.extend({
 .custom-tabulator .tabulator-cell[tabulator-field='date'] {
   overflow: visible;
 }
-.vue-date-picker {
+.custom-tabulator .tabulator-cell[tabulator-field='date'] .v-picker {
   z-index: 9000;
 }
 .autocomplete--new-strain {
