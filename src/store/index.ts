@@ -9,6 +9,7 @@ import maps from "./modules/maps";
 import models from "./modules/models";
 import organisms from "./modules/organisms";
 import projects from "./modules/projects";
+import strains from "./modules/strains";
 import interactiveMap from "./modules/interactiveMap";
 
 Vue.use(Vuex);
@@ -23,6 +24,7 @@ export default new Vuex.Store({
     models,
     organisms,
     projects,
+    strains,
     interactiveMap
   },
   state: {
@@ -71,6 +73,7 @@ export default new Vuex.Store({
       dispatch("models/fetchModels");
       dispatch("organisms/fetchOrganisms");
       dispatch("projects/fetchProjects");
+      dispatch("strains/fetchStrains");
     },
     setFetchError({ commit }, error) {
       // Dispatch this action when failing to retrieve platform data from the
