@@ -2,7 +2,7 @@ export const environment = process.env.VUE_APP_ENVIRONMENT;
 export const deploymentHash = process.env.VUE_APP_DEPLOYMENT_HASH;
 
 export const apis = {
-  model: `${process.env.VUE_APP_MODEL_API}`,
+  simulations: `${process.env.VUE_APP_SIMULATIONS_API}`,
   modelStorage: `${process.env.VUE_APP_MODEL_STORAGE_API}`,
   warehouse: `${process.env.VUE_APP_WAREHOUSE_API}`,
   maps: `${process.env.VUE_APP_MAPS_API}`,

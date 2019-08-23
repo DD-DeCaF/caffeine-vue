@@ -416,7 +416,7 @@ export default Vue.extend({
       });
       axios
         .post(
-          `${settings.apis.model}/models/${model.id}/modify`,
+          `${settings.apis.simulations}/models/${model.id}/modify`,
           card.conditionData
         )
         .then(response => {
@@ -452,7 +452,7 @@ export default Vue.extend({
         }
       });
       axios
-        .post(`${settings.apis.model}/simulate`, {
+        .post(`${settings.apis.simulations}/simulate`, {
           model_id: model.id,
           method: card.method,
           operations: operations,
