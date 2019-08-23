@@ -1,6 +1,7 @@
 <template>
   <div>
     <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
+    <NewMedium v-model="isNewMediumDialogVisible" @return-object="passMedium" />
     <v-dialog v-model="isDialogVisible" full-width>
       <v-layout>
         <v-flex md9>
@@ -47,6 +48,34 @@
                             >add_circle</v-icon
                           >
                           New Strain
+                        </v-btn>
+                        <v-divider class="my-2"></v-divider>
+                      </template>
+                    </v-autocomplete-extended>
+                  </td>
+                  <td>
+                    <v-autocomplete-extended
+                      return-object
+                      item-text="name"
+                      item-value="id"
+                      v-model="condition.medium"
+                      :items="availableMedia"
+                      name="medium"
+                      type="text"
+                    >
+                      <template v-slot:prepend-item>
+                        <v-btn
+                          flat
+                          @click.stop="
+                            isNewMediumDialogVisible = true;
+                            currentRowIndex = index;
+                          "
+                          class="pl-0"
+                        >
+                          <v-icon class="mr-4" color="primary"
+                            >add_circle</v-icon
+                          >
+                          New Medium
                         </v-btn>
                         <v-divider class="my-2"></v-divider>
                       </template>
@@ -141,6 +170,7 @@ export default Vue.extend({
     conditions: [{}],
     samples: [{}],
     isNewStrainDialogVisible: false,
+    isNewMediumDialogVisible: false,
     currentRowIndex: null,
     selectedTable: "conditions",
     tableNames: {
@@ -170,6 +200,9 @@ export default Vue.extend({
     availableStrains() {
       return this.$store.state.strains.strains;
     },
+    availableMedia() {
+      return this.$store.state.media.media;
+    },
     selectedTableName() {
       return this.tableNames[this.selectedTable];
     },
@@ -185,6 +218,9 @@ export default Vue.extend({
   methods: {
     passStrain(strain) {
       this.conditions[this.currentRowIndex].strain = strain;
+    },
+    passMedium(medium) {
+      this.conditions[this.currentRowIndex].medium = medium;
     }
   }
 });
