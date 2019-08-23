@@ -7,14 +7,16 @@
         <v-flex md9>
           <v-card class="pa-4" min-height="600">
             <div class="display-1 mb-2">{{ selectedTableName }}</div>
-            <v-btn color="primary" small>
+            <v-btn color="primary" small @click="addRow()">
               Add row
             </v-btn>
+            <!-- Conditions table -->
             <template v-if="selectedTable === 'conditions'">
               <v-data-table
                 :headers="conditionsHeaders"
                 :items="conditions"
                 :pagination.sync="pagination"
+                disable-initial-sort
               >
                 <template v-slot:items="{ item: condition, index: index }">
                   <td>
@@ -26,103 +28,121 @@
                     </v-edit-dialog>
                   </td>
                   <td>
-                    <v-autocomplete-extended
-                      return-object
-                      item-text="name"
-                      item-value="id"
-                      v-model="condition.strain"
-                      :items="availableStrains"
-                      name="strain"
-                      type="text"
+                    <v-edit-dialog
+                      :return-value.sync="condition.strain"
+                      large
+                      persistent
                     >
-                      <template v-slot:prepend-item>
-                        <v-btn
-                          flat
-                          @click.stop="
-                            isNewStrainDialogVisible = true;
-                            currentRowIndex = index;
-                          "
-                          class="pl-0"
+                      {{ condition.strain.name }}
+                      <template v-slot:input>
+                        <v-autocomplete-extended
+                          return-object
+                          item-text="name"
+                          v-model="condition.strain"
+                          :items="availableStrains"
+                          name="strain"
+                          type="text"
                         >
-                          <v-icon class="mr-4" color="primary"
-                            >add_circle</v-icon
-                          >
-                          New Strain
-                        </v-btn>
-                        <v-divider class="my-2"></v-divider>
+                          <template v-slot:prepend-item>
+                            <v-btn
+                              flat
+                              @click.stop="
+                                isNewStrainDialogVisible = true;
+                                currentRowIndex = index;
+                              "
+                              class="pl-0"
+                            >
+                              <v-icon class="mr-4" color="primary"
+                                >add_circle</v-icon
+                              >
+                              New Strain
+                            </v-btn>
+                            <v-divider class="my-2"></v-divider>
+                          </template>
+                        </v-autocomplete-extended>
                       </template>
-                    </v-autocomplete-extended>
+                    </v-edit-dialog>
                   </td>
                   <td>
-                    <v-autocomplete-extended
-                      return-object
-                      item-text="name"
-                      item-value="id"
-                      v-model="condition.medium"
-                      :items="availableMedia"
-                      name="medium"
-                      type="text"
+                    <v-edit-dialog
+                      :return-value.sync="condition.medium"
+                      large
+                      persistent
                     >
-                      <template v-slot:prepend-item>
-                        <v-btn
-                          flat
-                          @click.stop="
-                            isNewMediumDialogVisible = true;
-                            currentRowIndex = index;
-                          "
-                          class="pl-0"
+                      {{ condition.medium.name }}
+                      <template v-slot:input>
+                        <v-autocomplete-extended
+                          return-object
+                          item-text="name"
+                          item-value="id"
+                          v-model="condition.medium"
+                          :items="availableMedia"
+                          name="medium"
+                          type="text"
                         >
-                          <v-icon class="mr-4" color="primary"
-                            >add_circle</v-icon
-                          >
-                          New Medium
-                        </v-btn>
-                        <v-divider class="my-2"></v-divider>
+                          <template v-slot:prepend-item>
+                            <v-btn
+                              flat
+                              @click.stop="
+                                isNewMediumDialogVisible = true;
+                                currentRowIndex = index;
+                              "
+                              class="pl-0"
+                            >
+                              <v-icon class="mr-4" color="primary"
+                                >add_circle</v-icon
+                              >
+                              New Medium
+                            </v-btn>
+                            <v-divider class="my-2"></v-divider>
+                          </template>
+                        </v-autocomplete-extended>
                       </template>
-                    </v-autocomplete-extended>
+                    </v-edit-dialog>
                   </td>
                 </template>
               </v-data-table>
             </template>
 
+            <!-- Samples table -->
             <template v-if="selectedTable === 'samples'">
               <v-data-table
                 :headers="samplesHeaders"
                 :items="samples"
                 :pagination.sync="pagination"
+                disable-initial-sort
               >
                 <template v-slot:items="{ item: sample, index: index }">
                   <td>
-                    <!-- <v-select :items="conditions.map(c => c.name)" v-model="sample.condition"> -->
-                    <v-select
-                      return-object
-                      :items="conditions"
-                      item-text="name"
-                      v-model="sample.condition"
+                    <v-edit-dialog
+                      :return-value.sync="sample.condition"
+                      large
+                      persistent
                     >
-                    </v-select>
-                  </td>
-                  <td>
-                    <v-edit-dialog :return-value.sync="sample.numerator">
-                      {{ sample.numerator }}
+                      {{ sample.condition.name }}
                       <template v-slot:input>
-                        <v-text-field v-model="sample.numerator"></v-text-field>
+                        <v-select
+                          return-object
+                          :items="conditions"
+                          item-text="name"
+                          v-model="sample.condition"
+                        >
+                        </v-select>
                       </template>
                     </v-edit-dialog>
                   </td>
                   <td>
-                    <v-edit-dialog :return-value.sync="sample.denominator">
-                      {{ sample.denominator }}
+                    <v-edit-dialog :return-value.sync="sample.time">
+                      {{ sample.time }}
                       <template v-slot:input>
-                        <v-text-field
-                          v-model="sample.denominator"
-                        ></v-text-field>
+                        <v-text-field v-model="sample.time"></v-text-field>
                       </template>
                     </v-edit-dialog>
                   </td>
                 </template>
               </v-data-table>
             </template>
+
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="secondary" flat @click="isDialogVisible = false">
@@ -134,8 +154,20 @@
             </v-card-actions>
           </v-card>
         </v-flex>
+
+        <!-- Selection area -->
         <v-flex md3>
           <v-card class="pa-4" min-height="600">
+            <v-text-field
+              v-model="experimentName"
+              label="Experiment name"
+            ></v-text-field>
+            <v-textarea
+              v-model="experimentDescription"
+              label="Description"
+              auto-grow
+              rows="1"
+            ></v-textarea>
             <v-radio-group v-model="selectedTable">
               <v-radio
                 label="Conditions"
@@ -167,8 +199,25 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    conditions: [{}],
-    samples: [{}],
+    conditions: [
+      {
+        strain: {
+          name: null
+        },
+        medium: {
+          name: null
+        }
+      }
+    ],
+    samples: [
+      {
+        condition: {
+          name: null
+        }
+      }
+    ],
+    experimentName: null,
+    experimentDescription: null,
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     currentRowIndex: null,
@@ -178,19 +227,13 @@ export default Vue.extend({
       samples: "Samples"
     },
     conditionsHeaders: [
-      { text: "Name", value: "name" },
-      { text: "Strain", value: "strain" },
-      { text: "Medium", value: "medium" },
-      { text: "Date", value: "date" }
+      { text: "Name", value: "name", width: "30%" },
+      { text: "Strain", value: "strain", width: "35%" },
+      { text: "Medium", value: "medium", width: "35%" }
     ],
     samplesHeaders: [
-      { text: "Condition", value: "condition" },
-      { text: "Date", value: "date" },
-      { text: "Time", value: "time" },
-      { text: "Numerator", value: "numerator" },
-      { text: "Denominator", value: "denominator" },
-      { text: "Unit", value: "unit" },
-      { text: "Value", value: "value" }
+      { text: "Condition", value: "condition", width: "50%" },
+      { text: "Time", value: "time", width: "50%" }
     ],
     pagination: {
       rowsPerPage: 10
@@ -216,6 +259,24 @@ export default Vue.extend({
     }
   },
   methods: {
+    addRow() {
+      if (this.selectedTable === "conditions") {
+        this.conditions.push({
+          strain: {
+            name: null
+          },
+          medium: {
+            name: null
+          }
+        });
+      } else if (this.selectedTable === "samples") {
+        this.samples.push({
+          condition: {
+            name: null
+          }
+        });
+      }
+    },
     passStrain(strain) {
       this.conditions[this.currentRowIndex].strain = strain;
     },
