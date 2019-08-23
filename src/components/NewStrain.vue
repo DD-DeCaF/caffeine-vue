@@ -9,26 +9,22 @@
         v-model="isOrganismCreationDialogVisible"
         @return-object="passOrganism"
       />
-      <v-card class="pa-2">
-        <div class="text-xs-center pa-4" v-if="isLoading">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="50"
-          ></v-progress-circular>
-        </div>
-        <div v-if="!isLoading">
-          <v-container grid-list-lg text-md-left>
-            <v-layout fill-height column wrap>
-              <v-flex md6>
-                <h3>Add a new strain</h3>
-              </v-flex>
-              <v-flex>
-                <v-form
-                  ref="form"
-                  v-model="isValid"
-                  @keyup.native.enter="onEnter"
-                >
+      <v-form ref="form" v-model="isValid" @submit.prevent="">
+        <v-card class="pa-2">
+          <div class="text-xs-center pa-4" v-if="isLoading">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+              size="50"
+            ></v-progress-circular>
+          </div>
+          <div v-if="!isLoading">
+            <v-container grid-list-lg text-md-left>
+              <v-layout fill-height column wrap>
+                <v-flex md6>
+                  <h3>Add a new strain</h3>
+                </v-flex>
+                <v-flex>
                   <v-text-field
                     v-model="strainName"
                     :rules="[rules.required]"
@@ -99,33 +95,34 @@
                       <v-divider class="my-2"></v-divider>
                     </template>
                   </v-autocomplete-extended>
-                </v-form>
-              </v-flex>
-            </v-layout>
-          </v-container>
-        </div>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </div>
 
-        <v-divider class="my-2"></v-divider>
+          <v-divider class="my-2"></v-divider>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="secondary"
-            flat
-            @click="isDialogVisible = false"
-            :disabled="isLoading"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="primary"
-            @click="createStrain"
-            :disabled="!isValid || isLoading"
-          >
-            Create
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="secondary"
+              flat
+              @click="isDialogVisible = false"
+              :disabled="isLoading"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              type="submit"
+              @click="createStrain"
+              :disabled="!isValid || isLoading"
+            >
+              Create
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
     </v-dialog>
     <v-snackbar
       color="success"
@@ -186,11 +183,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    onEnter() {
-      if (this.$refs.form.validate()) {
-        this.createStrain();
-      }
-    },
     createStrain() {
       this.isLoading = true;
       const payload = {
