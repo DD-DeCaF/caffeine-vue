@@ -136,6 +136,16 @@
                         </template>
                       </v-edit-dialog>
                     </td>
+                    <!-- Name field was added, so user can distinguish -->
+                    <!-- samples in other tables -->
+                    <td>
+                      <v-edit-dialog :return-value.sync="sample.name">
+                        {{ sample.name }}
+                        <template v-slot:input>
+                          <v-text-field v-model="sample.name"></v-text-field>
+                        </template>
+                      </v-edit-dialog>
+                    </td>
                     <td>
                       <v-edit-dialog :return-value.sync="sample.time">
                         {{ sample.time }}
@@ -148,6 +158,77 @@
                 </v-data-table>
               </template>
 
+              <!-- Fluxomics table -->
+              <template v-if="selectedTable === 'fluxomics'">
+                <v-data-table
+                  :headers="fluxomicsHeaders"
+                  :items="fluxomics"
+                  :pagination.sync="pagination"
+                  disable-initial-sort
+                >
+                  <template
+                    v-slot:items="{ item: fluxomicsItem, index: index }"
+                  >
+                    <td>
+                      <v-edit-dialog
+                        :return-value.sync="fluxomicsItem.sample"
+                        large
+                        persistent
+                      >
+                        {{ fluxomicsItem.sample.name }}
+                        <template v-slot:input>
+                          <v-select
+                            return-object
+                            :items="samples"
+                            item-text="name"
+                            v-model="fluxomicsItem.sample"
+                          >
+                          </v-select>
+                        </template>
+                      </v-edit-dialog>
+                    </td>
+                    <td>
+                      <v-edit-dialog
+                        :return-value.sync="fluxomicsItem.reaction"
+                        large
+                        persistent
+                      >
+                        {{ fluxomicsItem.reaction.name }}
+                        <template v-slot:input>
+                          <AutocompleteMnxReaction
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
+                            @change="fluxomicsItem.reaction = $event.reaction"
+                          ></AutocompleteMnxReaction>
+                        </template>
+                      </v-edit-dialog>
+                    </td>
+                    <td>
+                      <v-edit-dialog
+                        :return-value.sync="fluxomicsItem.measurement"
+                      >
+                        {{ fluxomicsItem.measurement }}
+                        <template v-slot:input>
+                          <v-text-field
+                            v-model.number="fluxomicsItem.measurement"
+                          ></v-text-field>
+                        </template>
+                      </v-edit-dialog>
+                    </td>
+                    <td>
+                      <v-edit-dialog
+                        :return-value.sync="fluxomicsItem.uncertainty"
+                      >
+                        {{ fluxomicsItem.uncertainty }}
+                        <template v-slot:input>
+                          <v-text-field
+                            v-model.number="fluxomicsItem.uncertainty"
+                          ></v-text-field>
+                        </template>
+                      </v-edit-dialog>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="secondary" flat @click="isDialogVisible = false">
@@ -186,6 +267,11 @@
                   value="samples"
                   color="primary"
                 ></v-radio>
+                <v-radio
+                  label="Fluxomics"
+                  value="fluxomics"
+                  color="primary"
+                ></v-radio>
               </v-radio-group>
             </v-card>
           </v-flex>
@@ -197,6 +283,8 @@
 
 <script lang="ts">
 import Vue from "vue";
+import axios from "axios";
+import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "NewExperiment",
@@ -224,6 +312,16 @@ export default Vue.extend({
         }
       }
     ],
+    fluxomics: [
+      {
+        sample: {
+          name: null
+        },
+        reaction: {
+          name: null
+        }
+      }
+    ],
     experimentName: null,
     experimentDescription: null,
     isNewStrainDialogVisible: false,
@@ -232,7 +330,8 @@ export default Vue.extend({
     selectedTable: "conditions",
     tableNames: {
       conditions: "Conditions",
-      samples: "Samples"
+      samples: "Samples",
+      fluxomics: "Fluxomics"
     },
     conditionsHeaders: [
       { text: "Name", value: "name", width: "30%" },
@@ -240,8 +339,15 @@ export default Vue.extend({
       { text: "Medium", value: "medium", width: "35%" }
     ],
     samplesHeaders: [
-      { text: "Condition", value: "condition", width: "50%" },
-      { text: "Time", value: "time", width: "50%" }
+      { text: "Condition", value: "condition", width: "30%" },
+      { text: "Name", value: "name", width: "35%" },
+      { text: "Time", value: "time", width: "35%" }
+    ],
+    fluxomicsHeaders: [
+      { text: "Sample", value: "sample", width: "25%" },
+      { text: "Reaction", value: "reaction", width: "25%" },
+      { text: "Measurement", value: "measurement", width: "25%" },
+      { text: "Uncertainty", value: "uncertainty", width: "25%" }
     ],
     pagination: {
       rowsPerPage: 10
@@ -280,6 +386,15 @@ export default Vue.extend({
       } else if (this.selectedTable === "samples") {
         this.samples.push({
           condition: {
+            name: null
+          }
+        });
+      } else if (this.selectedTable === "fluxomics") {
+        this.fluxomics.push({
+          sample: {
+            name: null
+          },
+          reaction: {
             name: null
           }
         });
