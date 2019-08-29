@@ -43,6 +43,7 @@
                           <v-autocomplete-extended
                             return-object
                             item-text="name"
+                            item-value="id"
                             v-model="condition.strain"
                             :items="availableStrains"
                             name="strain"
@@ -129,6 +130,7 @@
                           <v-select
                             return-object
                             :items="conditions"
+                            item-value="temporaryId"
                             item-text="name"
                             v-model="sample.condition"
                           >
@@ -181,6 +183,7 @@
                             return-object
                             :items="samples"
                             item-text="name"
+                            item-value="temporaryId"
                             v-model="fluxomicsItem.sample"
                           >
                           </v-select>
@@ -284,6 +287,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
@@ -297,6 +301,7 @@ export default Vue.extend({
   data: () => ({
     conditions: [
       {
+        temporaryId: uuidv4(),
         strain: {
           name: null
         },
@@ -307,6 +312,7 @@ export default Vue.extend({
     ],
     samples: [
       {
+        temporaryId: uuidv4(),
         condition: {
           name: null
         }
@@ -314,6 +320,7 @@ export default Vue.extend({
     ],
     fluxomics: [
       {
+        temporaryId: uuidv4(),
         sample: {
           name: null
         },
@@ -376,6 +383,7 @@ export default Vue.extend({
     addRow() {
       if (this.selectedTable === "conditions") {
         this.conditions.push({
+          temporaryId: uuidv4(),
           strain: {
             name: null
           },
@@ -385,12 +393,14 @@ export default Vue.extend({
         });
       } else if (this.selectedTable === "samples") {
         this.samples.push({
+          temporaryId: uuidv4(),
           condition: {
             name: null
           }
         });
       } else if (this.selectedTable === "fluxomics") {
         this.fluxomics.push({
+          temporaryId: uuidv4(),
           sample: {
             name: null
           },
