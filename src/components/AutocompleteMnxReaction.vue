@@ -75,7 +75,10 @@ interface Annotation {
 export default Vue.extend({
   name: "AutocompleteMnxReaction",
   inheritAttrs: false,
-  props: ["rules"],
+  props: {
+    rules: [Array, Object],
+    clearOnChange: Boolean
+  },
   data: () => ({
     addReactionItem: null,
     addReactionSearchResults: [] as MetaNetXReaction[],
@@ -169,10 +172,12 @@ export default Vue.extend({
       );
     },
     onChange(selectedReaction: MetaNetXReaction): void {
-      this.addReactionSearchQuery = null;
-      this.$nextTick(() => {
-        this.addReactionItem = null;
-      });
+      if (this.clearOnChange) {
+        this.addReactionSearchQuery = null;
+        this.$nextTick(() => {
+          this.addReactionItem = null;
+        });
+      }
 
       const reaction: Reaction = {
         id: selectedReaction.reaction.mnx_id,
