@@ -26,17 +26,16 @@
                 </v-flex>
                 <v-flex>
                   <v-text-field
-                    v-model="strainName"
+                    v-model="strain.name"
                     :rules="[rules.required]"
                     name="name"
                     label="Name"
                     type="text"
                   ></v-text-field>
                   <v-autocomplete-extended
-                    return-object
                     item-text="name"
                     item-value="id"
-                    v-model="parentStrain"
+                    v-model="strain.parent_id"
                     :items="availableStrains"
                     name="parentStrain"
                     label="Parent strain"
@@ -44,16 +43,15 @@
                   >
                   </v-autocomplete-extended>
                   <v-text-field
-                    v-model="genotype"
+                    v-model="strain.genotype"
                     name="genotype"
                     label="Genotype"
                     type="text"
                   ></v-text-field>
                   <v-autocomplete-extended
-                    return-object
                     item-text="name"
                     item-value="id"
-                    v-model="organism"
+                    v-model="strain.organism_id"
                     :items="availableOrganisms"
                     :rules="[rules.required]"
                     name="organism"
@@ -73,10 +71,9 @@
                     </template>
                   </v-autocomplete-extended>
                   <v-autocomplete-extended
-                    return-object
                     item-text="name"
                     item-value="id"
-                    v-model="project"
+                    v-model="strain.project_id"
                     :items="availableProjects"
                     :rules="[rules.required]"
                     name="project"
@@ -129,7 +126,7 @@
       v-model="isStrainCreationSuccess"
       :timeout="3000"
     >
-      {{ strainName }} successfully created.
+      {{ strain.name }} successfully created.
     </v-snackbar>
   </div>
 </template>
@@ -153,12 +150,14 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isOrganismCreationDialogVisible: false,
     isStrainCreationSuccess: false,
-    strainName: null,
-    parentStrain: null,
-    genotype: "",
-    organism: null,
-    project: null,
     isLoading: false,
+    strain: {
+      name: null,
+      parent_id: null,
+      genotype: "",
+      organism_id: null,
+      project_id: null
+    },
     rules: {
       required: value => !!value || "Required."
     }
@@ -185,19 +184,13 @@ export default Vue.extend({
   methods: {
     createStrain() {
       this.isLoading = true;
-      const payload = {
-        name: this.strainName,
-        parent_id: this.parentStrain ? this.parentStrain.id : null,
-        genotype: this.genotype,
-        project_id: this.project.id,
-        organism_id: this.organism.id
-      };
       axios
-        .post(`${settings.apis.warehouse}/strains`, payload)
+        .post(`${settings.apis.warehouse}/strains`, this.strain)
         .then((response: AxiosResponse) => {
-          const strainWithID = { ...payload, ...response.data };
-          this.$store.commit("strains/addStrain", strainWithID);
-          this.$emit("return-object", strainWithID);
+          const strainWithId = { ...this.strain, ...response.data };
+          console.log({ strainWithId });
+          this.$store.commit("strains/addStrain", strainWithId);
+          this.$emit("return-object", strainWithId);
           this.isStrainCreationSuccess = true;
           this.isDialogVisible = false;
         })
