@@ -25,86 +25,63 @@
                 >
                   <template v-slot:items="{ item: condition, index: index }">
                     <td>
-                      <v-edit-dialog :return-value.sync="condition.name">
-                        {{ condition.name }}
-                        <template v-slot:input>
-                          <v-text-field v-model="condition.name"></v-text-field>
-                        </template>
-                      </v-edit-dialog>
+                      <v-text-field v-model="condition.name"></v-text-field>
                     </td>
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="condition.strain"
-                        large
-                        persistent
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="condition.strain"
+                        :items="availableStrains"
+                        name="strain"
+                        type="text"
                       >
-                        {{ condition.strain.name }}
-                        <template v-slot:input>
-                          <v-autocomplete-extended
-                            return-object
-                            item-text="name"
-                            item-value="id"
-                            v-model="condition.strain"
-                            :items="availableStrains"
-                            name="strain"
-                            type="text"
+                        <template v-slot:prepend-item>
+                          <v-btn
+                            flat
+                            @click.stop="
+                              isNewStrainDialogVisible = true;
+                              currentRowIndex = index;
+                            "
+                            class="pl-0"
                           >
-                            <template v-slot:prepend-item>
-                              <v-btn
-                                flat
-                                @click.stop="
-                                  isNewStrainDialogVisible = true;
-                                  currentRowIndex = index;
-                                "
-                                class="pl-0"
-                              >
-                                <v-icon class="mr-4" color="primary"
-                                  >add_circle</v-icon
-                                >
-                                New Strain
-                              </v-btn>
-                              <v-divider class="my-2"></v-divider>
-                            </template>
-                          </v-autocomplete-extended>
+                            <v-icon class="mr-4" color="primary"
+                              >add_circle</v-icon
+                            >
+                            New Strain
+                          </v-btn>
+                          <v-divider class="my-2"></v-divider>
                         </template>
-                      </v-edit-dialog>
+                      </v-autocomplete-extended>
                     </td>
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="condition.medium"
-                        large
-                        persistent
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="condition.medium"
+                        :items="availableMedia"
+                        name="medium"
+                        type="text"
                       >
-                        {{ condition.medium.name }}
-                        <template v-slot:input>
-                          <v-autocomplete-extended
-                            return-object
-                            item-text="name"
-                            item-value="id"
-                            v-model="condition.medium"
-                            :items="availableMedia"
-                            name="medium"
-                            type="text"
+                        <template v-slot:prepend-item>
+                          <v-btn
+                            flat
+                            @click.stop="
+                              isNewMediumDialogVisible = true;
+                              currentRowIndex = index;
+                            "
+                            class="pl-0"
                           >
-                            <template v-slot:prepend-item>
-                              <v-btn
-                                flat
-                                @click.stop="
-                                  isNewMediumDialogVisible = true;
-                                  currentRowIndex = index;
-                                "
-                                class="pl-0"
-                              >
-                                <v-icon class="mr-4" color="primary"
-                                  >add_circle</v-icon
-                                >
-                                New Medium
-                              </v-btn>
-                              <v-divider class="my-2"></v-divider>
-                            </template>
-                          </v-autocomplete-extended>
+                            <v-icon class="mr-4" color="primary"
+                              >add_circle</v-icon
+                            >
+                            New Medium
+                          </v-btn>
+                          <v-divider class="my-2"></v-divider>
                         </template>
-                      </v-edit-dialog>
+                      </v-autocomplete-extended>
                     </td>
                   </template>
                 </v-data-table>
@@ -120,41 +97,22 @@
                 >
                   <template v-slot:items="{ item: sample, index: index }">
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="sample.condition"
-                        large
-                        persistent
+                      <v-select
+                        return-object
+                        :items="conditions"
+                        item-value="temporaryId"
+                        item-text="name"
+                        v-model="sample.condition"
                       >
-                        {{ sample.condition.name }}
-                        <template v-slot:input>
-                          <v-select
-                            return-object
-                            :items="conditions"
-                            item-value="temporaryId"
-                            item-text="name"
-                            v-model="sample.condition"
-                          >
-                          </v-select>
-                        </template>
-                      </v-edit-dialog>
+                      </v-select>
                     </td>
                     <!-- Name field was added, so user can distinguish -->
                     <!-- samples in other tables -->
                     <td>
-                      <v-edit-dialog :return-value.sync="sample.name">
-                        {{ sample.name }}
-                        <template v-slot:input>
-                          <v-text-field v-model="sample.name"></v-text-field>
-                        </template>
-                      </v-edit-dialog>
+                      <v-text-field v-model="sample.name"></v-text-field>
                     </td>
                     <td>
-                      <v-edit-dialog :return-value.sync="sample.time">
-                        {{ sample.time }}
-                        <template v-slot:input>
-                          <v-text-field v-model="sample.time"></v-text-field>
-                        </template>
-                      </v-edit-dialog>
+                      <v-text-field v-model="sample.time"></v-text-field>
                     </td>
                   </template>
                 </v-data-table>
@@ -172,62 +130,30 @@
                     v-slot:items="{ item: fluxomicsItem, index: index }"
                   >
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="fluxomicsItem.sample"
-                        large
-                        persistent
+                      <v-select
+                        return-object
+                        :items="samples"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="fluxomicsItem.sample"
                       >
-                        {{ fluxomicsItem.sample.name }}
-                        <template v-slot:input>
-                          <v-select
-                            return-object
-                            :items="samples"
-                            item-text="name"
-                            item-value="temporaryId"
-                            v-model="fluxomicsItem.sample"
-                          >
-                          </v-select>
-                        </template>
-                      </v-edit-dialog>
+                      </v-select>
                     </td>
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="fluxomicsItem.reaction"
-                        large
-                        persistent
-                      >
-                        {{ fluxomicsItem.reaction.name }}
-                        <template v-slot:input>
-                          <AutocompleteMnxReaction
-                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                            @change="fluxomicsItem.reaction = $event.reaction"
-                          ></AutocompleteMnxReaction>
-                        </template>
-                      </v-edit-dialog>
+                      <AutocompleteMnxReaction
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
+                        @change="fluxomicsItem.reaction = $event.reaction"
+                      ></AutocompleteMnxReaction>
                     </td>
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="fluxomicsItem.measurement"
-                      >
-                        {{ fluxomicsItem.measurement }}
-                        <template v-slot:input>
-                          <v-text-field
-                            v-model.number="fluxomicsItem.measurement"
-                          ></v-text-field>
-                        </template>
-                      </v-edit-dialog>
+                      <v-text-field
+                        v-model.number="fluxomicsItem.measurement"
+                      ></v-text-field>
                     </td>
                     <td>
-                      <v-edit-dialog
-                        :return-value.sync="fluxomicsItem.uncertainty"
-                      >
-                        {{ fluxomicsItem.uncertainty }}
-                        <template v-slot:input>
-                          <v-text-field
-                            v-model.number="fluxomicsItem.uncertainty"
-                          ></v-text-field>
-                        </template>
-                      </v-edit-dialog>
+                      <v-text-field
+                        v-model.number="fluxomicsItem.uncertainty"
+                      ></v-text-field>
                     </td>
                   </template>
                 </v-data-table>
