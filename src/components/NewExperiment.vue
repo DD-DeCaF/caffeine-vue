@@ -232,6 +232,52 @@
                   </template>
                 </v-data-table>
               </template>
+
+              <!-- Metabolomics table -->
+              <template v-if="selectedTable === 'metabolomics'">
+                <v-data-table
+                  :headers="metabolomicsHeaders"
+                  :items="metabolomics"
+                  :pagination.sync="pagination"
+                  disable-initial-sort
+                >
+                  <template
+                    v-slot:items="{ item: metabolomicsItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="samples"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="metabolomicsItem.sample"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="metabolomicsItem.compound"
+                        :items="availableCompounds"
+                        name="compound"
+                        type="text"
+                      ></v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="metabolomicsItem.measurement"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="metabolomicsItem.uncertainty"
+                      ></v-text-field>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="secondary" flat @click="isDialogVisible = false">
@@ -273,6 +319,11 @@
                 <v-radio
                   label="Fluxomics"
                   value="fluxomics"
+                  color="primary"
+                ></v-radio>
+                <v-radio
+                  label="Metabolomics"
+                  value="metabolomics"
                   color="primary"
                 ></v-radio>
               </v-radio-group>
@@ -329,16 +380,29 @@ export default Vue.extend({
         }
       }
     ],
+    metabolomics: [
+      {
+        temporaryId: uuidv4(),
+        sample: {
+          name: null
+        },
+        compound: {
+          name: null
+        }
+      }
+    ],
     experimentName: null,
     experimentDescription: null,
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     currentRowIndex: null,
+    availableCompounds: [],
     selectedTable: "conditions",
     tableNames: {
       conditions: "Conditions",
       samples: "Samples",
-      fluxomics: "Fluxomics"
+      fluxomics: "Fluxomics",
+      metabolomics: "Metabolomics"
     },
     conditionsHeaders: [
       { text: "Name", value: "name", width: "30%" },
@@ -353,6 +417,12 @@ export default Vue.extend({
     fluxomicsHeaders: [
       { text: "Sample", value: "sample", width: "25%" },
       { text: "Reaction", value: "reaction", width: "25%" },
+      { text: "Measurement", value: "measurement", width: "25%" },
+      { text: "Uncertainty", value: "uncertainty", width: "25%" }
+    ],
+    metabolomicsHeaders: [
+      { text: "Sample", value: "sample", width: "25%" },
+      { text: "Compound", value: "reaction", width: "25%" },
       { text: "Measurement", value: "measurement", width: "25%" },
       { text: "Uncertainty", value: "uncertainty", width: "25%" }
     ],
@@ -378,6 +448,12 @@ export default Vue.extend({
         this.$emit("input", value);
       }
     }
+  },
+  // TODO: move fetch compounds logic
+  created() {
+    this.$store
+      .dispatch("media/fetchCachedCompounds")
+      .then(compounds => (this.availableCompounds = compounds));
   },
   methods: {
     addRow() {
@@ -405,6 +481,16 @@ export default Vue.extend({
             name: null
           },
           reaction: {
+            name: null
+          }
+        });
+      } else if (this.selectedTable === "metabolomics") {
+        this.metabolomics.push({
+          temporaryId: uuidv4(),
+          sample: {
+            name: null
+          },
+          compound: {
             name: null
           }
         });
