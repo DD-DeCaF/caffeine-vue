@@ -60,17 +60,17 @@
                     ref="organismAutocomplete"
                   >
                     <template v-slot:prepend-item>
-                      <v-btn
-                        flat
+                      <v-list-tile
                         @click.stop="
                           isOrganismCreationDialogVisible = true;
                           $refs.organismAutocomplete.isMenuActive = false;
                         "
-                        class="pl-0"
                       >
-                        <v-icon class="mr-2" color="primary">add_circle</v-icon>
-                        New Organism
-                      </v-btn>
+                        <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                        <v-list-tile-title>
+                          New Organism
+                        </v-list-tile-title>
+                      </v-list-tile>
                       <v-divider class="my-2"></v-divider>
                     </template>
                   </v-autocomplete-extended>
@@ -86,17 +86,17 @@
                     ref="projectAutocomplete"
                   >
                     <template v-slot:prepend-item>
-                      <v-btn
-                        flat
+                      <v-list-tile
                         @click.stop="
                           isProjectCreationDialogVisible = true;
                           $refs.projectAutocomplete.isMenuActive = false;
                         "
-                        class="pl-0"
                       >
-                        <v-icon class="mr-2" color="primary">add_circle</v-icon>
-                        New project
-                      </v-btn>
+                        <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                        <v-list-tile-title>
+                          New project
+                        </v-list-tile-title>
+                      </v-list-tile>
                       <v-divider class="my-2"></v-divider>
                     </template>
                   </v-autocomplete-extended>

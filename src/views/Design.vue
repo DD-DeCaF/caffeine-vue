@@ -32,16 +32,17 @@
             ref="organismAutocomplete"
           >
             <template v-slot:prepend-item>
-              <v-btn
-                depressed
+              <v-list-tile
                 @click.stop="
                   isOrganismCreationDialogVisible = true;
                   $refs.organismAutocomplete.isMenuActive = false;
                 "
               >
-                <v-icon class="mr-4">add_circle</v-icon>
-                New organism
-              </v-btn>
+                <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                <v-list-tile-title>
+                  New Organism
+                </v-list-tile-title>
+              </v-list-tile>
               <v-divider></v-divider>
             </template>
             <template v-slot:selection="{ item: organism }">
@@ -85,16 +86,17 @@
             ref="projectAutocomplete"
           >
             <template v-slot:prepend-item>
-              <v-btn
-                depressed
+              <v-list-tile
                 @click.stop="
                   isProjectCreationDialogVisible = true;
                   $refs.projectAutocomplete.isMenuActive = false;
                 "
               >
-                <v-icon class="mr-4">add_circle</v-icon>
-                New project
-              </v-btn>
+                <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                <v-list-tile-title>
+                  New Project
+                </v-list-tile-title>
+              </v-list-tile>
               <v-divider></v-divider>
             </template>
           </v-autocomplete-extended>
@@ -159,15 +161,20 @@
                   :hint="modelHint"
                   persistent-hint
                   required
+                  ref="modelAutocomplete"
                 >
                   <template v-slot:prepend-item>
-                    <v-btn
-                      depressed
-                      @click.stop="isModelCreationDialogVisible = true"
+                    <v-list-tile
+                      @click.stop="
+                        isModelCreationDialogVisible = true;
+                        $refs.modelAutocomplete.isMenuActive = false;
+                      "
                     >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New model
-                    </v-btn>
+                      <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                      <v-list-tile-title>
+                        New Model
+                      </v-list-tile-title>
+                    </v-list-tile>
                     <v-divider></v-divider>
                   </template>
                 </v-autocomplete-extended>

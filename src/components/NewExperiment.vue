@@ -39,20 +39,20 @@
                         ref="strainAutocomplete"
                       >
                         <template v-slot:prepend-item>
-                          <v-btn
-                            flat
+                          <v-list-tile
                             @click.stop="
                               isNewStrainDialogVisible = true;
                               currentRowIndex = index;
                               $refs.strainAutocomplete.isMenuActive = false;
                             "
-                            class="pl-0"
                           >
-                            <v-icon class="mr-4" color="primary"
+                            <v-icon class="mr-3" color="primary"
                               >add_circle</v-icon
                             >
-                            New Strain
-                          </v-btn>
+                            <v-list-tile-title>
+                              New Strain
+                            </v-list-tile-title>
+                          </v-list-tile>
                           <v-divider class="my-2"></v-divider>
                         </template>
                       </v-autocomplete-extended>
@@ -69,20 +69,20 @@
                         ref="mediumAutocomplete"
                       >
                         <template v-slot:prepend-item>
-                          <v-btn
-                            flat
+                          <v-list-tile
                             @click.stop="
                               isNewMediumDialogVisible = true;
                               currentRowIndex = index;
                               $refs.mediumAutocomplete.isMenuActive = false;
                             "
-                            class="pl-0"
                           >
-                            <v-icon class="mr-4" color="primary"
+                            <v-icon class="mr-3" color="primary"
                               >add_circle</v-icon
                             >
-                            New Medium
-                          </v-btn>
+                            <v-list-tile-title>
+                              New Medium
+                            </v-list-tile-title>
+                          </v-list-tile>
                           <v-divider class="my-2"></v-divider>
                         </template>
                       </v-autocomplete-extended>
