@@ -208,6 +208,39 @@
                   </template>
                 </v-data-table>
               </template>
+
+              <!-- Growth table -->
+              <template v-if="selectedTable === 'growth'">
+                <v-data-table
+                  :headers="growthHeaders"
+                  :items="growth"
+                  :pagination.sync="pagination"
+                  disable-initial-sort
+                >
+                  <template v-slot:items="{ item: growthItem, index: index }">
+                    <td>
+                      <v-select
+                        return-object
+                        :items="samples"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="growthItem.sample"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="growthItem.measurement"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="growthItem.uncertainty"
+                      ></v-text-field>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="secondary" flat @click="isDialogVisible = false">
@@ -254,6 +287,11 @@
                 <v-radio
                   label="Metabolomics"
                   value="metabolomics"
+                  color="primary"
+                ></v-radio>
+                <v-radio
+                  label="Growth"
+                  value="growth"
                   color="primary"
                 ></v-radio>
               </v-radio-group>
@@ -321,6 +359,14 @@ export default Vue.extend({
         }
       }
     ],
+    growth: [
+      {
+        temporaryId: uuidv4(),
+        sample: {
+          name: null
+        }
+      }
+    ],
     experimentName: null,
     experimentDescription: null,
     isNewStrainDialogVisible: false,
@@ -332,7 +378,8 @@ export default Vue.extend({
       conditions: "Conditions",
       samples: "Samples",
       fluxomics: "Fluxomics",
-      metabolomics: "Metabolomics"
+      metabolomics: "Metabolomics",
+      growth: "Growth"
     },
     conditionsHeaders: [
       { text: "Name", value: "name", width: "30%" },
@@ -355,6 +402,11 @@ export default Vue.extend({
       { text: "Compound", value: "reaction", width: "25%" },
       { text: "Measurement", value: "measurement", width: "25%" },
       { text: "Uncertainty", value: "uncertainty", width: "25%" }
+    ],
+    growthHeaders: [
+      { text: "Sample", value: "sample", width: "30%" },
+      { text: "Measurement", value: "measurement", width: "35%" },
+      { text: "Uncertainty", value: "uncertainty", width: "35%" }
     ],
     pagination: {
       rowsPerPage: 10
@@ -421,6 +473,13 @@ export default Vue.extend({
             name: null
           },
           compound: {
+            name: null
+          }
+        });
+      } else {
+        this.growth.push({
+          temporaryId: uuidv4(),
+          sample: {
             name: null
           }
         });
