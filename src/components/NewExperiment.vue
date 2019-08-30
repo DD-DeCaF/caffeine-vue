@@ -36,6 +36,7 @@
                         :items="availableStrains"
                         name="strain"
                         type="text"
+                        ref="strainAutocomplete"
                       >
                         <template v-slot:prepend-item>
                           <v-btn
@@ -43,6 +44,7 @@
                             @click.stop="
                               isNewStrainDialogVisible = true;
                               currentRowIndex = index;
+                              $refs.strainAutocomplete.isMenuActive = false;
                             "
                             class="pl-0"
                           >
@@ -64,6 +66,7 @@
                         :items="availableMedia"
                         name="medium"
                         type="text"
+                        ref="mediumAutocomplete"
                       >
                         <template v-slot:prepend-item>
                           <v-btn
@@ -71,6 +74,7 @@
                             @click.stop="
                               isNewMediumDialogVisible = true;
                               currentRowIndex = index;
+                              $refs.mediumAutocomplete.isMenuActive = false;
                             "
                             class="pl-0"
                           >

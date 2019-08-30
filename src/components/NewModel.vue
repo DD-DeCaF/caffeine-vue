@@ -47,11 +47,15 @@
                   name="organism"
                   label="Organism"
                   type="text"
+                  ref="organismAutocomplete"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
                       depressed
-                      @click.stop="isOrganismCreationDialogVisible = true"
+                      @click.stop="
+                        isOrganismCreationDialogVisible = true;
+                        $refs.organismAutocomplete.isMenuActive = false;
+                      "
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Organism
@@ -70,11 +74,15 @@
                   name="project"
                   label="Project"
                   type="text"
+                  ref="projectAutocomplete"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
                       depressed
-                      @click.stop="isProjectCreationDialogVisible = true"
+                      @click.stop="
+                        isProjectCreationDialogVisible = true;
+                        $refs.projectAutocomplete.isMenuActive = false;
+                      "
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New project
@@ -93,11 +101,15 @@
                   name="map"
                   label="Preferred Map"
                   type="text"
+                  ref="mapAutocomplete"
                 >
                   <template v-slot:prepend-item>
                     <v-btn
                       depressed
-                      @click.stop="isMapCreationDialogVisible = true"
+                      @click.stop="
+                        isMapCreationDialogVisible = true;
+                        $refs.mapAutocomplete.isMenuActive = false;
+                      "
                     >
                       <v-icon class="mr-4">add_circle</v-icon>
                       New Map

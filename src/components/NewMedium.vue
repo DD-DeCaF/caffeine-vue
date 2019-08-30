@@ -48,11 +48,15 @@
                     name="project"
                     label="Project"
                     type="text"
+                    ref="projectAutocomplete"
                   >
                     <template v-slot:prepend-item>
                       <v-btn
                         flat
-                        @click.stop="isProjectCreationDialogVisible = true"
+                        @click.stop="
+                          isProjectCreationDialogVisible = true;
+                          $refs.projectAutocomplete.isMenuActive = false;
+                        "
                         class="pl-0"
                       >
                         <v-icon class="mr-2" color="primary">add_circle</v-icon>

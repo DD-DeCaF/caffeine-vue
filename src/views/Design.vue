@@ -29,11 +29,15 @@
             clearable
             placeholder="e.g., Escherichia coli"
             required
+            ref="organismAutocomplete"
           >
             <template v-slot:prepend-item>
               <v-btn
                 depressed
-                @click.stop="isOrganismCreationDialogVisible = true"
+                @click.stop="
+                  isOrganismCreationDialogVisible = true;
+                  $refs.organismAutocomplete.isMenuActive = false;
+                "
               >
                 <v-icon class="mr-4">add_circle</v-icon>
                 New organism
@@ -78,11 +82,15 @@
             :rules="projectRules"
             clearable
             required
+            ref="projectAutocomplete"
           >
             <template v-slot:prepend-item>
               <v-btn
                 depressed
-                @click.stop="isProjectCreationDialogVisible = true"
+                @click.stop="
+                  isProjectCreationDialogVisible = true;
+                  $refs.projectAutocomplete.isMenuActive = false;
+                "
               >
                 <v-icon class="mr-4">add_circle</v-icon>
                 New project

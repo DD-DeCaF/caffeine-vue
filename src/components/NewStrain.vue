@@ -57,11 +57,15 @@
                     name="organism"
                     label="Organism"
                     type="text"
+                    ref="organismAutocomplete"
                   >
                     <template v-slot:prepend-item>
                       <v-btn
                         flat
-                        @click.stop="isOrganismCreationDialogVisible = true"
+                        @click.stop="
+                          isOrganismCreationDialogVisible = true;
+                          $refs.organismAutocomplete.isMenuActive = false;
+                        "
                         class="pl-0"
                       >
                         <v-icon class="mr-2" color="primary">add_circle</v-icon>
@@ -79,11 +83,15 @@
                     name="project"
                     label="Project"
                     type="text"
+                    ref="projectAutocomplete"
                   >
                     <template v-slot:prepend-item>
                       <v-btn
                         flat
-                        @click.stop="isProjectCreationDialogVisible = true"
+                        @click.stop="
+                          isProjectCreationDialogVisible = true;
+                          $refs.projectAutocomplete.isMenuActive = false;
+                        "
                         class="pl-0"
                       >
                         <v-icon class="mr-2" color="primary">add_circle</v-icon>
