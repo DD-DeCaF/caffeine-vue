@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueAnalytics from "vue-analytics";
+import VueRx from "vue-rx";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
@@ -43,6 +44,7 @@ if (sentryDSN) {
 }
 
 Vue.use(require("vue-moment"));
+Vue.use(VueRx);
 
 if (gaTrackingID) {
   Vue.use(VueAnalytics, {
