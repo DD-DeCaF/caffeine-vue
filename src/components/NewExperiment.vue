@@ -154,11 +154,17 @@
                     <td>
                       <v-text-field
                         v-model.number="fluxomicsItem.measurement"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                     <td>
                       <v-text-field
                         v-model.number="fluxomicsItem.uncertainty"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                   </template>
@@ -200,11 +206,17 @@
                     <td>
                       <v-text-field
                         v-model.number="metabolomicsItem.measurement"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                     <td>
                       <v-text-field
                         v-model.number="metabolomicsItem.uncertainty"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                   </template>
@@ -233,11 +245,17 @@
                     <td>
                       <v-text-field
                         v-model.number="growthItem.measurement"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                     <td>
                       <v-text-field
                         v-model.number="growthItem.uncertainty"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
                       ></v-text-field>
                     </td>
                   </template>
