@@ -36,6 +36,7 @@
                       name="ph"
                       label="pH"
                       type="number"
+                      step="any"
                     ></v-text-field>
                   </v-flex>
 
@@ -88,6 +89,7 @@
                             name="mass"
                             label="Mass Concentration"
                             type="number"
+                            step="any"
                             class="mx-2"
                           ></v-text-field>
                         </v-flex>

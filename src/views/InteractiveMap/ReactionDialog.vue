@@ -25,6 +25,7 @@
             <v-text-field
               v-model.number="lowerBound"
               type="number"
+              step="any"
               label="Lower bound"
               :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
             ></v-text-field>
@@ -33,6 +34,7 @@
             <v-text-field
               v-model.number="upperBound"
               type="number"
+              step="any"
               label="Upper bound"
               :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
             ></v-text-field>

@@ -114,6 +114,7 @@
           <v-text-field
             v-model.number="editBoundsLowerBound"
             type="number"
+            step="any"
             label="Lower bound"
             :rules="[editBoundsBoundRule]"
           ></v-text-field>
@@ -122,6 +123,7 @@
           <v-text-field
             v-model.number="editBoundsUpperBound"
             type="number"
+            step="any"
             label="Upper bound"
             :rules="[editBoundsBoundRule]"
           ></v-text-field>
