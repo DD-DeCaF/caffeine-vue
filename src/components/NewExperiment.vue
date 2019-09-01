@@ -40,7 +40,8 @@
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
-                            @click.stop="
+                            ripple
+                            @click="
                               isNewStrainDialogVisible = true;
                               currentRowIndex = index;
                               $refs.strainAutocomplete.isMenuActive = false;
@@ -70,7 +71,8 @@
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
-                            @click.stop="
+                            ripple
+                            @click="
                               isNewMediumDialogVisible = true;
                               currentRowIndex = index;
                               $refs.mediumAutocomplete.isMenuActive = false;

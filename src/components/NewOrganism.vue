@@ -42,6 +42,7 @@
                 >
                   <template v-slot:prepend-item>
                     <v-list-tile
+                      ripple
                       @click="
                         isProjectCreationDialogVisible = true;
                         $refs.projectAutocomplete.isMenuActive = false;

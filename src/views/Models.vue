@@ -143,6 +143,7 @@
                 >
                   <template v-slot:prepend-item>
                     <v-list-tile
+                      ripple
                       @click="
                         isOrganismCreationDialogVisible = true;
                         $refs.organismAutocomplete.isMenuActive = false;
@@ -170,6 +171,7 @@
                 >
                   <template v-slot:prepend-item>
                     <v-list-tile
+                      ripple
                       @click="
                         isMapCreationDialogVisible = true;
                         $refs.mapAutocomplete.isMenuActive = false;

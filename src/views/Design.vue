@@ -33,7 +33,8 @@
           >
             <template v-slot:prepend-item>
               <v-list-tile
-                @click.stop="
+                ripple
+                @click="
                   isOrganismCreationDialogVisible = true;
                   $refs.organismAutocomplete.isMenuActive = false;
                 "
@@ -87,7 +88,8 @@
           >
             <template v-slot:prepend-item>
               <v-list-tile
-                @click.stop="
+                ripple
+                @click="
                   isProjectCreationDialogVisible = true;
                   $refs.projectAutocomplete.isMenuActive = false;
                 "
@@ -165,7 +167,8 @@
                 >
                   <template v-slot:prepend-item>
                     <v-list-tile
-                      @click.stop="
+                      ripple
+                      @click="
                         isModelCreationDialogVisible = true;
                         $refs.modelAutocomplete.isMenuActive = false;
                       "
