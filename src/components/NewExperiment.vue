@@ -243,6 +243,59 @@
                 </v-data-table>
               </template>
 
+              <!-- Uptake/Secretion rates table -->
+              <template v-if="selectedTable === 'uptakeSecretion'">
+                <v-data-table
+                  :headers="uptakeSecretionHeaders"
+                  :items="uptakeSecretion"
+                  :pagination.sync="pagination"
+                  disable-initial-sort
+                >
+                  <template
+                    v-slot:items="{ item: uptakeSecretionItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="samples.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="uptakeSecretionItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="uptakeSecretionItem.compound"
+                        :items="availableCompounds"
+                        name="compound"
+                        type="text"
+                      ></v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="uptakeSecretionItem.measurement"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="uptakeSecretionItem.uncertainty"
+                        suffix="mmol/g/h"
+                        type="number"
+                        step="any"
+                      ></v-text-field>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
+
               <!-- Growth table -->
               <template v-if="selectedTable === 'growth'">
                 <v-data-table
@@ -348,6 +401,11 @@
                   color="primary"
                 ></v-radio>
                 <v-radio
+                  label="Uptake/Secretion rates"
+                  value="uptakeSecretion"
+                  color="primary"
+                ></v-radio>
+                <v-radio
                   label="Growth"
                   value="growth"
                   color="primary"
@@ -426,6 +484,17 @@ export default Vue.extend({
         }
       }
     ],
+    uptakeSecretion: [
+      {
+        temporaryId: uuidv4(),
+        sample: {
+          name: null
+        },
+        compound: {
+          name: null
+        }
+      }
+    ],
     growth: [
       {
         temporaryId: uuidv4(),
@@ -450,6 +519,7 @@ export default Vue.extend({
       samples: "Samples",
       fluxomics: "Fluxomics",
       metabolomics: "Metabolomics",
+      uptakeSecretion: "Uptake/Secretion rates",
       growth: "Growth"
     },
     conditionsHeaders: [
@@ -470,6 +540,12 @@ export default Vue.extend({
       { text: "Uncertainty", value: "uncertainty", width: "25%" }
     ],
     metabolomicsHeaders: [
+      { text: "Sample", value: "sample", width: "25%" },
+      { text: "Compound", value: "reaction", width: "25%" },
+      { text: "Measurement", value: "measurement", width: "25%" },
+      { text: "Uncertainty", value: "uncertainty", width: "25%" }
+    ],
+    uptakeSecretionHeaders: [
       { text: "Sample", value: "sample", width: "25%" },
       { text: "Compound", value: "reaction", width: "25%" },
       { text: "Measurement", value: "measurement", width: "25%" },
