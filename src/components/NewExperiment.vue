@@ -2,6 +2,10 @@
   <div>
     <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
     <NewMedium v-model="isNewMediumDialogVisible" @return-object="passMedium" />
+    <NewProject
+      v-model="isProjectCreationDialogVisible"
+      @return-object="passProject"
+    />
     <v-dialog
       v-model="isDialogVisible"
       full-width
@@ -105,10 +109,11 @@
                     <td>
                       <v-select
                         return-object
-                        :items="conditions"
+                        :items="conditions.filter(c => c.name)"
                         item-value="temporaryId"
                         item-text="name"
                         v-model="sample.condition"
+                        no-data-text="No data available. You can add it in Conditions table."
                       >
                       </v-select>
                     </td>
@@ -138,10 +143,11 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples"
+                        :items="samples.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="fluxomicsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
                       >
                       </v-select>
                     </td>
@@ -185,10 +191,11 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples"
+                        :items="samples.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="metabolomicsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
                       >
                       </v-select>
                     </td>
@@ -235,10 +242,11 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples"
+                        :items="samples.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="growthItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
                       >
                       </v-select>
                     </td>
@@ -261,15 +269,6 @@
                   </template>
                 </v-data-table>
               </template>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" flat @click="isDialogVisible = false">
-                  Cancel
-                </v-btn>
-                <v-btn color="primary">
-                  Submit
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-flex>
 
@@ -279,15 +278,41 @@
           <v-flex md2>
             <v-card class="pa-4" elevation="0">
               <v-text-field
-                v-model="experimentName"
+                v-model="experiment.name"
                 label="Experiment name"
               ></v-text-field>
               <v-textarea
-                v-model="experimentDescription"
+                v-model="experiment.description"
                 label="Description"
                 auto-grow
                 rows="1"
               ></v-textarea>
+              <v-autocomplete-extended
+                item-text="name"
+                item-value="id"
+                v-model="experiment.project_id"
+                :items="availableProjects"
+                name="project"
+                label="Project"
+                type="text"
+                ref="projectAutocomplete"
+              >
+                <template v-slot:prepend-item>
+                  <v-list-tile
+                    ripple
+                    @click="
+                      isProjectCreationDialogVisible = true;
+                      $refs.projectAutocomplete.isMenuActive = false;
+                    "
+                  >
+                    <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                    <v-list-tile-title>
+                      New project
+                    </v-list-tile-title>
+                  </v-list-tile>
+                  <v-divider class="my-2"></v-divider>
+                </template>
+              </v-autocomplete-extended>
               <v-radio-group v-model="selectedTable">
                 <v-radio
                   label="Conditions"
@@ -315,6 +340,15 @@
                   color="primary"
                 ></v-radio>
               </v-radio-group>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="secondary" flat @click="isDialogVisible = false">
+                  Cancel
+                </v-btn>
+                <v-btn color="primary" @click="createExperiment()">
+                  Submit
+                </v-btn>
+              </v-card-actions>
             </v-card>
           </v-flex>
         </v-layout>
@@ -387,10 +421,14 @@ export default Vue.extend({
         }
       }
     ],
-    experimentName: null,
-    experimentDescription: null,
+    experiment: {
+      name: null,
+      description: null,
+      project_id: null
+    },
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
+    isProjectCreationDialogVisible: false,
     currentRowIndex: null,
     availableCompounds: [],
     selectedTable: "conditions",
@@ -438,6 +476,9 @@ export default Vue.extend({
     },
     availableMedia() {
       return this.$store.state.media.media;
+    },
+    availableProjects() {
+      return this.$store.state.projects.projects;
     },
     selectedTableName() {
       return this.tableNames[this.selectedTable];
@@ -510,7 +551,11 @@ export default Vue.extend({
     },
     passMedium(medium) {
       this.conditions[this.currentRowIndex].medium = medium;
-    }
+    },
+    passProject(project) {
+      this.experiment.project_id = project.id;
+    },
+    createExperiment() {}
   }
 });
 </script>
