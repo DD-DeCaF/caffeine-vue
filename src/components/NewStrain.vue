@@ -213,7 +213,7 @@ export default Vue.extend({
       this.organism = organism;
     },
     passProject(project) {
-      this.project = project;
+      this.strain.project_id = project.id;
     }
   }
 });
