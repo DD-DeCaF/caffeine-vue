@@ -296,6 +296,70 @@
                 </v-data-table>
               </template>
 
+              <!-- Molar Yields table -->
+              <template v-if="selectedTable === 'molarYields'">
+                <v-data-table
+                  :headers="molarYieldsHeaders"
+                  :items="molarYields"
+                  :pagination.sync="pagination"
+                  disable-initial-sort
+                >
+                  <template
+                    v-slot:items="{ item: molarYieldsItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="samples.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="molarYieldsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="molarYieldsItem.numeratorCompound"
+                        :items="availableCompounds"
+                        name="numeratorCompound"
+                        type="text"
+                      ></v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="molarYieldsItem.denominatorCompound"
+                        :items="availableCompounds"
+                        name="denominatorCompound"
+                        type="text"
+                      ></v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="molarYieldsItem.measurement"
+                        suffix="mmol-num/mmol-den"
+                        type="number"
+                        step="any"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model.number="molarYieldsItem.uncertainty"
+                        suffix="mmol-num/mmol-den"
+                        type="number"
+                        step="any"
+                      ></v-text-field>
+                    </td>
+                  </template>
+                </v-data-table>
+              </template>
+
               <!-- Growth table -->
               <template v-if="selectedTable === 'growth'">
                 <v-data-table
@@ -406,6 +470,11 @@
                   color="primary"
                 ></v-radio>
                 <v-radio
+                  label="Molar Yields"
+                  value="molarYields"
+                  color="primary"
+                ></v-radio>
+                <v-radio
                   label="Growth"
                   value="growth"
                   color="primary"
@@ -495,6 +564,20 @@ export default Vue.extend({
         }
       }
     ],
+    molarYields: [
+      {
+        temporaryId: uuidv4(),
+        sample: {
+          name: null
+        },
+        numeratorCompound: {
+          name: null
+        },
+        denominatorCompound: {
+          name: null
+        }
+      }
+    ],
     growth: [
       {
         temporaryId: uuidv4(),
@@ -520,6 +603,7 @@ export default Vue.extend({
       fluxomics: "Fluxomics",
       metabolomics: "Metabolomics",
       uptakeSecretion: "Uptake/Secretion rates",
+      molarYields: "Molar Yields",
       growth: "Growth"
     },
     conditionsHeaders: [
@@ -541,15 +625,22 @@ export default Vue.extend({
     ],
     metabolomicsHeaders: [
       { text: "Sample", value: "sample", width: "25%" },
-      { text: "Compound", value: "reaction", width: "25%" },
+      { text: "Compound", value: "compound", width: "25%" },
       { text: "Measurement", value: "measurement", width: "25%" },
       { text: "Uncertainty", value: "uncertainty", width: "25%" }
     ],
     uptakeSecretionHeaders: [
       { text: "Sample", value: "sample", width: "25%" },
-      { text: "Compound", value: "reaction", width: "25%" },
+      { text: "Compound", value: "compound", width: "25%" },
       { text: "Measurement", value: "measurement", width: "25%" },
       { text: "Uncertainty", value: "uncertainty", width: "25%" }
+    ],
+    molarYieldsHeaders: [
+      { text: "Sample", value: "sample", width: "20%" },
+      { text: "Numerator compound", value: "numeratorCompound", width: "20%" },
+      { text: "Denominator compound", value: "denominatorCompound", width: "20%" },
+      { text: "Measurement", value: "measurement", width: "20%" },
+      { text: "Uncertainty", value: "uncertainty", width: "20%" }
     ],
     growthHeaders: [
       { text: "Sample", value: "sample", width: "30%" },
