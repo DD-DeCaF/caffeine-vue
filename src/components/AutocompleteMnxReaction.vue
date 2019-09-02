@@ -18,6 +18,8 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import { Observable, of, concat } from "rxjs";
+import { map, filter, startWith, switchMap, share } from "rxjs/operators";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
 
@@ -70,34 +72,55 @@ export default Vue.extend({
   data: () => ({
     addReactionItem: null,
     addReactionSearchResults: [] as MetaNetXReaction[],
-    isLoadingAddReaction: false,
     addReactionSearchQuery: null,
-    requestError: false,
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
   }),
-  watch: {
-    addReactionSearchQuery(query: string): void {
-      this.addReactionSearchResults = [];
-      if (query === null || query.trim().length === 0) {
-        return;
-      }
+  subscriptions(this) {
+    const query$ = this.$watchAsObservable("addReactionSearchQuery").pipe(
+      map(query => query.newValue as string),
+      startWith(null),
+      switchMap(query => {
+        if (query === null || query.trim().length === 0) {
+          return of({
+            status: "responded" as "responded",
+            results: [] as MetaNetXReaction[]
+          });
+        }
 
-      this.isLoadingAddReaction = true;
-      this.requestError = false;
-      axios
-        .get(`${settings.apis.metanetx}/reactions?query=${query}`)
-        .then(response => {
-          this.addReactionSearchResults = response.data;
-        })
-        .catch(error => {
-          this.requestError = true;
-        })
-        .then(() => {
-          this.isLoadingAddReaction = false;
-        });
-    }
+        return concat(
+          of({
+            status: "searching" as "searching",
+            query: query
+          }),
+          axios
+            .get<MetaNetXReaction[]>(
+              `${settings.apis.metanetx}/reactions?query=${query}`
+            )
+            .then(
+              response => ({
+                status: "responded" as "responded",
+                results: response.data
+              }),
+              error => ({
+                status: "error" as "error",
+                error: error
+              })
+            )
+        );
+      }),
+      share()
+    );
+
+    return {
+      addReactionSearchResults: query$.pipe(
+        filter(r => r.status === "responded"),
+        map(r => r.status === "responded" && r.results)
+      ),
+      requestError: query$.pipe(map(r => r.status === "error")),
+      isLoadingAddReaction: query$.pipe(map(r => r.status === "searching"))
+    };
   },
   methods: {
     reactionDisplay(reaction: MetaNetXReaction): string {
