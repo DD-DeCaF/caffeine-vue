@@ -19,7 +19,14 @@
 import Vue from "vue";
 import axios from "axios";
 import { Observable, of, concat } from "rxjs";
-import { map, filter, startWith, switchMap, share } from "rxjs/operators";
+import {
+  map,
+  filter,
+  startWith,
+  switchMap,
+  share,
+  debounceTime
+} from "rxjs/operators";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
 
@@ -81,6 +88,7 @@ export default Vue.extend({
     const query$ = this.$watchAsObservable("addReactionSearchQuery").pipe(
       map(query => query.newValue as string),
       startWith(null),
+      debounceTime(500),
       switchMap(query => {
         if (query === null || query.trim().length === 0) {
           return of({
