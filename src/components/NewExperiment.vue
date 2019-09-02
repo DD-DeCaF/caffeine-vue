@@ -123,7 +123,20 @@
                       <v-text-field v-model="sample.name"></v-text-field>
                     </td>
                     <td>
-                      <v-text-field v-model="sample.time"></v-text-field>
+                      <v-text-field
+                        v-model="sample.startTime"
+                        mask="date-with-time"
+                        return-masked-value
+                        placeholder="dd/mm/yyyy hh:mm"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="sample.endTime"
+                        mask="date-with-time"
+                        return-masked-value
+                        placeholder="dd/mm/yyyy hh:mm"
+                      ></v-text-field>
                     </td>
                   </template>
                 </v-data-table>
@@ -445,9 +458,10 @@ export default Vue.extend({
       { text: "Medium", value: "medium", width: "35%" }
     ],
     samplesHeaders: [
-      { text: "Condition", value: "condition", width: "30%" },
-      { text: "Name", value: "name", width: "35%" },
-      { text: "Time", value: "time", width: "35%" }
+      { text: "Condition", value: "condition", width: "25%" },
+      { text: "Name", value: "name", width: "25%" },
+      { text: "Start time", value: "startTime", width: "25%" },
+      { text: "End time", value: "endTime", width: "25%" }
     ],
     fluxomicsHeaders: [
       { text: "Sample", value: "sample", width: "25%" },

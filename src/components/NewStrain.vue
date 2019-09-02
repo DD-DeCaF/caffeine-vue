@@ -198,7 +198,6 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/strains`, this.strain)
         .then((response: AxiosResponse) => {
           const strainWithId = { ...this.strain, ...response.data };
-          console.log({ strainWithId });
           this.$store.commit("strains/addStrain", strainWithId);
           this.$emit("return-object", strainWithId);
           this.isStrainCreationSuccess = true;
