@@ -213,7 +213,7 @@
                     <td>
                       <v-text-field
                         v-model.number="metabolomicsItem.measurement"
-                        suffix="mmol/g/h"
+                        suffix="mmol/l"
                         type="number"
                         step="any"
                       ></v-text-field>
@@ -221,7 +221,7 @@
                     <td>
                       <v-text-field
                         v-model.number="metabolomicsItem.uncertainty"
-                        suffix="mmol/g/h"
+                        suffix="mmol/l"
                         type="number"
                         step="any"
                       ></v-text-field>
