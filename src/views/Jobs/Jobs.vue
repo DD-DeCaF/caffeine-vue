@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-layout justify-center>
-      <v-flex md9>
+      <v-flex xs12 sm12 md12 lg9>
         <h1 class="mb-2">Jobs</h1>
         <v-data-table
           :headers="headers"
