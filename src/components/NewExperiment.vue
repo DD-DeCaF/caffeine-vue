@@ -15,14 +15,14 @@
         <v-layout>
           <v-flex md10>
             <v-card class="pa-4" elevation="0">
-              <div class="display-1 mb-2">{{ selectedTableName }}</div>
+              <div class="display-1 mb-2">{{ tables[selectedTable].name }}</div>
               <v-btn color="primary" small @click="addRow()">
                 Add row
               </v-btn>
               <!-- Conditions table -->
               <template v-if="selectedTable === 'conditions'">
                 <v-data-table
-                  :headers="conditionsHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="conditions"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -100,7 +100,7 @@
               <!-- Samples table -->
               <template v-if="selectedTable === 'samples'">
                 <v-data-table
-                  :headers="samplesHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="samples"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -145,7 +145,7 @@
               <!-- Fluxomics table -->
               <template v-if="selectedTable === 'fluxomics'">
                 <v-data-table
-                  :headers="fluxomicsHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="fluxomics"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -193,7 +193,7 @@
               <!-- Metabolomics table -->
               <template v-if="selectedTable === 'metabolomics'">
                 <v-data-table
-                  :headers="metabolomicsHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="metabolomics"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -246,7 +246,7 @@
               <!-- Uptake/Secretion rates table -->
               <template v-if="selectedTable === 'uptakeSecretion'">
                 <v-data-table
-                  :headers="uptakeSecretionHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="uptakeSecretion"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -299,7 +299,7 @@
               <!-- Molar Yields table -->
               <template v-if="selectedTable === 'molarYields'">
                 <v-data-table
-                  :headers="molarYieldsHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="molarYields"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -363,7 +363,7 @@
               <!-- Growth table -->
               <template v-if="selectedTable === 'growth'">
                 <v-data-table
-                  :headers="growthHeaders"
+                  :headers="tables[selectedTable].headers"
                   :items="growth"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -597,56 +597,78 @@ export default Vue.extend({
     currentRowIndex: null,
     availableCompounds: [],
     selectedTable: "conditions",
-    tableNames: {
-      conditions: "Conditions",
-      samples: "Samples",
-      fluxomics: "Fluxomics",
-      metabolomics: "Metabolomics",
-      uptakeSecretion: "Uptake/Secretion rates",
-      molarYields: "Molar Yields",
-      growth: "Growth"
+    tables: {
+      conditions: {
+        name: "Conditions",
+        headers: [
+          { text: "Name", value: "name", width: "30%" },
+          { text: "Strain", value: "strain", width: "35%" },
+          { text: "Medium", value: "medium", width: "35%" }
+        ]
+      },
+      samples: {
+        name: "Samples",
+        headers: [
+          { text: "Condition", value: "condition", width: "25%" },
+          { text: "Name", value: "name", width: "25%" },
+          { text: "Start time", value: "startTime", width: "25%" },
+          { text: "End time", value: "endTime", width: "25%" }
+        ]
+      },
+      fluxomics: {
+        name: "Fluxomics",
+        headers: [
+          { text: "Sample", value: "sample", width: "25%" },
+          { text: "Reaction", value: "reaction", width: "25%" },
+          { text: "Measurement", value: "measurement", width: "25%" },
+          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+        ]
+      },
+      metabolomics: {
+        name: "Metabolomics",
+        headers: [
+          { text: "Sample", value: "sample", width: "25%" },
+          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Measurement", value: "measurement", width: "25%" },
+          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+        ]
+      },
+      uptakeSecretion: {
+        name: "Uptake/Secretion rates",
+        headers: [
+          { text: "Sample", value: "sample", width: "25%" },
+          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Measurement", value: "measurement", width: "25%" },
+          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+        ]
+      },
+      molarYields: {
+        name: "Molar Yields",
+        headers: [
+          { text: "Sample", value: "sample", width: "20%" },
+          {
+            text: "Numerator compound",
+            value: "numeratorCompound",
+            width: "20%"
+          },
+          {
+            text: "Denominator compound",
+            value: "denominatorCompound",
+            width: "20%"
+          },
+          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Uncertainty", value: "uncertainty", width: "20%" }
+        ]
+      },
+      growth: {
+        name: "Growth",
+        headers: [
+          { text: "Sample", value: "sample", width: "30%" },
+          { text: "Measurement", value: "measurement", width: "35%" },
+          { text: "Uncertainty", value: "uncertainty", width: "35%" }
+        ]
+      }
     },
-    conditionsHeaders: [
-      { text: "Name", value: "name", width: "30%" },
-      { text: "Strain", value: "strain", width: "35%" },
-      { text: "Medium", value: "medium", width: "35%" }
-    ],
-    samplesHeaders: [
-      { text: "Condition", value: "condition", width: "25%" },
-      { text: "Name", value: "name", width: "25%" },
-      { text: "Start time", value: "startTime", width: "25%" },
-      { text: "End time", value: "endTime", width: "25%" }
-    ],
-    fluxomicsHeaders: [
-      { text: "Sample", value: "sample", width: "25%" },
-      { text: "Reaction", value: "reaction", width: "25%" },
-      { text: "Measurement", value: "measurement", width: "25%" },
-      { text: "Uncertainty", value: "uncertainty", width: "25%" }
-    ],
-    metabolomicsHeaders: [
-      { text: "Sample", value: "sample", width: "25%" },
-      { text: "Compound", value: "compound", width: "25%" },
-      { text: "Measurement", value: "measurement", width: "25%" },
-      { text: "Uncertainty", value: "uncertainty", width: "25%" }
-    ],
-    uptakeSecretionHeaders: [
-      { text: "Sample", value: "sample", width: "25%" },
-      { text: "Compound", value: "compound", width: "25%" },
-      { text: "Measurement", value: "measurement", width: "25%" },
-      { text: "Uncertainty", value: "uncertainty", width: "25%" }
-    ],
-    molarYieldsHeaders: [
-      { text: "Sample", value: "sample", width: "20%" },
-      { text: "Numerator compound", value: "numeratorCompound", width: "20%" },
-      { text: "Denominator compound", value: "denominatorCompound", width: "20%" },
-      { text: "Measurement", value: "measurement", width: "20%" },
-      { text: "Uncertainty", value: "uncertainty", width: "20%" }
-    ],
-    growthHeaders: [
-      { text: "Sample", value: "sample", width: "30%" },
-      { text: "Measurement", value: "measurement", width: "35%" },
-      { text: "Uncertainty", value: "uncertainty", width: "35%" }
-    ],
     pagination: {
       rowsPerPage: 10
     }
@@ -660,9 +682,6 @@ export default Vue.extend({
     },
     availableProjects() {
       return this.$store.state.projects.projects;
-    },
-    selectedTableName() {
-      return this.tableNames[this.selectedTable];
     },
     isDialogVisible: {
       get() {
