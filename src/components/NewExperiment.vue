@@ -445,38 +445,10 @@
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTable">
                 <v-radio
-                  label="Conditions"
-                  value="conditions"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Samples"
-                  value="samples"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Fluxomics"
-                  value="fluxomics"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Metabolomics"
-                  value="metabolomics"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Uptake/Secretion rates"
-                  value="uptakeSecretion"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Molar Yields"
-                  value="molarYields"
-                  color="primary"
-                ></v-radio>
-                <v-radio
-                  label="Growth"
-                  value="growth"
+                  v-for="(table, key) in tables"
+                  :key="key"
+                  :label="table.name"
+                  :value="key"
                   color="primary"
                 ></v-radio>
               </v-radio-group>
