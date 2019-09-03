@@ -88,6 +88,7 @@
                             ]"
                             name="mass"
                             label="Mass Concentration"
+                            placeholder=" "
                             suffix="mmol/l"
                             type="number"
                             step="any"
