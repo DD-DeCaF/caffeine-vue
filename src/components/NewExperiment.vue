@@ -487,75 +487,49 @@ export default Vue.extend({
     conditions: [
       {
         temporaryId: uuidv4(),
-        strain: {
-          name: null
-        },
-        medium: {
-          name: null
-        }
+        strain: null,
+        medium: null
       }
     ],
     samples: [
       {
         temporaryId: uuidv4(),
-        condition: {
-          name: null
-        }
+        condition: null
       }
     ],
     fluxomics: [
       {
         temporaryId: uuidv4(),
-        sample: {
-          name: null
-        },
-        reaction: {
-          name: null
-        }
+        sample: null,
+        reaction: null
       }
     ],
     metabolomics: [
       {
         temporaryId: uuidv4(),
-        sample: {
-          name: null
-        },
-        compound: {
-          name: null
-        }
+        sample: null,
+        compound: null
       }
     ],
     uptakeSecretion: [
       {
         temporaryId: uuidv4(),
-        sample: {
-          name: null
-        },
-        compound: {
-          name: null
-        }
+        sample: null,
+        compound: null
       }
     ],
     molarYields: [
       {
         temporaryId: uuidv4(),
-        sample: {
-          name: null
-        },
-        numeratorCompound: {
-          name: null
-        },
-        denominatorCompound: {
-          name: null
-        }
+        sample: null,
+        numeratorCompound: null,
+        denominatorCompound: null
       }
     ],
     growth: [
       {
         temporaryId: uuidv4(),
-        sample: {
-          name: null
-        }
+        sample: null
       }
     ],
     experiment: {
@@ -675,46 +649,43 @@ export default Vue.extend({
       if (this.selectedTable === "conditions") {
         this.conditions.push({
           temporaryId: uuidv4(),
-          strain: {
-            name: null
-          },
-          medium: {
-            name: null
-          }
+          strain: null,
+          medium: null
         });
       } else if (this.selectedTable === "samples") {
         this.samples.push({
           temporaryId: uuidv4(),
-          condition: {
-            name: null
-          }
+          condition: null
         });
       } else if (this.selectedTable === "fluxomics") {
         this.fluxomics.push({
           temporaryId: uuidv4(),
-          sample: {
-            name: null
-          },
-          reaction: {
-            name: null
-          }
+          sample: null,
+          reaction: null
         });
       } else if (this.selectedTable === "metabolomics") {
         this.metabolomics.push({
           temporaryId: uuidv4(),
-          sample: {
-            name: null
-          },
-          compound: {
-            name: null
-          }
+          sample: null,
+          compound: null
+        });
+      } else if (this.selectedTable === "uptakeSecretion") {
+        this.uptakeSecretion.push({
+          temporaryId: uuidv4(),
+          sample: null,
+          compound: null
+        });
+      } else if (this.selectedTable === "molarYields") {
+        this.uptakeSecretion.push({
+          temporaryId: uuidv4(),
+          sample: null,
+          numeratorCompound: null,
+          denominatorCompound: null
         });
       } else {
         this.growth.push({
           temporaryId: uuidv4(),
-          sample: {
-            name: null
-          }
+          sample: null
         });
       }
     },
