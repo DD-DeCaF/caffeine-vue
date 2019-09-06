@@ -23,7 +23,7 @@
               <template v-if="selectedTableKey === 'conditions'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="conditions"
+                  :items="tables.conditions.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -101,7 +101,7 @@
               <template v-if="selectedTableKey === 'samples'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="samples"
+                  :items="tables.samples.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -109,7 +109,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="conditions.filter(c => c.name)"
+                        :items="tables.conditions.items.filter(c => c.name)"
                         item-value="temporaryId"
                         item-text="name"
                         v-model="sample.condition"
@@ -146,7 +146,7 @@
               <template v-if="selectedTableKey === 'fluxomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="fluxomics"
+                  :items="tables.fluxomics.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -156,7 +156,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples.filter(s => s.name)"
+                        :items="tables.samples.items.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="fluxomicsItem.sample"
@@ -194,7 +194,7 @@
               <template v-if="selectedTableKey === 'metabolomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="metabolomics"
+                  :items="tables.metabolomics.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -204,7 +204,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples.filter(s => s.name)"
+                        :items="tables.samples.items.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="metabolomicsItem.sample"
@@ -247,7 +247,7 @@
               <template v-if="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="uptakeSecretion"
+                  :items="tables.uptakeSecretion.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -257,7 +257,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples.filter(s => s.name)"
+                        :items="tables.samples.items.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="uptakeSecretionItem.sample"
@@ -300,7 +300,7 @@
               <template v-if="selectedTableKey === 'molarYields'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="molarYields"
+                  :items="tables.molarYields.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -310,7 +310,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples.filter(s => s.name)"
+                        :items="tables.samples.items.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="molarYieldsItem.sample"
@@ -364,7 +364,7 @@
               <template v-if="selectedTableKey === 'growth'">
                 <v-data-table
                   :headers="selectedTable.headers"
-                  :items="growth"
+                  :items="tables.growth.items"
                   :pagination.sync="pagination"
                   disable-initial-sort
                 >
@@ -372,7 +372,7 @@
                     <td>
                       <v-select
                         return-object
-                        :items="samples.filter(s => s.name)"
+                        :items="tables.samples.items.filter(s => s.name)"
                         item-text="name"
                         item-value="temporaryId"
                         v-model="growthItem.sample"
@@ -484,54 +484,6 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    conditions: [
-      {
-        temporaryId: uuidv4(),
-        strain: null,
-        medium: null
-      }
-    ],
-    samples: [
-      {
-        temporaryId: uuidv4(),
-        condition: null
-      }
-    ],
-    fluxomics: [
-      {
-        temporaryId: uuidv4(),
-        sample: null,
-        reaction: null
-      }
-    ],
-    metabolomics: [
-      {
-        temporaryId: uuidv4(),
-        sample: null,
-        compound: null
-      }
-    ],
-    uptakeSecretion: [
-      {
-        temporaryId: uuidv4(),
-        sample: null,
-        compound: null
-      }
-    ],
-    molarYields: [
-      {
-        temporaryId: uuidv4(),
-        sample: null,
-        numeratorCompound: null,
-        denominatorCompound: null
-      }
-    ],
-    growth: [
-      {
-        temporaryId: uuidv4(),
-        sample: null
-      }
-    ],
     experiment: {
       name: null,
       description: null,
@@ -550,7 +502,8 @@ export default Vue.extend({
           { text: "Name", value: "name", width: "30%" },
           { text: "Strain", value: "strain", width: "35%" },
           { text: "Medium", value: "medium", width: "35%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       samples: {
         name: "Samples",
@@ -559,7 +512,8 @@ export default Vue.extend({
           { text: "Name", value: "name", width: "25%" },
           { text: "Start time", value: "startTime", width: "25%" },
           { text: "End time", value: "endTime", width: "25%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       fluxomics: {
         name: "Fluxomics",
@@ -568,7 +522,8 @@ export default Vue.extend({
           { text: "Reaction", value: "reaction", width: "25%" },
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       metabolomics: {
         name: "Metabolomics",
@@ -577,7 +532,8 @@ export default Vue.extend({
           { text: "Compound", value: "compound", width: "25%" },
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
@@ -586,7 +542,8 @@ export default Vue.extend({
           { text: "Compound", value: "compound", width: "25%" },
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       molarYields: {
         name: "Molar Yields",
@@ -604,15 +561,18 @@ export default Vue.extend({
           },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       },
       growth: {
         name: "Growth",
+        mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "30%" },
           { text: "Measurement", value: "measurement", width: "35%" },
           { text: "Uncertainty", value: "uncertainty", width: "35%" }
-        ]
+        ],
+        items: [{ temporaryId: uuidv4() }]
       }
     },
     pagination: {
@@ -649,54 +609,15 @@ export default Vue.extend({
   },
   methods: {
     addRow() {
-      if (this.selectedTableKey === "conditions") {
-        this.conditions.push({
-          temporaryId: uuidv4(),
-          strain: null,
-          medium: null
-        });
-      } else if (this.selectedTableKey === "samples") {
-        this.samples.push({
-          temporaryId: uuidv4(),
-          condition: null
-        });
-      } else if (this.selectedTableKey === "fluxomics") {
-        this.fluxomics.push({
-          temporaryId: uuidv4(),
-          sample: null,
-          reaction: null
-        });
-      } else if (this.selectedTableKey === "metabolomics") {
-        this.metabolomics.push({
-          temporaryId: uuidv4(),
-          sample: null,
-          compound: null
-        });
-      } else if (this.selectedTable === "uptakeSecretion") {
-        this.uptakeSecretion.push({
-          temporaryId: uuidv4(),
-          sample: null,
-          compound: null
-        });
-      } else if (this.selectedTable === "molarYields") {
-        this.uptakeSecretion.push({
-          temporaryId: uuidv4(),
-          sample: null,
-          numeratorCompound: null,
-          denominatorCompound: null
-        });
-      } else {
-        this.growth.push({
-          temporaryId: uuidv4(),
-          sample: null
-        });
-      }
+      this.selectedTable.items.push({
+        temporaryId: uuidv4()
+      });
     },
     passStrain(strain) {
-      this.conditions[this.currentRowIndex].strain = strain;
+      this.selectedTable.items[this.currentRowIndex].strain = strain;
     },
     passMedium(medium) {
-      this.conditions[this.currentRowIndex].medium = medium;
+      this.selectedTable.items[this.currentRowIndex].medium = medium;
     },
     passProject(project) {
       this.experiment.project_id = project.id;
