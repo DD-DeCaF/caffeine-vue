@@ -7,8 +7,8 @@
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
-    :item-text="reactionDisplay"
-    item-value="reaction.mnx_id"
+    :item-text="metaboliteDisplay"
+    item-value="mnx_id"
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
@@ -19,11 +19,6 @@
 import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
-import { Reaction } from "@/store/modules/interactiveMap";
-import {
-  MetaNetXMetabolite,
-  Annotation
-} from "./AutocompleteMnxMetabolite.vue";
 
 export interface MetaNetXMetabolite {
   annotation: Annotation;
@@ -48,7 +43,7 @@ export interface Annotation {
 }
 
 export default Vue.extend({
-  name: "AutocompleteMnxReaction",
+  name: "AutocompleteMnxMetabolite",
   inheritAttrs: false,
   props: {
     rules: [Array, Object],
@@ -56,13 +51,11 @@ export default Vue.extend({
   },
   data: () => ({
     addItem: null,
-    searchResults: [] as MetaNetXReaction[],
-    isLoading: false,
+    searchResults: [] as MetaNetXMetabolite[],
     searchQuery: null,
-    requestError: false,
     requestErrorRule: error =>
       !error ||
-      "Could not search MetaNetX for reactions, please check your internet connection."
+      "Could not search MetaNetX for compounds, please check your internet connection."
   }),
   watch: {
     searchQuery(query: string): void {
@@ -74,7 +67,7 @@ export default Vue.extend({
       this.isLoading = true;
       this.requestError = false;
       axios
-        .get(`${settings.apis.metanetx}/reactions?query=${query}`)
+        .get(`${settings.apis.metanetx}/metabolites?query=${query}`)
         .then(response => {
           this.searchResults = response.data;
         })
@@ -87,44 +80,11 @@ export default Vue.extend({
     }
   },
   methods: {
-    reactionDisplay(reaction: MetaNetXReaction): string {
-      const { name, mnx_id, ec, equation_parsed } = reaction.reaction;
-      return `${name || "N/A"} (${mnx_id}) ${
-        ec ? `EC:${ec}` : ""
-      } – ${this.equationDisplay(reaction)}`;
+    metaboliteDisplay(metabolite: MetaNetXMetabolite): string {
+      const { name, mnx_id, formula } = metabolite;
+      return `${name || "N/A"} (${mnx_id}) – ${formula}`;
     },
-    equationDisplay(reaction: MetaNetXReaction): string {
-      const { equation_parsed } = reaction.reaction;
-
-      const substrates = equation_parsed
-        .filter(e => e.coefficient < 0)
-        .map(e => ({ ...e, coefficient: -e.coefficient }));
-      const products = equation_parsed.filter(e => e.coefficient > 0);
-
-      const substratesSerialized = substrates
-        .map(({ coefficient, metabolite_id }) => {
-          const fullMetabolite = reaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === metabolite_id
-          );
-          // TODO: print compartment_id, mapped through annotations
-          return `${coefficient} \`${fullMetabolite!.name}\``;
-        })
-        .join(" + ");
-      const productsSerialized = products
-        .map(({ coefficient, metabolite_id }) => {
-          const fullMetabolite = reaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === metabolite_id
-          );
-          // TODO: print compartment_id, mapped through annotations
-          return `${coefficient} \`${fullMetabolite!.name}\``;
-        })
-        .join(" + ");
-
-      return (
-        (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
-      );
-    },
-    onChange(selectedReaction: MetaNetXReaction): void {
+    onChange(selectedMetabolite: MetaNetXMetabolite): void {
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
@@ -132,35 +92,7 @@ export default Vue.extend({
         });
       }
 
-      const reaction: Reaction = {
-        id: selectedReaction.reaction.mnx_id,
-        name: selectedReaction.reaction.name || "",
-        // TODO: rebuild reaction string more consistently, from equation_parsed
-        reactionString: this.equationDisplay(selectedReaction),
-        // Note: Assuming all reactions in the universal model are
-        // reversible, but this might not be the case. Could potentially use
-        // the reaction string to check reversibility.
-        lowerBound: -1000,
-        upperBound: 1000,
-        metabolites: selectedReaction.reaction.equation_parsed.map(m => {
-          const fullMetabolite = selectedReaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === m.metabolite_id
-          );
-          return {
-            id: m.metabolite_id,
-            name: fullMetabolite ? fullMetabolite.name : "",
-            formula: fullMetabolite ? fullMetabolite.formula : "",
-            // TODO: use m.compartment_id, mapped through selectedReaction.annotations
-            compartment: "",
-            stoichiometry: m.coefficient
-          };
-        })
-      };
-
-      this.$emit("change", {
-        reaction: reaction,
-        mnxReaction: selectedReaction
-      });
+      this.$emit("change", selectedMetabolite);
     },
     dontFilterByDisplayedText() {
       return true;

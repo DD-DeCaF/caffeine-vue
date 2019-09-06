@@ -17,6 +17,7 @@ import FileUpload from "@/components/FileUpload.vue";
 import VSelectExtended from "@/components/VSelectExtended";
 import VAutocompleteExtended from "@/components/VAutocompleteExtended";
 import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
+import AutocompleteMnxMetabolite from "@/components/AutocompleteMnxMetabolite.vue";
 import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
@@ -61,6 +62,7 @@ Vue.component("LoaderDialog", LoaderDialog);
 Vue.component("DeletionDialog", DeletionDialog);
 Vue.component("FileUpload", FileUpload);
 Vue.component("AutocompleteMnxReaction", AutocompleteMnxReaction);
+Vue.component("AutocompleteMnxMetabolite", AutocompleteMnxMetabolite);
 Vue.component("v-select-extended", VSelectExtended);
 Vue.component("v-autocomplete-extended", VAutocompleteExtended);
 
