@@ -25,26 +25,26 @@ import {
   Annotation
 } from "./AutocompleteMnxMetabolite.vue";
 
-export interface MetaNetXReaction {
-  compartments: {
-    annotation: Annotation;
-    mnx_id: string;
-    name: string;
-    xref: string;
-  }[];
-  metabolites: MetaNetXMetabolite[];
-  reaction: {
-    mnx_id: string;
-    name: string | undefined;
-    ec: string;
-    equation_string: string;
-    equation_parsed: {
-      coefficient: number;
-      compartment_id: string;
-      metabolite_id: string;
-    }[];
-    annotation: Annotation;
-  };
+export interface MetaNetXMetabolite {
+  annotation: Annotation;
+  name: string;
+  mnx_id: string;
+  formula: string;
+}
+
+export interface Annotation {
+  bigg: string[];
+  chebi: string[];
+  deprecated: string[];
+  hmdb: string[];
+  kegg: string[];
+  metacyc: string[];
+  seed: string[];
+  reactome: string[];
+  sabiork: string[];
+  envipath: string[];
+  lipidmaps: string[];
+  slm: string[];
 }
 
 export default Vue.extend({
