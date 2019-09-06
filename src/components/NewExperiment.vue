@@ -15,14 +15,14 @@
         <v-layout>
           <v-flex md10>
             <v-card class="pa-4" elevation="0">
-              <div class="display-1 mb-2">{{ tables[selectedTable].name }}</div>
+              <div class="display-1 mb-2">{{ selectedTable.name }}</div>
               <v-btn color="primary" small @click="addRow()">
                 Add row
               </v-btn>
               <!-- Conditions table -->
-              <template v-if="selectedTable === 'conditions'">
+              <template v-if="selectedTableKey === 'conditions'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="conditions"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -98,9 +98,9 @@
               </template>
 
               <!-- Samples table -->
-              <template v-if="selectedTable === 'samples'">
+              <template v-if="selectedTableKey === 'samples'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="samples"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -143,9 +143,9 @@
               </template>
 
               <!-- Fluxomics table -->
-              <template v-if="selectedTable === 'fluxomics'">
+              <template v-if="selectedTableKey === 'fluxomics'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="fluxomics"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -191,9 +191,9 @@
               </template>
 
               <!-- Metabolomics table -->
-              <template v-if="selectedTable === 'metabolomics'">
+              <template v-if="selectedTableKey === 'metabolomics'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="metabolomics"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -244,9 +244,9 @@
               </template>
 
               <!-- Uptake/Secretion rates table -->
-              <template v-if="selectedTable === 'uptakeSecretion'">
+              <template v-if="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="uptakeSecretion"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -297,9 +297,9 @@
               </template>
 
               <!-- Molar Yields table -->
-              <template v-if="selectedTable === 'molarYields'">
+              <template v-if="selectedTableKey === 'molarYields'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="molarYields"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -361,9 +361,9 @@
               </template>
 
               <!-- Growth table -->
-              <template v-if="selectedTable === 'growth'">
+              <template v-if="selectedTableKey === 'growth'">
                 <v-data-table
-                  :headers="tables[selectedTable].headers"
+                  :headers="selectedTable.headers"
                   :items="growth"
                   :pagination.sync="pagination"
                   disable-initial-sort
@@ -443,7 +443,7 @@
                   <v-divider class="my-2"></v-divider>
                 </template>
               </v-autocomplete-extended>
-              <v-radio-group v-model="selectedTable">
+              <v-radio-group v-model="selectedTableKey">
                 <v-radio
                   v-for="(table, key) in tables"
                   :key="key"
@@ -542,7 +542,7 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     currentRowIndex: null,
     availableCompounds: [],
-    selectedTable: "conditions",
+    selectedTableKey: "conditions",
     tables: {
       conditions: {
         name: "Conditions",
@@ -636,6 +636,9 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    },
+    selectedTable() {
+      return this.tables[this.selectedTableKey];
     }
   },
   // TODO: move fetch compounds logic
@@ -646,24 +649,24 @@ export default Vue.extend({
   },
   methods: {
     addRow() {
-      if (this.selectedTable === "conditions") {
+      if (this.selectedTableKey === "conditions") {
         this.conditions.push({
           temporaryId: uuidv4(),
           strain: null,
           medium: null
         });
-      } else if (this.selectedTable === "samples") {
+      } else if (this.selectedTableKey === "samples") {
         this.samples.push({
           temporaryId: uuidv4(),
           condition: null
         });
-      } else if (this.selectedTable === "fluxomics") {
+      } else if (this.selectedTableKey === "fluxomics") {
         this.fluxomics.push({
           temporaryId: uuidv4(),
           sample: null,
           reaction: null
         });
-      } else if (this.selectedTable === "metabolomics") {
+      } else if (this.selectedTableKey === "metabolomics") {
         this.metabolomics.push({
           temporaryId: uuidv4(),
           sample: null,
