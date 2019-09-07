@@ -514,7 +514,7 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     currentRowIndex: null,
     availableCompounds: [],
-    selectedTableKey: "conditions",
+    selectedTableKey: "fluxomics",
     tables: {
       conditions: {
         name: "Conditions",
@@ -539,7 +539,10 @@ export default Vue.extend({
           { text: "Start time", value: "startTime", width: "25%" },
           { text: "End time", value: "endTime", width: "25%" }
         ],
-        items: [{ temporaryId: uuidv4() }]
+        items: [
+          { temporaryId: uuidv4(), name: "a" },
+          { temporaryId: uuidv4(), name: "b" }
+        ]
       },
       fluxomics: {
         name: "Fluxomics",
@@ -567,7 +570,19 @@ export default Vue.extend({
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [
+          { temporaryId: uuidv4() },
+          { temporaryId: uuidv4(), measurement: 1, uncertainty: 1 },
+          { temporaryId: uuidv4(), measurement: 2, uncertainty: 1 }
+        ]
+        /*
+in excel:
+sample	reaction	measurement	uncertainity
+0	MNXR94672	5
+1	CO transporter via diffusion	4	1mmol/g/h
+5		0.1	0.5 mmol/g/h
+  MNXR96863	0.1	2
+*/
       },
       metabolomics: {
         name: "Metabolomics",

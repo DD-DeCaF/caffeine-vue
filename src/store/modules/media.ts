@@ -78,7 +78,7 @@ export default {
 
       const compoundsPromise = axios
         .get<Compound[]>(`${settings.apis.warehouse}/bioentities/compounds`)
-        .then(response => response.data)
+        .then(response => response.data.slice(0, 100))
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
           throw error;

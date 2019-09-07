@@ -90,7 +90,7 @@ export default Vue.extend({
     experimentToDelete: { name: null },
     isDeleting: false,
     isDeletionDialogVisible: false,
-    isNewExperimentDialogVisible: false,
+    isNewExperimentDialogVisible: true,
     pagination: {
       rowsPerPage: 10,
       sortBy: "created",
