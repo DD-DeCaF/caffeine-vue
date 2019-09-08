@@ -168,6 +168,7 @@
                           item-value="temporaryId"
                           v-model="fluxomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @paste="paste(0, index, selectedTable, $event)"
                         >
                         </v-select>
                       </td>
@@ -175,6 +176,7 @@
                         <AutocompleteMnxReaction
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
                           @change="fluxomicsItem.reaction = $event.reaction"
+                          @paste="paste(1, index, selectedTable, $event)"
                         ></AutocompleteMnxReaction>
                       </td>
                       <td>
@@ -183,6 +185,7 @@
                           suffix="mmol/g/h"
                           type="number"
                           step="any"
+                          @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -191,6 +194,7 @@
                           suffix="mmol/g/h"
                           type="number"
                           step="any"
+                          @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                     </template>
@@ -484,6 +488,7 @@
 import Vue from "vue";
 import axios from "axios";
 import uuidv4 from "uuid/v4";
+import { tsvParseRows } from "d3-dsv";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
@@ -541,6 +546,12 @@ export default Vue.extend({
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
         ],
+        parsePasted: {
+          sample: str => null,
+          reaction: str => null,
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       metabolomics: {
@@ -657,6 +668,51 @@ export default Vue.extend({
         }
       }
       return true;
+    },
+    paste(columnOffset, rowOffset, table, $event) {
+      const text = $event.clipboardData.getData("text/plain");
+      const rows = tsvParseRows(text);
+      const isSingleValue = rows.length === 1 && rows[0].length === 1;
+      if (!text || isSingleValue) {
+        return;
+      }
+
+      // Tabular data pasted.
+      $event.preventDefault();
+
+      // rows = [["a", "5", ""]]
+      const parsedRows = rows.map(row => {
+        return row
+          .filter((cell, columnIx) => {
+            // Ignore excess columns.
+            return !!table.headers[columnOffset + columnIx];
+          })
+          .map((cell, columnIx) => {
+            const property = table.headers[columnOffset + columnIx].value;
+            let value;
+            if (cell) {
+              // Parse cell.
+              value = table.parsePasted[property](cell);
+            } else {
+              // Empty cell clears existing value.
+              value = null;
+            }
+
+            return [property, value];
+          });
+      });
+
+      // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+      parsedRows.forEach((rowPairs, rowIx) => {
+        if (!table.items[rowOffset + rowIx]) {
+          // Create excess rows.
+          table.items.push({ temporaryId: uuidv4() });
+        }
+
+        rowPairs.forEach(([property, value]) => {
+          Vue.set(table.items[rowOffset + rowIx], property, value);
+        });
+      });
     },
     createExperiment() {}
   }
