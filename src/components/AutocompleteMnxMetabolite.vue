@@ -12,6 +12,7 @@
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
+    @focus="loadForcedSearchQuery"
   ></v-autocomplete-extended>
 </template>
 
@@ -47,7 +48,8 @@ export default Vue.extend({
   inheritAttrs: false,
   props: {
     rules: [Array, Object],
-    clearOnChange: Boolean
+    clearOnChange: Boolean,
+    forceSearchQuery: String
   },
   data: () => ({
     addItem: null,
@@ -77,6 +79,9 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
+    },
+    forceSearchQuery(): void {
+      this.loadForcedSearchQuery();
     }
   },
   methods: {
@@ -94,8 +99,14 @@ export default Vue.extend({
 
       this.$emit("change", selectedMetabolite);
     },
-    dontFilterByDisplayedText() {
+    dontFilterByDisplayedText(): boolean {
       return true;
+    },
+    loadForcedSearchQuery(): void {
+      if (!this.forceSearchQuery) {
+        return;
+      }
+      this.searchQuery = this.forceSearchQuery;
     }
   }
 });
