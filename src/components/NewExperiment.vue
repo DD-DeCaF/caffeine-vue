@@ -547,7 +547,16 @@ export default Vue.extend({
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
         ],
         parsePasted: {
-          sample: str => null,
+          sample: (str, { tables }) => {
+            const index = parseInt(str, 10);
+            const isExactMatch = index.toString() === str;
+            // If an integer (without unit postfix) is pasted, use it to try to
+            // get sample by index.
+            if (isExactMatch && tables.samples.items[index]) {
+              return tables.samples.items[index];
+            }
+            return null;
+          },
           reaction: str => null,
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
@@ -692,7 +701,11 @@ export default Vue.extend({
             let value;
             if (cell) {
               // Parse cell.
-              value = table.parsePasted[property](cell);
+              value = table.parsePasted[property](cell, {
+                // Extra parameters for parsePasted:
+                tables: this.tables,
+                availableCompounds: this.availableCompounds
+              });
             } else {
               // Empty cell clears existing value.
               value = null;
