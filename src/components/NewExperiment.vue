@@ -177,6 +177,10 @@
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
                           @change="fluxomicsItem.reaction = $event.reaction"
                           @paste="paste(1, index, selectedTable, $event)"
+                          :forceSearchQuery="
+                            fluxomicsItem.reaction &&
+                              fluxomicsItem.reaction._pastedText
+                          "
                         ></AutocompleteMnxReaction>
                       </td>
                       <td>
@@ -557,7 +561,9 @@ export default Vue.extend({
             }
             return null;
           },
-          reaction: str => null,
+          // Temporarily create mock reaction object and use forceSearchQuery;
+          // selecting a reaction then clears forceSearchQuery.
+          reaction: str => ({ _pastedText: str }),
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
@@ -673,6 +679,9 @@ export default Vue.extend({
       const mainField = this.selectedTable.mainField;
       if (row[mainField]) {
         if (!value && value !== 0) {
+          return "Required.";
+        }
+        if (value && value._pastedText) {
           return "Required.";
         }
       }
