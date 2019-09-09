@@ -402,7 +402,10 @@
                           type="number"
                           step="any"
                           :rules="[
-                            requiredIfHasMain(growthItem.measurement, growthItem)
+                            requiredIfHasMain(
+                              growthItem.measurement,
+                              growthItem
+                            )
                           ]"
                         ></v-text-field>
                       </td>
@@ -472,7 +475,11 @@
                 </v-radio-group>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="secondary" flat @click="isDialogVisible = false">
+                  <v-btn
+                    color="secondary"
+                    flat
+                    @click="isDialogVisible = false"
+                  >
                     Cancel
                   </v-btn>
                   <v-btn color="primary" @click="createExperiment()">
