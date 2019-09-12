@@ -1,17 +1,18 @@
 <template>
   <v-autocomplete-extended
     v-bind="$attrs"
-    v-model="addReactionItem"
-    :items="addReactionSearchResults"
+    v-model="addItem"
+    :items="searchResults"
     :filter="dontFilterByDisplayedText"
-    :loading="isLoadingAddReaction"
-    :search-input.sync="addReactionSearchQuery"
+    :loading="isLoading"
+    :search-input.sync="searchQuery"
     hide-no-data
     :item-text="reactionDisplay"
     item-value="reaction.mnx_id"
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
+    @focus="loadForcedSearchQuery"
   ></v-autocomplete-extended>
 </template>
 
@@ -20,6 +21,10 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
+import {
+  MetaNetXMetabolite,
+  Annotation
+} from "./AutocompleteMnxMetabolite.vue";
 
 export interface MetaNetXReaction {
   compartments: {
@@ -28,12 +33,7 @@ export interface MetaNetXReaction {
     name: string;
     xref: string;
   }[];
-  metabolites: {
-    annotation: Annotation;
-    name: string;
-    mnx_id: string;
-    formula: string;
-  }[];
+  metabolites: MetaNetXMetabolite[];
   reaction: {
     mnx_id: string;
     name: string | undefined;
@@ -48,55 +48,47 @@ export interface MetaNetXReaction {
   };
 }
 
-interface Annotation {
-  bigg: string[];
-  chebi: string[];
-  deprecated: string[];
-  hmdb: string[];
-  kegg: string[];
-  metacyc: string[];
-  seed: string[];
-  reactome: string[];
-  sabiork: string[];
-  envipath: string[];
-  lipidmaps: string[];
-  slm: string[];
-}
-
 export default Vue.extend({
   name: "AutocompleteMnxReaction",
   inheritAttrs: false,
-  props: ["rules"],
+  props: {
+    rules: [Array, Object],
+    clearOnChange: Boolean,
+    forceSearchQuery: String
+  },
   data: () => ({
-    addReactionItem: null,
-    addReactionSearchResults: [] as MetaNetXReaction[],
-    isLoadingAddReaction: false,
-    addReactionSearchQuery: null,
+    addItem: null,
+    searchResults: [] as MetaNetXReaction[],
+    isLoading: false,
+    searchQuery: null,
     requestError: false,
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
   }),
   watch: {
-    addReactionSearchQuery(query: string): void {
-      this.addReactionSearchResults = [];
+    searchQuery(query: string): void {
+      this.searchResults = [];
       if (query === null || query.trim().length === 0) {
         return;
       }
 
-      this.isLoadingAddReaction = true;
+      this.isLoading = true;
       this.requestError = false;
       axios
         .get(`${settings.apis.metanetx}/reactions?query=${query}`)
         .then(response => {
-          this.addReactionSearchResults = response.data;
+          this.searchResults = response.data;
         })
         .catch(error => {
           this.requestError = true;
         })
         .then(() => {
-          this.isLoadingAddReaction = false;
+          this.isLoading = false;
         });
+    },
+    forceSearchQuery(): void {
+      this.loadForcedSearchQuery();
     }
   },
   methods: {
@@ -138,10 +130,12 @@ export default Vue.extend({
       );
     },
     onChange(selectedReaction: MetaNetXReaction): void {
-      this.addReactionSearchQuery = null;
-      this.$nextTick(() => {
-        this.addReactionItem = null;
-      });
+      if (this.clearOnChange) {
+        this.searchQuery = null;
+        this.$nextTick(() => {
+          this.addItem = null;
+        });
+      }
 
       const reaction: Reaction = {
         id: selectedReaction.reaction.mnx_id,
@@ -173,8 +167,14 @@ export default Vue.extend({
         mnxReaction: selectedReaction
       });
     },
-    dontFilterByDisplayedText() {
+    dontFilterByDisplayedText(): boolean {
       return true;
+    },
+    loadForcedSearchQuery(): void {
+      if (!this.forceSearchQuery) {
+        return;
+      }
+      this.searchQuery = this.forceSearchQuery;
     }
   }
 });

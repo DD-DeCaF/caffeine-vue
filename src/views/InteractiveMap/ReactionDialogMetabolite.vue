@@ -11,6 +11,7 @@
         solo
         class="mx-1"
         type="number"
+        step="any"
       ></v-text-field></v-flex
     ><v-flex xs8>
       <v-autocomplete-extended

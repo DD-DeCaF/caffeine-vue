@@ -41,6 +41,7 @@
       label="Add a reaction..."
       hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID, EC number or the reaction name."
       prepend-icon="add"
+      clear-on-change
       @change="addReaction"
     ></AutocompleteMnxReaction>
     <ReactionDialog
@@ -113,6 +114,7 @@
           <v-text-field
             v-model.number="editBoundsLowerBound"
             type="number"
+            step="any"
             label="Lower bound"
             :rules="[editBoundsBoundRule]"
           ></v-text-field>
@@ -121,6 +123,7 @@
           <v-text-field
             v-model.number="editBoundsUpperBound"
             type="number"
+            step="any"
             label="Upper bound"
             :rules="[editBoundsBoundRule]"
           ></v-text-field>

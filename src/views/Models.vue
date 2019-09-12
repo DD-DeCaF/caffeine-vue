@@ -8,7 +8,7 @@
     />
     <NewModel v-model="isModelCreationDialogVisible" />
     <!-- Disabled because its not on the old platform -->
-    <!-- <NewProject 
+    <!-- <NewProject
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     /> -->
@@ -139,15 +139,21 @@
                   name="organism"
                   label="Organism"
                   type="text"
+                  ref="organismAutocomplete"
                 >
                   <template v-slot:prepend-item>
-                    <v-btn
-                      depressed
-                      @click.stop="isOrganismCreationDialogVisible = true"
+                    <v-list-tile
+                      ripple
+                      @click="
+                        isOrganismCreationDialogVisible = true;
+                        $refs.organismAutocomplete.isMenuActive = false;
+                      "
                     >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New organism
-                    </v-btn>
+                      <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                      <v-list-tile-title>
+                        New Organism
+                      </v-list-tile-title>
+                    </v-list-tile>
                     <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete-extended>
@@ -161,15 +167,21 @@
                   name="map"
                   label="Preferred Map"
                   type="text"
+                  ref="mapAutocomplete"
                 >
                   <template v-slot:prepend-item>
-                    <v-btn
-                      depressed
-                      @click.stop="isMapCreationDialogVisible = true"
+                    <v-list-tile
+                      ripple
+                      @click="
+                        isMapCreationDialogVisible = true;
+                        $refs.mapAutocomplete.isMenuActive = false;
+                      "
                     >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New map
-                    </v-btn>
+                      <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                      <v-list-tile-title>
+                        New Map
+                      </v-list-tile-title>
+                    </v-list-tile>
                     <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete-extended>

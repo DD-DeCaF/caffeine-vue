@@ -136,16 +136,22 @@
                   name="project"
                   label="Project"
                   type="text"
+                  ref="projectAutocomplete"
                 >
                   <template v-slot:prepend-item>
                     <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
-                    <v-btn
-                      depressed
-                      @click.stop="isProjectCreationDialogVisible = true"
+                    <v-list-tile
+                      ripple
+                      @click="
+                        isProjectCreationDialogVisible = true;
+                        $refs.projectAutocomplete.isMenuActive = false;
+                      "
                     >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New project
-                    </v-btn>
+                      <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                      <v-list-tile-title>
+                        New Project
+                      </v-list-tile-title>
+                    </v-list-tile>
                     <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete-extended>
@@ -161,15 +167,21 @@
                   name="model"
                   label="Model"
                   type="text"
+                  ref="modelAutocomplete"
                 >
                   <template v-slot:prepend-item>
-                    <v-btn
-                      depressed
-                      @click.stop="isModelCreationDialogVisible = true"
+                    <v-list-tile
+                      ripple
+                      @click="
+                        isModelCreationDialogVisible = true;
+                        $refs.modelAutocomplete.isMenuActive = false;
+                      "
                     >
-                      <v-icon class="mr-4">add_circle</v-icon>
-                      New Model
-                    </v-btn>
+                      <v-icon class="mr-3">add_circle</v-icon>
+                      <v-list-tile-title>
+                        New Model
+                      </v-list-tile-title>
+                    </v-list-tile>
                     <v-divider class="my-2"></v-divider>
                   </template>
                 </v-autocomplete-extended>
