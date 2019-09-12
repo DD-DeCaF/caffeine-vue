@@ -43,7 +43,7 @@
     </div>
 
     <v-layout v-if="card.conditionData">
-      <v-flex class="mr-2">
+      <v-flex class="mr-2" xs5>
         <v-card>
           <v-subheader>Genotype changes</v-subheader>
           <v-list>
@@ -55,7 +55,7 @@
           </v-list>
         </v-card>
       </v-flex>
-      <v-flex>
+      <v-flex xs4>
         <v-card class="mx-2">
           <v-subheader>Measurements</v-subheader>
           <v-list>
@@ -77,7 +77,7 @@
           </v-list>
         </v-card>
       </v-flex>
-      <v-flex>
+      <v-flex xs3>
         <v-card class="ml-2">
           <v-subheader>Medium</v-subheader>
           <v-list>
@@ -119,6 +119,8 @@ import Vue from "vue";
 import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
+import { Metabolite } from "@/store/modules/interactiveMap";
+import { buildReactionString } from "@/utils/reaction";
 
 export default Vue.extend({
   name: "CardDialogDataDriven",
@@ -248,7 +250,120 @@ export default Vue.extend({
       if (!this.card.conditionData) {
         return;
       }
-      this.$emit("simulate-card");
+
+      // Reset warnings and errors
+      // We'll be modifying the model before simulating, but just re-use the
+      // loading flag for `isSimulating` to indicate that _something_ is going
+      // on.
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: {
+          conditionWarnings: [],
+          conditionErrors: [],
+          isSimulating: true,
+          hasSimulationError: false
+        }
+      });
+
+      axios
+        .post(
+          `${settings.apis.simulations}/models/${this.card.modelId}/modify`,
+          this.card.conditionData
+        )
+        .then(response => {
+          // Save all modifications to the card
+          const editedBounds: Object[] = [];
+          response.data.operations.forEach(modification => {
+            if (modification.operation === "remove") {
+              this.$store.dispatch("interactiveMap/removeReaction", {
+                uuid: this.card.uuid,
+                reactionId: modification.id
+              });
+            } else if (modification.operation === "add") {
+              const metabolites: Metabolite[] = [];
+              const metabolitesFromResponse = modification.data.metabolites;
+              for (const metaboliteIdWithCompartment in metabolitesFromResponse) {
+                const index = metaboliteIdWithCompartment.lastIndexOf("_");
+                const metabolite: Metabolite = {
+                  stoichiometry:
+                    metabolitesFromResponse[metaboliteIdWithCompartment],
+                  id: metaboliteIdWithCompartment.substring(0, index),
+                  compartment: metaboliteIdWithCompartment.substring(index + 1)
+                };
+                metabolites.push(metabolite);
+              }
+              const reactionString = buildReactionString(
+                metabolites,
+                modification.data.lower_bound,
+                modification.data.upper_bound
+              );
+              this.$store.commit("interactiveMap/addReaction", {
+                uuid: this.card.uuid,
+                reaction: {
+                  annotation: modification.data.annotation,
+                  name: modification.data.name ? modification.data.name : "N/A",
+                  id: modification.data.id,
+                  reactionString: reactionString,
+                  gene_reaction_rule: modification.data.gene_reaction_rule,
+                  lowerBound: modification.data.lower_bound,
+                  upperBound: modification.data.upper_bound,
+                  metabolites: metabolites
+                }
+              });
+            } else if (modification.operation === "modify") {
+              editedBounds.push({
+                id: modification.data.id,
+                lowerBound: modification.data.lower_bound,
+                upperBound: modification.data.upper_bound
+              });
+            } else if (modification.operation === "knockout") {
+              if (modification.type === "reaction") {
+                this.$store.dispatch("interactiveMap/knockoutReaction", {
+                  uuid: this.card.uuid,
+                  reactionId: modification.id
+                });
+              } else {
+                this.$store.dispatch("interactiveMap/knockoutGene", {
+                  uuid: this.card.uuid,
+                  geneId: modification.id
+                });
+              }
+            } else {
+              throw new Error(
+                `Unexpected simulation operation ${modification.operation}`
+              );
+            }
+          });
+          // TODO: dispatch editBounds action to display reaction name
+          // on modifications table when simulations service returns
+          // modifications that were actually applied to the reactions.
+          // For now commit all collected editBounds modifications in a single mutation
+          this.$store.commit("interactiveMap/editMultipleBounds", {
+            uuid: this.card.uuid,
+            reactions: editedBounds
+          });
+          // Note: Don't toggle `card.isSimulating`, because we're still
+          // waiting for the actual simulation to finish.
+          this.updateCard({
+            uuid: this.card.uuid,
+            props: { conditionWarnings: response.data.warnings }
+          });
+          this.$emit("simulate-card");
+        })
+        .catch(error => {
+          this.updateCard({
+            uuid: this.card.uuid,
+            props: { isSimulating: false, hasSimulationError: true }
+          });
+
+          if (error.response && error.response.data.errors) {
+            this.updateCard({
+              uuid: this.card.uuid,
+              props: { conditionErrors: error.response.data.errors }
+            });
+          }
+          this.$emit("simulation-error");
+        });
     }
   },
   methods: {

@@ -91,6 +91,7 @@
           @select-card="selectCard"
           @remove-card="removeCard"
           @simulate-card="simulate"
+          @simulation-error="hasSimulationError = true"
           @load-data-error="hasLoadDataError = true"
           @design-saved="designSaved"
           @design-save-error="hasSaveDesignError = true"
@@ -341,14 +342,6 @@ export default Vue.extend({
         // installations of the platform).
         return;
       }
-
-      if (["Design", "DiffFVA"].includes(card.type)) {
-        this.simulateDesignCard(card, model);
-      } else if (card.type === "DataDriven") {
-        this.simulateDataDrivenCard(card, model);
-      }
-    },
-    simulateDesignCard(card, model) {
       this.postSimulation(card, model, this.cardModifications(card));
     },
     cardModifications(card) {
@@ -401,53 +394,6 @@ export default Vue.extend({
         ...geneKnockouts,
         ...editedBounds
       ];
-    },
-    simulateDataDrivenCard(card, model) {
-      // Reset warnings and errors
-      this.updateCard({
-        uuid: card.uuid,
-        props: { conditionWarnings: [], conditionErrors: [] }
-      });
-
-      if (!card.conditionData) {
-        return;
-      }
-
-      // We'll be modifying the model before simulating, but just re-use the
-      // loading flag for `isSimulating` to indicate that _something_ is going
-      // on.
-      this.updateCard({
-        uuid: card.uuid,
-        props: { isSimulating: true, hasSimulationError: false }
-      });
-      axios
-        .post(
-          `${settings.apis.simulations}/models/${model.id}/modify`,
-          card.conditionData
-        )
-        .then(response => {
-          // Note: Don't toggle `card.isSimulating`, because we're still
-          // waiting for the actual simulation to finish.
-          this.updateCard({
-            uuid: card.uuid,
-            props: { conditionWarnings: response.data.warnings }
-          });
-          this.postSimulation(card, model, response.data.operations);
-        })
-        .catch(error => {
-          this.updateCard({
-            uuid: card.uuid,
-            props: { isSimulating: false, hasSimulationError: true }
-          });
-          this.hasSimulationError = true;
-
-          if (error.response && error.response.data.errors) {
-            this.updateCard({
-              uuid: card.uuid,
-              props: { conditionErrors: error.response.data.errors }
-            });
-          }
-        });
     },
     postSimulation(card, model, operations) {
       this.updateCard({

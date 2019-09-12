@@ -14,8 +14,8 @@ export interface Gene {
 
 export interface Metabolite {
   id: string;
-  name: string;
-  formula: string;
+  name?: string;
+  formula?: string;
   compartment: string;
   stoichiometry: number;
 }

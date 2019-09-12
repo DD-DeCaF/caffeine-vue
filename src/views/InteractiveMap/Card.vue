@@ -20,6 +20,7 @@
           :model="model"
           :modifications="modifications"
           @simulate-card="simulateCard"
+          @simulation-error="$emit('simulation-error')"
           @open-method-help-dialog="showMethodHelpDialog = true"
           @load-data-error="$emit('load-data-error')"
         />

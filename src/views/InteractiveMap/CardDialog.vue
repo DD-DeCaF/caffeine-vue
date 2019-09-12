@@ -71,6 +71,7 @@
             :card="card"
             :modifications="modifications"
             @simulate-card="$emit('simulate-card')"
+            @simulation-error="$emit('simulation-error')"
             @load-data-error="$emit('load-data-error')"
           />
           <CardDialogDiffFVA
