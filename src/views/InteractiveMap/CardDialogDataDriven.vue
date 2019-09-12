@@ -42,8 +42,8 @@
       </v-alert>
     </div>
 
-    <v-layout v-if="card.conditionData">
-      <v-flex class="mr-2" xs5>
+    <v-layout v-if="card.conditionData" column>
+      <v-flex mb-1>
         <v-card>
           <v-subheader>Genotype changes</v-subheader>
           <v-list>
@@ -55,8 +55,8 @@
           </v-list>
         </v-card>
       </v-flex>
-      <v-flex xs4>
-        <v-card class="mx-2">
+      <v-flex mb-1>
+        <v-card>
           <v-subheader>Measurements</v-subheader>
           <v-list>
             <!-- TODO: Handle non-bigg namespaces -->
@@ -77,8 +77,8 @@
           </v-list>
         </v-card>
       </v-flex>
-      <v-flex xs3>
-        <v-card class="ml-2">
+      <v-flex mb-1>
+        <v-card>
           <v-subheader>Medium</v-subheader>
           <v-list>
             <!-- TODO: Handle non-chebi namespaces -->
@@ -100,17 +100,51 @@
       </v-flex>
     </v-layout>
 
-    <div v-for="warning in card.conditionWarnings" :key="warning" class="mt-2">
-      <v-alert :value="true" type="warning">
-        {{ warning }}
-      </v-alert>
-    </div>
+    <ModificationsTable :modifications="modifications" :readonly="true" />
 
-    <div v-for="error in card.conditionErrors" :key="error" class="mt-2">
-      <v-alert :value="true" type="error">
-        {{ error }}
-      </v-alert>
-    </div>
+    <v-expansion-panel v-if="card.conditionWarnings.length" class="mt-2">
+      <v-expansion-panel-content>
+        <template v-slot:header>
+          <div>
+            <v-badge color="warning">
+              <template v-slot:badge
+                >{{ card.conditionWarnings.length }}
+              </template>
+              <span>Warnings</span>
+            </v-badge>
+          </div>
+        </template>
+        <div
+          v-for="warning in card.conditionWarnings"
+          :key="warning"
+          class="mt-2"
+        >
+          <v-alert :value="true" type="warning">
+            {{ warning }}
+          </v-alert>
+        </div>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
+
+    <v-expansion-panel v-if="card.conditionErrors.length" class="mt-2">
+      <v-expansion-panel-content>
+        <template v-slot:header>
+          <div>
+            <v-badge color="error">
+              <template v-slot:badge
+                >{{ card.conditionErrors.length }}
+              </template>
+              <span>Errors</span>
+            </v-badge>
+          </div>
+        </template>
+        <div v-for="error in card.conditionErrors" :key="error" class="mt-2">
+          <v-alert :value="true" type="error">
+            {{ error }}
+          </v-alert>
+        </div>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </div>
 </template>
 
@@ -119,11 +153,15 @@ import Vue from "vue";
 import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
+import ModificationsTable from "@/components/ModificationsTable.vue";
 import { Metabolite } from "@/store/modules/interactiveMap";
 import { buildReactionString } from "@/utils/reaction";
 
 export default Vue.extend({
   name: "CardDialogDataDriven",
+  components: {
+    ModificationsTable
+  },
   props: ["card", "modifications"],
   data: () => ({
     conditions: [],
