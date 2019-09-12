@@ -467,13 +467,13 @@ export default Vue.extend({
           method: "pfba",
           modified: false,
           type: "Design",
-          // Design card fields
           objective: {
             reaction: null,
             maximize: true
           },
           reactionAdditions: design.design.reactionKnockins,
           reactionKnockouts: design.design.reactionKnockouts,
+          reactionDeletions: [], // user cannot remove a reaction
           geneKnockouts: design.design.geneKnockouts,
           editedBounds: design.design.constraints,
           // Data-driven card fields

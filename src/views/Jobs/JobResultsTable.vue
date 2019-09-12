@@ -943,7 +943,6 @@ export default Vue.extend({
               method: "pfba",
               modified: true,
               type: cardType,
-              // Design card fields
               objective: {
                 reaction: this.prediction.result.reactions[
                   this.prediction.result.target
@@ -952,6 +951,7 @@ export default Vue.extend({
               },
               reactionAdditions: addedReactions,
               reactionKnockouts: [],
+              reactionDeletions: [],
               geneKnockouts: [],
               editedBounds: [],
               // Data-driven card fields

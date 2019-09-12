@@ -234,6 +234,7 @@ export default Vue.extend({
           },
           reactionAdditions: [],
           reactionKnockouts: [],
+          reactionDeletions: [],
           geneKnockouts: [],
           editedBounds: [],
           // Reset simulation results too

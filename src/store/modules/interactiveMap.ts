@@ -40,13 +40,13 @@ export interface Card {
   // can be saved. Not relevant for data-driven cards.
   modified: boolean;
   type: "Design" | "DataDriven" | "DiffFVA";
-  // Design card fields
   objective: {
     reaction: Reaction | null;
     maximize: boolean;
   };
   reactionAdditions: Reaction[];
   reactionKnockouts: Reaction[];
+  reactionDeletions: Reaction[];
   geneKnockouts: any[];
   editedBounds: Reaction[];
   // Data-driven card fields
@@ -130,6 +130,16 @@ export default {
         card.reactionKnockouts.splice(index, 1);
         card.modified = true;
       }
+    },
+    removeReaction(state, { uuid, reaction }) {
+      const card = state.cards.find(c => c.uuid === uuid);
+      card.reactionDeletions.push(reaction);
+      card.modified = true;
+    },
+    updateRemoveReaction(state, { uuid, reaction }) {
+      const card = state.cards.find(c => c.uuid === uuid);
+      const index = card.reactionDeletions.findIndex(r => r.id === reaction.id);
+      Vue.set(card.reactionDeletions, index, reaction);
     },
     knockoutGene(state, { uuid, gene }) {
       const card = state.cards.find(c => c.uuid === uuid);
@@ -244,6 +254,12 @@ export default {
       commit("knockoutReaction", { uuid: uuid, reaction: { id: reactionId } });
       dispatch("getBiggReaction", reactionId).then(reaction => {
         commit("updateKnockoutReaction", { uuid: uuid, reaction: reaction });
+      });
+    },
+    removeReaction({ commit, dispatch }, { uuid, reactionId }) {
+      commit("removeReaction", { uuid: uuid, reaction: { id: reactionId } });
+      dispatch("getBiggReaction", reactionId).then(reaction => {
+        commit("updateRemoveReaction", { uuid: uuid, reaction: reaction });
       });
     },
     knockoutGene({ state, commit, dispatch }, { uuid, geneId }) {

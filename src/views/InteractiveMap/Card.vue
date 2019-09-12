@@ -288,6 +288,10 @@ export default Vue.extend({
     modifications() {
       // Concatenate all modifications for a single table display, and add a
       // `type` key to distinguish the different modifications.
+      const reactionDeletions = this.card.reactionDeletions.map(reaction => ({
+        type: "removed_reaction",
+        ...reaction
+      }));
       const reactionAdditions = this.card.reactionAdditions.map(reaction => ({
         type: "added_reaction",
         ...reaction
@@ -305,6 +309,7 @@ export default Vue.extend({
         ...reaction
       }));
       return [
+        ...reactionDeletions,
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,

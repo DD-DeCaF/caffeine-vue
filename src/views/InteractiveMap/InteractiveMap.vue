@@ -265,13 +265,13 @@ export default Vue.extend({
         method: method,
         modified: false,
         type: cardType,
-        // Design card fields
         objective: {
           reaction: null,
           maximize: true
         },
         reactionAdditions: [],
         reactionKnockouts: [],
+        reactionDeletions: [],
         geneKnockouts: [],
         editedBounds: [],
         // Data-driven card fields
@@ -353,6 +353,11 @@ export default Vue.extend({
     },
     cardModifications(card) {
       // Collect card operations from modifications
+      const reactionDeletions = card.reactionDeletions.map(reaction => ({
+        operation: "remove",
+        type: "reaction",
+        id: reaction.id
+      }));
       const reactionAdditions = card.reactionAdditions.map(reaction => ({
         operation: "add",
         type: "reaction",
@@ -390,6 +395,7 @@ export default Vue.extend({
         }
       }));
       return [
+        ...reactionDeletions,
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
