@@ -162,8 +162,8 @@ export default Vue.extend({
       ];
     },
     modificationsWithTableKeys() {
-      return this.modifications.map(modification => ({
-        tableKey: modification.type + " " + modification.id,
+      return this.modifications.map((modification, index) => ({
+        tableKey: modification.type + " " + modification.id + index,
         modification
       }));
     }
