@@ -994,7 +994,7 @@ export default Vue.extend({
                   uuid: card.uuid,
                   geneId: geneId
                 });
-                this.$store.commit("interactiveMap/updateKnockoutReaction", {
+                this.$store.commit("interactiveMap/updateKnockoutGene", {
                   uuid: card.uuid,
                   gene: {
                     id: geneId,
