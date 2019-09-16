@@ -29,17 +29,6 @@
                     type="text"
                   ></v-text-field>
 
-                  <v-flex xs4>
-                    <v-text-field
-                      v-model.number="medium.ph"
-                      :rules="[rules.required]"
-                      name="ph"
-                      label="pH"
-                      type="number"
-                      step="any"
-                    ></v-text-field>
-                  </v-flex>
-
                   <v-autocomplete-extended
                     item-text="name"
                     item-value="id"
@@ -72,10 +61,7 @@
                     Compounds:
                   </div>
                   <v-layout column mx-3>
-                    <div
-                      v-for="(compound, index) in medium.compounds"
-                      :key="index"
-                    >
+                    <div v-for="(compound, index) in compounds" :key="index">
                       <v-layout>
                         <v-flex xs3>
                           <v-text-field
@@ -97,28 +83,24 @@
                         </v-flex>
 
                         <v-flex xs8>
-                          <v-autocomplete-extended
-                            item-text="name"
-                            item-value="id"
-                            v-model="compound.id"
-                            :items="availableCompounds"
-                            clearable
-                            name="compound"
-                            label="Compound"
-                            type="text"
-                            class="mx-2"
-                          ></v-autocomplete-extended>
+                          <AutocompleteMnxMetabolite
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            @change="
+                              compound.name = $event.name;
+                              compound.id = $event.mnx_id;
+                            "
+                          ></AutocompleteMnxMetabolite>
                         </v-flex>
 
                         <v-flex xs2>
                           <v-layout>
-                            <v-btn icon @click="medium.compounds.push({})">
+                            <v-btn icon @click="compounds.push({})">
                               <v-icon color="primary">add_circle</v-icon>
                             </v-btn>
                             <v-btn
                               icon
-                              v-if="medium.compounds.length > 1"
-                              @click="medium.compounds.splice(index, 1)"
+                              v-if="compounds.length > 1"
+                              @click="compounds.splice(index, 1)"
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -183,15 +165,9 @@ export default Vue.extend({
   data: () => ({
     medium: {
       name: null,
-      ph: null,
-      project_id: null,
-      compounds: [
-        {
-          id: null,
-          mass_concentration: null
-        }
-      ]
+      project_id: null
     },
+    compounds: [{}],
 
     isValid: true,
     isProjectCreationDialogVisible: false,
@@ -206,8 +182,7 @@ export default Vue.extend({
           return true;
         }
       }
-    },
-    availableCompounds: []
+    }
   }),
   computed: {
     availableProjects() {
@@ -222,36 +197,18 @@ export default Vue.extend({
       }
     }
   },
-  watch: {
-    isDialogVisible() {
-      this.getAvailableCompounds();
-    }
-  },
-  mounted() {
-    this.getAvailableCompounds();
-  },
   methods: {
-    getAvailableCompounds() {
-      if (this.isDialogVisible) {
-        this.isLoading = true;
-        this.$store.dispatch("media/fetchCachedCompounds").then(compounds => {
-          this.availableCompounds = compounds;
-          this.isLoading = false;
-        });
-      }
-    },
     createMedium() {
       this.isLoading = true;
-
-      const payload = {
-        ...this.medium,
-        compounds: this.medium.compounds.filter(({ id }) => id)
-      };
       axios
-        .post(`${settings.apis.warehouse}/media`, payload)
-        .then((response: AxiosResponse<MediumItem>) => {
-          this.$store.commit("media/addMedium", response.data);
-          this.$emit("return-object", response.data);
+        .post(`${settings.apis.warehouse}/media`, this.medium)
+        .then((response: AxiosResponse) => {
+          this.medium.id = response.data.id;
+          return Promise.all(this.postCompounds(this.medium.id));
+        })
+        .then(() => {
+          this.$store.commit("media/addMedium", this.medium);
+          this.$emit("return-object", this.medium);
           this.isMediumCreationSuccess = true;
           this.isDialogVisible = false;
         })
@@ -259,6 +216,23 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => (this.isLoading = false));
+    },
+    postCompounds(mediumId) {
+      return this.compounds
+        .filter(({ id }) => id)
+        .map(compound => {
+          const payload = {
+            compound_identifier: compound.id,
+            compound_name: compound.name,
+            compound_namespace: "Metanetx",
+            mass_concentration: compound.mass_concentration,
+            medium_id: mediumId
+          };
+          return axios.post(
+            `${settings.apis.warehouse}/media/compounds`,
+            payload
+          );
+        });
     },
     passProject(project) {
       this.medium.project_id = project.id;

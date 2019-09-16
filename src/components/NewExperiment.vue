@@ -747,7 +747,7 @@ sample	reaction	measurement	uncertainity
               // Parse cell.
               value = table.parsePasted[property](cell, {
                 // Extra parameters for parsePasted:
-                tables: this.tables,
+                tables: this.tables
                 //availableCompounds: this.availableCompounds
               });
             } else {
