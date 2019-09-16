@@ -118,7 +118,7 @@
 import Vue from "vue";
 
 export default Vue.extend({
-  name: "CardDialogDesign",
+  name: "ModificationsTable",
   props: {
     modifications: [Array, Object],
     readonly: Boolean
