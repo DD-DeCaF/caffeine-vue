@@ -221,13 +221,11 @@ export default Vue.extend({
       this.conditions = [];
       this.isLoadingConditions = true;
       axios
-        .get(
-          `${settings.apis.warehouse}/experiments/${
-            this.card.experiment.id
-          }/conditions`
-        )
+        .get(`${settings.apis.warehouse}/conditions`)
         .then(response => {
-          this.conditions = response.data;
+          this.conditions = response.data.filter(condition => {
+            return condition.experiment_id === this.card.experiment.id;
+          });
         })
         .catch(error => {
           this.$emit("load-data-error");
