@@ -228,15 +228,15 @@
                         </v-select>
                       </td>
                       <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="metabolomicsItem.compound"
-                          :items="availableCompounds"
-                          name="compound"
-                          type="text"
-                        ></v-autocomplete-extended>
+                        <AutocompleteMnxMetabolite
+                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                          @change="
+                            metabolomicsItem.compound = {
+                              name: $event.name,
+                              id: $event.mnx_id
+                            }
+                          "
+                        ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
                         <v-text-field
@@ -281,15 +281,15 @@
                         </v-select>
                       </td>
                       <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="uptakeSecretionItem.compound"
-                          :items="availableCompounds"
-                          name="compound"
-                          type="text"
-                        ></v-autocomplete-extended>
+                        <AutocompleteMnxMetabolite
+                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                          @change="
+                            uptakeSecretionItem.compound = {
+                              name: $event.name,
+                              id: $event.mnx_id
+                            }
+                          "
+                        ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
                         <v-text-field
@@ -334,26 +334,26 @@
                         </v-select>
                       </td>
                       <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="molarYieldsItem.numeratorCompound"
-                          :items="availableCompounds"
-                          name="numeratorCompound"
-                          type="text"
-                        ></v-autocomplete-extended>
+                        <AutocompleteMnxMetabolite
+                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                          @change="
+                            molarYieldsItem.product = {
+                              name: $event.name,
+                              id: $event.mnx_id
+                            }
+                          "
+                        ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="molarYieldsItem.denominatorCompound"
-                          :items="availableCompounds"
-                          name="denominatorCompound"
-                          type="text"
-                        ></v-autocomplete-extended>
+                        <AutocompleteMnxMetabolite
+                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                          @change="
+                            molarYieldsItem.substrate = {
+                              name: $event.name,
+                              id: $event.mnx_id
+                            }
+                          "
+                        ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
                         <v-text-field
@@ -531,7 +531,6 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isLoading: false,
     currentRowIndex: null,
-    availableCompounds: [],
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     itemsNameAPIMap: {
@@ -690,12 +689,6 @@ sample	reaction	measurement	uncertainity
       return this.tables[this.selectedTableKey];
     }
   },
-  // TODO: move fetch compounds logic
-  created() {
-    this.$store
-      .dispatch("media/fetchCachedCompounds")
-      .then(compounds => (this.availableCompounds = compounds));
-  },
   mounted() {
     setTimeout(() => {
       // Show validation messages before user activates each input.
@@ -755,7 +748,7 @@ sample	reaction	measurement	uncertainity
               value = table.parsePasted[property](cell, {
                 // Extra parameters for parsePasted:
                 tables: this.tables,
-                availableCompounds: this.availableCompounds
+                //availableCompounds: this.availableCompounds
               });
             } else {
               // Empty cell clears existing value.

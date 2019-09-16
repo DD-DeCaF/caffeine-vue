@@ -54,7 +54,9 @@ export default Vue.extend({
   data: () => ({
     addItem: null,
     searchResults: [] as MetaNetXMetabolite[],
+    isLoading: false,
     searchQuery: null,
+    requestError: false,
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
