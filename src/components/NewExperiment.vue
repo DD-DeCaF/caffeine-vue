@@ -6,12 +6,12 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-dialog
-      v-model="isDialogVisible"
-      full-width
-      content-class="full-height-dialog"
-    >
-      <v-form ref="newExperimentForm">
+    <v-form ref="newExperimentForm">
+      <v-dialog
+        v-model="isDialogVisible"
+        full-width
+        content-class="full-height-dialog"
+      >
         <v-card height="100%">
           <v-layout>
             <v-flex md10>
@@ -482,22 +482,32 @@
                   >
                     Cancel
                   </v-btn>
-                  <v-btn color="primary" @click="createExperiment()">
-                    Submit
+                  <v-btn
+                    color="primary"
+                    @click="createExperiment()"
+                    :disabled="isLoading"
+                  >
+                    <span v-if="!isLoading">Submit</span>
+                    <v-progress-circular
+                      v-if="isLoading"
+                      indeterminate
+                      color="primary"
+                    ></v-progress-circular>
                   </v-btn>
                 </v-card-actions>
               </v-card>
             </v-flex>
           </v-layout>
         </v-card>
-      </v-form>
-    </v-dialog>
+      </v-dialog>
+    </v-form>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows } from "d3-dsv";
 import * as settings from "@/utils/settings";
@@ -519,8 +529,18 @@ export default Vue.extend({
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
+    isLoading: false,
     currentRowIndex: null,
     availableCompounds: [],
+    conditionTempIdsMap: {},
+    sampleTempIdsMap: {},
+    itemsNameAPIMap: {
+      fluxomics: "fluxomics",
+      metabolomics: "metabolomics",
+      uptakeSecretion: "uptake-secretion-rates",
+      molarYields: "molar-yields",
+      growth: "growth-rates"
+    },
     selectedTableKey: "fluxomics",
     tables: {
       conditions: {
@@ -619,13 +639,13 @@ sample	reaction	measurement	uncertainity
         headers: [
           { text: "Sample", value: "sample", width: "20%" },
           {
-            text: "Numerator compound",
-            value: "numeratorCompound",
+            text: "Product",
+            value: "product",
             width: "20%"
           },
           {
-            text: "Denominator compound",
-            value: "denominatorCompound",
+            text: "Substrate",
+            value: "substrate",
             width: "20%"
           },
           { text: "Measurement", value: "measurement", width: "20%" },
@@ -758,7 +778,142 @@ sample	reaction	measurement	uncertainity
         });
       });
     },
-    createExperiment() {}
+    createExperiment() {
+      this.conditionTempIdsMap = {};
+      this.sampleTempIdsMap = {};
+      this.isLoading = true;
+      axios
+        .post(`${settings.apis.warehouse}/experiments`, this.experiment)
+        .then((response: AxiosResponse) => {
+          return Promise.all(this.postConditions(response.data.id));
+        })
+        .then(() => {
+          return Promise.all(this.postSamples());
+        })
+        .then(() => {
+          return Promise.all(this.postItems("fluxomics"));
+        })
+        .then(() => {
+          return Promise.all(this.postItems("metabolomics"));
+        })
+        .then(() => {
+          return Promise.all(this.postItems("uptakeSecretion"));
+        })
+        .then(() => {
+          return Promise.all(this.postItems("molarYields"));
+        })
+        .then(() => {
+          return Promise.all(this.postItems("growth"));
+        })
+        .catch(error => {
+          this.$store.commit("setPostError", error);
+        })
+        .then(() => (this.isLoading = false));
+    },
+    postConditions(experimentId) {
+      return this.tables.conditions.items
+        .filter(condition => condition.name)
+        .map(condition => {
+          const payload = {
+            name: condition.name,
+            experiment_id: experimentId,
+            strain_id: condition.strain.id,
+            medium_id: condition.medium.id
+          };
+          return axios
+            .post(`${settings.apis.warehouse}/conditions`, payload)
+            .then(
+              (response: AxiosResponse) =>
+                (this.conditionTempIdsMap[condition.temporaryId] =
+                  response.data.id)
+            );
+        });
+    },
+    postSamples() {
+      return this.tables.samples.items
+        .filter(sample => sample.name)
+        .map(sample => {
+          const conditionId = this.conditionTempIdsMap[
+            sample.condition.temporaryId
+          ];
+
+          const date = this.$moment("01/01/2019 15:35", "DD/MM/YYYY HH:mm");
+          const date2 = date.toDate();
+          const payload = {
+            condition_id: conditionId,
+            start_time: this.$moment(
+              sample.startTime,
+              "DD/MM/YYYY HH:mm"
+            ).toDate(),
+            end_time: sample.endTime
+              ? this.$moment(sample.endTime, "DD/MM/YYYY HH:mm").toDate()
+              : null
+          };
+          return axios
+            .post(`${settings.apis.warehouse}/samples`, payload)
+            .then((response: AxiosResponse) => {
+              this.sampleTempIdsMap[sample.temporaryId] = response.data.id;
+            });
+        });
+    },
+    postItems(itemsName) {
+      const items = this.tables[itemsName].items;
+      return items
+        .filter(item => item.sample)
+        .map(item => {
+          const payload = this.getPayload(itemsName, item);
+          return axios.post(
+            `${settings.apis.warehouse}/${this.itemsNameAPIMap[itemsName]}`,
+            payload
+          );
+        });
+    },
+    getPayload(itemsName, item) {
+      const payload = {
+        sample_id: this.sampleTempIdsMap[item.sample.temporaryId],
+        measurement: item.measurement,
+        uncertainty: item.uncertainty
+      };
+      if (itemsName === "fluxomics") {
+        return {
+          ...payload,
+          ...{
+            reaction_name: item.reaction.name,
+            reaction_identifier: item.reaction.id,
+            reaction_namespace: "Metanetx"
+          }
+        };
+      } else if (
+        itemsName === "metabolomics" ||
+        itemsName === "uptakeSecretion"
+      ) {
+        return {
+          ...payload,
+          ...{
+            compound_name: item.compound.name,
+            compound_identifier: item.compound.id,
+            compound_namespace: "Metanetx"
+          }
+        };
+      } else if (itemsName === "molarYields") {
+        return {
+          ...payload,
+          ...{
+            product_name: item.product.name,
+            product_identifier: item.product.id,
+            product_namespace: "Metanetx",
+            substrate_name: item.substrate.name,
+            substrate_identifier: item.substrate.id,
+            substrate_namespace: "Metanetx"
+          }
+        };
+      } else {
+        return payload;
+      }
+    },
+    print(event) {
+      console.log(event);
+    }
   }
 });
 </script>
