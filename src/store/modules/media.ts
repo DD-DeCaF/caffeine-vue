@@ -8,21 +8,14 @@ export interface MediumItem {
   project_id: number;
 }
 
-export interface Compound {
+export interface MediumCompound {
   compound_identifier: string;
-  compound_name: string;
-  compound_namespace: string;
+  compound_name: string; // sodium chloride
+  compound_namespace: string; // CHEBI
   id: number;
   mass_concentration: number;
   medium_id: number;
 }
-
-export interface NewMediumCompound {
-  id: number;
-  mass_concentration: number;
-}
-
-export interface MediumCompound extends NewMediumCompound, Compound {}
 
 export default {
   namespaced: true,
@@ -69,7 +62,7 @@ export default {
       }
 
       const compoundsPromise = axios
-        .get<Compound[]>(`${settings.apis.warehouse}/media/compounds`)
+        .get<MediumCompound[]>(`${settings.apis.warehouse}/media/compounds`)
         .then(response => response.data.slice(0, 100))
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
