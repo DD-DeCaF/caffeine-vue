@@ -270,9 +270,9 @@ export default Vue.extend({
           reaction: null,
           maximize: true
         },
+        reactionDeletions: [],
         reactionAdditions: [],
         reactionKnockouts: [],
-        reactionDeletions: [],
         geneKnockouts: [],
         editedBounds: [],
         // Data-driven card fields
@@ -342,9 +342,6 @@ export default Vue.extend({
         // installations of the platform).
         return;
       }
-      this.postSimulation(card, model, this.cardModifications(card));
-    },
-    cardModifications(card) {
       // Collect card operations from modifications
       const reactionDeletions = card.reactionDeletions.map(reaction => ({
         operation: "remove",
@@ -387,15 +384,14 @@ export default Vue.extend({
           upper_bound: reaction.upperBound
         }
       }));
-      return [
+      const operations = [
         ...reactionDeletions,
         ...reactionAdditions,
         ...reactionKnockouts,
         ...geneKnockouts,
         ...editedBounds
       ];
-    },
-    postSimulation(card, model, operations) {
+      // Simulate
       this.updateCard({
         uuid: card.uuid,
         props: {

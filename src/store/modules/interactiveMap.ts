@@ -44,9 +44,9 @@ export interface Card {
     reaction: Reaction | null;
     maximize: boolean;
   };
+  reactionDeletions: Reaction[];
   reactionAdditions: Reaction[];
   reactionKnockouts: Reaction[];
-  reactionDeletions: Reaction[];
   geneKnockouts: any[];
   editedBounds: Reaction[];
   // Data-driven card fields

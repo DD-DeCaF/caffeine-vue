@@ -471,9 +471,9 @@ export default Vue.extend({
             reaction: null,
             maximize: true
           },
+          reactionDeletions: [], // user cannot remove a reaction
           reactionAdditions: design.design.reactionKnockins,
           reactionKnockouts: design.design.reactionKnockouts,
-          reactionDeletions: [], // user cannot remove a reaction
           geneKnockouts: design.design.geneKnockouts,
           editedBounds: design.design.constraints,
           // Data-driven card fields

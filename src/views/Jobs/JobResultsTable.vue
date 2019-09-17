@@ -949,9 +949,9 @@ export default Vue.extend({
                 ],
                 maximize: true
               },
+              reactionDeletions: [],
               reactionAdditions: addedReactions,
               reactionKnockouts: [],
-              reactionDeletions: [],
               geneKnockouts: [],
               editedBounds: [],
               // Data-driven card fields

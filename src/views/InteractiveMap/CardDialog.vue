@@ -233,9 +233,9 @@ export default Vue.extend({
             reaction: null,
             maximize: true
           },
+          reactionDeletions: [],
           reactionAdditions: [],
           reactionKnockouts: [],
-          reactionDeletions: [],
           geneKnockouts: [],
           editedBounds: [],
           // Reset simulation results too
