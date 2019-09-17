@@ -1,5 +1,9 @@
 import { Metabolite } from "@/store/modules/interactiveMap";
 
+// Produces reaction string based on:
+// sign of stoichiometry (positive/negative -> products/substrates)
+// bounds (direction of the reaction)
+// Format of the metabolite in the string: "stoichiometry id_compartment"                                                                                                                                 )
 export function buildReactionString(
   metabolites: Metabolite[],
   lowerBound: number,
