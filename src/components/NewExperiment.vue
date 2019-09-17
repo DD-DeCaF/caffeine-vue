@@ -21,7 +21,7 @@
                   Add row
                 </v-btn>
                 <!-- Conditions table -->
-                <template v-if="selectedTableKey === 'conditions'">
+                <div v-show="selectedTableKey === 'conditions'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.conditions.items"
@@ -102,10 +102,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Samples table -->
-                <template v-if="selectedTableKey === 'samples'">
+                <div v-show="selectedTableKey === 'samples'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.samples.items"
@@ -147,10 +147,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Fluxomics table -->
-                <template v-if="selectedTableKey === 'fluxomics'">
+                <div v-show="selectedTableKey === 'fluxomics'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.fluxomics.items"
@@ -203,10 +203,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Metabolomics table -->
-                <template v-if="selectedTableKey === 'metabolomics'">
+                <div v-show="selectedTableKey === 'metabolomics'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.metabolomics.items"
@@ -256,10 +256,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Uptake/Secretion rates table -->
-                <template v-if="selectedTableKey === 'uptakeSecretion'">
+                <div v-show="selectedTableKey === 'uptakeSecretion'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.uptakeSecretion.items"
@@ -309,10 +309,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Molar Yields table -->
-                <template v-if="selectedTableKey === 'molarYields'">
+                <div v-show="selectedTableKey === 'molarYields'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.molarYields.items"
@@ -373,10 +373,10 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
 
                 <!-- Growth table -->
-                <template v-if="selectedTableKey === 'growth'">
+                <div v-show="selectedTableKey === 'growth'">
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.growth.items"
@@ -419,7 +419,7 @@
                       </td>
                     </template>
                   </v-data-table>
-                </template>
+                </div>
               </v-card>
             </v-flex>
 
