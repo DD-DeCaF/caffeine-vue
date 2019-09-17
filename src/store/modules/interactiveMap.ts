@@ -1,10 +1,8 @@
 import Vue from "vue";
 import axios from "axios";
 import he from "he";
-import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
 import { OrganismItem } from "./organisms";
-import { ModelItem } from "./models";
 
 export interface Gene {
   id: string;
@@ -14,8 +12,8 @@ export interface Gene {
 
 export interface Metabolite {
   id: string;
-  name?: string;
-  formula?: string;
+  name: string;
+  formula: string;
   compartment: string;
   stoichiometry: number;
 }

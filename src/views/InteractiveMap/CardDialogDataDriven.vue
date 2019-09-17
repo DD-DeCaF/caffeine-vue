@@ -326,7 +326,10 @@ export default Vue.extend({
                   stoichiometry:
                     metabolitesFromResponse[metaboliteIdWithCompartment],
                   id: metaboliteIdWithCompartment.substring(0, index),
-                  compartment: metaboliteIdWithCompartment.substring(index + 1)
+                  compartment: metaboliteIdWithCompartment.substring(index + 1),
+                  // TODO: get name and formula data
+                  name: "N/A",
+                  formula: "N/A"
                 };
                 metabolites.push(metabolite);
               }
