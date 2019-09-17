@@ -224,7 +224,7 @@ export default Vue.extend({
           const payload = {
             compound_identifier: compound.id,
             compound_name: compound.name,
-            compound_namespace: "Metanetx",
+            compound_namespace: "metanetx.chemical",
             mass_concentration: compound.mass_concentration,
             medium_id: mediumId
           };

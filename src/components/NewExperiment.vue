@@ -748,7 +748,6 @@ sample	reaction	measurement	uncertainity
               value = table.parsePasted[property](cell, {
                 // Extra parameters for parsePasted:
                 tables: this.tables
-                //availableCompounds: this.availableCompounds
               });
             } else {
               // Empty cell clears existing value.
@@ -831,7 +830,6 @@ sample	reaction	measurement	uncertainity
           ];
 
           const date = this.$moment("01/01/2019 15:35", "DD/MM/YYYY HH:mm");
-          const date2 = date.toDate();
           const payload = {
             condition_id: conditionId,
             start_time: this.$moment(
@@ -873,7 +871,7 @@ sample	reaction	measurement	uncertainity
           ...{
             reaction_name: item.reaction.name,
             reaction_identifier: item.reaction.id,
-            reaction_namespace: "Metanetx"
+            reaction_namespace: "metanetx.chemical"
           }
         };
       } else if (
@@ -885,7 +883,7 @@ sample	reaction	measurement	uncertainity
           ...{
             compound_name: item.compound.name,
             compound_identifier: item.compound.id,
-            compound_namespace: "Metanetx"
+            compound_namespace: "metanetx.chemical"
           }
         };
       } else if (itemsName === "molarYields") {
@@ -894,18 +892,15 @@ sample	reaction	measurement	uncertainity
           ...{
             product_name: item.product.name,
             product_identifier: item.product.id,
-            product_namespace: "Metanetx",
+            product_namespace: "metanetx.chemical",
             substrate_name: item.substrate.name,
             substrate_identifier: item.substrate.id,
-            substrate_namespace: "Metanetx"
+            substrate_namespace: "metanetx.chemical"
           }
         };
       } else {
         return payload;
       }
-    },
-    print(event) {
-      console.log(event);
     }
   }
 });
