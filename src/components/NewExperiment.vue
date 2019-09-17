@@ -533,14 +533,7 @@ export default Vue.extend({
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
-    itemsNameAPIMap: {
-      fluxomics: "fluxomics",
-      metabolomics: "metabolomics",
-      uptakeSecretion: "uptake-secretion-rates",
-      molarYields: "molar-yields",
-      growth: "growth-rates"
-    },
-    selectedTableKey: "fluxomics",
+    selectedTableKey: "conditions",
     tables: {
       conditions: {
         name: "Conditions",
@@ -565,10 +558,7 @@ export default Vue.extend({
           { text: "Start time", value: "startTime", width: "25%" },
           { text: "End time", value: "endTime", width: "25%" }
         ],
-        items: [
-          { temporaryId: uuidv4(), name: "a" },
-          { temporaryId: uuidv4(), name: "b" }
-        ]
+        items: [{ temporaryId: uuidv4() }]
       },
       fluxomics: {
         name: "Fluxomics",
@@ -596,11 +586,7 @@ export default Vue.extend({
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [
-          { temporaryId: uuidv4() },
-          { temporaryId: uuidv4(), measurement: 1, uncertainty: 1 },
-          { temporaryId: uuidv4(), measurement: 2, uncertainty: 1 }
-        ]
+        items: [{ temporaryId: uuidv4() }]
         /*
 in excel:
 sample	reaction	measurement	uncertainity
@@ -783,19 +769,19 @@ sample	reaction	measurement	uncertainity
           return Promise.all(this.postSamples());
         })
         .then(() => {
-          return Promise.all(this.postItems("fluxomics"));
+          return Promise.all(this.postFluxomics());
         })
         .then(() => {
-          return Promise.all(this.postItems("metabolomics"));
+          return Promise.all(this.postMetabolomics());
         })
         .then(() => {
-          return Promise.all(this.postItems("uptakeSecretion"));
+          return Promise.all(this.postUptakeSecretionRates());
         })
         .then(() => {
-          return Promise.all(this.postItems("molarYields"));
+          return Promise.all(this.postMolarYields());
         })
         .then(() => {
-          return Promise.all(this.postItems("growth"));
+          return Promise.all(this.postGrowthRates());
         })
         .catch(error => {
           this.$store.commit("setPostError", error);
@@ -847,60 +833,89 @@ sample	reaction	measurement	uncertainity
             });
         });
     },
-    postItems(itemsName) {
-      const items = this.tables[itemsName].items;
-      return items
-        .filter(item => item.sample)
-        .map(item => {
-          const payload = this.getPayload(itemsName, item);
+    postFluxomics() {
+      return this.tables.fluxomics.items
+        .filter(fluxomicsItem => fluxomicsItem.sample)
+        .map(fluxomicsItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[fluxomicsItem.sample.temporaryId],
+            reaction_name: fluxomicsItem.reaction.name,
+            reaction_identifier: fluxomicsItem.reaction.id,
+            reaction_namespace: "metanetx.chemical",
+            measurement: fluxomicsItem.measurement,
+            uncertainty: fluxomicsItem.uncertainty
+          };
+          return axios.post(`${settings.apis.warehouse}/fluxomics`, payload);
+        });
+    },
+    postMetabolomics() {
+      return this.tables.metabolomics.items
+        .filter(metabolomicsItem => metabolomicsItem.sample)
+        .map(metabolomicsItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[
+              metabolomicsItem.sample.temporaryId
+            ],
+            compound_name: metabolomicsItem.compound.name,
+            compound_identifier: metabolomicsItem.compound.id,
+            compound_namespace: "metanetx.chemical",
+            measurement: metabolomicsItem.measurement,
+            uncertainty: metabolomicsItem.uncertainty
+          };
+          return axios.post(`${settings.apis.warehouse}/metabolomics`, payload);
+        });
+    },
+    postUptakeSecretionRates() {
+      return this.tables.uptakeSecretion.items
+        .filter(uptakeSecretionItem => uptakeSecretionItem.sample)
+        .map(uptakeSecretionItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[
+              uptakeSecretionItem.sample.temporaryId
+            ],
+            compound_name: uptakeSecretionItem.compound.name,
+            compound_identifier: uptakeSecretionItem.compound.id,
+            compound_namespace: "metanetx.chemical",
+            measurement: uptakeSecretionItem.measurement,
+            uncertainty: uptakeSecretionItem.uncertainty
+          };
           return axios.post(
-            `${settings.apis.warehouse}/${this.itemsNameAPIMap[itemsName]}`,
+            `${settings.apis.warehouse}/uptake-secretion-rates`,
             payload
           );
         });
     },
-    getPayload(itemsName, item) {
-      const payload = {
-        sample_id: this.sampleTempIdsMap[item.sample.temporaryId],
-        measurement: item.measurement,
-        uncertainty: item.uncertainty
-      };
-      if (itemsName === "fluxomics") {
-        return {
-          ...payload,
-          ...{
-            reaction_name: item.reaction.name,
-            reaction_identifier: item.reaction.id,
-            reaction_namespace: "metanetx.chemical"
-          }
-        };
-      } else if (
-        itemsName === "metabolomics" ||
-        itemsName === "uptakeSecretion"
-      ) {
-        return {
-          ...payload,
-          ...{
-            compound_name: item.compound.name,
-            compound_identifier: item.compound.id,
-            compound_namespace: "metanetx.chemical"
-          }
-        };
-      } else if (itemsName === "molarYields") {
-        return {
-          ...payload,
-          ...{
-            product_name: item.product.name,
-            product_identifier: item.product.id,
+    postMolarYields() {
+      return this.tables.molarYields.items
+        .filter(molarYieldsItem => molarYieldsItem.sample)
+        .map(molarYieldsItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[
+              molarYieldsItem.sample.temporaryId
+            ],
+            product_name: molarYieldsItem.product.name,
+            product_identifier: molarYieldsItem.product.id,
             product_namespace: "metanetx.chemical",
-            substrate_name: item.substrate.name,
-            substrate_identifier: item.substrate.id,
-            substrate_namespace: "metanetx.chemical"
-          }
-        };
-      } else {
-        return payload;
-      }
+            substrate_name: molarYieldsItem.substrate.name,
+            substrate_identifier: molarYieldsItem.substrate.id,
+            substrate_namespace: "metanetx.chemical",
+            measurement: molarYieldsItem.measurement,
+            uncertainty: molarYieldsItem.uncertainty
+          };
+          return axios.post(`${settings.apis.warehouse}/molar-yields`, payload);
+        });
+    },
+    postGrowthRates() {
+      return this.tables.growth.items
+        .filter(growthItem => growthItem.sample)
+        .map(growthItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[growthItem.sample.temporaryId],
+            measurement: growthItem.measurement,
+            uncertainty: growthItem.uncertainty
+          };
+          return axios.post(`${settings.apis.warehouse}/growth-rates`, payload);
+        });
     }
   }
 });
