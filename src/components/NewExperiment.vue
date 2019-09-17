@@ -17,9 +17,6 @@
             <v-flex md10>
               <v-card class="pa-4" elevation="0">
                 <div class="display-1 mb-2">{{ selectedTable.name }}</div>
-                <v-btn color="primary" small @click="addRow()">
-                  Add row
-                </v-btn>
                 <!-- Conditions table -->
                 <div v-show="selectedTableKey === 'conditions'">
                   <v-data-table
@@ -100,6 +97,15 @@
                           </template>
                         </v-autocomplete-extended>
                       </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="index === tables.conditions.items.length - 1"
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
+                      </td>
                     </template>
                   </v-data-table>
                 </div>
@@ -144,6 +150,15 @@
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
                         ></v-text-field>
+                      </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="index === tables.samples.items.length - 1"
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
                       </td>
                     </template>
                   </v-data-table>
@@ -203,6 +218,15 @@
                           @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="index === tables.fluxomics.items.length - 1"
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
+                      </td>
                     </template>
                   </v-data-table>
                 </div>
@@ -258,6 +282,17 @@
                           step="any"
                         ></v-text-field>
                       </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="
+                            index === tables.metabolomics.items.length - 1
+                          "
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
+                      </td>
                     </template>
                   </v-data-table>
                 </div>
@@ -312,6 +347,17 @@
                           type="number"
                           step="any"
                         ></v-text-field>
+                      </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="
+                            index === tables.uptakeSecretion.items.length - 1
+                          "
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
                       </td>
                     </template>
                   </v-data-table>
@@ -379,6 +425,15 @@
                           step="any"
                         ></v-text-field>
                       </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="index === tables.molarYields.items.length - 1"
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
+                      </td>
                     </template>
                   </v-data-table>
                 </div>
@@ -426,6 +481,15 @@
                           type="number"
                           step="any"
                         ></v-text-field>
+                      </td>
+                      <td class="hidden-bottom-border">
+                        <v-btn
+                          v-show="index === tables.growth.items.length - 1"
+                          icon
+                          @click="addRow()"
+                        >
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
                       </td>
                     </template>
                   </v-data-table>
@@ -824,8 +888,6 @@ sample	reaction	measurement	uncertainity
           const conditionId = this.conditionTempIdsMap[
             sample.condition.temporaryId
           ];
-
-          const date = this.$moment("01/01/2019 15:35", "DD/MM/YYYY HH:mm");
           const payload = {
             condition_id: conditionId,
             start_time: this.$moment(
@@ -934,5 +996,8 @@ sample	reaction	measurement	uncertainity
 <style>
 .full-height-dialog {
   height: 90%;
+}
+.hidden-bottom-border {
+  border-bottom: hidden;
 }
 </style>
