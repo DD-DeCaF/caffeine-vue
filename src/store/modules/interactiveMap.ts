@@ -49,10 +49,10 @@ export interface Card {
   editedBounds: Reaction[];
   // Data-driven card fields
   experiment: any;
-  condition: any;
   conditionData: any;
-  conditionWarnings: any[];
-  conditionErrors: any[];
+  sample: any;
+  sampleWarnings: any[];
+  sampleErrors: any[];
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;

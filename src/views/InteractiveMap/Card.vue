@@ -130,10 +130,37 @@
       </v-container>
       <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
         <v-layout>
-          <v-flex>Conditions:</v-flex>
+          <v-flex>Strain:</v-flex>
           <v-flex class="text-xs-right">
-            <span v-if="card.condition === null"><em>Not selected</em></span>
-            <span v-else>{{ card.condition.name }}</span>
+            <span v-if="card.conditionData === null"
+              ><em>Not selected</em></span
+            >
+            <span v-else>{{ card.conditionData.strain.name }}</span>
+          </v-flex>
+        </v-layout>
+      </v-container>
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
+        <v-layout>
+          <v-flex>Medium:</v-flex>
+          <v-flex class="text-xs-right">
+            <span v-if="card.conditionData === null"
+              ><em>Not selected</em></span
+            >
+            <span v-else>{{ card.conditionData.medium.name }}</span>
+          </v-flex>
+        </v-layout>
+      </v-container>
+      <v-container v-if="card.type == 'DataDriven'" fluid class="pa-0">
+        <v-layout>
+          <v-flex>Sample:</v-flex>
+          <v-flex class="text-xs-right">
+            <span v-if="card.sample === null"><em>Not selected</em></span>
+            <span v-else>
+              {{ card.sample.start_time }}
+              <span v-if="card.sample.end_time">{{
+                card.sample.end_time
+              }}</span>
+            </span>
           </v-flex>
         </v-layout>
       </v-container>
