@@ -20,7 +20,7 @@ export default Vue.extend({
     link() {
       if (this.namespace === "bigg.metabolite") {
         return `http://bigg.ucsd.edu/universal/metabolites/${this.identifier}`;
-      } else if (this.namespace === "CHEBI") {
+      } else if (this.namespace === "chebi") {
         return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${
           this.identifier
         }`;
