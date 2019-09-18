@@ -277,10 +277,10 @@ export default Vue.extend({
         editedBounds: [],
         // Data-driven card fields
         experiment: null,
-        condition: null,
         conditionData: null,
-        conditionWarnings: [],
-        conditionErrors: [],
+        sample: null,
+        sampleWarnings: [],
+        sampleErrors: [],
         // General simulation fields
         isSimulating: false,
         hasSimulationError: false,
