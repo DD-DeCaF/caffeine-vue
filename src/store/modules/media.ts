@@ -5,32 +5,17 @@ import * as settings from "@/utils/settings";
 export interface MediumItem {
   id: number;
   name: string;
-  ph: number;
-  compounds: MediumCompound[];
-
   project_id: number;
-  created: string;
-  updated: string;
 }
 
-export interface Compound {
-  id: number;
-  name: string; // sodium chloride
-  reference: string; // CHEBI:26710
-  namespace_id: number; // CHEBI
-  type_id: number; // compound
-
-  project_id: number;
-  created: string;
-  updated: string;
-}
-
-export interface NewMediumCompound {
+export interface MediumCompound {
+  compound_identifier: string;
+  compound_name: string; // sodium chloride
+  compound_namespace: string; // CHEBI
   id: number;
   mass_concentration: number;
+  medium_id: number;
 }
-
-export interface MediumCompound extends NewMediumCompound, Compound {}
 
 export default {
   namespaced: true,
@@ -77,7 +62,7 @@ export default {
       }
 
       const compoundsPromise = axios
-        .get<Compound[]>(`${settings.apis.warehouse}/bioentities/compounds`)
+        .get<MediumCompound[]>(`${settings.apis.warehouse}/media/compounds`)
         .then(response => response.data.slice(0, 100))
         .catch(error => {
           dispatch("setFetchError", error, { root: true });

@@ -3,6 +3,7 @@
     v-bind="$attrs"
     v-model="addItem"
     :items="searchResults"
+    cache-items
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
@@ -54,7 +55,10 @@ export default Vue.extend({
   data: () => ({
     addItem: null,
     searchResults: [] as MetaNetXMetabolite[],
+    isLoading: false,
     searchQuery: null,
+    requestError: false,
+    selectedValue: null,
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -62,7 +66,12 @@ export default Vue.extend({
   watch: {
     searchQuery(query: string): void {
       this.searchResults = [];
-      if (query === null || query.trim().length === 0) {
+      if (
+        query === null ||
+        query.trim().length === 0 ||
+        (this.selectedValue &&
+          query === this.metaboliteDisplay(this.selectedValue))
+      ) {
         return;
       }
 
@@ -96,7 +105,7 @@ export default Vue.extend({
           this.addItem = null;
         });
       }
-
+      this.selectedValue = selectedMetabolite;
       this.$emit("change", selectedMetabolite);
     },
     dontFilterByDisplayedText(): boolean {

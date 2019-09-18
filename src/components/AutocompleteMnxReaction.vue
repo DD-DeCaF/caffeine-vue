@@ -3,6 +3,7 @@
     v-bind="$attrs"
     v-model="addItem"
     :items="searchResults"
+    cache-items
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
@@ -62,6 +63,7 @@ export default Vue.extend({
     isLoading: false,
     searchQuery: null,
     requestError: false,
+    selectedValue: null,
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -69,10 +71,14 @@ export default Vue.extend({
   watch: {
     searchQuery(query: string): void {
       this.searchResults = [];
-      if (query === null || query.trim().length === 0) {
+      if (
+        query === null ||
+        query.trim().length === 0 ||
+        (this.selectedValue &&
+          query === this.reactionDisplay(this.selectedValue))
+      ) {
         return;
       }
-
       this.isLoading = true;
       this.requestError = false;
       axios
@@ -136,7 +142,7 @@ export default Vue.extend({
           this.addItem = null;
         });
       }
-
+      this.selectedValue = selectedReaction;
       const reaction: Reaction = {
         id: selectedReaction.reaction.mnx_id,
         name: selectedReaction.reaction.name || "",
