@@ -126,6 +126,7 @@ import { Reaction } from "@/store/modules/interactiveMap";
 import ReactionDialogMetabolite from "@/views/InteractiveMap/ReactionDialogMetabolite.vue";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
+import { buildReactionString } from "@/utils/reaction";
 import axios from "axios";
 
 function getInitialState() {
@@ -174,29 +175,14 @@ export default Vue.extend({
   data: () => getInitialState(),
   computed: {
     reactionString() {
-      const substratesSerialized = this.serializeMetabolites(
-        this.substrates
-      ).join(" + ");
-      const productsSerialized = this.serializeMetabolites(this.products).join(
-        " + "
+      return buildReactionString(
+        [
+          ...this.serializeMetabolites(this.substrates, false),
+          ...this.serializeMetabolites(this.products, true)
+        ],
+        this.lowerBound,
+        this.upperBound
       );
-      if (substratesSerialized || productsSerialized) {
-        return (
-          (substratesSerialized || "Ø") +
-          this.direction +
-          (productsSerialized || "Ø")
-        );
-      }
-      return "";
-    },
-    direction() {
-      if (this.lowerBound >= 0) {
-        return " ⟶ ";
-      }
-      if (this.upperBound <= 0) {
-        return " ⟵ ";
-      }
-      return " ⇌ ";
     },
     showDialog: {
       get() {
@@ -253,23 +239,21 @@ export default Vue.extend({
       }
       return true;
     },
-    serializeMetabolites(metabolites) {
+    serializeMetabolites(metabolites, isProduct) {
       return metabolites
-        .filter(m => m.metabolite)
-        .map(metabolite => {
-          const compartment = metabolite.compartment
-            ? "_" + metabolite.compartment
-            : "";
-          return (
-            metabolite.stoichiometry +
-            " " +
-            getMetaboliteId(
-              metabolite.metabolite.id,
-              metabolite.metabolite.compartment
-            ) +
-            compartment
-          );
-        });
+        .filter(metabolite => metabolite.metabolite)
+        .map(metabolite => ({
+          stoichiometry: isProduct
+            ? Math.abs(metabolite.stoichiometry)
+            : -Math.abs(metabolite.stoichiometry),
+          id: getMetaboliteId(
+            metabolite.metabolite.id,
+            metabolite.metabolite.compartment
+          ),
+          compartment: metabolite.compartment || "",
+          name: metabolite.metabolite.name || "N/A",
+          formula: metabolite.metabolite.formula || "N/A"
+        }));
     },
     addSubstrate() {
       this.substrates.push({

@@ -6,6 +6,33 @@
     item-key="tableKey"
   >
     <template v-slot:items="{ item: { modification } }">
+      <!-- Removed reaction -->
+      <td v-if="modification.type === 'removed_reaction'">
+        Removed reaction
+      </td>
+      <td v-if="modification.type === 'removed_reaction'">
+        <span v-if="modification.name">
+          {{ modification.name }} ({{ modification.id }})
+        </span>
+        <v-progress-circular
+          v-else
+          indeterminate
+          size="12"
+          :width="1"
+        ></v-progress-circular>
+      </td>
+      <td v-if="modification.type === 'removed_reaction'">
+        <span v-if="modification.reactionString">
+          {{ modification.reactionString }}
+        </span>
+        <v-progress-circular
+          v-else
+          indeterminate
+          size="12"
+          :width="1"
+        ></v-progress-circular>
+      </td>
+
       <!-- Added reaction -->
       <td v-if="modification.type === 'added_reaction'">
         Added reaction
@@ -135,8 +162,8 @@ export default Vue.extend({
       ];
     },
     modificationsWithTableKeys() {
-      return this.modifications.map(modification => ({
-        tableKey: modification.type + " " + modification.id,
+      return this.modifications.map((modification, index) => ({
+        tableKey: modification.type + " " + modification.id + index,
         modification
       }));
     }

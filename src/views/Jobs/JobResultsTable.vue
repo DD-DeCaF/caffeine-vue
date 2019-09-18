@@ -943,13 +943,13 @@ export default Vue.extend({
               method: "pfba",
               modified: true,
               type: cardType,
-              // Design card fields
               objective: {
                 reaction: this.prediction.result.reactions[
                   this.prediction.result.target
                 ],
                 maximize: true
               },
+              reactionDeletions: [],
               reactionAdditions: addedReactions,
               reactionKnockouts: [],
               geneKnockouts: [],
