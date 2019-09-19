@@ -3,7 +3,6 @@
     v-bind="$attrs"
     v-model="addItem"
     :items="searchResults"
-    cache-items
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
@@ -55,7 +54,8 @@ export default Vue.extend({
   props: {
     rules: [Array, Object],
     clearOnChange: Boolean,
-    forceSearchQuery: String
+    forceSearchQuery: String,
+    modelIds: Array
   },
   data: () => ({
     addItem: null,
@@ -64,6 +64,7 @@ export default Vue.extend({
     searchQuery: null,
     requestError: false,
     selectedValue: null,
+    reactionIdsInTheModels: new Set([]),
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -71,12 +72,17 @@ export default Vue.extend({
   watch: {
     searchQuery(query: string): void {
       this.searchResults = [];
+      if (query === null || query.trim().length === 0) {
+        return;
+      }
       if (
-        query === null ||
-        query.trim().length === 0 ||
-        (this.selectedValue &&
-          query === this.reactionDisplay(this.selectedValue))
+        this.selectedValue &&
+        query === this.reactionDisplay(this.selectedValue)
       ) {
+        // In order to keep selected reaction displayed after clicking
+        // outside of the v-autocomplete, this reaction should be
+        // listed in the items prop
+        this.searchResults = [this.selectedValue];
         return;
       }
       this.isLoading = true;
@@ -84,7 +90,31 @@ export default Vue.extend({
       axios
         .get(`${settings.apis.metanetx}/reactions?query=${query}`)
         .then(response => {
-          this.searchResults = response.data;
+          // Prioritize reactions that exist in the passed models
+          const searchResultsInTheModel = [] as MetaNetXReaction[];
+          const searchResultsNotInTheModel = [] as MetaNetXReaction[];
+          response.data.forEach((reaction: MetaNetXReaction) => {
+            const annotation = reaction.reaction.annotation;
+            const reactionIds = [reaction.reaction.mnx_id];
+            for (const namespace in annotation) {
+              annotation[namespace].forEach(reactionId =>
+                reactionIds.push(reactionId)
+              );
+            }
+            if (
+              reactionIds.some(reactionId =>
+                this.reactionIdsInTheModels.has(reactionId)
+              )
+            ) {
+              searchResultsInTheModel.push(reaction);
+            } else {
+              searchResultsNotInTheModel.push(reaction);
+            }
+          });
+          this.searchResults = [
+            ...searchResultsInTheModel,
+            ...searchResultsNotInTheModel
+          ];
         })
         .catch(error => {
           this.requestError = true;
@@ -95,6 +125,30 @@ export default Vue.extend({
     },
     forceSearchQuery(): void {
       this.loadForcedSearchQuery();
+    },
+    modelIds: {
+      immediate: true,
+      handler() {
+        this.reactionIdsInTheModels = new Set([]);
+        if (this.modelIds) {
+          axios
+            .all(
+              this.modelIds.map(modelId =>
+                axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
+              )
+            )
+            .then(response => {
+              response.forEach(responseItem =>
+                responseItem.data.model_serialized.reactions.forEach(reaction =>
+                  this.reactionIdsInTheModels.add(reaction.id)
+                )
+              );
+            })
+            .catch(error => {
+              this.$store.commit("setFetchError", error);
+            });
+        }
+      }
     }
   },
   methods: {
