@@ -615,7 +615,8 @@ export default Vue.extend({
     experiment: {
       name: null,
       description: null,
-      project_id: null
+      project_id: null,
+      id: null
     },
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
@@ -898,7 +899,8 @@ sample	reaction	measurement	uncertainity
       axios
         .post(`${settings.apis.warehouse}/experiments`, this.experiment)
         .then((response: AxiosResponse) => {
-          return Promise.all(this.postConditions(response.data.id));
+          this.experiment.id = response.data.id;
+          return Promise.all(this.postConditions());
         })
         .then(() => {
           return Promise.all(this.postSamples());
@@ -918,18 +920,21 @@ sample	reaction	measurement	uncertainity
         .then(() => {
           return Promise.all(this.postGrowthRates());
         })
+        .then(() => {
+          this.$store.commit("experiments/addExperiment", this.experiment);
+        })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
         .then(() => (this.isLoading = false));
     },
-    postConditions(experimentId) {
+    postConditions() {
       return this.tables.conditions.items
         .filter(condition => condition.name)
         .map(condition => {
           const payload = {
             name: condition.name,
-            experiment_id: experimentId,
+            experiment_id: this.experiment.id,
             strain_id: condition.strain.id,
             medium_id: condition.medium.id
           };

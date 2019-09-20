@@ -21,6 +21,9 @@ export default {
     setExperiments(state, experiments: ExperimentItem[]) {
       state.experiments = experiments;
     },
+    addExperiment(state, experiment: ExperimentItem) {
+      state.experiments.push(experiment);
+    },
     setExperimentsPromise(state, experimentsPromise) {
       state.experimentsPromise = experimentsPromise;
     },
