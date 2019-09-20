@@ -20,6 +20,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import { debounce } from "lodash";
 import * as settings from "@/utils/settings";
 
 export interface MetaNetXMetabolite {
@@ -64,13 +65,13 @@ export default Vue.extend({
       "Could not search MetaNetX for compounds, please check your internet connection."
   }),
   watch: {
-    searchQuery(query: string): void {
+    searchQuery: debounce(function() {
       this.searchResults = [];
       if (
-        query === null ||
-        query.trim().length === 0 ||
+        this.searchQuery === null ||
+        this.searchQuery.trim().length === 0 ||
         (this.selectedValue &&
-          query === this.metaboliteDisplay(this.selectedValue))
+          this.searchQuery === this.metaboliteDisplay(this.selectedValue))
       ) {
         return;
       }
@@ -78,7 +79,7 @@ export default Vue.extend({
       this.isLoading = true;
       this.requestError = false;
       axios
-        .get(`${settings.apis.metanetx}/metabolites?query=${query}`)
+        .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
         .then(response => {
           this.searchResults = response.data;
         })
@@ -88,7 +89,7 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
-    },
+    }, 500),
     forceSearchQuery(): void {
       this.loadForcedSearchQuery();
     }
