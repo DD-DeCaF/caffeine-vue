@@ -89,6 +89,7 @@
                               compound.name = $event.name;
                               compound.id = $event.mnx_id;
                             "
+                            :modelIds="modelIds"
                           ></AutocompleteMnxMetabolite>
                         </v-flex>
 
@@ -160,7 +161,8 @@ export default Vue.extend({
     value: {
       type: Boolean,
       required: true
-    }
+    },
+    modelIds: Array
   },
   data: () => ({
     medium: {

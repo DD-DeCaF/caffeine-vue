@@ -1,7 +1,11 @@
 <template>
   <div>
     <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
-    <NewMedium v-model="isNewMediumDialogVisible" @return-object="passMedium" />
+    <NewMedium
+      v-model="isNewMediumDialogVisible"
+      @return-object="passMedium"
+      :modelIds="selectedMediumRelevantModelIds"
+    />
     <NewProject
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
@@ -82,6 +86,7 @@
                             <v-list-tile
                               ripple
                               @click="
+                                getRelevantModelIdsForNewMedium(condition);
                                 isNewMediumDialogVisible = true;
                                 currentRowIndex = index;
                                 $refs.mediumAutocomplete.isMenuActive = false;
@@ -617,6 +622,7 @@ export default Vue.extend({
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
+    selectedMediumRelevantModelIds: [],
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -814,6 +820,12 @@ sample	reaction	measurement	uncertainity
           ? item.sample.condition.strain.organism_id
           : null;
       item.modelIds = this.models
+        .filter(model => model.organism_id === organismId)
+        .map(model => model.id);
+    },
+    getRelevantModelIdsForNewMedium(condition) {
+      const organismId = condition.strain ? condition.strain.organism_id : null;
+      this.selectedMediumRelevantModelIds = this.models
         .filter(model => model.organism_id === organismId)
         .map(model => model.id);
     },
