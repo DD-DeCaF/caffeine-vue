@@ -7,13 +7,26 @@
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
-    :item-text="metaboliteDisplay"
+    item-text="displayValue"
     item-value="mnx_id"
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
-  ></v-autocomplete-extended>
+  >
+    <template v-slot:item="{ item: metabolite }">
+      <v-list-tile-content>
+        <v-list-tile-title v-text="metabolite.displayValue"></v-list-tile-title>
+        <v-list-tile-sub-title v-if="metabolite.modelNames.length">
+          <span
+            v-for="(modelName, index) in metabolite.modelNames"
+            :key="modelName + index"
+            >{{ modelName }}&nbsp;&nbsp;</span
+          ></v-list-tile-sub-title
+        >
+      </v-list-tile-content>
+    </template>
+  </v-autocomplete-extended>
 </template>
 
 <script lang="ts">
@@ -27,6 +40,8 @@ export interface MetaNetXMetabolite {
   name: string;
   mnx_id: string;
   formula: string;
+  modelNames?: Array<string>;
+  displayValue?: string;
 }
 
 export interface Annotation {
@@ -60,7 +75,7 @@ export default Vue.extend({
     searchQuery: null,
     requestError: false,
     selectedValue: null,
-    metaboliteIdsInTheModels: new Set([]),
+    metabolitesInModelsMap: {},
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -71,10 +86,7 @@ export default Vue.extend({
       if (query === null || query.trim().length === 0) {
         return;
       }
-      if (
-        this.selectedValue &&
-        query === this.metaboliteDisplay(this.selectedValue)
-      ) {
+      if (this.selectedValue && query === this.selectedValue.displayValue) {
         // In order to keep selected metabolite displayed after clicking
         // outside of the v-autocomplete, this metabolite should be
         // listed in the items prop
@@ -98,20 +110,33 @@ export default Vue.extend({
                 metaboliteIds.push(metaboliteId)
               );
             }
-            if (
-              metaboliteIds.some(metaboliteId =>
-                this.metaboliteIdsInTheModels.has(metaboliteId)
-              )
-            ) {
+            let isMetaboliteFound = false;
+            metabolite.modelNames = [];
+            for (const modelName in this.metabolitesInModelsMap) {
+              if (
+                metaboliteIds.some(metaboliteId =>
+                  this.metabolitesInModelsMap[modelName].has(metaboliteId)
+                )
+              ) {
+                isMetaboliteFound = true;
+                metabolite.modelNames.push(modelName);
+              }
+            }
+            metabolite.displayValue = this.metaboliteDisplay(metabolite);
+            if (isMetaboliteFound) {
               searchResultsInTheModel.push(metabolite);
             } else {
               searchResultsNotInTheModel.push(metabolite);
             }
           });
-          this.searchResults = [
-            ...searchResultsInTheModel,
-            ...searchResultsNotInTheModel
-          ];
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ header: "Found in the models" })
+          }
+          this.searchResults.push(...searchResultsInTheModel);
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ divider: true }, { header: "MetaNetX" })
+          }
+          this.searchResults.push(...searchResultsNotInTheModel);
         })
         .catch(error => {
           this.requestError = true;
