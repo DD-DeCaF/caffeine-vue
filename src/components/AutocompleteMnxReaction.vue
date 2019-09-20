@@ -7,13 +7,26 @@
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
-    :item-text="reactionDisplay"
+    item-text="displayValue"
     item-value="reaction.mnx_id"
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
-  ></v-autocomplete-extended>
+  >
+    <template v-slot:item="{ item: reaction }">
+      <v-list-tile-content>
+        <v-list-tile-title v-text="reaction.displayValue"></v-list-tile-title>
+        <v-list-tile-sub-title v-if="reaction.modelNames.length">
+          <span
+            v-for="(modelName, index) in reaction.modelNames"
+            :key="modelName + index"
+            >{{ modelName }}&nbsp;&nbsp;</span
+          ></v-list-tile-sub-title
+        >
+      </v-list-tile-content>
+    </template>
+  </v-autocomplete-extended>
 </template>
 
 <script lang="ts">
@@ -46,6 +59,8 @@ export interface MetaNetXReaction {
     }[];
     annotation: Annotation;
   };
+  modelNames?: Array<string>;
+  displayValue?: string;
 }
 
 export default Vue.extend({
@@ -64,7 +79,7 @@ export default Vue.extend({
     searchQuery: null,
     requestError: false,
     selectedValue: null,
-    reactionIdsInTheModels: new Set([]),
+    reactionsInModelsMap: {},
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -75,10 +90,7 @@ export default Vue.extend({
       if (query === null || query.trim().length === 0) {
         return;
       }
-      if (
-        this.selectedValue &&
-        query === this.reactionDisplay(this.selectedValue)
-      ) {
+      if (this.selectedValue && query === this.selectedValue.displayValue) {
         // In order to keep selected reaction displayed after clicking
         // outside of the v-autocomplete, this reaction should be
         // listed in the items prop
@@ -101,20 +113,33 @@ export default Vue.extend({
                 reactionIds.push(reactionId)
               );
             }
-            if (
-              reactionIds.some(reactionId =>
-                this.reactionIdsInTheModels.has(reactionId)
-              )
-            ) {
+            let isReactionFound = false;
+            reaction.modelNames = [];
+            for (const modelName in this.reactionsInModelsMap) {
+              if (
+                reactionIds.some(reactionId =>
+                  this.reactionsInModelsMap[modelName].has(reactionId)
+                )
+              ) {
+                isReactionFound = true;
+                reaction.modelNames.push(modelName);
+              }
+            }
+            reaction.displayValue = this.reactionDisplay(reaction);
+            if (isReactionFound) {
               searchResultsInTheModel.push(reaction);
             } else {
               searchResultsNotInTheModel.push(reaction);
             }
           });
-          this.searchResults = [
-            ...searchResultsInTheModel,
-            ...searchResultsNotInTheModel
-          ];
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ header: "Found in the models" })
+          }
+          this.searchResults.push(...searchResultsInTheModel);
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ divider: true }, { header: "MetaNetX" })
+          }
+          this.searchResults.push(...searchResultsNotInTheModel);
         })
         .catch(error => {
           this.requestError = true;
