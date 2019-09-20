@@ -42,6 +42,7 @@
                           :rules="[
                             requiredIfHasMain(condition.strain, condition)
                           ]"
+                          @change="updateRelevantModels(condition)"
                         >
                           <template v-slot:prepend-item>
                             <v-list-tile
@@ -183,6 +184,7 @@
                           item-value="temporaryId"
                           v-model="fluxomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(fluxomicsItem)"
                           @paste="paste(0, index, selectedTable, $event)"
                         >
                         </v-select>
@@ -196,6 +198,7 @@
                             fluxomicsItem.reaction &&
                               fluxomicsItem.reaction._pastedText
                           "
+                          :modelIds="fluxomicsItem.modelIds"
                         ></AutocompleteMnxReaction>
                       </td>
                       <td>
@@ -737,6 +740,9 @@ sample	reaction	measurement	uncertainity
     availableProjects() {
       return this.$store.state.projects.projects;
     },
+    models() {
+      return this.$store.getters["models/getModels"];
+    },
     isDialogVisible: {
       get() {
         return this.value;
@@ -769,6 +775,35 @@ sample	reaction	measurement	uncertainity
     },
     passProject(project) {
       this.experiment.project_id = project.id;
+    },
+    updateRelevantModels(condition) {
+      const conditionId = condition.temporaryId;
+      this.tables.samples.items
+        .filter(
+          sample =>
+            sample.condition && sample.condition.temporaryId === conditionId
+        )
+        .forEach(sample => {
+          const sampleId = sample.temporaryId;
+          this.tables.fluxomics.items
+            .filter(
+              fluxomicsItem =>
+                fluxomicsItem.sample &&
+                fluxomicsItem.sample.temporaryId === sampleId
+            )
+            .forEach(fluxomicsItem => this.getRelevantModelIds(fluxomicsItem));
+        });
+    },
+    getRelevantModelIds(item) {
+      // Get ids of the models the selected organism belongs to
+      // in order to prioritize results from AutocompleteMnxReaction
+      const organismId =
+        item.sample.condition && item.sample.condition.strain
+          ? item.sample.condition.strain.organism_id
+          : null;
+      item.modelIds = this.models
+        .filter(model => model.organism_id === organismId)
+        .map(model => model.id);
     },
     requiredIfHasMain(value, row) {
       const mainField = this.selectedTable.mainField;
