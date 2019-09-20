@@ -253,6 +253,7 @@
                           item-value="temporaryId"
                           v-model="metabolomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(metabolomicsItem)"
                         >
                         </v-select>
                       </td>
@@ -265,6 +266,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="metabolomicsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -319,6 +321,7 @@
                           item-value="temporaryId"
                           v-model="uptakeSecretionItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(uptakeSecretionItem)"
                         >
                         </v-select>
                       </td>
@@ -331,6 +334,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="uptakeSecretionItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -385,6 +389,7 @@
                           item-value="temporaryId"
                           v-model="molarYieldsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(molarYieldsItem)"
                         >
                         </v-select>
                       </td>
@@ -397,6 +402,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -408,6 +414,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -785,18 +792,23 @@ sample	reaction	measurement	uncertainity
         )
         .forEach(sample => {
           const sampleId = sample.temporaryId;
-          this.tables.fluxomics.items
-            .filter(
-              fluxomicsItem =>
-                fluxomicsItem.sample &&
-                fluxomicsItem.sample.temporaryId === sampleId
-            )
-            .forEach(fluxomicsItem => this.getRelevantModelIds(fluxomicsItem));
+          [
+            "fluxomics",
+            "metabolomics",
+            "uptakeSecretion",
+            "molarYields"
+          ].forEach(tableName => {
+            this.tables[tableName].items
+              .filter(
+                item => item.sample && item.sample.temporaryId === sampleId
+              )
+              .forEach(item => this.getRelevantModelIds(item));
+          });
         });
     },
     getRelevantModelIds(item) {
       // Get ids of the models the selected organism belongs to
-      // in order to prioritize results from AutocompleteMnxReaction
+      // in order to prioritize reaction and compound results from autocomplete
       const organismId =
         item.sample.condition && item.sample.condition.strain
           ? item.sample.condition.strain.organism_id
