@@ -101,7 +101,7 @@ export default Vue.extend({
         .catch(error => {
           this.$store.commit("setDeleteError", error);
         })
-        .then(() => {
+        .finally(() => {
           this.$emit("toggleLoader");
         });
     }

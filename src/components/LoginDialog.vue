@@ -239,7 +239,7 @@ export default Vue.extend({
             this.hasLoginError = true;
           }
         })
-        .then(() => {
+        .finally(() => {
           this.isLoading = false;
         });
     },

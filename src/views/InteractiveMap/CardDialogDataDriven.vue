@@ -455,7 +455,7 @@ export default Vue.extend({
         .catch(error => {
           this.$emit("load-data-error");
         })
-        .then(() => {
+        .finally(() => {
           this.isLoadingConditions = false;
         });
     },
@@ -490,7 +490,7 @@ export default Vue.extend({
         .catch(error => {
           this.$emit("load-data-error");
         })
-        .then(() => {
+        .finally(() => {
           this.isLoadingConditionData = false;
         });
     },
@@ -670,7 +670,7 @@ export default Vue.extend({
           }
           this.$emit("simulation-error");
         })
-        .then(() => {
+        .finally(() => {
           this.isModifyingModel = false;
         });
     }

@@ -1316,7 +1316,7 @@ export default Vue.extend({
           };
           reader.readAsText(error.response.data);
         })
-        .then(() => (this.isExporting = false));
+        .finally(() => (this.isExporting = false));
     }
   }
 });

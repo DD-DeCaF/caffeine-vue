@@ -860,7 +860,7 @@ sample	reaction	measurement	uncertainity
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
-        .then(() => (this.isLoading = false));
+        .finally(() => (this.isLoading = false));
     },
     postConditions(experimentId) {
       return this.tables.conditions.items

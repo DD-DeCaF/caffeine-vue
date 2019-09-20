@@ -189,7 +189,7 @@ export default Vue.extend({
           this.userRegisterErrorMessage = error.response.data;
           this.isUserRegisterError = true;
         })
-        .then(() => (this.isLoading = false));
+        .finally(() => (this.isLoading = false));
     },
     passwordConfirmationRules(password, confirmedPassword) {
       if (password && confirmedPassword && password !== confirmedPassword) {

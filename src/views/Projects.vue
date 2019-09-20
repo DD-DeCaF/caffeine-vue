@@ -227,7 +227,7 @@ export default Vue.extend({
             this.hasOtherError = true;
           }
         })
-        .then(() => {
+        .finally(() => {
           this.$store.commit("toggleDialog", "loader");
           this.isProjectEditDialogVisible = false;
         });

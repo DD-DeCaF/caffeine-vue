@@ -437,7 +437,7 @@ export default Vue.extend({
           });
           this.hasSimulationError = true;
         })
-        .then(response => {
+        .finally(() => {
           this.updateCard({
             uuid: card.uuid,
             props: { isSimulating: false }

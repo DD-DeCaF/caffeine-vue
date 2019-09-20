@@ -560,7 +560,7 @@ export default Vue.extend({
           .catch(error => {
             this.$emit("design-save-error");
           })
-          .then(() => {
+          .finally(() => {
             this.isSaving = false;
           });
       } else {
@@ -582,7 +582,7 @@ export default Vue.extend({
           .catch(error => {
             this.$emit("design-save-error");
           })
-          .then(() => {
+          .finally(() => {
             this.isSaving = false;
           });
       }

@@ -113,7 +113,7 @@ export default Vue.extend({
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
-        .then(() => {
+        .finally(() => {
           this.$store.commit("toggleDialog", "loader");
         });
     }

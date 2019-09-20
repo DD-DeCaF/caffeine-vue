@@ -49,7 +49,7 @@ export default {
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
         })
-        .then(() => {
+        .finally(() => {
           if (
             state.jobs.some(job => {
               return job.status === "STARTED" || job.status === "PENDING";

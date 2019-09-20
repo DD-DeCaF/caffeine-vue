@@ -89,7 +89,7 @@ export default Vue.extend({
         .catch(error => {
           this.requestError = true;
         })
-        .then(() => {
+        .finally(() => {
           this.isLoading = false;
         });
     },

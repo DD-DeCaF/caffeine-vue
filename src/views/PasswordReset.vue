@@ -150,7 +150,7 @@ export default Vue.extend({
         .catch(error => {
           this.isTokenInvalid = true;
         })
-        .then(() => (this.isRequestingPasswordChange = false));
+        .finally(() => (this.isRequestingPasswordChange = false));
     }
   }
 });

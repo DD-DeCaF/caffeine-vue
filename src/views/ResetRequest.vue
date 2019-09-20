@@ -99,7 +99,7 @@ export default Vue.extend({
           }
           this.hasResetRequestError = true;
         })
-        .then(() => (this.isRequestingResetLink = false));
+        .finally(() => (this.isRequestingResetLink = false));
     }
   }
 });

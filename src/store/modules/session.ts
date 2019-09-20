@@ -148,7 +148,7 @@ export default {
             commit("setRefreshError", error);
             dispatch("fetchAllData", null, { root: true });
           })
-          .then(response => {
+          .finally(response => {
             commit("setRefreshRequest", null);
           });
         commit("setRefreshRequest", refreshRequest);

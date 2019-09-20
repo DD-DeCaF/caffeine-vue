@@ -206,7 +206,7 @@ export default Vue.extend({
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
-        .then(() => (this.isLoading = false));
+        .finally(() => (this.isLoading = false));
     },
     passOrganism(organism) {
       this.organism = organism;
