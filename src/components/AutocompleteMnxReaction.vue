@@ -21,6 +21,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { debounce } from "lodash";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { Reaction } from "@/store/modules/interactiveMap";
 import {
@@ -63,6 +64,7 @@ export default Vue.extend({
     searchResults: [] as MetaNetXReaction[],
     isLoading: false,
     searchQuery: null,
+    activeSearchID: null,
     requestError: false,
     selectedValue: null,
     requestErrorRule: error =>
@@ -82,15 +84,31 @@ export default Vue.extend({
       }
       this.isLoading = true;
       this.requestError = false;
+      // Create a unique reference for this search, to be compared when results return.
+      // If `activeSearchID` has changed by the time the results are ready, then a new
+      // request has been triggered, so the results for this search are irrelevant and
+      // will be ignored. This ensures that we don't overwrite the search results with
+      // results from a stale request.
+      const searchId = uuidv4();
+      this.activeSearchID = searchId;
       axios
         .get(`${settings.apis.metanetx}/reactions?query=${this.searchQuery}`)
         .then(response => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           this.searchResults = response.data;
         })
         .catch(error => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           this.requestError = true;
         })
         .then(() => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           this.isLoading = false;
         });
     }, 500),
