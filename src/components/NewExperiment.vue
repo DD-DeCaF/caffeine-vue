@@ -147,6 +147,7 @@
                           mask="date-with-time"
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
+                          hint="dd/mm/yyyy hh:mm"
                         ></v-text-field>
                       </td>
                       <td>
@@ -155,6 +156,7 @@
                           mask="date-with-time"
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
+                          hint="dd/mm/yyyy hh:mm"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
