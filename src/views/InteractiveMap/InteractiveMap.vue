@@ -396,7 +396,8 @@ export default Vue.extend({
         uuid: card.uuid,
         props: {
           isSimulating: true,
-          hasSimulationError: false
+          hasSimulationError: false,
+          solverStatus: null
         }
       });
       axios

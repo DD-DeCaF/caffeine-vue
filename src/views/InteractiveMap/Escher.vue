@@ -159,7 +159,7 @@ export default Vue.extend({
           }
           this.setReactionKnockouts();
           this.setGeneKnockouts();
-          this.setConditionData();
+          this.setDataSample();
           this.setFluxes();
         }, 10);
       };
@@ -194,8 +194,8 @@ export default Vue.extend({
     "card.geneKnockouts"() {
       this.onEscherReady.then(this.setGeneKnockouts);
     },
-    "card.conditionData"() {
-      this.onEscherReady.then(this.setConditionData);
+    "card.sample"() {
+      this.onEscherReady.then(this.setDataSample);
     },
     "card.fluxes"() {
       this.onEscherReady.then(this.setFluxes);
@@ -285,13 +285,13 @@ export default Vue.extend({
       }
       this.escherBuilder._updateData(true, true);
     },
-    setConditionData() {
-      if (!this.card || !this.card.conditionData) {
+    setDataSample() {
+      if (!this.card || !this.card.sample) {
         this.escherBuilder.set_highlight_reactions([]);
         return;
       }
       this.escherBuilder.set_highlight_reactions(
-        this.card.conditionData.fluxomics.map(m => m.identifier)
+        this.card.sample.fluxomics.map(m => m.identifier)
       );
     },
     setFluxes() {
