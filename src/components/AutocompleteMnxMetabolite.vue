@@ -32,6 +32,8 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import { debounce } from "lodash";
+import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
 
@@ -73,6 +75,7 @@ export default Vue.extend({
     searchResults: [] as MetaNetXMetabolite[],
     isLoading: false,
     searchQuery: null,
+    activeSearchID: null,
     requestError: false,
     selectedValue: null,
     metabolitesInModelsMap: {},
@@ -81,12 +84,14 @@ export default Vue.extend({
       "Could not search MetaNetX for compounds, please check your internet connection."
   }),
   watch: {
-    searchQuery(query: string): void {
+    searchQuery: debounce(function() {
       this.searchResults = [];
-      if (query === null || query.trim().length === 0) {
+      if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         return;
       }
-      if (this.selectedValue && query === this.selectedValue.displayValue) {
+      if (
+        this.selectedValue && this.searchQuery === this.selectedValue.displayValue
+      ) {
         // In order to keep selected metabolite displayed after clicking
         // outside of the v-autocomplete, this metabolite should be
         // listed in the items prop
@@ -96,9 +101,19 @@ export default Vue.extend({
 
       this.isLoading = true;
       this.requestError = false;
+      // Create a unique reference for this search, to be compared when results return.
+      // If `activeSearchID` has changed by the time the results are ready, then a new
+      // request has been triggered, so the results for this search are irrelevant and
+      // will be ignored. This ensures that we don't overwrite the search results with
+      // results from a stale request.
+      const searchId = uuidv4();
+      this.activeSearchID = searchId;
       axios
-        .get(`${settings.apis.metanetx}/metabolites?query=${query}`)
+        .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
         .then(response => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           // Prioritize metabolites that exist in the passed models
           const searchResultsInTheModel = [] as MetaNetXMetabolite[];
           const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
@@ -139,12 +154,18 @@ export default Vue.extend({
           this.searchResults.push(...searchResultsNotInTheModel);
         })
         .catch(error => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           this.requestError = true;
         })
         .then(() => {
+          if (searchId !== this.activeSearchID) {
+            return;
+          }
           this.isLoading = false;
         });
-    },
+    }, 500),
     forceSearchQuery(): void {
       this.loadForcedSearchQuery();
     },
