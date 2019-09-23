@@ -90,7 +90,8 @@ export default Vue.extend({
         return;
       }
       if (
-        this.selectedValue && this.searchQuery === this.selectedValue.displayValue
+        this.selectedValue &&
+        this.searchQuery === this.selectedValue.displayValue
       ) {
         // In order to keep selected metabolite displayed after clicking
         // outside of the v-autocomplete, this metabolite should be
