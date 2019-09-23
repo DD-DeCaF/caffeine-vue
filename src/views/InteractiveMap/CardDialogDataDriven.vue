@@ -554,10 +554,12 @@ export default Vue.extend({
         measurement: m.measurement,
         uncertainty: m.uncertainty
       }));
-      const growthRate = {
-        measurement: this.card.sample.growth_rate.measurement,
-        uncertainty: this.card.sample.growth_rate.uncertainty
-      };
+      const growthRate = this.card.sample.growth_rate
+        ? {
+            measurement: this.card.sample.growth_rate.measurement,
+            uncertainty: this.card.sample.growth_rate.uncertainty
+          }
+        : null;
 
       this.isModifyingModel = true;
       axios
