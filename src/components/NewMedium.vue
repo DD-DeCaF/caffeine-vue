@@ -162,7 +162,7 @@ export default Vue.extend({
       type: Boolean,
       required: true
     },
-    modelIds: Array
+    modelIds: Array as () => Array<string>
   },
   data: () => ({
     medium: {
@@ -200,7 +200,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    createMedium(this: any) {
+    createMedium() {
       this.isLoading = true;
       axios
         .post(`${settings.apis.warehouse}/media`, this.medium)
@@ -219,7 +219,7 @@ export default Vue.extend({
         })
         .then(() => (this.isLoading = false));
     },
-    postCompounds(this: any, mediumId) {
+    postCompounds(mediumId) {
       return this.compounds
         .filter(({ id }) => id)
         .map(compound => {
@@ -236,7 +236,7 @@ export default Vue.extend({
           );
         });
     },
-    passProject(this: any, project) {
+    passProject(project) {
       this.medium.project_id = project.id;
     }
   }

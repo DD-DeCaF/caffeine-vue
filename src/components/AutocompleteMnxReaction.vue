@@ -72,7 +72,7 @@ export default Vue.extend({
     rules: [Array, Object],
     clearOnChange: Boolean,
     forceSearchQuery: String,
-    modelIds: Array
+    modelIds: Array as () => Array<string>
   },
   data: () => ({
     addItem: null,
@@ -239,7 +239,7 @@ export default Vue.extend({
         (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
       );
     },
-    onChange(this: any, selectedReaction: MetaNetXReaction): void {
+    onChange(selectedReaction: MetaNetXReaction): void {
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {

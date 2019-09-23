@@ -27,8 +27,7 @@ install:
 
 script:
   - npx vue-cli-service lint --mode production --no-fix --max-warnings 0
-  # Temporarily skip in order to deploy on staging
-  # - npx vue-cli-service test:unit
+  - npx vue-cli-service test:unit
 
 deploy:
   skip_cleanup: true
