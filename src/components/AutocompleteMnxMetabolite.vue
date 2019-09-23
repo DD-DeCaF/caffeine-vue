@@ -3,18 +3,30 @@
     v-bind="$attrs"
     v-model="addItem"
     :items="searchResults"
-    cache-items
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
-    :item-text="metaboliteDisplay"
+    item-text="displayValue"
     item-value="mnx_id"
     return-object
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
-  ></v-autocomplete-extended>
+  >
+    <template v-slot:item="{ item: metabolite }">
+      <v-list-tile-content>
+        <v-list-tile-title v-text="metabolite.displayValue"></v-list-tile-title>
+        <v-list-tile-sub-title v-if="metabolite.modelNames.length">
+          <span
+            v-for="(modelName, index) in metabolite.modelNames"
+            :key="modelName + index"
+            >{{ modelName }}&nbsp;&nbsp;</span
+          ></v-list-tile-sub-title
+        >
+      </v-list-tile-content>
+    </template>
+  </v-autocomplete-extended>
 </template>
 
 <script lang="ts">
@@ -23,12 +35,15 @@ import axios from "axios";
 import { debounce } from "lodash";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
+import { getMetaboliteId } from "@/utils/metabolite";
 
 export interface MetaNetXMetabolite {
   annotation: Annotation;
   name: string;
   mnx_id: string;
   formula: string;
+  modelNames?: Array<string>;
+  displayValue?: string;
 }
 
 export interface Annotation {
@@ -52,7 +67,8 @@ export default Vue.extend({
   props: {
     rules: [Array, Object],
     clearOnChange: Boolean,
-    forceSearchQuery: String
+    forceSearchQuery: String,
+    modelIds: Array
   },
   data: () => ({
     addItem: null,
@@ -62,6 +78,7 @@ export default Vue.extend({
     activeSearchID: null,
     requestError: false,
     selectedValue: null,
+    metabolitesInModelsMap: {},
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -69,12 +86,17 @@ export default Vue.extend({
   watch: {
     searchQuery: debounce(function() {
       this.searchResults = [];
+      if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
+        return;
+      }
       if (
-        this.searchQuery === null ||
-        this.searchQuery.trim().length === 0 ||
-        (this.selectedValue &&
-          this.searchQuery === this.metaboliteDisplay(this.selectedValue))
+        this.selectedValue &&
+        this.searchQuery === this.selectedValue.displayValue
       ) {
+        // In order to keep selected metabolite displayed after clicking
+        // outside of the v-autocomplete, this metabolite should be
+        // listed in the items prop
+        this.searchResults = [this.selectedValue];
         return;
       }
 
@@ -93,7 +115,44 @@ export default Vue.extend({
           if (searchId !== this.activeSearchID) {
             return;
           }
-          this.searchResults = response.data;
+          // Prioritize metabolites that exist in the passed models
+          const searchResultsInTheModel = [] as MetaNetXMetabolite[];
+          const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
+          response.data.forEach((metabolite: MetaNetXMetabolite) => {
+            const annotation = metabolite.annotation;
+            const metaboliteIds = [metabolite.mnx_id];
+            for (const namespace in annotation) {
+              annotation[namespace].forEach(metaboliteId =>
+                metaboliteIds.push(metaboliteId)
+              );
+            }
+            let isMetaboliteFound = false;
+            metabolite.modelNames = [];
+            for (const modelName in this.metabolitesInModelsMap) {
+              if (
+                metaboliteIds.some(metaboliteId =>
+                  this.metabolitesInModelsMap[modelName].has(metaboliteId)
+                )
+              ) {
+                isMetaboliteFound = true;
+                metabolite.modelNames.push(modelName);
+              }
+            }
+            metabolite.displayValue = this.metaboliteDisplay(metabolite);
+            if (isMetaboliteFound) {
+              searchResultsInTheModel.push(metabolite);
+            } else {
+              searchResultsNotInTheModel.push(metabolite);
+            }
+          });
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ header: "Found in the models" });
+          }
+          this.searchResults.push(...searchResultsInTheModel);
+          if (this.modelIds && this.modelIds.length) {
+            this.searchResults.push({ divider: true }, { header: "MetaNetX" });
+          }
+          this.searchResults.push(...searchResultsNotInTheModel);
         })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
@@ -110,6 +169,36 @@ export default Vue.extend({
     }, 500),
     forceSearchQuery(): void {
       this.loadForcedSearchQuery();
+    },
+    modelIds: {
+      immediate: true,
+      handler() {
+        this.metabolitesInModelsMap = {};
+        if (this.modelIds) {
+          axios
+            .all(
+              this.modelIds.map(modelId =>
+                axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
+              )
+            )
+            .then(response => {
+              response.forEach(responseItem => {
+                this.metabolitesInModelsMap[responseItem.data.name] = new Set(
+                  []
+                );
+                responseItem.data.model_serialized.metabolites.forEach(
+                  metabolite =>
+                    this.metabolitesInModelsMap[responseItem.data.name].add(
+                      getMetaboliteId(metabolite.id, metabolite.compartment)
+                    )
+                );
+              });
+            })
+            .catch(error => {
+              this.$store.commit("setFetchError", error);
+            });
+        }
+      }
     }
   },
   methods: {

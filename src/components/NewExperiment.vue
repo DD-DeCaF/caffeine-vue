@@ -1,7 +1,11 @@
 <template>
   <div>
     <NewStrain v-model="isNewStrainDialogVisible" @return-object="passStrain" />
-    <NewMedium v-model="isNewMediumDialogVisible" @return-object="passMedium" />
+    <NewMedium
+      v-model="isNewMediumDialogVisible"
+      @return-object="passMedium"
+      :modelIds="selectedMediumRelevantModelIds"
+    />
     <NewProject
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
@@ -42,6 +46,7 @@
                           :rules="[
                             requiredIfHasMain(condition.strain, condition)
                           ]"
+                          @change="updateRelevantModels(condition)"
                         >
                           <template v-slot:prepend-item>
                             <v-list-tile
@@ -81,6 +86,7 @@
                             <v-list-tile
                               ripple
                               @click="
+                                getRelevantModelIdsForNewMedium(condition);
                                 isNewMediumDialogVisible = true;
                                 currentRowIndex = index;
                                 $refs.mediumAutocomplete.isMenuActive = false;
@@ -141,6 +147,7 @@
                           mask="date-with-time"
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
+                          hint="dd/mm/yyyy hh:mm"
                         ></v-text-field>
                       </td>
                       <td>
@@ -149,6 +156,7 @@
                           mask="date-with-time"
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
+                          hint="dd/mm/yyyy hh:mm"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -183,6 +191,7 @@
                           item-value="temporaryId"
                           v-model="fluxomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(fluxomicsItem)"
                           @paste="paste(0, index, selectedTable, $event)"
                         >
                         </v-select>
@@ -196,6 +205,7 @@
                             fluxomicsItem.reaction &&
                               fluxomicsItem.reaction._pastedText
                           "
+                          :modelIds="fluxomicsItem.modelIds"
                         ></AutocompleteMnxReaction>
                       </td>
                       <td>
@@ -250,6 +260,7 @@
                           item-value="temporaryId"
                           v-model="metabolomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(metabolomicsItem)"
                         >
                         </v-select>
                       </td>
@@ -262,6 +273,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="metabolomicsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -316,6 +328,7 @@
                           item-value="temporaryId"
                           v-model="uptakeSecretionItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(uptakeSecretionItem)"
                         >
                         </v-select>
                       </td>
@@ -328,6 +341,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="uptakeSecretionItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -382,6 +396,7 @@
                           item-value="temporaryId"
                           v-model="molarYieldsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
+                          @change="getRelevantModelIds(molarYieldsItem)"
                         >
                         </v-select>
                       </td>
@@ -394,6 +409,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -405,6 +421,7 @@
                               id: $event.mnx_id
                             }
                           "
+                          :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -598,7 +615,8 @@ export default Vue.extend({
     experiment: {
       name: null,
       description: null,
-      project_id: null
+      project_id: null,
+      id: null
     },
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
@@ -607,6 +625,7 @@ export default Vue.extend({
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
+    selectedMediumRelevantModelIds: [],
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -737,6 +756,9 @@ sample	reaction	measurement	uncertainity
     availableProjects() {
       return this.$store.state.projects.projects;
     },
+    models() {
+      return this.$store.getters["models/getModels"];
+    },
     isDialogVisible: {
       get() {
         return this.value;
@@ -769,6 +791,46 @@ sample	reaction	measurement	uncertainity
     },
     passProject(project) {
       this.experiment.project_id = project.id;
+    },
+    updateRelevantModels(condition) {
+      const conditionId = condition.temporaryId;
+      this.tables.samples.items
+        .filter(
+          sample =>
+            sample.condition && sample.condition.temporaryId === conditionId
+        )
+        .forEach(sample => {
+          const sampleId = sample.temporaryId;
+          [
+            "fluxomics",
+            "metabolomics",
+            "uptakeSecretion",
+            "molarYields"
+          ].forEach(tableName => {
+            this.tables[tableName].items
+              .filter(
+                item => item.sample && item.sample.temporaryId === sampleId
+              )
+              .forEach(item => this.getRelevantModelIds(item));
+          });
+        });
+    },
+    getRelevantModelIds(item) {
+      // Get ids of the models the selected organism belongs to
+      // in order to prioritize reaction and compound results from autocomplete
+      const organismId =
+        item.sample.condition && item.sample.condition.strain
+          ? item.sample.condition.strain.organism_id
+          : null;
+      item.modelIds = this.models
+        .filter(model => model.organism_id === organismId)
+        .map(model => model.id);
+    },
+    getRelevantModelIdsForNewMedium(condition) {
+      const organismId = condition.strain ? condition.strain.organism_id : null;
+      this.selectedMediumRelevantModelIds = this.models
+        .filter(model => model.organism_id === organismId)
+        .map(model => model.id);
     },
     requiredIfHasMain(value, row) {
       const mainField = this.selectedTable.mainField;
@@ -837,7 +899,8 @@ sample	reaction	measurement	uncertainity
       axios
         .post(`${settings.apis.warehouse}/experiments`, this.experiment)
         .then((response: AxiosResponse) => {
-          return Promise.all(this.postConditions(response.data.id));
+          this.experiment.id = response.data.id;
+          return Promise.all(this.postConditions());
         })
         .then(() => {
           return Promise.all(this.postSamples());
@@ -857,18 +920,21 @@ sample	reaction	measurement	uncertainity
         .then(() => {
           return Promise.all(this.postGrowthRates());
         })
+        .then(() => {
+          this.$store.commit("experiments/addExperiment", this.experiment);
+        })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
         .then(() => (this.isLoading = false));
     },
-    postConditions(experimentId) {
+    postConditions() {
       return this.tables.conditions.items
         .filter(condition => condition.name)
         .map(condition => {
           const payload = {
             name: condition.name,
-            experiment_id: experimentId,
+            experiment_id: this.experiment.id,
             strain_id: condition.strain.id,
             medium_id: condition.medium.id
           };
