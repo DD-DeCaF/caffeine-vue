@@ -499,17 +499,24 @@ export default Vue.extend({
         return;
       }
 
-      // Reset warnings and errors
-      // We'll be modifying the model before simulating, but just re-use the
-      // loading flag for `isSimulating` to indicate that _something_ is going
-      // on.
       this.updateCard({
         uuid: this.card.uuid,
         props: {
+          // Reset warnings and errors
           sampleWarnings: [],
           sampleErrors: [],
+          hasSimulationError: false,
+          solverStatus: null,
+          // We'll be modifying the model before simulating, but just re-use the
+          // loading flag for `isSimulating` to indicate that _something_ is
+          // going on.
           isSimulating: true,
-          hasSimulationError: false
+          // Remove any previous operations from the card.
+          reactionDeletions: [],
+          reactionAdditions: [],
+          reactionKnockouts: [],
+          geneKnockouts: [],
+          editedBounds: []
         }
       });
 
