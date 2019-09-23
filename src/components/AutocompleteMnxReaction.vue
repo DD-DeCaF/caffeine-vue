@@ -184,7 +184,7 @@ export default Vue.extend({
                 axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
               )
             )
-            .then(response => {
+            .then((response: any) => {
               response.forEach(responseItem => {
                 this.reactionsInModelsMap[responseItem.data.name] = new Set([]);
                 responseItem.data.model_serialized.reactions.forEach(reaction =>
@@ -239,7 +239,7 @@ export default Vue.extend({
         (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
       );
     },
-    onChange(selectedReaction: MetaNetXReaction): void {
+    onChange(this: any, selectedReaction: MetaNetXReaction): void {
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {

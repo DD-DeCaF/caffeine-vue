@@ -200,7 +200,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    createMedium() {
+    createMedium(this: any) {
       this.isLoading = true;
       axios
         .post(`${settings.apis.warehouse}/media`, this.medium)
@@ -219,7 +219,7 @@ export default Vue.extend({
         })
         .then(() => (this.isLoading = false));
     },
-    postCompounds(mediumId) {
+    postCompounds(this: any, mediumId) {
       return this.compounds
         .filter(({ id }) => id)
         .map(compound => {
@@ -236,7 +236,7 @@ export default Vue.extend({
           );
         });
     },
-    passProject(project) {
+    passProject(this: any, project) {
       this.medium.project_id = project.id;
     }
   }

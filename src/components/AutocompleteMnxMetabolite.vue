@@ -111,7 +111,7 @@ export default Vue.extend({
       this.activeSearchID = searchId;
       axios
         .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
-        .then(response => {
+        .then((response: any) => {
           if (searchId !== this.activeSearchID) {
             return;
           }
@@ -181,7 +181,7 @@ export default Vue.extend({
                 axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
               )
             )
-            .then(response => {
+            .then((response: any) => {
               response.forEach(responseItem => {
                 this.metabolitesInModelsMap[responseItem.data.name] = new Set(
                   []
@@ -206,7 +206,7 @@ export default Vue.extend({
       const { name, mnx_id, formula } = metabolite;
       return `${name || "N/A"} (${mnx_id}) – ${formula}`;
     },
-    onChange(selectedMetabolite: MetaNetXMetabolite): void {
+    onChange(this: any, selectedMetabolite: MetaNetXMetabolite): void {
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
