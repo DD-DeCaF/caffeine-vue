@@ -267,12 +267,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            metabolomicsItem.compound = {
-                              name: $event.name,
-                              id: $event.mnx_id
-                            }
-                          "
+                          @change="metabolomicsItem.compound = $event"
                           :modelIds="metabolomicsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -335,12 +330,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            uptakeSecretionItem.compound = {
-                              name: $event.name,
-                              id: $event.mnx_id
-                            }
-                          "
+                          @change="uptakeSecretionItem.compound = $event"
                           :modelIds="uptakeSecretionItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -403,24 +393,14 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            molarYieldsItem.product = {
-                              name: $event.name,
-                              id: $event.mnx_id
-                            }
-                          "
+                          @change="molarYieldsItem.product = $event"
                           :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            molarYieldsItem.substrate = {
-                              name: $event.name,
-                              id: $event.mnx_id
-                            }
-                          "
+                          @change="molarYieldsItem.substrate = $event"
                           :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -996,7 +976,7 @@ sample	reaction	measurement	uncertainity
             ],
             compound_name: metabolomicsItem.compound.name,
             compound_identifier: metabolomicsItem.compound.id,
-            compound_namespace: "metanetx.chemical",
+            compound_namespace: metabolomicsItem.compound.namespace,
             measurement: metabolomicsItem.measurement,
             uncertainty: metabolomicsItem.uncertainty
           };
@@ -1013,7 +993,7 @@ sample	reaction	measurement	uncertainity
             ],
             compound_name: uptakeSecretionItem.compound.name,
             compound_identifier: uptakeSecretionItem.compound.id,
-            compound_namespace: "metanetx.chemical",
+            compound_namespace: uptakeSecretionItem.compound.namespace,
             measurement: uptakeSecretionItem.measurement,
             uncertainty: uptakeSecretionItem.uncertainty
           };
@@ -1033,10 +1013,10 @@ sample	reaction	measurement	uncertainity
             ],
             product_name: molarYieldsItem.product.name,
             product_identifier: molarYieldsItem.product.id,
-            product_namespace: "metanetx.chemical",
+            product_namespace: molarYieldsItem.product.namespace,
             substrate_name: molarYieldsItem.substrate.name,
             substrate_identifier: molarYieldsItem.substrate.id,
-            substrate_namespace: "metanetx.chemical",
+            substrate_namespace: molarYieldsItem.substrate.namespace,
             measurement: molarYieldsItem.measurement,
             uncertainty: molarYieldsItem.uncertainty
           };
