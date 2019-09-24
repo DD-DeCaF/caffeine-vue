@@ -74,8 +74,8 @@
                             ]"
                             name="mass"
                             label="Mass Concentration"
-                            placeholder=" "
-                            suffix="mmol/l"
+                            hint="mmol l <sup>-1</sup>"
+                            persistent-hint
                             type="number"
                             step="any"
                             class="mx-2"
@@ -84,7 +84,8 @@
 
                         <v-flex xs8>
                           <AutocompleteMnxMetabolite
-                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            label="Compound"
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
                             @change="
                               compound.name = $event.name;
                               compound.id = $event.mnx_id;
