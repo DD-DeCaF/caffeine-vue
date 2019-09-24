@@ -979,7 +979,7 @@ sample	reaction	measurement	uncertainity
             sample_id: this.sampleTempIdsMap[fluxomicsItem.sample.temporaryId],
             reaction_name: fluxomicsItem.reaction.name,
             reaction_identifier: fluxomicsItem.reaction.id,
-            reaction_namespace: "metanetx.chemical",
+            reaction_namespace: fluxomicsItem.reaction.namespace,
             measurement: fluxomicsItem.measurement,
             uncertainty: fluxomicsItem.uncertainty
           };

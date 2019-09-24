@@ -25,6 +25,7 @@ export interface Reaction {
   metabolites: Metabolite[];
   lowerBound?: number; // Used when editing bounds
   upperBound?: number; // Used when editing bounds
+  namespace?: string;
 }
 
 export interface Card {
