@@ -152,6 +152,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
+import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
 import { MediumItem } from "@/store/modules/media";
 
@@ -162,7 +163,7 @@ export default Vue.extend({
       type: Boolean,
       required: true
     },
-    modelIds: Array as () => Array<string>
+    modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
     medium: {

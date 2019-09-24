@@ -34,6 +34,7 @@ import Vue from "vue";
 import axios from "axios";
 import { debounce } from "lodash";
 import uuidv4 from "uuid/v4";
+import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
 
@@ -68,7 +69,7 @@ export default Vue.extend({
     rules: [Array, Object],
     clearOnChange: Boolean,
     forceSearchQuery: String,
-    modelIds: Array as () => Array<string>
+    modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
     addItem: null,
