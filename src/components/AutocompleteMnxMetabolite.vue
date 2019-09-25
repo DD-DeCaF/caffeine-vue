@@ -17,9 +17,9 @@
     <template v-slot:item="{ item: metabolite }">
       <v-list-tile-content>
         <v-list-tile-title v-text="metabolite.displayValue"></v-list-tile-title>
-        <v-list-tile-sub-title v-if="metabolite.modelNames.length">
+        <v-list-tile-sub-title v-if="metabolite.modelNames.size">
           <span
-            v-for="(modelName, index) in metabolite.modelNames"
+            v-for="(modelName, index) of metabolite.modelNames"
             :key="modelName + index"
             >{{ modelName }}&nbsp;&nbsp;</span
           ></v-list-tile-sub-title
@@ -43,7 +43,7 @@ export interface MetaNetXMetabolite {
   name: string;
   mnx_id: string;
   formula: string;
-  modelNames?: Array<string>;
+  modelNames?: Set<string>;
   displayValue?: string;
   foundId?: string; // exists if was found in the passed models
   namespace?: string;
@@ -136,20 +136,20 @@ export default Vue.extend({
           const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
           response.data.forEach((metabolite: MetaNetXMetabolite) => {
             const deprecatedIds = metabolite.annotation["deprecated"] || [];
-            delete metabolite.annotation["deprecated"];
             const metaboliteIdsMap = {
               ...metabolite.annotation,
               "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
             };
+            delete metaboliteIdsMap["deprecated"];
             let isMetaboliteFound = false;
-            metabolite.modelNames = [];
+            metabolite.modelNames = new Set([]);
             for (const model in this.metabolitesInModelsMap) {
               const [modelId, modelName] = JSON.parse(model);
               for (const namespace in metaboliteIdsMap) {
                 metaboliteIdsMap[namespace].forEach(metaboliteId => {
                   if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
                     isMetaboliteFound = true;
-                    metabolite.modelNames!.push(modelName);
+                    metabolite.modelNames!.add(modelName);
                     metabolite.foundId = metaboliteId;
                     metabolite.namespace =
                       this.namespaceMap[namespace] || namespace;
@@ -170,7 +170,10 @@ export default Vue.extend({
           }
           this.searchResults.push(...searchResultsInTheModel);
           if (this.modelIds && this.modelIds.length) {
-            this.searchResults.push({ divider: true }, { header: "MetaNetX" });
+            this.searchResults.push(
+              { divider: true },
+              { header: "Other compounds" }
+            );
           }
           this.searchResults.push(...searchResultsNotInTheModel);
         })

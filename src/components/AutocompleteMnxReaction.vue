@@ -17,9 +17,9 @@
     <template v-slot:item="{ item: reaction }">
       <v-list-tile-content>
         <v-list-tile-title v-text="reaction.displayValue"></v-list-tile-title>
-        <v-list-tile-sub-title v-if="reaction.modelNames.length">
+        <v-list-tile-sub-title v-if="reaction.modelNames.size">
           <span
-            v-for="(modelName, index) in reaction.modelNames"
+            v-for="(modelName, index) of reaction.modelNames"
             :key="modelName + index"
             >{{ modelName }}&nbsp;&nbsp;</span
           ></v-list-tile-sub-title
@@ -62,7 +62,7 @@ export interface MetaNetXReaction {
     }[];
     annotation: Annotation;
   };
-  modelNames?: Array<string>;
+  modelNames?: Set<string>;
   displayValue?: string;
   foundId?: string; // exists if was found in the passed models
   namespace?: string;
@@ -140,20 +140,20 @@ export default Vue.extend({
           response.data.forEach((reaction: MetaNetXReaction) => {
             const deprecatedIds =
               reaction.reaction.annotation["deprecated"] || [];
-            delete reaction.reaction.annotation["deprecated"];
             const reactionIdsMap = {
               ...reaction.reaction.annotation,
               "metanetx.chemical": [reaction.reaction.mnx_id, ...deprecatedIds]
             };
+            delete reactionIdsMap["deprecated"];
             let isReactionFound = false;
-            reaction.modelNames = [];
+            reaction.modelNames = new Set([]);
             for (const model in this.reactionsInModelsMap) {
               const [modelId, modelName] = JSON.parse(model);
               for (const namespace in reactionIdsMap) {
                 reactionIdsMap[namespace].forEach(reactionId => {
                   if (this.reactionsInModelsMap[model].has(reactionId)) {
                     isReactionFound = true;
-                    reaction.modelNames!.push(modelName);
+                    reaction.modelNames!.add(modelName);
                     reaction.foundId = reactionId;
                     reaction.namespace =
                       this.namespaceMap[namespace] || namespace;
@@ -174,7 +174,10 @@ export default Vue.extend({
           }
           this.searchResults.push(...searchResultsInTheModel);
           if (this.modelIds && this.modelIds.length) {
-            this.searchResults.push({ divider: true }, { header: "MetaNetX" });
+            this.searchResults.push(
+              { divider: true },
+              { header: "Other reactions" }
+            );
           }
           this.searchResults.push(...searchResultsNotInTheModel);
         })
