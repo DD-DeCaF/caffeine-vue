@@ -291,7 +291,7 @@ export default Vue.extend({
         return;
       }
       this.escherBuilder.set_highlight_reactions(
-        this.card.sample.fluxomics.map(m => m.identifier)
+        this.card.sample.fluxomics.map(m => m.reaction_identifier)
       );
     },
     setFluxes() {
