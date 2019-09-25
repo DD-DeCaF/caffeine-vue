@@ -371,7 +371,7 @@ export default Vue.extend({
         .catch((error: Error) => {
           this.$store.dispatch("setFetchError", error, { root: true });
         })
-        .finally(() => {
+        .then(() => {
           this.isLoadingProducts = false;
         });
     },
