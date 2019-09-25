@@ -571,6 +571,13 @@
           </v-layout>
         </v-card>
       </v-dialog>
+      <v-snackbar
+        color="success"
+        v-model="isExperimentCreationSuccess"
+        :timeout="3000"
+      >
+        {{ experiment.name }} successfully created.
+      </v-snackbar>
     </v-form>
   </div>
 </template>
@@ -602,6 +609,7 @@ export default Vue.extend({
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
     isLoading: false,
+    isExperimentCreationSuccess: false,
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
@@ -906,7 +914,11 @@ sample	reaction	measurement	uncertainity
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
-        .then(() => (this.isLoading = false));
+        .finally(() => {
+          this.isLoading = false;
+          this.isExperimentCreationSuccess = true;
+          this.isDialogVisible = false;
+        });
     },
     postConditions() {
       return this.tables.conditions.items
