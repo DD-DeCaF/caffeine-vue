@@ -680,14 +680,6 @@ export default Vue.extend({
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }]
-        /*
-in excel:
-sample	reaction	measurement	uncertainity
-0	MNXR94672	5
-1	CO transporter via diffusion	4	1mmol/g/h
-5		0.1	0.5 mmol/g/h
-  MNXR96863	0.1	2
-*/
       },
       metabolomics: {
         name: "Metabolomics",
