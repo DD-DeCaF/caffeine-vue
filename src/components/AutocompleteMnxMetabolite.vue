@@ -36,6 +36,7 @@ import { debounce } from "lodash";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
+import { mapGetters } from "vuex";
 
 export interface MetaNetXMetabolite {
   annotation: Annotation;
@@ -93,6 +94,11 @@ export default Vue.extend({
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
   }),
+  computed: {
+    ...mapGetters({
+      getModelById: "models/getModelById"
+    })
+  },
   watch: {
     searchQuery: debounce(function() {
       this.searchResults = [];
@@ -188,31 +194,23 @@ export default Vue.extend({
       immediate: true,
       handler() {
         if (this.modelIds) {
-          axios
-            .all(
-              this.modelIds.map(modelId =>
-                axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
-              )
+          Promise.all(
+            this.modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
             )
-            .then((response: any) => {
-              this.metabolitesInModelsMap = {};
-              response.forEach(responseItem => {
-                const key = JSON.stringify([
-                  responseItem.data.id,
-                  responseItem.data.name
-                ]);
-                this.metabolitesInModelsMap[key] = new Set([]);
-                responseItem.data.model_serialized.metabolites.forEach(
-                  metabolite =>
-                    this.metabolitesInModelsMap[key].add(
-                      getMetaboliteId(metabolite.id, metabolite.compartment)
-                    )
-                );
-              });
-            })
-            .catch(error => {
-              this.$store.commit("setFetchError", error);
+          ).then(() => {
+            this.metabolitesInModelsMap = {};
+            this.modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.metabolitesInModelsMap[key] = new Set([]);
+              model.model_serialized.metabolites.forEach(metabolite =>
+                this.metabolitesInModelsMap[key].add(
+                  getMetaboliteId(metabolite.id, metabolite.compartment)
+                )
+              );
             });
+          });
         }
       }
     }

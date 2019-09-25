@@ -40,6 +40,7 @@ import {
   MetaNetXMetabolite,
   Annotation
 } from "./AutocompleteMnxMetabolite.vue";
+import { mapGetters } from "vuex";
 
 export interface MetaNetXReaction {
   compartments: {
@@ -97,6 +98,11 @@ export default Vue.extend({
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
   }),
+  computed: {
+    ...mapGetters({
+      getModelById: "models/getModelById"
+    })
+  },
   watch: {
     searchQuery: debounce(function() {
       this.searchResults = [];
@@ -192,28 +198,21 @@ export default Vue.extend({
       immediate: true,
       handler() {
         if (this.modelIds) {
-          axios
-            .all(
-              this.modelIds.map(modelId =>
-                axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
-              )
+          Promise.all(
+            this.modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
             )
-            .then((response: any) => {
-              this.reactionsInModelsMap = {};
-              response.forEach(responseItem => {
-                const key = JSON.stringify([
-                  responseItem.data.id,
-                  responseItem.data.name
-                ]);
-                this.reactionsInModelsMap[key] = new Set([]);
-                responseItem.data.model_serialized.reactions.forEach(reaction =>
-                  this.reactionsInModelsMap[key].add(reaction.id)
-                );
-              });
-            })
-            .catch(error => {
-              this.$store.commit("setFetchError", error);
+          ).then(() => {
+            this.reactionsInModelsMap = {};
+            this.modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.reactionsInModelsMap[key] = new Set([]);
+              model.model_serialized.reactions.forEach(reaction =>
+                this.reactionsInModelsMap[key].add(reaction.id)
+              );
             });
+          });
         }
       }
     }
