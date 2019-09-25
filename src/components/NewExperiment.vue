@@ -133,6 +133,7 @@
                           item-text="name"
                           v-model="sample.condition"
                           no-data-text="No data available. You can add it in Conditions table."
+                          :rules="[requiredIfHasMain(sample.condition, sample)]"
                         >
                         </v-select>
                       </td>
@@ -148,6 +149,7 @@
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
                           hint="dd/mm/yyyy hh:mm"
+                          :rules="[requiredIfHasMain(sample.startTime, sample)]"
                         ></v-text-field>
                       </td>
                       <td>
@@ -199,12 +201,18 @@
                         <AutocompleteMnxReaction
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
                           @change="fluxomicsItem.reaction = $event.reaction"
+                          :modelIds="fluxomicsItem.modelIds"
+                          :rules="[
+                            requiredIfHasMain(
+                              fluxomicsItem.reaction,
+                              fluxomicsItem
+                            )
+                          ]"
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             fluxomicsItem.reaction &&
                               fluxomicsItem.reaction._pastedText
                           "
-                          :modelIds="fluxomicsItem.modelIds"
                         ></AutocompleteMnxReaction>
                       </td>
                       <td>
@@ -214,6 +222,12 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          :rules="[
+                            requiredIfHasMain(
+                              fluxomicsItem.measurement,
+                              fluxomicsItem
+                            )
+                          ]"
                           @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
@@ -273,6 +287,12 @@
                               metabolomicsItem.compound._pastedText
                           "
                           :modelIds="metabolomicsItem.modelIds"
+                          :rules="[
+                            requiredIfHasMain(
+                              metabolomicsItem.compound,
+                              metabolomicsItem
+                            )
+                          ]"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -283,6 +303,12 @@
                           type="number"
                           step="any"
                           @paste="paste(2, index, selectedTable, $event)"
+                          :rules="[
+                            requiredIfHasMain(
+                              metabolomicsItem.measurement,
+                              metabolomicsItem
+                            )
+                          ]"
                         ></v-text-field>
                       </td>
                       <td>
@@ -343,6 +369,12 @@
                               uptakeSecretionItem.compound._pastedText
                           "
                           :modelIds="uptakeSecretionItem.modelIds"
+                          :rules="[
+                            requiredIfHasMain(
+                              uptakeSecretionItem.compound,
+                              uptakeSecretionItem
+                            )
+                          ]"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -353,6 +385,12 @@
                           type="number"
                           step="any"
                           @paste="paste(2, index, selectedTable, $event)"
+                          :rules="[
+                            requiredIfHasMain(
+                              uptakeSecretionItem.measurement,
+                              uptakeSecretionItem
+                            )
+                          ]"
                         ></v-text-field>
                       </td>
                       <td>
@@ -413,6 +451,12 @@
                               molarYieldsItem.product._pastedText
                           "
                           :modelIds="molarYieldsItem.modelIds"
+                          :rules="[
+                            requiredIfHasMain(
+                              molarYieldsItem.product,
+                              molarYieldsItem
+                            )
+                          ]"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -425,6 +469,12 @@
                               molarYieldsItem.substrate._pastedText
                           "
                           :modelIds="molarYieldsItem.modelIds"
+                          :rules="[
+                            requiredIfHasMain(
+                              molarYieldsItem.substrate,
+                              molarYieldsItem
+                            )
+                          ]"
                         ></AutocompleteMnxMetabolite>
                       </td>
                       <td>
@@ -435,6 +485,12 @@
                           type="number"
                           step="any"
                           @paste="paste(3, index, selectedTable, $event)"
+                          :rules="[
+                            requiredIfHasMain(
+                              molarYieldsItem.measurement,
+                              molarYieldsItem
+                            )
+                          ]"
                         ></v-text-field>
                       </td>
                       <td>
