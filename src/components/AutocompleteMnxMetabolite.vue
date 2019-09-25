@@ -18,9 +18,9 @@
     <template v-slot:item="{ item: metabolite }">
       <v-list-tile-content>
         <v-list-tile-title v-text="metabolite.displayValue"></v-list-tile-title>
-        <v-list-tile-sub-title v-if="metabolite.modelNames.length">
+        <v-list-tile-sub-title v-if="metabolite.modelNames.size">
           <span
-            v-for="(modelName, index) in metabolite.modelNames"
+            v-for="(modelName, index) of metabolite.modelNames"
             :key="modelName + index"
             >{{ modelName }}&nbsp;&nbsp;</span
           ></v-list-tile-sub-title
@@ -38,13 +38,14 @@ import uuidv4 from "uuid/v4";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
+import { mapGetters } from "vuex";
 
 export interface MetaNetXMetabolite {
   annotation: Annotation;
   name: string;
   mnx_id: string;
   formula: string;
-  modelNames?: Array<string>;
+  modelNames?: Set<string>;
   displayValue?: string;
   foundId?: string; // exists if was found in the passed models
   namespace?: string;
@@ -95,6 +96,11 @@ export default Vue.extend({
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
   }),
+  computed: {
+    ...mapGetters({
+      getModelById: "models/getModelById"
+    })
+  },
   watch: {
     searchQuery: debounce(function() {
       this.searchResults = [];
@@ -132,20 +138,20 @@ export default Vue.extend({
           const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
           response.data.forEach((metabolite: MetaNetXMetabolite) => {
             const deprecatedIds = metabolite.annotation["deprecated"] || [];
-            delete metabolite.annotation["deprecated"];
             const metaboliteIdsMap = {
               ...metabolite.annotation,
               "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
             };
+            delete metaboliteIdsMap["deprecated"];
             let isMetaboliteFound = false;
-            metabolite.modelNames = [];
+            metabolite.modelNames = new Set([]);
             for (const model in this.metabolitesInModelsMap) {
               const [modelId, modelName] = JSON.parse(model);
               for (const namespace in metaboliteIdsMap) {
                 metaboliteIdsMap[namespace].forEach(metaboliteId => {
                   if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
                     isMetaboliteFound = true;
-                    metabolite.modelNames!.push(modelName);
+                    metabolite.modelNames!.add(modelName);
                     metabolite.foundId = metaboliteId;
                     metabolite.namespace =
                       this.namespaceMap[namespace] || namespace;
@@ -166,7 +172,10 @@ export default Vue.extend({
           }
           this.searchResults.push(...searchResultsInTheModel);
           if (this.modelIds && this.modelIds.length) {
-            this.searchResults.push({ divider: true }, { header: "MetaNetX" });
+            this.searchResults.push(
+              { divider: true },
+              { header: "Other compounds" }
+            );
           }
           this.searchResults.push(...searchResultsNotInTheModel);
         })
@@ -190,31 +199,23 @@ export default Vue.extend({
       immediate: true,
       handler() {
         if (this.modelIds) {
-          axios
-            .all(
-              this.modelIds.map(modelId =>
-                axios.get(`${settings.apis.modelStorage}/models/${modelId}`)
-              )
+          Promise.all(
+            this.modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
             )
-            .then((response: any) => {
-              this.metabolitesInModelsMap = {};
-              response.forEach(responseItem => {
-                const key = JSON.stringify([
-                  responseItem.data.id,
-                  responseItem.data.name
-                ]);
-                this.metabolitesInModelsMap[key] = new Set([]);
-                responseItem.data.model_serialized.metabolites.forEach(
-                  metabolite =>
-                    this.metabolitesInModelsMap[key].add(
-                      getMetaboliteId(metabolite.id, metabolite.compartment)
-                    )
-                );
-              });
-            })
-            .catch(error => {
-              this.$store.commit("setFetchError", error);
+          ).then(() => {
+            this.metabolitesInModelsMap = {};
+            this.modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.metabolitesInModelsMap[key] = new Set([]);
+              model.model_serialized.metabolites.forEach(metabolite =>
+                this.metabolitesInModelsMap[key].add(
+                  getMetaboliteId(metabolite.id, metabolite.compartment)
+                )
+              );
             });
+          });
         }
       }
     }

@@ -88,7 +88,8 @@
                             hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
                             @change="
                               compound.name = $event.name;
-                              compound.id = $event.mnx_id;
+                              compound.id = $event.id;
+                              compound.namespace = $event.namespace;
                             "
                             :modelIds="modelIds"
                           ></AutocompleteMnxMetabolite>
@@ -228,7 +229,7 @@ export default Vue.extend({
           const payload = {
             compound_identifier: compound.id,
             compound_name: compound.name,
-            compound_namespace: "metanetx.chemical",
+            compound_namespace: compound.namespace,
             mass_concentration: compound.mass_concentration,
             medium_id: mediumId
           };

@@ -906,7 +906,7 @@ export default Vue.extend({
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
-        .finally(() => {
+        .then(() => {
           this.isLoading = false;
           this.isExperimentCreationSuccess = true;
           this.isDialogVisible = false;
