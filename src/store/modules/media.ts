@@ -63,7 +63,7 @@ export default {
 
       const compoundsPromise = axios
         .get<MediumCompound[]>(`${settings.apis.warehouse}/media/compounds`)
-        .then(response => response.data.slice(0, 100))
+        .then(response => response.data)
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
           throw error;
