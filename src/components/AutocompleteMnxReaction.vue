@@ -147,7 +147,7 @@ export default Vue.extend({
                 reactionIdsMap[namespace].forEach(reactionId => {
                   if (this.reactionsInModelsMap[model].has(reactionId)) {
                     isReactionFound = true;
-                    reaction.modelNames.push(modelName);
+                    reaction.modelNames!.push(modelName);
                     reaction.foundId = reactionId;
                     reaction.namespace =
                       this.namespaceMap[namespace] || namespace;

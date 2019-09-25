@@ -143,7 +143,7 @@ export default Vue.extend({
                 metaboliteIdsMap[namespace].forEach(metaboliteId => {
                   if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
                     isMetaboliteFound = true;
-                    metabolite.modelNames.push(modelName);
+                    metabolite.modelNames!.push(modelName);
                     metabolite.foundId = metaboliteId;
                     metabolite.namespace =
                       this.namespaceMap[namespace] || namespace;
