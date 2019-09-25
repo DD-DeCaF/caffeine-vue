@@ -13,6 +13,7 @@
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
+    @paste="$emit('paste', $event)"
   >
     <template v-slot:item="{ item: metabolite }">
       <v-list-tile-content>
