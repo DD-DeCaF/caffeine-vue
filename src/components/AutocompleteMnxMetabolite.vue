@@ -44,6 +44,8 @@ export interface MetaNetXMetabolite {
   formula: string;
   modelNames?: Array<string>;
   displayValue?: string;
+  foundId?: string; // exists if was found in the passed models
+  namespace?: string;
 }
 
 export interface Annotation {
@@ -79,6 +81,14 @@ export default Vue.extend({
     requestError: false,
     selectedValue: null,
     metabolitesInModelsMap: {},
+    namespaceMap: {
+      seed: "seed.compound",
+      bigg: "bigg.metabolite",
+      kegg: "kegg.compound",
+      metacyc: "metacyc.compound",
+      rhea: "rhea",
+      sabiork: "sabiork.compound"
+    },
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -119,29 +129,33 @@ export default Vue.extend({
           const searchResultsInTheModel = [] as MetaNetXMetabolite[];
           const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
           response.data.forEach((metabolite: MetaNetXMetabolite) => {
-            const annotation = metabolite.annotation;
-            const metaboliteIds = [metabolite.mnx_id];
-            for (const namespace in annotation) {
-              annotation[namespace].forEach(metaboliteId =>
-                metaboliteIds.push(metaboliteId)
-              );
-            }
+            const deprecatedIds = metabolite.annotation["deprecated"] || [];
+            delete metabolite.annotation["deprecated"];
+            const metaboliteIdsMap = {
+              ...metabolite.annotation,
+              "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
+            };
             let isMetaboliteFound = false;
             metabolite.modelNames = [];
-            for (const modelName in this.metabolitesInModelsMap) {
-              if (
-                metaboliteIds.some(metaboliteId =>
-                  this.metabolitesInModelsMap[modelName].has(metaboliteId)
-                )
-              ) {
-                isMetaboliteFound = true;
-                metabolite.modelNames.push(modelName);
+            for (const model in this.metabolitesInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in metaboliteIdsMap) {
+                metaboliteIdsMap[namespace].forEach(metaboliteId => {
+                  if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
+                    isMetaboliteFound = true;
+                    metabolite.modelNames!.push(modelName);
+                    metabolite.foundId = metaboliteId;
+                    metabolite.namespace =
+                      this.namespaceMap[namespace] || namespace;
+                  }
+                });
               }
             }
             metabolite.displayValue = this.metaboliteDisplay(metabolite);
             if (isMetaboliteFound) {
               searchResultsInTheModel.push(metabolite);
             } else {
+              metabolite.namespace = "metanetx.chemical";
               searchResultsNotInTheModel.push(metabolite);
             }
           });
@@ -173,7 +187,6 @@ export default Vue.extend({
     modelIds: {
       immediate: true,
       handler() {
-        this.metabolitesInModelsMap = {};
         if (this.modelIds) {
           axios
             .all(
@@ -182,13 +195,16 @@ export default Vue.extend({
               )
             )
             .then((response: any) => {
+              this.metabolitesInModelsMap = {};
               response.forEach(responseItem => {
-                this.metabolitesInModelsMap[responseItem.data.name] = new Set(
-                  []
-                );
+                const key = JSON.stringify([
+                  responseItem.data.id,
+                  responseItem.data.name
+                ]);
+                this.metabolitesInModelsMap[key] = new Set([]);
                 responseItem.data.model_serialized.metabolites.forEach(
                   metabolite =>
-                    this.metabolitesInModelsMap[responseItem.data.name].add(
+                    this.metabolitesInModelsMap[key].add(
                       getMetaboliteId(metabolite.id, metabolite.compartment)
                     )
                 );
@@ -214,7 +230,13 @@ export default Vue.extend({
         });
       }
       this.selectedValue = selectedMetabolite;
-      this.$emit("change", selectedMetabolite);
+      const metabolite = {
+        id: selectedMetabolite.foundId || selectedMetabolite.mnx_id,
+        name: selectedMetabolite.name,
+        formula: selectedMetabolite.formula,
+        namespace: selectedMetabolite.namespace
+      };
+      this.$emit("change", metabolite);
     },
     dontFilterByDisplayedText(): boolean {
       return true;

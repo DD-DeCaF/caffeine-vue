@@ -63,6 +63,8 @@ export interface MetaNetXReaction {
   };
   modelNames?: Array<string>;
   displayValue?: string;
+  foundId?: string; // exists if was found in the passed models
+  namespace?: string;
 }
 
 export default Vue.extend({
@@ -83,6 +85,14 @@ export default Vue.extend({
     requestError: false,
     selectedValue: null,
     reactionsInModelsMap: {},
+    namespaceMap: {
+      seed: "seed.reaction",
+      bigg: "bigg.reaction",
+      kegg: "kegg.reaction",
+      metacyc: "metacyc.reaction",
+      rhea: "rhea",
+      sabiork: "sabiork.reaction"
+    },
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -122,29 +132,34 @@ export default Vue.extend({
           const searchResultsInTheModel = [] as MetaNetXReaction[];
           const searchResultsNotInTheModel = [] as MetaNetXReaction[];
           response.data.forEach((reaction: MetaNetXReaction) => {
-            const annotation = reaction.reaction.annotation;
-            const reactionIds = [reaction.reaction.mnx_id];
-            for (const namespace in annotation) {
-              annotation[namespace].forEach(reactionId =>
-                reactionIds.push(reactionId)
-              );
-            }
+            const deprecatedIds =
+              reaction.reaction.annotation["deprecated"] || [];
+            delete reaction.reaction.annotation["deprecated"];
+            const reactionIdsMap = {
+              ...reaction.reaction.annotation,
+              "metanetx.chemical": [reaction.reaction.mnx_id, ...deprecatedIds]
+            };
             let isReactionFound = false;
             reaction.modelNames = [];
-            for (const modelName in this.reactionsInModelsMap) {
-              if (
-                reactionIds.some(reactionId =>
-                  this.reactionsInModelsMap[modelName].has(reactionId)
-                )
-              ) {
-                isReactionFound = true;
-                reaction.modelNames.push(modelName);
+            for (const model in this.reactionsInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in reactionIdsMap) {
+                reactionIdsMap[namespace].forEach(reactionId => {
+                  if (this.reactionsInModelsMap[model].has(reactionId)) {
+                    isReactionFound = true;
+                    reaction.modelNames!.push(modelName);
+                    reaction.foundId = reactionId;
+                    reaction.namespace =
+                      this.namespaceMap[namespace] || namespace;
+                  }
+                });
               }
             }
             reaction.displayValue = this.reactionDisplay(reaction);
             if (isReactionFound) {
               searchResultsInTheModel.push(reaction);
             } else {
+              reaction.namespace = "metanetx.chemical";
               searchResultsNotInTheModel.push(reaction);
             }
           });
@@ -176,7 +191,6 @@ export default Vue.extend({
     modelIds: {
       immediate: true,
       handler() {
-        this.reactionsInModelsMap = {};
         if (this.modelIds) {
           axios
             .all(
@@ -185,12 +199,15 @@ export default Vue.extend({
               )
             )
             .then((response: any) => {
+              this.reactionsInModelsMap = {};
               response.forEach(responseItem => {
-                this.reactionsInModelsMap[responseItem.data.name] = new Set([]);
+                const key = JSON.stringify([
+                  responseItem.data.id,
+                  responseItem.data.name
+                ]);
+                this.reactionsInModelsMap[key] = new Set([]);
                 responseItem.data.model_serialized.reactions.forEach(reaction =>
-                  this.reactionsInModelsMap[responseItem.data.name].add(
-                    reaction.id
-                  )
+                  this.reactionsInModelsMap[key].add(reaction.id)
                 );
               });
             })
@@ -248,7 +265,7 @@ export default Vue.extend({
       }
       this.selectedValue = selectedReaction;
       const reaction: Reaction = {
-        id: selectedReaction.reaction.mnx_id,
+        id: selectedReaction.foundId || selectedReaction.reaction.mnx_id,
         name: selectedReaction.reaction.name || "",
         // TODO: rebuild reaction string more consistently, from equation_parsed
         reactionString: this.equationDisplay(selectedReaction),
@@ -269,7 +286,8 @@ export default Vue.extend({
             compartment: "",
             stoichiometry: m.coefficient
           };
-        })
+        }),
+        namespace: selectedReaction.namespace
       };
 
       this.$emit("change", {
