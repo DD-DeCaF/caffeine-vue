@@ -85,6 +85,14 @@ export default Vue.extend({
     requestError: false,
     selectedValue: null,
     reactionsInModelsMap: {},
+    namespaceMap: {
+      seed: "seed.reaction",
+      bigg: "bigg.reaction",
+      kegg: "kegg.reaction",
+      metacyc: "metacyc.reaction",
+      rhea: "rhea",
+      sabiork: "sabiork.reaction"
+    },
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -141,7 +149,8 @@ export default Vue.extend({
                     isReactionFound = true;
                     reaction.modelNames.push(modelName);
                     reaction.foundId = reactionId;
-                    reaction.namespace = namespace;
+                    reaction.namespace =
+                      this.namespaceMap[namespace] || namespace;
                   }
                 });
               }
