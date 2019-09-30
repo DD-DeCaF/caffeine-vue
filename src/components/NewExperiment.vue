@@ -238,7 +238,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="fluxomicsItem.measurement"
+                          v-model="fluxomicsItem.measurement"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -248,7 +248,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="fluxomicsItem.uncertainty"
+                          v-model="fluxomicsItem.uncertainty"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -318,7 +318,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="metabolomicsItem.measurement"
+                          v-model="metabolomicsItem.measurement"
                           hint="mmol l <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -327,7 +327,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="metabolomicsItem.uncertainty"
+                          v-model="metabolomicsItem.uncertainty"
                           hint="mmol l <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -396,7 +396,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="uptakeSecretionItem.measurement"
+                          v-model="uptakeSecretionItem.measurement"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -405,7 +405,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="uptakeSecretionItem.uncertainty"
+                          v-model="uptakeSecretionItem.uncertainty"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -484,7 +484,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="molarYieldsItem.measurement"
+                          v-model="molarYieldsItem.measurement"
                           hint="mmol-product / mmol-substrate"
                           persistent-hint
                           type="number"
@@ -493,7 +493,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="molarYieldsItem.uncertainty"
+                          v-model="molarYieldsItem.uncertainty"
                           hint="mmol-product / mmol-substrate"
                           persistent-hint
                           type="number"
@@ -552,7 +552,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="growthItem.measurement"
+                          v-model="growthItem.measurement"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
@@ -567,7 +567,7 @@
                       </td>
                       <td>
                         <v-text-field
-                          v-model.number="growthItem.uncertainty"
+                          v-model="growthItem.uncertainty"
                           hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                           persistent-hint
                           type="number"
