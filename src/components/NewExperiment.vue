@@ -104,13 +104,27 @@
                         </v-autocomplete-extended>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="index === tables.conditions.items.length - 1"
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.conditions.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('conditions')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn icon @click="deleteCondition(index)">
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -160,13 +174,27 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="index === tables.samples.items.length - 1"
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.samples.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('samples')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn icon @click="deleteSample(index, true)">
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -229,13 +257,30 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="index === tables.fluxomics.items.length - 1"
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.fluxomics.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('fluxomics')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn
+                              icon
+                              @click="deleteMeasurement('fluxomics', index)"
+                            >
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -290,15 +335,30 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="
-                            index === tables.metabolomics.items.length - 1
-                          "
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.metabolomics.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('metabolomics')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn
+                              icon
+                              @click="deleteMeasurement('metabolomics', index)"
+                            >
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -353,15 +413,33 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="
-                            index === tables.uptakeSecretion.items.length - 1
-                          "
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index ===
+                                  tables.uptakeSecretion.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('uptakeSecretion')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn
+                              icon
+                              @click="
+                                deleteMeasurement('uptakeSecretion', index)
+                              "
+                            >
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -423,13 +501,30 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="index === tables.molarYields.items.length - 1"
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.molarYields.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('molarYields')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn
+                              icon
+                              @click="deleteMeasurement('molarYields', index)"
+                            >
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -480,13 +575,30 @@
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
-                        <v-btn
-                          v-show="index === tables.growth.items.length - 1"
-                          icon
-                          @click="addRow()"
-                        >
-                          <v-icon color="primary">add_circle</v-icon>
-                        </v-btn>
+                        <v-layout>
+                          <v-flex>
+                            <v-btn
+                              :style="{
+                                opacity:
+                                  index === tables.growth.items.length - 1
+                                    ? 1
+                                    : 0
+                              }"
+                              icon
+                              @click="addRow('growth')"
+                            >
+                              <v-icon color="primary">add_circle</v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex>
+                            <v-btn
+                              icon
+                              @click="deleteMeasurement('growth', index)"
+                            >
+                              <v-icon color="primary">delete</v-icon>
+                            </v-btn>
+                          </v-flex>
+                        </v-layout>
                       </td>
                     </template>
                   </v-data-table>
@@ -625,8 +737,9 @@ export default Vue.extend({
         mainField: "name",
         headers: [
           { text: "Name", value: "name", width: "30%" },
-          { text: "Strain", value: "strain", width: "35%" },
-          { text: "Medium", value: "medium", width: "35%" }
+          { text: "Strain", value: "strain", width: "30%" },
+          { text: "Medium", value: "medium", width: "30%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -636,8 +749,9 @@ export default Vue.extend({
         headers: [
           { text: "Condition", value: "condition", width: "25%" },
           { text: "Name", value: "name", width: "25%" },
-          { text: "Start time", value: "startTime", width: "25%" },
-          { text: "End time", value: "endTime", width: "25%" }
+          { text: "Start time", value: "startTime", width: "20%" },
+          { text: "End time", value: "endTime", width: "20%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -647,8 +761,9 @@ export default Vue.extend({
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
           { text: "Reaction", value: "reaction", width: "25%" },
-          { text: "Measurement", value: "measurement", width: "25%" },
-          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Uncertainty", value: "uncertainty", width: "20%" },
+          { value: "actions", width: "10%" }
         ],
         parsePasted: {
           sample: (str, { tables }) => {
@@ -675,8 +790,9 @@ export default Vue.extend({
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
           { text: "Compound", value: "compound", width: "25%" },
-          { text: "Measurement", value: "measurement", width: "25%" },
-          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Uncertainty", value: "uncertainty", width: "20%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -686,8 +802,9 @@ export default Vue.extend({
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
           { text: "Compound", value: "compound", width: "25%" },
-          { text: "Measurement", value: "measurement", width: "25%" },
-          { text: "Uncertainty", value: "uncertainty", width: "25%" }
+          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Uncertainty", value: "uncertainty", width: "20%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -706,8 +823,9 @@ export default Vue.extend({
             value: "substrate",
             width: "20%"
           },
-          { text: "Measurement", value: "measurement", width: "20%" },
-          { text: "Uncertainty", value: "uncertainty", width: "20%" }
+          { text: "Measurement", value: "measurement", width: "15%" },
+          { text: "Uncertainty", value: "uncertainty", width: "15%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -716,8 +834,9 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "35%" },
-          { text: "Uncertainty", value: "uncertainty", width: "35%" }
+          { text: "Measurement", value: "measurement", width: "30%" },
+          { text: "Uncertainty", value: "uncertainty", width: "30%" },
+          { value: "actions", width: "10%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       }
@@ -758,10 +877,111 @@ export default Vue.extend({
     }, 0);
   },
   methods: {
-    addRow() {
-      this.selectedTable.items.push({
+    addRow(tableName) {
+      this.tables[tableName].items.push({
         temporaryId: uuidv4()
       });
+    },
+    deleteCondition(index) {
+      const conditionId = this.tables.conditions.items[index].temporaryId;
+      if (
+        this.tables.samples.items.some(
+          sample =>
+            sample.condition && sample.condition.temporaryId === conditionId
+        )
+      ) {
+        this.$confirm(
+          `Are you sure you want to delete the condition?<br>
+          All related samples and measurements will be deleted.`
+        ).then(isConfirmed => {
+          if (!isConfirmed) {
+            return;
+          }
+          for (let i = this.tables.samples.items.length - 1; i >= 0; i -= 1) {
+            if (
+              this.tables.samples.items[i].condition &&
+              this.tables.samples.items[i].condition.temporaryId === conditionId
+            ) {
+              this.deleteSample(i, false);
+            }
+          }
+          this._deleteCondition(index);
+        });
+      } else {
+        this._deleteCondition(index);
+      }
+    },
+    _deleteCondition(index) {
+      this.tables.conditions.items.splice(index, 1);
+      if (this.tables.conditions.items.length === 0) {
+        this.addRow("conditions");
+      }
+    },
+    deleteSample(index, isConfirmationRequired) {
+      const sampleId = this.tables.samples.items[index].temporaryId;
+      if (!isConfirmationRequired) {
+        this.deleteRelatedMeasurements(sampleId);
+        this._deleteSample(index);
+      } else if (
+        [
+          "fluxomics",
+          "metabolomics",
+          "uptakeSecretion",
+          "molarYields",
+          "growth"
+        ].some(measurement =>
+          this.tables[measurement].items.some(
+            item => item.sample && item.sample.temporaryId === sampleId
+          )
+        )
+      ) {
+        this.$confirm(
+          `Are you sure you want to delete the sample?<br>
+          All related measurements will be deleted.`
+        ).then(isConfirmed => {
+          if (!isConfirmed) {
+            return;
+          }
+          this.deleteRelatedMeasurements(sampleId);
+          this._deleteSample(index);
+        });
+      } else {
+        this._deleteSample(index);
+      }
+    },
+    _deleteSample(index) {
+      this.tables.samples.items.splice(index, 1);
+      if (this.tables.samples.items.length === 0) {
+        this.addRow("samples");
+      }
+    },
+    deleteRelatedMeasurements(sampleId) {
+      [
+        "fluxomics",
+        "metabolomics",
+        "uptakeSecretion",
+        "molarYields",
+        "growth"
+      ].forEach(measurement => {
+        for (
+          let i = this.tables[measurement].items.length - 1;
+          i >= 0;
+          i -= 1
+        ) {
+          if (
+            this.tables[measurement].items[i].sample &&
+            this.tables[measurement].items[i].sample.temporaryId === sampleId
+          ) {
+            this.deleteMeasurement(measurement, i);
+          }
+        }
+      });
+    },
+    deleteMeasurement(measurement, index) {
+      this.tables[measurement].items.splice(index, 1);
+      if (this.tables[measurement].items.length === 0) {
+        this.addRow(measurement);
+      }
     },
     passStrain(strain) {
       this.selectedTable.items[this.currentRowIndex].strain = strain;
