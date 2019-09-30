@@ -20,6 +20,7 @@ import VSelectExtended from "@/components/VSelectExtended";
 import VAutocompleteExtended from "@/components/VAutocompleteExtended";
 import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
 import AutocompleteMnxMetabolite from "@/components/AutocompleteMnxMetabolite.vue";
+import VuetifyConfirm from "vuetify-confirm";
 import { initFromStorage } from "@/utils/startup";
 import * as Sentry from "@sentry/browser";
 import * as Integrations from "@sentry/integrations";
@@ -46,6 +47,15 @@ if (sentryDSN) {
 }
 
 Vue.use(require("vue-moment"));
+Vue.use(VuetifyConfirm, {
+  buttonTrueText: "Yes",
+  buttonFalseText: "Cancel",
+  color: "warning",
+  icon: "warning",
+  title: "Warning",
+  width: 350,
+  property: "$confirm"
+});
 
 if (gaTrackingID) {
   Vue.use(VueAnalytics, {
