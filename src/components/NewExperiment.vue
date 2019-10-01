@@ -192,7 +192,6 @@
                           v-model="fluxomicsItem.sample"
                           no-data-text="No data available. You can add it in Samples table."
                           @change="getRelevantModelIds(fluxomicsItem)"
-                          @paste="paste(0, index, selectedTable, $event)"
                         >
                         </v-select>
                       </td>
@@ -268,6 +267,11 @@
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                           @change="metabolomicsItem.compound = $event"
+                          @paste="paste(1, index, selectedTable, $event)"
+                          :forceSearchQuery="
+                            metabolomicsItem.compound &&
+                              metabolomicsItem.compound._pastedText
+                          "
                           :modelIds="metabolomicsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -278,6 +282,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -287,6 +292,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -331,6 +337,11 @@
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                           @change="uptakeSecretionItem.compound = $event"
+                          @paste="paste(1, index, selectedTable, $event)"
+                          :forceSearchQuery="
+                            uptakeSecretionItem.compound &&
+                              uptakeSecretionItem.compound._pastedText
+                          "
                           :modelIds="uptakeSecretionItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -341,6 +352,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -350,6 +362,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -394,6 +407,11 @@
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                           @change="molarYieldsItem.product = $event"
+                          @paste="paste(1, index, selectedTable, $event)"
+                          :forceSearchQuery="
+                            molarYieldsItem.product &&
+                              molarYieldsItem.product._pastedText
+                          "
                           :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -401,6 +419,11 @@
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                           @change="molarYieldsItem.substrate = $event"
+                          @paste="paste(2, index, selectedTable, $event)"
+                          :forceSearchQuery="
+                            molarYieldsItem.substrate &&
+                              molarYieldsItem.substrate._pastedText
+                          "
                           :modelIds="molarYieldsItem.modelIds"
                         ></AutocompleteMnxMetabolite>
                       </td>
@@ -411,6 +434,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -420,6 +444,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(4, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -468,6 +493,7 @@
                               growthItem
                             )
                           ]"
+                          @paste="paste(1, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -477,6 +503,7 @@
                           persistent-hint
                           type="number"
                           step="any"
+                          @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -651,16 +678,6 @@ export default Vue.extend({
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
         ],
         parsePasted: {
-          sample: (str, { tables }) => {
-            const index = parseInt(str, 10);
-            const isExactMatch = index.toString() === str;
-            // If an integer (without unit postfix) is pasted, use it to try to
-            // get sample by index.
-            if (isExactMatch && tables.samples.items[index]) {
-              return tables.samples.items[index];
-            }
-            return null;
-          },
           // Temporarily create mock reaction object and use forceSearchQuery;
           // selecting a reaction then clears forceSearchQuery.
           reaction: str => ({ _pastedText: str }),
@@ -678,6 +695,11 @@ export default Vue.extend({
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
         ],
+        parsePasted: {
+          compound: str => ({ _pastedText: str }),
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       uptakeSecretion: {
@@ -689,6 +711,11 @@ export default Vue.extend({
           { text: "Measurement", value: "measurement", width: "25%" },
           { text: "Uncertainty", value: "uncertainty", width: "25%" }
         ],
+        parsePasted: {
+          compound: str => ({ _pastedText: str }),
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       molarYields: {
@@ -709,6 +736,12 @@ export default Vue.extend({
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" }
         ],
+        parsePasted: {
+          product: str => ({ _pastedText: str }),
+          substrate: str => ({ _pastedText: str }),
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       growth: {
@@ -719,6 +752,10 @@ export default Vue.extend({
           { text: "Measurement", value: "measurement", width: "35%" },
           { text: "Uncertainty", value: "uncertainty", width: "35%" }
         ],
+        parsePasted: {
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       }
     },
