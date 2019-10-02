@@ -36,7 +36,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import { debounce } from "lodash";
+import { debounce, flatten } from "lodash";
 import uuidv4 from "uuid/v4";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
@@ -232,18 +232,17 @@ export default Vue.extend({
           if (this.searchQuery === this.forceSearchQuery) {
             const firstResult = this.searchResults[0];
             const metaboliteIds = new Set(
-              Object.values(firstResult.annotation).flat()
-              );
+              flatten(Object.values(firstResult.annotation))
+            );
             metaboliteIds.add(firstResult.mnx_id);
             if (
               metaboliteIds.has(this.searchQuery) ||
               this.searchQuery === firstResult.name
             ) {
-              this.selectedValue = firstResult;
               this.searchResults = [firstResult];
-              }
             }
-          })
+          }
+        })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
             return;

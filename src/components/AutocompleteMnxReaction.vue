@@ -36,7 +36,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import { debounce } from "lodash";
+import { debounce, flatten } from "lodash";
 import uuidv4 from "uuid/v4";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
@@ -234,7 +234,7 @@ export default Vue.extend({
           if (this.searchQuery === this.forceSearchQuery) {
             const firstResult = this.searchResults[0];
             const reactionIds = new Set(
-              Object.values(firstResult.reaction.annotation).flat()
+              flatten(Object.values(firstResult.reaction.annotation))
             );
             reactionIds.add(firstResult.reaction.mnx_id);
             if (
@@ -242,7 +242,6 @@ export default Vue.extend({
               this.searchQuery === firstResult.reaction.name ||
               this.searchQuery === firstResult.reaction.ec
             ) {
-              this.selectedValue = firstResult;
               this.searchResults = [firstResult];
             }
           }
