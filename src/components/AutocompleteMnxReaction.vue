@@ -87,6 +87,7 @@ export default Vue.extend({
     activeSearchID: null,
     requestError: false,
     selectedValue: null,
+    debouncedQuery: null,
     reactionsInModelsMap: {},
     namespaceMap: {
       seed: "seed.reaction",
@@ -106,7 +107,37 @@ export default Vue.extend({
     })
   },
   watch: {
-    searchQuery: debounce(function() {
+    searchQuery() {
+      this.debouncedQuery();
+    },
+    forceSearchQuery(): void {
+      this.loadForcedSearchQuery();
+    },
+    modelIds: {
+      immediate: true,
+      handler() {
+        if (this.modelIds) {
+          Promise.all(
+            this.modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
+            )
+          ).then(() => {
+            this.reactionsInModelsMap = {};
+            this.modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.reactionsInModelsMap[key] = new Set([]);
+              model.model_serialized.reactions.forEach(reaction =>
+                this.reactionsInModelsMap[key].add(reaction.id)
+              );
+            });
+          });
+        }
+      }
+    }
+  },
+  created() {
+    this.debouncedQuery = debounce(() => {
       this.searchResults = [];
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         return;
@@ -195,32 +226,7 @@ export default Vue.extend({
           }
           this.isLoading = false;
         });
-    }, 500),
-    forceSearchQuery(): void {
-      this.loadForcedSearchQuery();
-    },
-    modelIds: {
-      immediate: true,
-      handler() {
-        if (this.modelIds) {
-          Promise.all(
-            this.modelIds.map(modelId =>
-              this.$store.dispatch("models/withFullModel", modelId)
-            )
-          ).then(() => {
-            this.reactionsInModelsMap = {};
-            this.modelIds.forEach(modelId => {
-              const model = this.getModelById(modelId);
-              const key = JSON.stringify([model.id, model.name]);
-              this.reactionsInModelsMap[key] = new Set([]);
-              model.model_serialized.reactions.forEach(reaction =>
-                this.reactionsInModelsMap[key].add(reaction.id)
-              );
-            });
-          });
-        }
-      }
-    }
+    }, 500);
   },
   methods: {
     reactionDisplay(reaction: MetaNetXReaction): string {
