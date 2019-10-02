@@ -232,18 +232,24 @@ export default Vue.extend({
           // If pasted reaction has the exact match with the first result
           // from metanetx service, it should be autoselected
           if (this.searchQuery === this.forceSearchQuery) {
-            const firstResult = this.searchResults[0];
-            const reactionIds = new Set(
-              flatten(Object.values(firstResult.reaction.annotation))
+            [searchResultsInTheModel[0], searchResultsNotInTheModel[0]].forEach(
+              searchResult => {
+                if (!searchResult) {
+                  return;
+                }
+                const reactionIds = new Set(
+                  flatten(Object.values(searchResult.reaction.annotation))
+                );
+                reactionIds.add(searchResult.reaction.mnx_id);
+                if (
+                  reactionIds.has(this.searchQuery) ||
+                  this.searchQuery === searchResult.reaction.name ||
+                  this.searchQuery === searchResult.reaction.ec
+                ) {
+                  this.searchResults = [searchResult];
+                }
+              }
             );
-            reactionIds.add(firstResult.reaction.mnx_id);
-            if (
-              reactionIds.has(this.searchQuery) ||
-              this.searchQuery === firstResult.reaction.name ||
-              this.searchQuery === firstResult.reaction.ec
-            ) {
-              this.searchResults = [firstResult];
-            }
           }
         })
         .catch(error => {
