@@ -7,13 +7,16 @@
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
+    hide-selected
     item-text="displayValue"
     item-value="reaction.mnx_id"
     return-object
+    autoselectOnlyOption
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
     @paste="$emit('paste', $event)"
+    ref="reactionAutocomplete"
   >
     <template v-slot:item="{ item: reaction }">
       <v-list-tile-content>
@@ -33,7 +36,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import { debounce } from "lodash";
+import { debounce, flatten } from "lodash";
 import uuidv4 from "uuid/v4";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
@@ -87,6 +90,7 @@ export default Vue.extend({
     activeSearchID: null,
     requestError: false,
     selectedValue: null,
+    debouncedQuery: null,
     reactionsInModelsMap: {},
     namespaceMap: {
       seed: "seed.reaction",
@@ -106,7 +110,50 @@ export default Vue.extend({
     })
   },
   watch: {
-    searchQuery: debounce(function() {
+    searchQuery() {
+      this.debouncedQuery();
+    },
+    forceSearchQuery: {
+      // Watcher needs to be immediate to trigger when copy-paste creates
+      // new rows with forceSearchQuery already set
+      immediate: true,
+      handler() {
+        this.loadForcedSearchQuery();
+      }
+    },
+    modelIds: {
+      immediate: true,
+      handler() {
+        if (this.modelIds) {
+          Promise.all(
+            this.modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
+            )
+          ).then(() => {
+            this.reactionsInModelsMap = {};
+            this.modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.reactionsInModelsMap[key] = new Set([]);
+              model.model_serialized.reactions.forEach(reaction =>
+                this.reactionsInModelsMap[key].add(reaction.id)
+              );
+            });
+          });
+        }
+      }
+    }
+  },
+  created() {
+    this.debouncedQuery = debounce(() => {
+      // Trigger focus event when pasting data to autoselect reaction with
+      // the exact match (without focus vuetify internally clears the search
+      // query when items are an empty array)
+      // Skip if search results exist (in which case pasted data didn't
+      // match result from metanetx service) to avoid infinite requests
+      if (this.forceSearchQuery && !this.searchResults.length) {
+        this.$refs.reactionAutocomplete.focus();
+      }
       this.searchResults = [];
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         return;
@@ -144,7 +191,7 @@ export default Vue.extend({
               reaction.reaction.annotation["deprecated"] || [];
             const reactionIdsMap = {
               ...reaction.reaction.annotation,
-              "metanetx.chemical": [reaction.reaction.mnx_id, ...deprecatedIds]
+              "metanetx.reaction": [reaction.reaction.mnx_id, ...deprecatedIds]
             };
             delete reactionIdsMap["deprecated"];
             let isReactionFound = false;
@@ -167,7 +214,7 @@ export default Vue.extend({
             if (isReactionFound) {
               searchResultsInTheModel.push(reaction);
             } else {
-              reaction.namespace = "metanetx.chemical";
+              reaction.namespace = "metanetx.reaction";
               searchResultsNotInTheModel.push(reaction);
             }
           });
@@ -182,6 +229,28 @@ export default Vue.extend({
             );
           }
           this.searchResults.push(...searchResultsNotInTheModel);
+          // If pasted reaction has the exact match with the first result
+          // from metanetx service, it should be autoselected
+          if (this.searchQuery === this.forceSearchQuery) {
+            [searchResultsInTheModel[0], searchResultsNotInTheModel[0]].forEach(
+              searchResult => {
+                if (!searchResult) {
+                  return;
+                }
+                const reactionIds = new Set(
+                  flatten(Object.values(searchResult.reaction.annotation))
+                );
+                reactionIds.add(searchResult.reaction.mnx_id);
+                if (
+                  reactionIds.has(this.searchQuery) ||
+                  this.searchQuery === searchResult.reaction.name ||
+                  this.searchQuery === searchResult.reaction.ec
+                ) {
+                  this.searchResults = [searchResult];
+                }
+              }
+            );
+          }
         })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
@@ -195,32 +264,7 @@ export default Vue.extend({
           }
           this.isLoading = false;
         });
-    }, 500),
-    forceSearchQuery(): void {
-      this.loadForcedSearchQuery();
-    },
-    modelIds: {
-      immediate: true,
-      handler() {
-        if (this.modelIds) {
-          Promise.all(
-            this.modelIds.map(modelId =>
-              this.$store.dispatch("models/withFullModel", modelId)
-            )
-          ).then(() => {
-            this.reactionsInModelsMap = {};
-            this.modelIds.forEach(modelId => {
-              const model = this.getModelById(modelId);
-              const key = JSON.stringify([model.id, model.name]);
-              this.reactionsInModelsMap[key] = new Set([]);
-              model.model_serialized.reactions.forEach(reaction =>
-                this.reactionsInModelsMap[key].add(reaction.id)
-              );
-            });
-          });
-        }
-      }
-    }
+    }, 500);
   },
   methods: {
     reactionDisplay(reaction: MetaNetXReaction): string {
