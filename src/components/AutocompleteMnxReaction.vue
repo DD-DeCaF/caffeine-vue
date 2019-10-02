@@ -7,13 +7,16 @@
     :loading="isLoading"
     :search-input.sync="searchQuery"
     hide-no-data
+    hide-selected
     item-text="displayValue"
     item-value="reaction.mnx_id"
     return-object
+    autoselectOnlyOption
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
     @paste="$emit('paste', $event)"
+    ref="reactionAutocomplete"
   >
     <template v-slot:item="{ item: reaction }">
       <v-list-tile-content>
@@ -110,8 +113,13 @@ export default Vue.extend({
     searchQuery() {
       this.debouncedQuery();
     },
-    forceSearchQuery(): void {
-      this.loadForcedSearchQuery();
+    forceSearchQuery: {
+      // Watcher needs to be immediate to trigger when copy-paste creates
+      // new rows with forceSearchQuery already set
+      immediate: true,
+      handler() {
+        this.loadForcedSearchQuery();
+      }
     },
     modelIds: {
       immediate: true,
@@ -138,6 +146,14 @@ export default Vue.extend({
   },
   created() {
     this.debouncedQuery = debounce(() => {
+      // Trigger focus event when pasting data to autoselect reaction with
+      // the exact match (without focus vuetify internally clears the search
+      // query when items are an empty array)
+      // Skip if search results exist (in which case pasted data didn't
+      // match result from metanetx service) to avoid infinite requests
+      if (this.forceSearchQuery && !this.searchResults.length) {
+        this.$refs.reactionAutocomplete.focus();
+      }
       this.searchResults = [];
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         return;
@@ -175,7 +191,7 @@ export default Vue.extend({
               reaction.reaction.annotation["deprecated"] || [];
             const reactionIdsMap = {
               ...reaction.reaction.annotation,
-              "metanetx.chemical": [reaction.reaction.mnx_id, ...deprecatedIds]
+              "metanetx.reaction": [reaction.reaction.mnx_id, ...deprecatedIds]
             };
             delete reactionIdsMap["deprecated"];
             let isReactionFound = false;
@@ -198,7 +214,7 @@ export default Vue.extend({
             if (isReactionFound) {
               searchResultsInTheModel.push(reaction);
             } else {
-              reaction.namespace = "metanetx.chemical";
+              reaction.namespace = "metanetx.reaction";
               searchResultsNotInTheModel.push(reaction);
             }
           });
@@ -213,6 +229,23 @@ export default Vue.extend({
             );
           }
           this.searchResults.push(...searchResultsNotInTheModel);
+          // If pasted reaction has the exact match with the first result
+          // from metanetx service, it should be autoselected
+          if (this.searchQuery === this.forceSearchQuery) {
+            const firstResult = this.searchResults[0];
+            const reactionIds = new Set(
+              Object.values(firstResult.reaction.annotation).flat()
+            );
+            reactionIds.add(firstResult.reaction.mnx_id);
+            if (
+              reactionIds.has(this.searchQuery) ||
+              this.searchQuery === firstResult.reaction.name ||
+              this.searchQuery === firstResult.reaction.ec
+            ) {
+              this.selectedValue = firstResult;
+              this.searchResults = [firstResult];
+            }
+          }
         })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
