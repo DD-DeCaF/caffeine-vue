@@ -120,7 +120,10 @@
                             </v-btn>
                           </v-flex>
                           <v-flex>
-                            <v-btn icon @click="deleteCondition(index)">
+                            <v-btn
+                              icon
+                              @click="deleteCondition(condition.temporaryId)"
+                            >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
                           </v-flex>
@@ -190,7 +193,10 @@
                             </v-btn>
                           </v-flex>
                           <v-flex>
-                            <v-btn icon @click="deleteSample(index, true)">
+                            <v-btn
+                              icon
+                              @click="deleteSample(sample.temporaryId, true)"
+                            >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
                           </v-flex>
@@ -275,7 +281,12 @@
                           <v-flex>
                             <v-btn
                               icon
-                              @click="deleteMeasurement('fluxomics', index)"
+                              @click="
+                                deleteMeasurement(
+                                  'fluxomics',
+                                  fluxomicsItem.temporaryId
+                                )
+                              "
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -353,7 +364,12 @@
                           <v-flex>
                             <v-btn
                               icon
-                              @click="deleteMeasurement('metabolomics', index)"
+                              @click="
+                                deleteMeasurement(
+                                  'metabolomics',
+                                  metabolomicsItem.temporaryId
+                                )
+                              "
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -433,7 +449,10 @@
                             <v-btn
                               icon
                               @click="
-                                deleteMeasurement('uptakeSecretion', index)
+                                deleteMeasurement(
+                                  'uptakeSecretion',
+                                  uptakeSecretionItem.temporaryId
+                                )
                               "
                             >
                               <v-icon color="primary">delete</v-icon>
@@ -519,7 +538,12 @@
                           <v-flex>
                             <v-btn
                               icon
-                              @click="deleteMeasurement('molarYields', index)"
+                              @click="
+                                deleteMeasurement(
+                                  'molarYields',
+                                  molarYieldsItem.temporaryId
+                                )
+                              "
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -593,7 +617,12 @@
                           <v-flex>
                             <v-btn
                               icon
-                              @click="deleteMeasurement('growth', index)"
+                              @click="
+                                deleteMeasurement(
+                                  'growth',
+                                  growthItem.temporaryId
+                                )
+                              "
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -700,6 +729,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows } from "d3-dsv";
+import { flatten } from "lodash";
 import * as settings from "@/utils/settings";
 
 export default Vue.extend({
@@ -877,110 +907,87 @@ export default Vue.extend({
     }, 0);
   },
   methods: {
-    addRow(tableName) {
-      this.tables[tableName].items.push({
+    addRow(tableKey) {
+      this.tables[tableKey].items.push({
         temporaryId: uuidv4()
       });
     },
-    deleteCondition(index) {
-      const conditionId = this.tables.conditions.items[index].temporaryId;
-      if (
-        this.tables.samples.items.some(
-          sample =>
-            sample.condition && sample.condition.temporaryId === conditionId
-        )
-      ) {
-        this.$confirm(
-          `Are you sure you want to delete the condition?<br>
-          All related samples and measurements will be deleted.`
-        ).then(isConfirmed => {
-          if (!isConfirmed) {
-            return;
-          }
-          for (let i = this.tables.samples.items.length - 1; i >= 0; i -= 1) {
-            if (
-              this.tables.samples.items[i].condition &&
-              this.tables.samples.items[i].condition.temporaryId === conditionId
-            ) {
-              this.deleteSample(i, false);
-            }
-          }
-          this._deleteCondition(index);
-        });
-      } else {
-        this._deleteCondition(index);
-      }
+    deleteCondition(conditionId) {
+      const relatedSamples = this.tables.samples.items.filter(
+        sample =>
+          sample.condition && sample.condition.temporaryId === conditionId
+      );
+      let isConfirmationRequired = relatedSamples.length ? true : false;
+
+      const confirmation = !isConfirmationRequired
+        ? Promise.resolve(true)
+        : this.$confirm(`
+            Are you sure you want to delete the condition?<br>
+            All related samples and measurements will be deleted.`);
+
+      confirmation.then(isConfirmed => {
+        if (!isConfirmed) {
+          return;
+        }
+        relatedSamples.forEach(sample =>
+          this.deleteSample(sample.temporaryId, false)
+        );
+        const indexToDelete = this.tables.conditions.items.findIndex(
+          condition => condition.temporaryId === conditionId
+        );
+        this.tables.conditions.items.splice(indexToDelete, 1);
+        if (this.tables.conditions.items.length === 0) {
+          this.addRow("conditions");
+        }
+      });
     },
-    _deleteCondition(index) {
-      this.tables.conditions.items.splice(index, 1);
-      if (this.tables.conditions.items.length === 0) {
-        this.addRow("conditions");
-      }
-    },
-    deleteSample(index, isConfirmationRequired) {
-      const sampleId = this.tables.samples.items[index].temporaryId;
-      if (!isConfirmationRequired) {
-        this.deleteRelatedMeasurements(sampleId);
-        this._deleteSample(index);
-      } else if (
+    deleteSample(sampleId, isConfirmationRequired) {
+      const relatedMeasurements = flatten(
         [
           "fluxomics",
           "metabolomics",
           "uptakeSecretion",
           "molarYields",
           "growth"
-        ].some(measurement =>
-          this.tables[measurement].items.some(
-            item => item.sample && item.sample.temporaryId === sampleId
-          )
+        ].map(tableKey =>
+          this.tables[tableKey].items
+            .filter(item => item.sample && item.sample.temporaryId === sampleId)
+            .map(item => ({
+              tableKey: tableKey,
+              temporaryId: item.temporaryId
+            }))
         )
-      ) {
-        this.$confirm(
-          `Are you sure you want to delete the sample?<br>
-          All related measurements will be deleted.`
-        ).then(isConfirmed => {
-          if (!isConfirmed) {
-            return;
-          }
-          this.deleteRelatedMeasurements(sampleId);
-          this._deleteSample(index);
-        });
-      } else {
-        this._deleteSample(index);
-      }
-    },
-    _deleteSample(index) {
-      this.tables.samples.items.splice(index, 1);
-      if (this.tables.samples.items.length === 0) {
-        this.addRow("samples");
-      }
-    },
-    deleteRelatedMeasurements(sampleId) {
-      [
-        "fluxomics",
-        "metabolomics",
-        "uptakeSecretion",
-        "molarYields",
-        "growth"
-      ].forEach(measurement => {
-        for (
-          let i = this.tables[measurement].items.length - 1;
-          i >= 0;
-          i -= 1
-        ) {
-          if (
-            this.tables[measurement].items[i].sample &&
-            this.tables[measurement].items[i].sample.temporaryId === sampleId
-          ) {
-            this.deleteMeasurement(measurement, i);
-          }
+      );
+
+      const confirmation = !isConfirmationRequired
+        ? Promise.resolve(true)
+        : this.$confirm(`
+            Are you sure you want to delete the sample?<br>
+            All related measurements will be deleted.`);
+
+      confirmation.then(isConfirmed => {
+        if (!isConfirmed) {
+          return;
+        }
+        relatedMeasurements.forEach(item =>
+          this.deleteMeasurement(item.tableKey, item.temporaryId)
+        );
+        const indexToDelete = this.tables.samples.items.findIndex(
+          sample => sample.temporaryId === sampleId
+        );
+        this.tables.samples.items.splice(indexToDelete, 1);
+        if (this.tables.samples.items.length === 0) {
+          this.addRow("samples");
         }
       });
     },
-    deleteMeasurement(measurement, index) {
-      this.tables[measurement].items.splice(index, 1);
-      if (this.tables[measurement].items.length === 0) {
-        this.addRow(measurement);
+    deleteMeasurement(tableKey, itemId) {
+      const indexToDelete = this.tables[tableKey].items.findIndex(
+        item => item.temporaryId === itemId
+      );
+      this.tables[tableKey].items.splice(indexToDelete, 1);
+      if (this.tables[tableKey].items.length === 0) {
+        this.addRow(tableKey);
       }
     },
     passStrain(strain) {
@@ -1006,8 +1013,8 @@ export default Vue.extend({
             "metabolomics",
             "uptakeSecretion",
             "molarYields"
-          ].forEach(tableName => {
-            this.tables[tableName].items
+          ].forEach(tableKey => {
+            this.tables[tableKey].items
               .filter(
                 item => item.sample && item.sample.temporaryId === sampleId
               )
