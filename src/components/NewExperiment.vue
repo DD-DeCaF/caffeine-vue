@@ -200,7 +200,7 @@
                       <td>
                         <AutocompleteMnxReaction
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                          @change="fluxomicsItem.reaction = $event.reaction"
+                          @change="onChange(fluxomicsItem, 'reaction', $event.reaction)"
                           :modelIds="fluxomicsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
@@ -280,7 +280,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="metabolomicsItem.compound = $event"
+                          @change="onChange(metabolomicsItem, 'compound', $event)"
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             metabolomicsItem.compound &&
@@ -362,7 +362,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="uptakeSecretionItem.compound = $event"
+                          @change="onChange(uptakeSecretionItem, 'compound', $event)"
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             uptakeSecretionItem.compound &&
@@ -444,7 +444,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="molarYieldsItem.product = $event"
+                          @change="onChange(molarYieldsItem, 'product', $event)"
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             molarYieldsItem.product &&
@@ -462,7 +462,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="molarYieldsItem.substrate = $event"
+                          @change="onChange(molarYieldsItem, 'substrate', $event)"
                           @paste="paste(2, index, selectedTable, $event)"
                           :forceSearchQuery="
                             molarYieldsItem.substrate &&
@@ -964,6 +964,9 @@ export default Vue.extend({
           Vue.set(table.items[rowOffset + rowIx], property, value);
         });
       });
+    },
+    onChange(item, property, value) {
+      Vue.set(item, property, value)
     },
     createExperiment() {
       this.conditionTempIdsMap = {};
