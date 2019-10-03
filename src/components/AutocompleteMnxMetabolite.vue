@@ -1,17 +1,17 @@
 <template>
   <v-autocomplete-extended
     v-bind="$attrs"
-    v-model="addItem"
+    v-model="selectedItem"
     :items="searchResults"
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
+    :placeholder="forceSearchQuery"
     hide-no-data
     hide-selected
     item-text="displayValue"
     item-value="mnx_id"
     return-object
-    autoselectOnlyOption
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
@@ -79,13 +79,12 @@ export default Vue.extend({
     modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
-    addItem: null,
+    selectedItem: null,
     searchResults: [] as MetaNetXMetabolite[],
     isLoading: false,
     searchQuery: null,
     activeSearchID: null,
     requestError: false,
-    selectedValue: null,
     debouncedQuery: null,
     metabolitesInModelsMap: {},
     namespaceMap: {
@@ -157,13 +156,13 @@ export default Vue.extend({
         return;
       }
       if (
-        this.selectedValue &&
-        this.searchQuery === this.selectedValue.displayValue
+        this.selectedItem &&
+        this.searchQuery === this.selectedItem.displayValue
       ) {
         // In order to keep selected metabolite displayed after clicking
         // outside of the v-autocomplete, this metabolite should be
         // listed in the items prop
-        this.searchResults = [this.selectedValue];
+        this.searchResults = [this.selectedItem];
         return;
       }
 
@@ -230,7 +229,7 @@ export default Vue.extend({
           // If pasted metabolite has the exact match with the first result
           // from metanetx service, it should be autoselected
           if (this.searchQuery === this.forceSearchQuery) {
-            [searchResultsInTheModel[0], searchResultsNotInTheModel[0]].forEach(
+            [searchResultsNotInTheModel[0], searchResultsInTheModel[0]].forEach(
               searchResult => {
                 if (!searchResult) {
                   return;
@@ -244,6 +243,8 @@ export default Vue.extend({
                   this.searchQuery === searchResult.name
                 ) {
                   this.searchResults = [searchResult];
+                  this.selectedItem = searchResult;
+                  this.onChange(this.selectedItem);
                 }
               }
             );
@@ -272,10 +273,9 @@ export default Vue.extend({
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
-          this.addItem = null;
+          this.selectedItem = null;
         });
       }
-      this.selectedValue = selectedMetabolite;
       const metabolite = {
         id: selectedMetabolite.foundId || selectedMetabolite.mnx_id,
         name: selectedMetabolite.name,

@@ -26,7 +26,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.conditions.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: condition, index: index }">
@@ -121,7 +121,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.samples.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: sample, index: index }">
@@ -179,7 +179,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.fluxomics.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -200,7 +200,9 @@
                       <td>
                         <AutocompleteMnxReaction
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                          @change="onChange(fluxomicsItem, 'reaction', $event.reaction)"
+                          @change="
+                            onChange(fluxomicsItem, 'reaction', $event.reaction)
+                          "
                           :modelIds="fluxomicsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
@@ -259,7 +261,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.metabolomics.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -280,7 +282,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="onChange(metabolomicsItem, 'compound', $event)"
+                          @change="
+                            onChange(metabolomicsItem, 'compound', $event)
+                          "
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             metabolomicsItem.compound &&
@@ -341,7 +345,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.uptakeSecretion.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -362,7 +366,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="onChange(uptakeSecretionItem, 'compound', $event)"
+                          @change="
+                            onChange(uptakeSecretionItem, 'compound', $event)
+                          "
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             uptakeSecretionItem.compound &&
@@ -423,7 +429,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.molarYields.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -462,7 +468,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="onChange(molarYieldsItem, 'substrate', $event)"
+                          @change="
+                            onChange(molarYieldsItem, 'substrate', $event)
+                          "
                           @paste="paste(2, index, selectedTable, $event)"
                           :forceSearchQuery="
                             molarYieldsItem.substrate &&
@@ -521,7 +529,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.growth.items"
-                    :pagination.sync="pagination"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: growthItem, index: index }">
@@ -814,9 +822,6 @@ export default Vue.extend({
         },
         items: [{ temporaryId: uuidv4() }]
       }
-    },
-    pagination: {
-      rowsPerPage: 10
     }
   }),
   computed: {
@@ -855,6 +860,9 @@ export default Vue.extend({
       this.selectedTable.items.push({
         temporaryId: uuidv4()
       });
+      setTimeout(() => {
+        this.$refs.newExperimentForm.validate();
+      }, 0);
     },
     passStrain(strain) {
       this.selectedTable.items[this.currentRowIndex].strain = strain;
@@ -966,7 +974,7 @@ export default Vue.extend({
       });
     },
     onChange(item, property, value) {
-      Vue.set(item, property, value)
+      Vue.set(item, property, value);
     },
     createExperiment() {
       this.conditionTempIdsMap = {};
