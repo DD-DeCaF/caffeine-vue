@@ -26,7 +26,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.conditions.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: condition, index: index }">
@@ -138,7 +139,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.samples.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: sample, index: index }">
@@ -213,7 +215,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.fluxomics.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -234,7 +237,9 @@
                       <td>
                         <AutocompleteMnxReaction
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                          @change="fluxomicsItem.reaction = $event.reaction"
+                          @change="
+                            onChange(fluxomicsItem, 'reaction', $event.reaction)
+                          "
                           :modelIds="fluxomicsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
@@ -315,7 +320,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.metabolomics.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -336,7 +342,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="metabolomicsItem.compound = $event"
+                          @change="
+                            onChange(metabolomicsItem, 'compound', $event)
+                          "
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             metabolomicsItem.compound &&
@@ -417,7 +425,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.uptakeSecretion.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -438,7 +447,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="uptakeSecretionItem.compound = $event"
+                          @change="
+                            onChange(uptakeSecretionItem, 'compound', $event)
+                          "
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             uptakeSecretionItem.compound &&
@@ -520,7 +531,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.molarYields.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template
@@ -541,7 +553,7 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="molarYieldsItem.product = $event"
+                          @change="onChange(molarYieldsItem, 'product', $event)"
                           @paste="paste(1, index, selectedTable, $event)"
                           :forceSearchQuery="
                             molarYieldsItem.product &&
@@ -559,7 +571,9 @@
                       <td>
                         <AutocompleteMnxMetabolite
                           hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="molarYieldsItem.substrate = $event"
+                          @change="
+                            onChange(molarYieldsItem, 'substrate', $event)
+                          "
                           @paste="paste(2, index, selectedTable, $event)"
                           :forceSearchQuery="
                             molarYieldsItem.substrate &&
@@ -640,7 +654,8 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.growth.items"
-                    :pagination.sync="pagination"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                    hide-actions
                     disable-initial-sort
                   >
                     <template v-slot:items="{ item: growthItem, index: index }">
@@ -835,6 +850,9 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isLoading: false,
     isExperimentCreationSuccess: false,
+    // We are relying on data table's `index` (for currentRowIndex and @paste)
+    // but that only works correctly on the first page.
+    disabledToPreventWrongIndexOnSecondPage: undefined,
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
@@ -963,9 +981,6 @@ export default Vue.extend({
         },
         items: [{ temporaryId: uuidv4() }]
       }
-    },
-    pagination: {
-      rowsPerPage: 10
     }
   }),
   computed: {
@@ -1004,6 +1019,9 @@ export default Vue.extend({
       this.tables[tableKey].items.push({
         temporaryId: uuidv4()
       });
+      setTimeout(() => {
+        this.$refs.newExperimentForm.validate();
+      }, 0);
     },
     deleteCondition(conditionId) {
       const relatedSamples = this.tables.samples.items.filter(
@@ -1188,6 +1206,9 @@ export default Vue.extend({
           Vue.set(table.items[rowOffset + rowIx], property, value);
         });
       });
+    },
+    onChange(item, property, value) {
+      Vue.set(item, property, value);
     },
     createExperiment() {
       this.conditionTempIdsMap = {};

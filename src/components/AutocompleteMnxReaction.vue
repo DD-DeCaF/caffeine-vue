@@ -1,17 +1,17 @@
 <template>
   <v-autocomplete-extended
     v-bind="$attrs"
-    v-model="addItem"
+    v-model="selectedItem"
     :items="searchResults"
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
     :search-input.sync="searchQuery"
+    :placeholder="forceSearchQuery"
     hide-no-data
     hide-selected
     item-text="displayValue"
     item-value="reaction.mnx_id"
     return-object
-    autoselectOnlyOption
     :rules="[...(rules || []), requestErrorRule(requestError)]"
     @change="onChange"
     @focus="loadForcedSearchQuery"
@@ -83,13 +83,12 @@ export default Vue.extend({
     modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
-    addItem: null,
+    selectedItem: null,
     searchResults: [] as MetaNetXReaction[],
     isLoading: false,
     searchQuery: null,
     activeSearchID: null,
     requestError: false,
-    selectedValue: null,
     debouncedQuery: null,
     reactionsInModelsMap: {},
     namespaceMap: {
@@ -159,13 +158,13 @@ export default Vue.extend({
         return;
       }
       if (
-        this.selectedValue &&
-        this.searchQuery === this.selectedValue.displayValue
+        this.selectedItem &&
+        this.searchQuery === this.selectedItem.displayValue
       ) {
         // In order to keep selected reaction displayed after clicking
         // outside of the v-autocomplete, this reaction should be
         // listed in the items prop
-        this.searchResults = [this.selectedValue];
+        this.searchResults = [this.selectedItem];
         return;
       }
       this.isLoading = true;
@@ -232,24 +231,28 @@ export default Vue.extend({
           // If pasted reaction has the exact match with the first result
           // from metanetx service, it should be autoselected
           if (this.searchQuery === this.forceSearchQuery) {
-            [searchResultsInTheModel[0], searchResultsNotInTheModel[0]].forEach(
-              searchResult => {
-                if (!searchResult) {
-                  return;
-                }
-                const reactionIds = new Set(
-                  flatten(Object.values(searchResult.reaction.annotation))
-                );
-                reactionIds.add(searchResult.reaction.mnx_id);
-                if (
-                  reactionIds.has(this.searchQuery) ||
-                  this.searchQuery === searchResult.reaction.name ||
-                  this.searchQuery === searchResult.reaction.ec
-                ) {
-                  this.searchResults = [searchResult];
-                }
+            const exactMatch = [
+              searchResultsInTheModel[0],
+              searchResultsNotInTheModel[0]
+            ].find(searchResult => {
+              if (!searchResult) {
+                return false;
               }
-            );
+              const reactionIds = flatten(
+                Object.values(searchResult.reaction.annotation)
+              );
+              const exactValues = new Set(reactionIds);
+              exactValues.add(searchResult.reaction.mnx_id);
+              exactValues.add(searchResult.reaction.name);
+              exactValues.add(searchResult.reaction.ec);
+
+              return exactValues.has(this.searchQuery);
+            });
+
+            if (exactMatch) {
+              this.selectedItem = exactMatch;
+              this.onChange(this.selectedItem);
+            }
           }
         })
         .catch(error => {
@@ -308,10 +311,9 @@ export default Vue.extend({
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
-          this.addItem = null;
+          this.selectedItem = null;
         });
       }
-      this.selectedValue = selectedReaction;
       const reaction: Reaction = {
         id: selectedReaction.foundId || selectedReaction.reaction.mnx_id,
         name: selectedReaction.reaction.name || "",
