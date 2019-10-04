@@ -229,25 +229,27 @@ export default Vue.extend({
           // If pasted metabolite has the exact match with the first result
           // from metanetx service, it should be autoselected
           if (this.searchQuery === this.forceSearchQuery) {
-            [searchResultsNotInTheModel[0], searchResultsInTheModel[0]].forEach(
-              searchResult => {
-                if (!searchResult) {
-                  return;
-                }
-                const metaboliteIds = new Set(
-                  flatten(Object.values(searchResult.annotation))
-                );
-                metaboliteIds.add(searchResult.mnx_id);
-                if (
-                  metaboliteIds.has(this.searchQuery) ||
-                  this.searchQuery === searchResult.name
-                ) {
-                  this.searchResults = [searchResult];
-                  this.selectedItem = searchResult;
-                  this.onChange(this.selectedItem);
-                }
+            const exactMatch = [
+              searchResultsInTheModel[0],
+              searchResultsNotInTheModel[0]
+            ].find(searchResult => {
+              if (!searchResult) {
+                return false;
               }
-            );
+              const metaboliteIds = flatten(
+                Object.values(searchResult.annotation)
+              );
+              const exactValues = new Set(metaboliteIds);
+              exactValues.add(searchResult.mnx_id);
+              exactValues.add(searchResult.name);
+
+              return exactValues.has(this.searchQuery);
+            });
+
+            if (exactMatch) {
+              this.selectedItem = exactMatch;
+              this.onChange(this.selectedItem);
+            }
           }
         })
         .catch(error => {

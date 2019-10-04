@@ -26,6 +26,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.conditions.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -121,6 +122,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.samples.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -179,6 +181,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.fluxomics.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -261,6 +264,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.metabolomics.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -345,6 +349,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.uptakeSecretion.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -429,6 +434,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.molarYields.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -529,6 +535,7 @@
                   <v-data-table
                     :headers="selectedTable.headers"
                     :items="tables.growth.items"
+                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                     hide-actions
                     disable-initial-sort
                   >
@@ -701,6 +708,9 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isLoading: false,
     isExperimentCreationSuccess: false,
+    // We are relying on data table's `index` (for currentRowIndex and @paste)
+    // but that only works correctly on the first page.
+    disabledToPreventWrongIndexOnSecondPage: undefined,
     currentRowIndex: null,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
