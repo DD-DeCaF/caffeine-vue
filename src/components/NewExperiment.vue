@@ -917,7 +917,7 @@ export default Vue.extend({
         sample =>
           sample.condition && sample.condition.temporaryId === conditionId
       );
-      let isConfirmationRequired = relatedSamples.length ? true : false;
+      const isConfirmationRequired = relatedSamples.length > 0;
 
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
@@ -932,10 +932,9 @@ export default Vue.extend({
         relatedSamples.forEach(sample =>
           this.deleteSample(sample.temporaryId, false)
         );
-        const indexToDelete = this.tables.conditions.items.findIndex(
-          condition => condition.temporaryId === conditionId
+        this.tables.conditions.items = this.tables.conditions.items.filter(
+          condition => condition.temporaryId !== conditionId
         );
-        this.tables.conditions.items.splice(indexToDelete, 1);
         if (this.tables.conditions.items.length === 0) {
           this.addRow("conditions");
         }
@@ -972,20 +971,18 @@ export default Vue.extend({
         relatedMeasurements.forEach(item =>
           this.deleteMeasurement(item.tableKey, item.temporaryId)
         );
-        const indexToDelete = this.tables.samples.items.findIndex(
-          sample => sample.temporaryId === sampleId
+        this.tables.samples.items = this.tables.samples.items.filter(
+          sample => sample.temporaryId !== sampleId
         );
-        this.tables.samples.items.splice(indexToDelete, 1);
         if (this.tables.samples.items.length === 0) {
           this.addRow("samples");
         }
       });
     },
     deleteMeasurement(tableKey, itemId) {
-      const indexToDelete = this.tables[tableKey].items.findIndex(
-        item => item.temporaryId === itemId
+      this.tables[tableKey].items = this.tables[tableKey].items.filter(
+        item => item.temporaryId !== itemId
       );
-      this.tables[tableKey].items.splice(indexToDelete, 1);
       if (this.tables[tableKey].items.length === 0) {
         this.addRow(tableKey);
       }
