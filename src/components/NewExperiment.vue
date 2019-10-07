@@ -829,6 +829,7 @@ import uuidv4 from "uuid/v4";
 import { tsvParseRows } from "d3-dsv";
 import { flatten } from "lodash";
 import * as settings from "@/utils/settings";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 
 export default Vue.extend({
   name: "NewExperiment",
@@ -1032,9 +1033,10 @@ export default Vue.extend({
 
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
-        : this.$confirm(`
-            Are you sure you want to delete the condition?<br>
-            All related samples and measurements will be deleted.`);
+        : this.$promisedDialog(ConfirmDialog, {
+            message: ` Are you sure you want to delete the condition?
+            All related samples and measurements will be deleted.`
+          });
 
       confirmation.then(isConfirmed => {
         if (!isConfirmed) {
@@ -1071,9 +1073,10 @@ export default Vue.extend({
 
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
-        : this.$confirm(`
-            Are you sure you want to delete the sample?<br>
-            All related measurements will be deleted.`);
+        : this.$promisedDialog(ConfirmDialog, {
+            message: ` Are you sure you want to delete the sample?
+            All related measurements will be deleted.`
+          });
 
       confirmation.then(isConfirmed => {
         if (!isConfirmed) {
