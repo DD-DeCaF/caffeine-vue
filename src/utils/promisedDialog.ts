@@ -21,15 +21,20 @@ function promisedDialog(Vue) {
 export default promisedDialog;
 
 declare module "vue/types/vue" {
+  // prettier-ignore
+  type ExtractValue<Component> =
+    Component extends ExtendedVue<Vue, { value: infer Value }, {}, {}, {}>
+      ? Value
+      : void;
+
   interface Vue {
     $promisedDialog<
-      Value,
       Props extends object,
-      Component extends ExtendedVue<Vue, { value: Value }, {}, {}, Props>
+      Component extends ExtendedVue<Vue, { value: any }, {}, {}, Props>
     >(
       component: Component,
       options: Props
-    ): Promise<Value>;
+    ): Promise<ExtractValue<Component>>;
   }
 }
 
