@@ -159,7 +159,10 @@
                       <!-- Name field was added, so user can distinguish -->
                       <!-- samples in other tables -->
                       <td>
-                        <v-text-field v-model="sample.name"></v-text-field>
+                        <v-text-field
+                          v-model="sample.name"
+                          @paste="paste(1, index, selectedTable, $event)"
+                        ></v-text-field>
                       </td>
                       <td>
                         <v-text-field
@@ -169,6 +172,7 @@
                           placeholder="dd/mm/yyyy hh:mm"
                           hint="dd/mm/yyyy hh:mm"
                           :rules="[requiredIfHasMain(sample.startTime, sample)]"
+                          @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td>
@@ -178,6 +182,7 @@
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
                           hint="dd/mm/yyyy hh:mm"
+                          @paste="paste(3, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
                       <td class="hidden-bottom-border">
@@ -886,6 +891,11 @@ export default Vue.extend({
           { text: "End time", value: "endTime", width: "20%" },
           { value: "actions", width: "10%" }
         ],
+        parsePasted: {
+          name: str => str,
+          startTime: str => parseFloat(str),
+          endTime: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       fluxomics: {
@@ -1199,18 +1209,29 @@ export default Vue.extend({
           });
       });
 
-      // Ask which sample pasted data belongs to
+      // Ask which condition/sample pasted data belongs to
+      let itemType;
+      let items;
+      if (table.name === "Samples") {
+        itemType = "condition";
+        items = this.tables.conditions.items.filter(
+          condition => condition.name
+        );
+      } else {
+        itemType = "sample";
+        items = this.tables.samples.items.filter(sample => sample.name);
+      }
       this.$promisedDialog(SelectDialog, {
-        itemType: "sample",
-        items: this.tables.samples.items.filter(sample => sample.name)
-      }).then(sample => {
+        itemType: itemType,
+        items: items
+      }).then(selectedItem => {
         // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
         parsedRows.forEach((rowPairs, rowIx) => {
           if (!table.items[rowOffset + rowIx]) {
             // Create excess rows.
             table.items.push({ temporaryId: uuidv4() });
           }
-          Vue.set(table.items[rowOffset + rowIx], "sample", sample);
+          Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
           rowPairs.forEach(([property, value]) => {
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
