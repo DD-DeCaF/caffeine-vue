@@ -32,7 +32,10 @@
                   >
                     <template v-slot:items="{ item: condition, index: index }">
                       <td>
-                        <v-text-field v-model="condition.name"></v-text-field>
+                        <v-text-field
+                          v-model="condition.name"
+                          @paste="paste(0, index, selectedTable, $event)"
+                        ></v-text-field>
                       </td>
                       <td>
                         <v-autocomplete-extended
@@ -43,11 +46,15 @@
                           :items="availableStrains"
                           name="strain"
                           type="text"
+                          :placeholder="
+                            condition.strain && condition.strain._pastedText
+                          "
                           ref="strainAutocomplete"
                           :rules="[
                             requiredIfHasMain(condition.strain, condition)
                           ]"
                           @change="updateRelevantModels(condition)"
+                          @paste="paste(1, index, selectedTable, $event)"
                         >
                           <template v-slot:prepend-item>
                             <v-list-tile
@@ -78,10 +85,14 @@
                           :items="availableMedia"
                           name="medium"
                           type="text"
+                          :placeholder="
+                            condition.medium && condition.medium._pastedText
+                          "
                           ref="mediumAutocomplete"
                           :rules="[
                             requiredIfHasMain(condition.medium, condition)
                           ]"
+                          @paste="paste(2, index, selectedTable, $event)"
                         >
                           <template v-slot:prepend-item>
                             <v-list-tile
@@ -879,6 +890,11 @@ export default Vue.extend({
           { text: "Medium", value: "medium", width: "30%" },
           { value: "actions", width: "10%" }
         ],
+        parsePasted: {
+          name: str => str,
+          strain: str => ({ _pastedText: str }),
+          medium: str => ({ _pastedText: str })
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       samples: {
@@ -1209,7 +1225,6 @@ export default Vue.extend({
           });
       });
 
-      // Ask which condition/sample pasted data belongs to
       let itemType;
       let items;
       if (table.name === "Samples") {
@@ -1221,20 +1236,44 @@ export default Vue.extend({
         itemType = "sample";
         items = this.tables.samples.items.filter(sample => sample.name);
       }
-      this.$promisedDialog(SelectDialog, {
-        itemType: itemType,
-        items: items
-      }).then(selectedItem => {
+
+      // Ask which condition/sample pasted data belongs to
+      const selection =
+        table.name === "Conditions"
+          ? Promise.resolve(true)
+          : this.$promisedDialog(SelectDialog, {
+              itemType: itemType,
+              items: items
+            });
+
+      selection.then(selectedItem => {
         // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
         parsedRows.forEach((rowPairs, rowIx) => {
           if (!table.items[rowOffset + rowIx]) {
             // Create excess rows.
             table.items.push({ temporaryId: uuidv4() });
           }
-          Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
           rowPairs.forEach(([property, value]) => {
+            // Autoselect the exact match for strain and medium
+            if (table.name === "Conditions") {
+              if (property === "strain") {
+                value =
+                  this.availableStrains.find(
+                    strain => strain.name === value._pastedText
+                  ) || value;
+              } else if (property === "medium") {
+                value =
+                  this.availableMedia.find(
+                    medium => medium.name === value._pastedText
+                  ) || value;
+              }
+            }
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
+          // Autoselect condition/sample that was chosen by user
+          if (table.name !== "Conditions") {
+            Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
+          }
         });
       });
     },
