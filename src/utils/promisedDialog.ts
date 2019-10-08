@@ -28,6 +28,9 @@ declare module "vue/types/vue" {
       : void;
 
   interface Vue {
+    /**
+     * Typesafe declaration for compiler.
+     */
     $promisedDialog<
       Props extends object,
       Component extends ExtendedVue<Vue, { value: any }, {}, {}, Props>
@@ -35,6 +38,15 @@ declare module "vue/types/vue" {
       component: Component,
       options: Props
     ): Promise<ExtractValue<Component>>;
+
+    /**
+     * Unsafe declaration for editors to hide incorrect errors.
+     *
+     * Compiler splits .vue files into html and typescript part and when it
+     * is imported, it returns the exported type. But editors just use
+     * shims-vue.d.ts.
+     */
+    $promisedDialog(component: Vue.VueConstructor, options: {}): Promise<any>;
   }
 }
 
