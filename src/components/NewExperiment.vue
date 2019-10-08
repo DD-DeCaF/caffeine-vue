@@ -830,6 +830,7 @@ import { tsvParseRows } from "d3-dsv";
 import { flatten } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import SelectDialog from "@/components/SelectDialog.vue";
 
 export default Vue.extend({
   name: "NewExperiment",
@@ -1198,15 +1199,21 @@ export default Vue.extend({
           });
       });
 
-      // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
-      parsedRows.forEach((rowPairs, rowIx) => {
-        if (!table.items[rowOffset + rowIx]) {
-          // Create excess rows.
-          table.items.push({ temporaryId: uuidv4() });
-        }
-
-        rowPairs.forEach(([property, value]) => {
-          Vue.set(table.items[rowOffset + rowIx], property, value);
+      // Ask which sample pasted data belongs to
+      this.$promisedDialog(SelectDialog, {
+        itemType: "sample",
+        items: this.tables.samples.items.filter(sample => sample.name)
+      }).then(sample => {
+        // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+        parsedRows.forEach((rowPairs, rowIx) => {
+          if (!table.items[rowOffset + rowIx]) {
+            // Create excess rows.
+            table.items.push({ temporaryId: uuidv4() });
+          }
+          Vue.set(table.items[rowOffset + rowIx], "sample", sample);
+          rowPairs.forEach(([property, value]) => {
+            Vue.set(table.items[rowOffset + rowIx], property, value);
+          });
         });
       });
     },
