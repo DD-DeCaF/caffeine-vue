@@ -10,7 +10,7 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-form ref="newExperimentForm">
+    <v-form v-model="isValid" ref="newExperimentForm">
       <v-dialog
         v-model="isDialogVisible"
         full-width
@@ -51,7 +51,11 @@
                           "
                           ref="strainAutocomplete"
                           :rules="[
-                            requiredIfHasMain(condition.strain, condition)
+                            requiredIfHasMain(
+                              'conditions',
+                              condition.strain,
+                              condition
+                            )
                           ]"
                           @change="updateRelevantModels(condition)"
                           @paste="paste(1, index, selectedTable, $event)"
@@ -90,7 +94,11 @@
                           "
                           ref="mediumAutocomplete"
                           :rules="[
-                            requiredIfHasMain(condition.medium, condition)
+                            requiredIfHasMain(
+                              'conditions',
+                              condition.medium,
+                              condition
+                            )
                           ]"
                           @paste="paste(2, index, selectedTable, $event)"
                         >
@@ -163,7 +171,13 @@
                           item-text="name"
                           v-model="sample.condition"
                           no-data-text="No data available. You can add it in Conditions table."
-                          :rules="[requiredIfHasMain(sample.condition, sample)]"
+                          :rules="[
+                            requiredIfHasMain(
+                              'samples',
+                              sample.condition,
+                              sample
+                            )
+                          ]"
                         >
                         </v-select>
                       </td>
@@ -182,7 +196,13 @@
                           return-masked-value
                           placeholder="dd/mm/yyyy hh:mm"
                           hint="dd/mm/yyyy hh:mm"
-                          :rules="[requiredIfHasMain(sample.startTime, sample)]"
+                          :rules="[
+                            requiredIfHasMain(
+                              'samples',
+                              sample.startTime,
+                              sample
+                            )
+                          ]"
                           @paste="paste(2, index, selectedTable, $event)"
                         ></v-text-field>
                       </td>
@@ -259,6 +279,7 @@
                           :modelIds="fluxomicsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
+                              'fluxomics',
                               fluxomicsItem.reaction,
                               fluxomicsItem
                             )
@@ -279,6 +300,7 @@
                           step="any"
                           :rules="[
                             requiredIfHasMain(
+                              'fluxomics',
                               fluxomicsItem.measurement,
                               fluxomicsItem
                             )
@@ -369,6 +391,7 @@
                           :modelIds="metabolomicsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
+                              'metabolomics',
                               metabolomicsItem.compound,
                               metabolomicsItem
                             )
@@ -385,6 +408,7 @@
                           @paste="paste(2, index, selectedTable, $event)"
                           :rules="[
                             requiredIfHasMain(
+                              'metabolomics',
                               metabolomicsItem.measurement,
                               metabolomicsItem
                             )
@@ -474,6 +498,7 @@
                           :modelIds="uptakeSecretionItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
+                              'uptakeSecretion',
                               uptakeSecretionItem.compound,
                               uptakeSecretionItem
                             )
@@ -490,6 +515,7 @@
                           @paste="paste(2, index, selectedTable, $event)"
                           :rules="[
                             requiredIfHasMain(
+                              'uptakeSecretion',
                               uptakeSecretionItem.measurement,
                               uptakeSecretionItem
                             )
@@ -578,6 +604,7 @@
                           :modelIds="molarYieldsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
+                              'molarYields',
                               molarYieldsItem.product,
                               molarYieldsItem
                             )
@@ -598,6 +625,7 @@
                           :modelIds="molarYieldsItem.modelIds"
                           :rules="[
                             requiredIfHasMain(
+                              'molarYields',
                               molarYieldsItem.substrate,
                               molarYieldsItem
                             )
@@ -614,6 +642,7 @@
                           @paste="paste(3, index, selectedTable, $event)"
                           :rules="[
                             requiredIfHasMain(
+                              'molarYields',
                               molarYieldsItem.measurement,
                               molarYieldsItem
                             )
@@ -695,6 +724,7 @@
                           step="any"
                           :rules="[
                             requiredIfHasMain(
+                              'growth',
                               growthItem.measurement,
                               growthItem
                             )
@@ -757,10 +787,12 @@
                 <v-text-field
                   v-model="experiment.name"
                   label="Experiment name"
+                  :rules="[requiredIfHasCondition(experiment.name)]"
                 ></v-text-field>
                 <v-textarea
                   v-model="experiment.description"
                   label="Description"
+                  :rules="[requiredIfHasCondition(experiment.description)]"
                   auto-grow
                   rows="1"
                 ></v-textarea>
@@ -769,6 +801,7 @@
                   item-value="id"
                   v-model="experiment.project_id"
                   :items="availableProjects"
+                  :rules="[requiredIfHasCondition(experiment.project_id)]"
                   name="project"
                   label="Project"
                   type="text"
@@ -811,7 +844,7 @@
                   <v-btn
                     color="primary"
                     @click="createExperiment()"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !isValid"
                   >
                     <span v-if="!isLoading">Submit</span>
                     <v-progress-circular
@@ -832,6 +865,9 @@
         :timeout="3000"
       >
         {{ experiment.name }} successfully created.
+      </v-snackbar>
+      <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
+        Please enter condition, sample and at least one measurement.
       </v-snackbar>
     </v-form>
   </div>
@@ -868,6 +904,8 @@ export default Vue.extend({
     isProjectCreationDialogVisible: false,
     isLoading: false,
     isExperimentCreationSuccess: false,
+    isValid: false,
+    isMoreDataRequired: false,
     // We are relying on data table's `index` (for currentRowIndex and @paste)
     // but that only works correctly on the first page.
     disabledToPreventWrongIndexOnSecondPage: undefined,
@@ -1177,8 +1215,8 @@ export default Vue.extend({
         .filter(model => model.organism_id === organismId)
         .map(model => model.id);
     },
-    requiredIfHasMain(value, row) {
-      const mainField = this.selectedTable.mainField;
+    requiredIfHasMain(tableKey, value, row) {
+      const mainField = this.tables[tableKey].mainField;
       if (row[mainField]) {
         if (!value && value !== 0) {
           return "Required.";
@@ -1186,6 +1224,17 @@ export default Vue.extend({
         if (value && value._pastedText) {
           return "Required.";
         }
+      }
+      return true;
+    },
+    requiredIfHasCondition(value) {
+      const mainField = this.tables.conditions.mainField;
+      if (
+        this.tables.conditions.items.filter(item => item[mainField]).length &&
+        !value &&
+        value !== 0
+      ) {
+        return "Required.";
       }
       return true;
     },
@@ -1253,6 +1302,13 @@ export default Vue.extend({
             // Create excess rows.
             table.items.push({ temporaryId: uuidv4() });
           }
+          // Autoselect condition/sample that was chosen by user
+          if (table.name !== "Conditions") {
+            Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
+          }
+          setTimeout(() => {
+            this.$refs.newExperimentForm.validate();
+          }, 0);
           rowPairs.forEach(([property, value]) => {
             // Autoselect the exact match for strain and medium
             if (table.name === "Conditions") {
@@ -1270,10 +1326,6 @@ export default Vue.extend({
             }
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
-          // Autoselect condition/sample that was chosen by user
-          if (table.name !== "Conditions") {
-            Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
-          }
         });
       });
     },
@@ -1281,6 +1333,32 @@ export default Vue.extend({
       Vue.set(item, property, value);
     },
     createExperiment() {
+      // Check that all required data is entered:
+      // condition, sample and at least one measurement
+      if (
+        this.tables.conditions.items.filter(
+          item => !item[this.tables.conditions.mainField]
+        ).length ||
+        this.tables.samples.items.filter(
+          item => !item[this.tables.samples.mainField]
+        ).length ||
+        [
+          "fluxomics",
+          "metabolomics",
+          "uptakeSecretion",
+          "molarYields",
+          "growth"
+        ].every(tableKey => {
+          const mainField = this.tables[tableKey].mainField;
+          return this.tables[tableKey].items.filter(
+            item => !item[this.tables[tableKey].mainField]
+          ).length;
+        })
+      ) {
+        this.isMoreDataRequired = true;
+        return;
+      }
+      this.$refs.newExperimentForm.validate();
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
       this.isLoading = true;
