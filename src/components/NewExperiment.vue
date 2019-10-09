@@ -1306,7 +1306,7 @@ export default Vue.extend({
             reaction_identifier: fluxomicsItem.reaction.id,
             reaction_namespace: fluxomicsItem.reaction.namespace,
             measurement: fluxomicsItem.measurement,
-            uncertainty: fluxomicsItem.uncertainty
+            uncertainty: fluxomicsItem.uncertainty || 0
           };
           return axios.post(`${settings.apis.warehouse}/fluxomics`, payload);
         });
@@ -1323,7 +1323,7 @@ export default Vue.extend({
             compound_identifier: metabolomicsItem.compound.id,
             compound_namespace: metabolomicsItem.compound.namespace,
             measurement: metabolomicsItem.measurement,
-            uncertainty: metabolomicsItem.uncertainty
+            uncertainty: metabolomicsItem.uncertainty || 0
           };
           return axios.post(`${settings.apis.warehouse}/metabolomics`, payload);
         });
@@ -1340,7 +1340,7 @@ export default Vue.extend({
             compound_identifier: uptakeSecretionItem.compound.id,
             compound_namespace: uptakeSecretionItem.compound.namespace,
             measurement: uptakeSecretionItem.measurement,
-            uncertainty: uptakeSecretionItem.uncertainty
+            uncertainty: uptakeSecretionItem.uncertainty || 0
           };
           return axios.post(
             `${settings.apis.warehouse}/uptake-secretion-rates`,
@@ -1363,7 +1363,7 @@ export default Vue.extend({
             substrate_identifier: molarYieldsItem.substrate.id,
             substrate_namespace: molarYieldsItem.substrate.namespace,
             measurement: molarYieldsItem.measurement,
-            uncertainty: molarYieldsItem.uncertainty
+            uncertainty: molarYieldsItem.uncertainty || 0
           };
           return axios.post(`${settings.apis.warehouse}/molar-yields`, payload);
         });
@@ -1375,7 +1375,7 @@ export default Vue.extend({
           const payload = {
             sample_id: this.sampleTempIdsMap[growthItem.sample.temporaryId],
             measurement: growthItem.measurement,
-            uncertainty: growthItem.uncertainty
+            uncertainty: growthItem.uncertainty || 0
           };
           return axios.post(`${settings.apis.warehouse}/growth-rates`, payload);
         });
