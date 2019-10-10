@@ -104,34 +104,23 @@
                         </template>
                       </v-autocomplete-extended>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.conditions.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('conditions')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="deleteCondition(condition.temporaryId)"
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="deleteCondition(condition.temporaryId)"
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('conditions')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Samples table -->
@@ -180,34 +169,23 @@
                         hint="dd/mm/yyyy hh:mm"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.samples.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('samples')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="deleteSample(sample.temporaryId, true)"
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="deleteSample(sample.temporaryId, true)"
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('samples')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Fluxomics table -->
@@ -280,39 +258,28 @@
                         @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.fluxomics.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('fluxomics')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="
-                              deleteMeasurement(
-                                'fluxomics',
-                                fluxomicsItem.temporaryId
-                              )
-                            "
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'fluxomics',
+                            fluxomicsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('fluxomics')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Metabolomics table -->
@@ -383,39 +350,28 @@
                         @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.metabolomics.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('metabolomics')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="
-                              deleteMeasurement(
-                                'metabolomics',
-                                metabolomicsItem.temporaryId
-                              )
-                            "
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'metabolomics',
+                            metabolomicsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('metabolomics')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Uptake/Secretion rates table -->
@@ -488,40 +444,28 @@
                         @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index ===
-                                tables.uptakeSecretion.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('uptakeSecretion')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="
-                              deleteMeasurement(
-                                'uptakeSecretion',
-                                uptakeSecretionItem.temporaryId
-                              )
-                            "
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'uptakeSecretion',
+                            uptakeSecretionItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('uptakeSecretion')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Molar Yields table -->
@@ -610,39 +554,28 @@
                         @paste="paste(4, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.molarYields.items.length - 1
-                                  ? 1
-                                  : 0
-                            }"
-                            icon
-                            @click="addRow('molarYields')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="
-                              deleteMeasurement(
-                                'molarYields',
-                                molarYieldsItem.temporaryId
-                              )
-                            "
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'molarYields',
+                            molarYieldsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('molarYields')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
 
               <!-- Growth table -->
@@ -689,37 +622,25 @@
                         @paste="paste(2, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
-                    <td class="hidden-bottom-border">
-                      <v-layout>
-                        <v-flex>
-                          <v-btn
-                            :style="{
-                              opacity:
-                                index === tables.growth.items.length - 1 ? 1 : 0
-                            }"
-                            icon
-                            @click="addRow('growth')"
-                          >
-                            <v-icon color="primary">add_circle</v-icon>
-                          </v-btn>
-                        </v-flex>
-                        <v-flex>
-                          <v-btn
-                            icon
-                            @click="
-                              deleteMeasurement(
-                                'growth',
-                                growthItem.temporaryId
-                              )
-                            "
-                          >
-                            <v-icon color="primary">delete</v-icon>
-                          </v-btn>
-                        </v-flex>
-                      </v-layout>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement('growth', growthItem.temporaryId)
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
                     </td>
                   </template>
                 </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('growth')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
               </div>
             </v-card>
           </v-flex>
@@ -857,10 +778,10 @@ export default Vue.extend({
          */
         mainField: "name",
         headers: [
-          { text: "Name", value: "name", width: "30%" },
+          { text: "Name", value: "name", width: "35%" },
           { text: "Strain", value: "strain", width: "30%" },
           { text: "Medium", value: "medium", width: "30%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -868,11 +789,11 @@ export default Vue.extend({
         name: "Samples",
         mainField: "name",
         headers: [
-          { text: "Condition", value: "condition", width: "25%" },
+          { text: "Condition", value: "condition", width: "30%" },
           { text: "Name", value: "name", width: "25%" },
           { text: "Start time", value: "startTime", width: "20%" },
           { text: "End time", value: "endTime", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         items: [{ temporaryId: uuidv4() }]
       },
@@ -881,10 +802,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Reaction", value: "reaction", width: "25%" },
+          { text: "Reaction", value: "reaction", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           // Temporarily create mock reaction object and use forceSearchQuery;
@@ -900,10 +821,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Compound", value: "compound", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           compound: str => ({ _pastedText: str }),
@@ -917,10 +838,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Compound", value: "compound", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           compound: str => ({ _pastedText: str }),
@@ -937,16 +858,16 @@ export default Vue.extend({
           {
             text: "Product",
             value: "product",
-            width: "20%"
+            width: "25%"
           },
           {
             text: "Substrate",
             value: "substrate",
-            width: "20%"
+            width: "25%"
           },
-          { text: "Measurement", value: "measurement", width: "15%" },
-          { text: "Uncertainty", value: "uncertainty", width: "15%" },
-          { value: "actions", width: "10%" }
+          { text: "Measurement", value: "measurement", width: "12.5%" },
+          { text: "Uncertainty", value: "uncertainty", width: "12.5%" },
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           product: str => ({ _pastedText: str }),
