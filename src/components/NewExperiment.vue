@@ -981,6 +981,10 @@ export default Vue.extend({
         )
       );
 
+      if (isConfirmationRequired) {
+        isConfirmationRequired = relatedMeasurements.length > 0;
+      }
+
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
         : this.$promisedDialog(ConfirmDialog, {
