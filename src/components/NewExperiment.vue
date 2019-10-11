@@ -710,16 +710,17 @@
                 <v-btn
                   color="primary"
                   @click="createExperiment()"
-                  :disabled="isLoading"
-                >
-                  <span v-if="!isLoading">Submit</span>
-                  <v-progress-circular
-                    v-if="isLoading"
-                    indeterminate
-                    color="primary"
-                  ></v-progress-circular>
+                  :loading="isSubmitting"
+                  >Submit
                 </v-btn>
               </v-card-actions>
+              <div class="my-5" v-if="isSubmitting">
+                <em>Submitting...</em>
+                <v-progress-linear
+                  v-model="submitProgressValue"
+                  class="my-2"
+                ></v-progress-linear>
+              </div>
             </v-card>
           </v-flex>
         </v-layout>
@@ -727,7 +728,7 @@
       <v-snackbar
         color="success"
         v-model="isExperimentCreationSuccess"
-        :timeout="3000"
+        :timeout="5000"
       >
         {{ experiment.name }} successfully created.
       </v-snackbar>
@@ -756,12 +757,13 @@ function getInitialState() {
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
-    isLoading: false,
+    isSubmitting: false,
     isExperimentCreationSuccess: false,
     // We are relying on data table's `index` (for currentRowIndex and @paste)
     // but that only works correctly on the first page.
     disabledToPreventWrongIndexOnSecondPage: undefined,
     currentRowIndex: null,
+    submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
@@ -928,6 +930,27 @@ export default Vue.extend({
     },
     selectedTable() {
       return this.tables[this.selectedTableKey];
+    },
+    // Needed to provide a real progress status while submitting data
+    itemsToPostAmount() {
+      let result = 1; // counting experiment that should be posted
+      [
+        "conditions",
+        "samples",
+        "fluxomics",
+        "metabolomics",
+        "uptakeSecretion",
+        "molarYields",
+        "growth"
+      ].forEach(tableKey => {
+        const mainField = this.tables[tableKey].mainField;
+        result += this.tables[tableKey].items.filter(item => item[mainField])
+          .length;
+      });
+      return result;
+    },
+    itemWeight() {
+      return Math.round(100 / this.itemsToPostAmount);
     }
   },
   mounted() {
@@ -1145,11 +1168,12 @@ export default Vue.extend({
     createExperiment() {
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
-      this.isLoading = true;
+      this.isSubmitting = true;
       axios
         .post(`${settings.apis.warehouse}/experiments`, this.experiment)
         .then((response: AxiosResponse) => {
           this.experiment.id = response.data.id;
+          this.updateProgressValue();
           return Promise.all(this.postConditions());
         })
         .then(() => {
@@ -1177,9 +1201,10 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isLoading = false;
+          this.isSubmitting = false;
           this.isExperimentCreationSuccess = true;
           this.isDialogVisible = false;
+          this.clear();
         });
     },
     postConditions() {
@@ -1194,11 +1219,11 @@ export default Vue.extend({
           };
           return axios
             .post(`${settings.apis.warehouse}/conditions`, payload)
-            .then(
-              (response: AxiosResponse) =>
-                (this.conditionTempIdsMap[condition.temporaryId] =
-                  response.data.id)
-            );
+            .then((response: AxiosResponse) => {
+              this.updateProgressValue();
+              this.conditionTempIdsMap[condition.temporaryId] =
+                response.data.id;
+            });
         });
     },
     postSamples() {
@@ -1221,6 +1246,7 @@ export default Vue.extend({
           return axios
             .post(`${settings.apis.warehouse}/samples`, payload)
             .then((response: AxiosResponse) => {
+              this.updateProgressValue();
               this.sampleTempIdsMap[sample.temporaryId] = response.data.id;
             });
         });
@@ -1237,7 +1263,9 @@ export default Vue.extend({
             measurement: fluxomicsItem.measurement,
             uncertainty: fluxomicsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/fluxomics`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/fluxomics`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postMetabolomics() {
@@ -1254,7 +1282,9 @@ export default Vue.extend({
             measurement: metabolomicsItem.measurement,
             uncertainty: metabolomicsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/metabolomics`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/metabolomics`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postUptakeSecretionRates() {
@@ -1271,10 +1301,9 @@ export default Vue.extend({
             measurement: uptakeSecretionItem.measurement,
             uncertainty: uptakeSecretionItem.uncertainty || 0
           };
-          return axios.post(
-            `${settings.apis.warehouse}/uptake-secretion-rates`,
-            payload
-          );
+          return axios
+            .post(`${settings.apis.warehouse}/uptake-secretion-rates`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postMolarYields() {
@@ -1294,7 +1323,9 @@ export default Vue.extend({
             measurement: molarYieldsItem.measurement,
             uncertainty: molarYieldsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/molar-yields`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/molar-yields`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postGrowthRates() {
@@ -1306,8 +1337,13 @@ export default Vue.extend({
             measurement: growthItem.measurement,
             uncertainty: growthItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/growth-rates`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/growth-rates`, payload)
+            .then(() => this.updateProgressValue());
         });
+    },
+    updateProgressValue() {
+      this.submitProgressValue += this.itemWeight;
     }
   }
 });
@@ -1316,9 +1352,6 @@ export default Vue.extend({
 <style>
 .full-height-dialog {
   height: 90%;
-}
-.hidden-bottom-border {
-  border-bottom: hidden;
 }
 .scroll {
   overflow-y: auto;
