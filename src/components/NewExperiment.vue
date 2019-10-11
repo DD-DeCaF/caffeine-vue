@@ -29,6 +29,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template v-slot:items="{ item: condition, index: index }">
                     <td>
@@ -131,6 +132,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template v-slot:items="{ item: sample, index: index }">
                     <td>
@@ -196,6 +198,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: fluxomicsItem, index: index }"
@@ -290,6 +293,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: metabolomicsItem, index: index }"
@@ -382,6 +386,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: uptakeSecretionItem, index: index }"
@@ -476,6 +481,7 @@
                   :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: molarYieldsItem, index: index }"
@@ -586,6 +592,7 @@
                   :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
                   hide-actions
                   disable-initial-sort
+                  item-key="temporaryId"
                 >
                   <template v-slot:items="{ item: growthItem, index: index }">
                     <td>
@@ -697,8 +704,8 @@
               </v-radio-group>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="secondary" flat @click="isDialogVisible = false">
-                  Cancel
+                <v-btn color="secondary" flat @click="clear()">
+                  Clear
                 </v-btn>
                 <v-btn
                   color="primary"
@@ -738,15 +745,8 @@ import { flatten } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 
-export default Vue.extend({
-  name: "NewExperiment",
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    }
-  },
-  data: () => ({
+function getInitialState() {
+  return {
     experiment: {
       name: null,
       description: null,
@@ -893,7 +893,18 @@ export default Vue.extend({
         items: [{ temporaryId: uuidv4() }]
       }
     }
-  }),
+  };
+}
+
+export default Vue.extend({
+  name: "NewExperiment",
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    }
+  },
+  data: () => getInitialState(),
   computed: {
     availableStrains() {
       return this.$store.state.strains.strains;
@@ -1126,6 +1137,10 @@ export default Vue.extend({
     },
     onChange(item, property, value) {
       Vue.set(item, property, value);
+    },
+    clear() {
+      this.$refs.newExperimentForm.resetValidation();
+      Object.assign(this.$data, getInitialState());
     },
     createExperiment() {
       this.conditionTempIdsMap = {};
