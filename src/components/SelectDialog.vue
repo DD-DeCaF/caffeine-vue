@@ -2,7 +2,8 @@
   <v-dialog @input="change" value="true" max-width="500px">
     <v-card class="text-xs-center pa-3">
       <v-card-text class="headline"
-        >Please choose the {{ itemType }} pasted data belongs to:</v-card-text
+        >Please choose which {{ itemType }} the pasted data belongs
+        to:</v-card-text
       >
       <v-select
         return-object
@@ -10,16 +11,16 @@
         item-value="temporaryId"
         item-text="name"
         v-model="selectedItem"
-        no-data-text="No data available. You can add it in relevant table."
+        no-data-text="No data available. You can add it in the corresponding table."
       >
       </v-select>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="primary" flat="flat" @click="choose(false)">
-          {{ buttonFalseText }}
+          Cancel
         </v-btn>
         <v-btn color="primary" flat="flat" @click="choose(true)">
-          {{ buttonTrueText }}
+          Ok
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -33,14 +34,6 @@ import { Prop } from "vue/types/options";
 export default Vue.extend({
   name: "SelectDialog",
   props: {
-    buttonTrueText: {
-      type: String,
-      default: "Ok"
-    },
-    buttonFalseText: {
-      type: String,
-      default: "Cancel"
-    },
     itemType: {
       type: String,
       required: true

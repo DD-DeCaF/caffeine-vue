@@ -930,8 +930,14 @@ export default Vue.extend({
         ],
         parsePasted: {
           name: str => str,
-          strain: str => ({ _pastedText: str }),
-          medium: str => ({ _pastedText: str })
+          strain: (str, { availableStrains }) => {
+            const match = availableStrains.find(({ name }) => name === str);
+            return match || { _pastedText: str };
+          },
+          medium: (str, { availableMedia }) => {
+            const match = availableMedia.find(({ name }) => name === str);
+            return match || { _pastedText: str };
+          }
         },
         items: [{ temporaryId: uuidv4() }]
       },
@@ -1263,7 +1269,9 @@ export default Vue.extend({
               // Parse cell.
               value = table.parsePasted[property](cell, {
                 // Extra parameters for parsePasted:
-                tables: this.tables
+                tables: this.tables,
+                availableStrains: this.availableStrains,
+                availableMedia: this.availableMedia
               });
             } else {
               // Empty cell clears existing value.
@@ -1274,90 +1282,68 @@ export default Vue.extend({
           });
       });
 
-      let itemType;
-      let items;
+      // Ask which condition/sample pasted data belongs to
+      let dialogSelection;
       if (table.name === "Samples") {
-        itemType = "condition";
-        items = this.tables.conditions.items.filter(
-          condition => condition.name
-        );
+        dialogSelection = this.$promisedDialog(SelectDialog, {
+          itemType: "condition",
+          items: this.tables.conditions.items.filter(({ name }) => name)
+        }).then(selected => (selected ? [["condition", selected]] : []));
+      } else if (table.name === "Conditions") {
+        dialogSelection = Promise.resolve([]);
       } else {
-        itemType = "sample";
-        items = this.tables.samples.items.filter(sample => sample.name);
+        dialogSelection = this.$promisedDialog(SelectDialog, {
+          itemType: "sample",
+          items: this.tables.samples.items.filter(({ name }) => name)
+        }).then(selected => (selected ? [["sample", selected]] : []));
       }
 
-      // Ask which condition/sample pasted data belongs to
-      const selection =
-        table.name === "Conditions"
-          ? Promise.resolve(true)
-          : this.$promisedDialog(SelectDialog, {
-              itemType: itemType,
-              items: items
-            });
-
-      selection.then(selectedItem => {
+      dialogSelection.then(rowPairsFromDialog => {
         // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
         parsedRows.forEach((rowPairs, rowIx) => {
           if (!table.items[rowOffset + rowIx]) {
             // Create excess rows.
             table.items.push({ temporaryId: uuidv4() });
           }
-          // Autoselect condition/sample that was chosen by user
-          if (table.name !== "Conditions") {
-            Vue.set(table.items[rowOffset + rowIx], itemType, selectedItem);
-          }
-          setTimeout(() => {
-            this.$refs.newExperimentForm.validate();
-          }, 0);
-          rowPairs.forEach(([property, value]) => {
-            // Autoselect the exact match for strain and medium
-            if (table.name === "Conditions") {
-              if (property === "strain") {
-                value =
-                  this.availableStrains.find(
-                    strain => strain.name === value._pastedText
-                  ) || value;
-              } else if (property === "medium") {
-                value =
-                  this.availableMedia.find(
-                    medium => medium.name === value._pastedText
-                  ) || value;
-              }
-            }
+          [...rowPairs, ...rowPairsFromDialog].forEach(([property, value]) => {
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
         });
+        setTimeout(() => {
+          this.$refs.newExperimentForm.validate();
+        }, 0);
       });
     },
     onChange(item, property, value) {
       Vue.set(item, property, value);
     },
     createExperiment() {
+      const hasACondition = this.tables.conditions.items.some(
+        item => item[this.tables.conditions.mainField]
+      );
+      const hasASample = this.tables.samples.items.some(
+        item => item[this.tables.samples.mainField]
+      );
+      const hasAMeasurement = [
+        "fluxomics",
+        "metabolomics",
+        "uptakeSecretion",
+        "molarYields",
+        "growth"
+      ].some(
+        tableKey =>
+          this.tables[tableKey].items.some(
+            item => item[this.tables[tableKey].mainField]
+          )
+      );
+
       // Check that all required data is entered:
       // condition, sample and at least one measurement
-      if (
-        this.tables.conditions.items.filter(
-          item => !item[this.tables.conditions.mainField]
-        ).length ||
-        this.tables.samples.items.filter(
-          item => !item[this.tables.samples.mainField]
-        ).length ||
-        [
-          "fluxomics",
-          "metabolomics",
-          "uptakeSecretion",
-          "molarYields",
-          "growth"
-        ].every(tableKey => {
-          const mainField = this.tables[tableKey].mainField;
-          return this.tables[tableKey].items.filter(
-            item => !item[this.tables[tableKey].mainField]
-          ).length;
-        })
-      ) {
-        this.isMoreDataRequired = true;
+      this.isMoreDataRequired = !hasACondition || !hasASample || !hasAMeasurement;
+      if (this.isMoreDataRequired) {
         return;
       }
+
       this.$refs.newExperimentForm.validate();
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
