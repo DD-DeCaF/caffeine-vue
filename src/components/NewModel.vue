@@ -266,7 +266,7 @@ export default Vue.extend({
         project_id: this.project.id,
         organism_id: this.organism.id,
         default_biomass_reaction: this.default_biomass_reaction,
-        ec_model: this.ecModel,
+        ec_model: this.ecModel
       };
       axios
         .post(`${settings.apis.modelStorage}/models`, payload)
