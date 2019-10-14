@@ -1330,16 +1330,16 @@ export default Vue.extend({
         "uptakeSecretion",
         "molarYields",
         "growth"
-      ].some(
-        tableKey =>
-          this.tables[tableKey].items.some(
-            item => item[this.tables[tableKey].mainField]
-          )
+      ].some(tableKey =>
+        this.tables[tableKey].items.some(
+          item => item[this.tables[tableKey].mainField]
+        )
       );
 
       // Check that all required data is entered:
       // condition, sample and at least one measurement
-      this.isMoreDataRequired = !hasACondition || !hasASample || !hasAMeasurement;
+      this.isMoreDataRequired =
+        !hasACondition || !hasASample || !hasAMeasurement;
       if (this.isMoreDataRequired) {
         return;
       }
