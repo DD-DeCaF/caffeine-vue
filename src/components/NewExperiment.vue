@@ -589,7 +589,7 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.growth.items"
-                  :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
+                  :pagination.sync="pagination"
                   hide-actions
                   disable-initial-sort
                   item-key="temporaryId"
@@ -759,14 +759,14 @@ function getInitialState() {
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
     isExperimentCreationSuccess: false,
-    // We are relying on data table's `index` (for currentRowIndex and @paste)
-    // but that only works correctly on the first page.
-    disabledToPreventWrongIndexOnSecondPage: undefined,
     currentRowIndex: null,
     submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
+    // Display all rows on a single page
+    // We are relying on data table's `index` (for currentRowIndex and @paste)
+    // but that only works correctly on the first page
     pagination: {
       rowsPerPage: -1
     },
