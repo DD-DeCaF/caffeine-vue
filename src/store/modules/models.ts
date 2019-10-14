@@ -10,6 +10,7 @@ export interface ModelItem {
   project_id: number;
   preferred_map_id: number;
   default_biomass_reaction: string;
+  ec_model: boolean;
   // Note that `model_serialized` will not be retrieved before requested through
   // the `withFullModel` action.
   model_serialized?: object;
