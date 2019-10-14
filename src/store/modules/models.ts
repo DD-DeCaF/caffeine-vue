@@ -8,7 +8,7 @@ export interface ModelItem {
   name: string;
   organism_id: number;
   project_id: number;
-  preferred_id: number;
+  preferred_map_id: number;
   default_biomass_reaction: string;
   // Note that `model_serialized` will not be retrieved before requested through
   // the `withFullModel` action.
