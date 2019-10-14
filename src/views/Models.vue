@@ -198,6 +198,13 @@
                   type="text"
                 >
                 </v-autocomplete-extended>
+                <v-checkbox
+                  v-model="ecModel"
+                  label="This is an enzyme-constrained model (ecModel)"
+                  hint="If checked, integration of proteomics data on this model will be allowed. <a href='https://geckotoolbox.readthedocs.io'>Read more about GECKO and ecModels</a>"
+                  persistent-hint
+                  required
+                ></v-checkbox>
               </v-form>
             </v-flex>
           </v-layout>
@@ -275,6 +282,7 @@ export default Vue.extend({
     project: null,
     organism: null,
     default_biomass_reaction: null,
+    ecModel: false,
     headers: [
       { text: "Name", align: "left", value: "name", width: "85%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
@@ -335,6 +343,7 @@ export default Vue.extend({
         obj => obj.id == item.project_id
       );
       this.default_biomass_reaction = item.default_biomass_reaction;
+      this.ecModel = item.ec_model;
       this.modelItemIndex = this.availableModels.indexOf(item);
       this.isModelEditDialogVisible = true;
     },
