@@ -973,14 +973,16 @@ export default Vue.extend({
         sample =>
           sample.condition && sample.condition.temporaryId === conditionId
       );
-      const isConfirmationRequired = relatedSamples.length > 0;
 
-      const confirmation = !isConfirmationRequired
-        ? Promise.resolve(true)
-        : this.$promisedDialog(ConfirmDialog, {
-            message: ` Are you sure you want to delete the condition?
-            All related samples and measurements will be deleted.`
-          });
+      const message =
+        "Are you sure you want to delete the condition?" +
+        (relatedSamples.length
+          ? " All related samples and measurements will be deleted."
+          : " This condition is not associated with any related data.");
+
+      const confirmation = this.$promisedDialog(ConfirmDialog, {
+        message: message
+      });
 
       confirmation.then(isConfirmed => {
         if (!isConfirmed) {
@@ -1015,15 +1017,16 @@ export default Vue.extend({
         )
       );
 
-      if (isConfirmationRequired) {
-        isConfirmationRequired = relatedMeasurements.length > 0;
-      }
+      const message =
+        "Are you sure you want to delete the sample?" +
+        (relatedMeasurements.length
+          ? " All related measurements will be deleted."
+          : " This sample is not associated with any related data.");
 
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
         : this.$promisedDialog(ConfirmDialog, {
-            message: ` Are you sure you want to delete the sample?
-            All related measurements will be deleted.`
+            message: message
           });
 
       confirmation.then(isConfirmed => {
