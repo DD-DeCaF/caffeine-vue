@@ -1,11 +1,9 @@
 <template>
   <v-text-field
     v-bind="$attrs"
-    v-on="listenersWithoutInput"
-
-    type="number"
     :value="stringValue"
-    @input="emitNumericInput"
+    v-on="$listeners"
+    type="number"
   ></v-text-field>
 </template>
 
@@ -19,17 +17,13 @@ import Vue from "vue";
  * TODO: remove if https://github.com/vuetifyjs/vuetify/issues/9368 fixed
  *
  * Usage:
- * `<v-number-field v-model="a" step="any" label="A">`
+ * `<v-number-field v-model.number="a" step="any" label="A">`
  */
 export default Vue.extend({
   name: "v-number-field",
   inheritAttrs: false,
   props: ["value"],
   computed: {
-    listenersWithoutInput() {
-      const { input, ...other } = this.$listeners;
-      return other;
-    },
     stringValue(): string | null | undefined {
       if (this.value === null || this.value === undefined) {
         return this.value;
@@ -38,13 +32,6 @@ export default Vue.extend({
         return "-0";
       }
       return String(this.value);
-    }
-  },
-  methods: {
-    emitNumericInput($event: string | null | undefined): void {
-      const number = parseFloat($event)
-      const numberOrString = isNaN(number) ? $event : number;
-      this.$emit('input', numberOrString);
     }
   }
 });
