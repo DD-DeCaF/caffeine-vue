@@ -181,13 +181,13 @@
                     <v-divider></v-divider>
                   </template>
                 </v-autocomplete-extended>
-                <v-text-field
+                <v-number-field
                   label="Maximum number of pathway predictions"
                   v-model.number="maxPredictions"
                   class="mt-0"
+                  step="1"
                   :rules="predictionRules"
-                  type="number"
-                ></v-text-field>
+                ></v-number-field>
               </v-card-text>
             </v-slide-y-transition>
           </v-card>
