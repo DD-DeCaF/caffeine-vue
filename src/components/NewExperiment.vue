@@ -15,854 +15,764 @@
         v-model="isDialogVisible"
         full-width
         content-class="full-height-dialog"
+        scrollable
       >
-        <v-card height="100%">
-          <v-layout>
-            <v-flex md10>
-              <v-card class="pa-4" elevation="0">
-                <div class="display-1 mb-2">{{ selectedTable.name }}</div>
-                <!-- Conditions table -->
-                <div v-show="selectedTableKey === 'conditions'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.conditions.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template v-slot:items="{ item: condition, index: index }">
-                      <td>
-                        <v-text-field
-                          v-model="condition.name"
-                          @paste="paste(0, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="condition.strain"
-                          :items="availableStrains"
-                          name="strain"
-                          type="text"
-                          :placeholder="
-                            condition.strain && condition.strain._pastedText
-                          "
-                          ref="strainAutocomplete"
-                          :rules="[
-                            requiredIfHasMain(
-                              'conditions',
-                              condition.strain,
-                              condition
-                            )
-                          ]"
-                          @change="updateRelevantModels(condition)"
-                          @paste="paste(1, index, selectedTable, $event)"
-                        >
-                          <template v-slot:prepend-item>
-                            <v-list-tile
-                              ripple
-                              @click="
-                                isNewStrainDialogVisible = true;
-                                currentRowIndex = index;
-                                $refs.strainAutocomplete.isMenuActive = false;
-                              "
-                            >
-                              <v-icon class="mr-3" color="primary"
-                                >add_circle</v-icon
-                              >
-                              <v-list-tile-title>
-                                New Strain
-                              </v-list-tile-title>
-                            </v-list-tile>
-                            <v-divider class="my-2"></v-divider>
-                          </template>
-                        </v-autocomplete-extended>
-                      </td>
-                      <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="condition.medium"
-                          :items="availableMedia"
-                          name="medium"
-                          type="text"
-                          :placeholder="
-                            condition.medium && condition.medium._pastedText
-                          "
-                          ref="mediumAutocomplete"
-                          :rules="[
-                            requiredIfHasMain(
-                              'conditions',
-                              condition.medium,
-                              condition
-                            )
-                          ]"
-                          @paste="paste(2, index, selectedTable, $event)"
-                        >
-                          <template v-slot:prepend-item>
-                            <v-list-tile
-                              ripple
-                              @click="
-                                getRelevantModelIdsForNewMedium(condition);
-                                isNewMediumDialogVisible = true;
-                                currentRowIndex = index;
-                                $refs.mediumAutocomplete.isMenuActive = false;
-                              "
-                            >
-                              <v-icon class="mr-3" color="primary"
-                                >add_circle</v-icon
-                              >
-                              <v-list-tile-title>
-                                New Medium
-                              </v-list-tile-title>
-                            </v-list-tile>
-                            <v-divider class="my-2"></v-divider>
-                          </template>
-                        </v-autocomplete-extended>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.conditions.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('conditions')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="deleteCondition(condition.temporaryId)"
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Samples table -->
-                <div v-show="selectedTableKey === 'samples'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.samples.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template v-slot:items="{ item: sample, index: index }">
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.conditions.items.filter(c => c.name)"
-                          item-value="temporaryId"
-                          item-text="name"
-                          v-model="sample.condition"
-                          no-data-text="No data available. You can add it in Conditions table."
-                          :rules="[
-                            requiredIfHasMain(
-                              'samples',
-                              sample.condition,
-                              sample
-                            )
-                          ]"
-                        >
-                        </v-select>
-                      </td>
-                      <!-- Name field was added, so user can distinguish -->
-                      <!-- samples in other tables -->
-                      <td>
-                        <v-text-field
-                          v-model="sample.name"
-                          @paste="paste(1, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="sample.startTime"
-                          mask="date-with-time"
-                          return-masked-value
-                          placeholder="dd/mm/yyyy hh:mm"
-                          hint="dd/mm/yyyy hh:mm"
-                          :rules="[
-                            requiredIfHasMain(
-                              'samples',
-                              sample.startTime,
-                              sample
-                            )
-                          ]"
-                          @paste="paste(2, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="sample.endTime"
-                          mask="date-with-time"
-                          return-masked-value
-                          placeholder="dd/mm/yyyy hh:mm"
-                          hint="dd/mm/yyyy hh:mm"
-                          @paste="paste(3, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.samples.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('samples')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="deleteSample(sample.temporaryId, true)"
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Fluxomics table -->
-                <div v-show="selectedTableKey === 'fluxomics'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.fluxomics.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template
-                      v-slot:items="{ item: fluxomicsItem, index: index }"
-                    >
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.samples.items.filter(s => s.name)"
-                          item-text="name"
-                          item-value="temporaryId"
-                          v-model="fluxomicsItem.sample"
-                          no-data-text="No data available. You can add it in Samples table."
-                          @change="getRelevantModelIds(fluxomicsItem)"
-                        >
-                        </v-select>
-                      </td>
-                      <td>
-                        <AutocompleteMnxReaction
-                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                          @change="
-                            onChange(fluxomicsItem, 'reaction', $event.reaction)
-                          "
-                          :modelIds="fluxomicsItem.modelIds"
-                          :rules="[
-                            requiredIfHasMain(
-                              'fluxomics',
-                              fluxomicsItem.reaction,
-                              fluxomicsItem
-                            )
-                          ]"
-                          @paste="paste(1, index, selectedTable, $event)"
-                          :forceSearchQuery="
-                            fluxomicsItem.reaction &&
-                              fluxomicsItem.reaction._pastedText
-                          "
-                        ></AutocompleteMnxReaction>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="fluxomicsItem.measurement"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          :rules="[
-                            requiredIfHasMain(
-                              'fluxomics',
-                              fluxomicsItem.measurement,
-                              fluxomicsItem
-                            )
-                          ]"
-                          @paste="paste(2, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="fluxomicsItem.uncertainty"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(3, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.fluxomics.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('fluxomics')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="
-                                deleteMeasurement(
-                                  'fluxomics',
-                                  fluxomicsItem.temporaryId
-                                )
-                              "
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Metabolomics table -->
-                <div v-show="selectedTableKey === 'metabolomics'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.metabolomics.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template
-                      v-slot:items="{ item: metabolomicsItem, index: index }"
-                    >
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.samples.items.filter(s => s.name)"
-                          item-text="name"
-                          item-value="temporaryId"
-                          v-model="metabolomicsItem.sample"
-                          no-data-text="No data available. You can add it in Samples table."
-                          @change="getRelevantModelIds(metabolomicsItem)"
-                        >
-                        </v-select>
-                      </td>
-                      <td>
-                        <AutocompleteMnxMetabolite
-                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            onChange(metabolomicsItem, 'compound', $event)
-                          "
-                          @paste="paste(1, index, selectedTable, $event)"
-                          :forceSearchQuery="
-                            metabolomicsItem.compound &&
-                              metabolomicsItem.compound._pastedText
-                          "
-                          :modelIds="metabolomicsItem.modelIds"
-                          :rules="[
-                            requiredIfHasMain(
-                              'metabolomics',
-                              metabolomicsItem.compound,
-                              metabolomicsItem
-                            )
-                          ]"
-                        ></AutocompleteMnxMetabolite>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="metabolomicsItem.measurement"
-                          hint="mmol l <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(2, index, selectedTable, $event)"
-                          :rules="[
-                            requiredIfHasMain(
-                              'metabolomics',
-                              metabolomicsItem.measurement,
-                              metabolomicsItem
-                            )
-                          ]"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="metabolomicsItem.uncertainty"
-                          hint="mmol l <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(3, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.metabolomics.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('metabolomics')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="
-                                deleteMeasurement(
-                                  'metabolomics',
-                                  metabolomicsItem.temporaryId
-                                )
-                              "
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Uptake/Secretion rates table -->
-                <div v-show="selectedTableKey === 'uptakeSecretion'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.uptakeSecretion.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template
-                      v-slot:items="{ item: uptakeSecretionItem, index: index }"
-                    >
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.samples.items.filter(s => s.name)"
-                          item-text="name"
-                          item-value="temporaryId"
-                          v-model="uptakeSecretionItem.sample"
-                          no-data-text="No data available. You can add it in Samples table."
-                          @change="getRelevantModelIds(uptakeSecretionItem)"
-                        >
-                        </v-select>
-                      </td>
-                      <td>
-                        <AutocompleteMnxMetabolite
-                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            onChange(uptakeSecretionItem, 'compound', $event)
-                          "
-                          @paste="paste(1, index, selectedTable, $event)"
-                          :forceSearchQuery="
-                            uptakeSecretionItem.compound &&
-                              uptakeSecretionItem.compound._pastedText
-                          "
-                          :modelIds="uptakeSecretionItem.modelIds"
-                          :rules="[
-                            requiredIfHasMain(
-                              'uptakeSecretion',
-                              uptakeSecretionItem.compound,
-                              uptakeSecretionItem
-                            )
-                          ]"
-                        ></AutocompleteMnxMetabolite>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="uptakeSecretionItem.measurement"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(2, index, selectedTable, $event)"
-                          :rules="[
-                            requiredIfHasMain(
-                              'uptakeSecretion',
-                              uptakeSecretionItem.measurement,
-                              uptakeSecretionItem
-                            )
-                          ]"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="uptakeSecretionItem.uncertainty"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(3, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index ===
-                                  tables.uptakeSecretion.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('uptakeSecretion')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="
-                                deleteMeasurement(
-                                  'uptakeSecretion',
-                                  uptakeSecretionItem.temporaryId
-                                )
-                              "
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Molar Yields table -->
-                <div v-show="selectedTableKey === 'molarYields'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.molarYields.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template
-                      v-slot:items="{ item: molarYieldsItem, index: index }"
-                    >
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.samples.items.filter(s => s.name)"
-                          item-text="name"
-                          item-value="temporaryId"
-                          v-model="molarYieldsItem.sample"
-                          no-data-text="No data available. You can add it in Samples table."
-                          @change="getRelevantModelIds(molarYieldsItem)"
-                        >
-                        </v-select>
-                      </td>
-                      <td>
-                        <AutocompleteMnxMetabolite
-                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="onChange(molarYieldsItem, 'product', $event)"
-                          @paste="paste(1, index, selectedTable, $event)"
-                          :forceSearchQuery="
-                            molarYieldsItem.product &&
-                              molarYieldsItem.product._pastedText
-                          "
-                          :modelIds="molarYieldsItem.modelIds"
-                          :rules="[
-                            requiredIfHasMain(
-                              'molarYields',
-                              molarYieldsItem.product,
-                              molarYieldsItem
-                            )
-                          ]"
-                        ></AutocompleteMnxMetabolite>
-                      </td>
-                      <td>
-                        <AutocompleteMnxMetabolite
-                          hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                          @change="
-                            onChange(molarYieldsItem, 'substrate', $event)
-                          "
-                          @paste="paste(2, index, selectedTable, $event)"
-                          :forceSearchQuery="
-                            molarYieldsItem.substrate &&
-                              molarYieldsItem.substrate._pastedText
-                          "
-                          :modelIds="molarYieldsItem.modelIds"
-                          :rules="[
-                            requiredIfHasMain(
-                              'molarYields',
-                              molarYieldsItem.substrate,
-                              molarYieldsItem
-                            )
-                          ]"
-                        ></AutocompleteMnxMetabolite>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="molarYieldsItem.measurement"
-                          hint="mmol-product / mmol-substrate"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(3, index, selectedTable, $event)"
-                          :rules="[
-                            requiredIfHasMain(
-                              'molarYields',
-                              molarYieldsItem.measurement,
-                              molarYieldsItem
-                            )
-                          ]"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="molarYieldsItem.uncertainty"
-                          hint="mmol-product / mmol-substrate"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(4, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.molarYields.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('molarYields')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="
-                                deleteMeasurement(
-                                  'molarYields',
-                                  molarYieldsItem.temporaryId
-                                )
-                              "
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-
-                <!-- Growth table -->
-                <div v-show="selectedTableKey === 'growth'">
-                  <v-data-table
-                    :headers="selectedTable.headers"
-                    :items="tables.growth.items"
-                    :pagination.sync="disabledToPreventWrongIndexOnSecondPage"
-                    hide-actions
-                    disable-initial-sort
-                  >
-                    <template v-slot:items="{ item: growthItem, index: index }">
-                      <td>
-                        <v-select
-                          return-object
-                          :items="tables.samples.items.filter(s => s.name)"
-                          item-text="name"
-                          item-value="temporaryId"
-                          v-model="growthItem.sample"
-                          no-data-text="No data available. You can add it in Samples table."
-                        >
-                        </v-select>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="growthItem.measurement"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          :rules="[
-                            requiredIfHasMain(
-                              'growth',
-                              growthItem.measurement,
-                              growthItem
-                            )
-                          ]"
-                          @paste="paste(1, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-text-field
-                          v-model="growthItem.uncertainty"
-                          hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                          persistent-hint
-                          type="number"
-                          step="any"
-                          @paste="paste(2, index, selectedTable, $event)"
-                        ></v-text-field>
-                      </td>
-                      <td class="hidden-bottom-border">
-                        <v-layout>
-                          <v-flex>
-                            <v-btn
-                              :style="{
-                                opacity:
-                                  index === tables.growth.items.length - 1
-                                    ? 1
-                                    : 0
-                              }"
-                              icon
-                              @click="addRow('growth')"
-                            >
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex>
-                            <v-btn
-                              icon
-                              @click="
-                                deleteMeasurement(
-                                  'growth',
-                                  growthItem.temporaryId
-                                )
-                              "
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-flex>
-                        </v-layout>
-                      </td>
-                    </template>
-                  </v-data-table>
-                </div>
-              </v-card>
-            </v-flex>
-
-            <v-divider vertical></v-divider>
-
-            <!-- Selection area -->
-            <v-flex md2>
-              <v-card class="pa-4" elevation="0">
-                <v-text-field
-                  v-model="experiment.name"
-                  label="Experiment name"
-                  :rules="[requiredIfHasCondition(experiment.name)]"
-                ></v-text-field>
-                <v-textarea
-                  v-model="experiment.description"
-                  label="Description"
-                  :rules="[requiredIfHasCondition(experiment.description)]"
-                  auto-grow
-                  rows="1"
-                ></v-textarea>
-                <v-autocomplete-extended
-                  item-text="name"
-                  item-value="id"
-                  v-model="experiment.project_id"
-                  :items="availableProjects"
-                  :rules="[requiredIfHasCondition(experiment.project_id)]"
-                  name="project"
-                  label="Project"
-                  type="text"
-                  ref="projectAutocomplete"
+        <v-layout>
+          <v-flex md10>
+            <v-card class="pa-4 scroll" height="100%" elevation="0">
+              <div class="display-1 mb-2">{{ selectedTable.name }}</div>
+              <!-- Conditions table -->
+              <div v-show="selectedTableKey === 'conditions'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.conditions.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
                 >
-                  <template v-slot:prepend-item>
-                    <v-list-tile
-                      ripple
-                      @click="
-                        isProjectCreationDialogVisible = true;
-                        $refs.projectAutocomplete.isMenuActive = false;
-                      "
-                    >
-                      <v-icon class="mr-3" color="primary">add_circle</v-icon>
-                      <v-list-tile-title>
-                        New project
-                      </v-list-tile-title>
-                    </v-list-tile>
-                    <v-divider class="my-2"></v-divider>
+                  <template v-slot:items="{ item: condition, index: index }">
+                    <td>
+                      <v-text-field
+                        v-model="condition.name"
+                        @paste="paste(0, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="condition.strain"
+                        :items="availableStrains"
+                        name="strain"
+                        type="text"
+                        :placeholder="
+                          condition.strain && condition.strain._pastedText
+                        "
+                        ref="strainAutocomplete"
+                        :rules="[
+                          requiredIfHasMain(
+                            'conditions',
+                            condition.strain,
+                            condition
+                          )
+                        ]"
+                        @change="updateRelevantModels(condition)"
+                        @paste="paste(1, index, selectedTable, $event)"
+                      >
+                        <template v-slot:prepend-item>
+                          <v-list-tile
+                            ripple
+                            @click="
+                              isNewStrainDialogVisible = true;
+                              currentRowIndex = index;
+                              $refs.strainAutocomplete.isMenuActive = false;
+                            "
+                          >
+                            <v-icon class="mr-3" color="primary"
+                              >add_circle</v-icon
+                            >
+                            <v-list-tile-title>
+                              New Strain
+                            </v-list-tile-title>
+                          </v-list-tile>
+                          <v-divider class="my-2"></v-divider>
+                        </template>
+                      </v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-autocomplete-extended
+                        return-object
+                        item-text="name"
+                        item-value="id"
+                        v-model="condition.medium"
+                        :items="availableMedia"
+                        name="medium"
+                        type="text"
+                        :placeholder="
+                          condition.medium && condition.medium._pastedText
+                        "
+                        ref="mediumAutocomplete"
+                        :rules="[
+                          requiredIfHasMain(
+                            'conditions',
+                            condition.medium,
+                            condition
+                          )
+                        ]"
+                        @paste="paste(2, index, selectedTable, $event)"
+                      >
+                        <template v-slot:prepend-item>
+                          <v-list-tile
+                            ripple
+                            @click="
+                              getRelevantModelIdsForNewMedium(condition);
+                              isNewMediumDialogVisible = true;
+                              currentRowIndex = index;
+                              $refs.mediumAutocomplete.isMenuActive = false;
+                            "
+                          >
+                            <v-icon class="mr-3" color="primary"
+                              >add_circle</v-icon
+                            >
+                            <v-list-tile-title>
+                              New Medium
+                            </v-list-tile-title>
+                          </v-list-tile>
+                          <v-divider class="my-2"></v-divider>
+                        </template>
+                      </v-autocomplete-extended>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="deleteCondition(condition.temporaryId)"
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
                   </template>
-                </v-autocomplete-extended>
-                <v-radio-group v-model="selectedTableKey">
-                  <v-radio
-                    v-for="(table, key) in tables"
-                    :key="key"
-                    :label="table.name"
-                    :value="key"
-                    color="primary"
-                  ></v-radio>
-                </v-radio-group>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="secondary"
-                    flat
-                    @click="isDialogVisible = false"
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('conditions')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Samples table -->
+              <div v-show="selectedTableKey === 'samples'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.samples.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template v-slot:items="{ item: sample, index: index }">
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.conditions.items.filter(c => c.name)"
+                        item-value="temporaryId"
+                        item-text="name"
+                        v-model="sample.condition"
+                        no-data-text="No data available. You can add it in Conditions table."
+                        :rules="[
+                          requiredIfHasMain('samples', sample.condition, sample)
+                        ]"
+                      >
+                      </v-select>
+                    </td>
+                    <!-- Name field was added, so user can distinguish -->
+                    <!-- samples in other tables -->
+                    <td>
+                      <v-text-field
+                        v-model="sample.name"
+                        @paste="paste(1, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="sample.startTime"
+                        mask="date-with-time"
+                        return-masked-value
+                        placeholder="dd/mm/yyyy hh:mm"
+                        hint="dd/mm/yyyy hh:mm"
+                        :rules="[
+                          requiredIfHasMain('samples', sample.startTime, sample)
+                        ]"
+                        @paste="paste(2, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="sample.endTime"
+                        mask="date-with-time"
+                        return-masked-value
+                        placeholder="dd/mm/yyyy hh:mm"
+                        hint="dd/mm/yyyy hh:mm"
+                        @paste="paste(3, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="deleteSample(sample.temporaryId, true)"
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('samples')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Fluxomics table -->
+              <div v-show="selectedTableKey === 'fluxomics'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.fluxomics.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template
+                    v-slot:items="{ item: fluxomicsItem, index: index }"
                   >
-                    Cancel
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    @click="createExperiment()"
-                    :disabled="isLoading || !isValid"
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="fluxomicsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                        @change="getRelevantModelIds(fluxomicsItem)"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <AutocompleteMnxReaction
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
+                        @change="
+                          onChange(fluxomicsItem, 'reaction', $event.reaction)
+                        "
+                        :modelIds="fluxomicsItem.modelIds"
+                        :rules="[
+                          requiredIfHasMain(
+                            'fluxomics',
+                            fluxomicsItem.reaction,
+                            fluxomicsItem
+                          )
+                        ]"
+                        @paste="paste(1, index, selectedTable, $event)"
+                        :forceSearchQuery="
+                          fluxomicsItem.reaction &&
+                            fluxomicsItem.reaction._pastedText
+                        "
+                      ></AutocompleteMnxReaction>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="fluxomicsItem.measurement"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        :rules="[
+                          requiredIfHasMain(
+                            'fluxomics',
+                            fluxomicsItem.measurement,
+                            fluxomicsItem
+                          )
+                        ]"
+                        @paste="paste(2, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="fluxomicsItem.uncertainty"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(3, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'fluxomics',
+                            fluxomicsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('fluxomics')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Metabolomics table -->
+              <div v-show="selectedTableKey === 'metabolomics'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.metabolomics.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template
+                    v-slot:items="{ item: metabolomicsItem, index: index }"
                   >
-                    <span v-if="!isLoading">Submit</span>
-                    <v-progress-circular
-                      v-if="isLoading"
-                      indeterminate
-                      color="primary"
-                    ></v-progress-circular>
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-card>
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="metabolomicsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                        @change="getRelevantModelIds(metabolomicsItem)"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <AutocompleteMnxMetabolite
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                        @change="onChange(metabolomicsItem, 'compound', $event)"
+                        @paste="paste(1, index, selectedTable, $event)"
+                        :forceSearchQuery="
+                          metabolomicsItem.compound &&
+                            metabolomicsItem.compound._pastedText
+                        "
+                        :modelIds="metabolomicsItem.modelIds"
+                        :rules="[
+                          requiredIfHasMain(
+                            'metabolomics',
+                            metabolomicsItem.compound,
+                            metabolomicsItem
+                          )
+                        ]"
+                      ></AutocompleteMnxMetabolite>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="metabolomicsItem.measurement"
+                        hint="mmol l <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(2, index, selectedTable, $event)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'metabolomics',
+                            metabolomicsItem.measurement,
+                            metabolomicsItem
+                          )
+                        ]"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="metabolomicsItem.uncertainty"
+                        hint="mmol l <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(3, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'metabolomics',
+                            metabolomicsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('metabolomics')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Uptake/Secretion rates table -->
+              <div v-show="selectedTableKey === 'uptakeSecretion'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.uptakeSecretion.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template
+                    v-slot:items="{ item: uptakeSecretionItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="uptakeSecretionItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                        @change="getRelevantModelIds(uptakeSecretionItem)"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <AutocompleteMnxMetabolite
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                        @change="
+                          onChange(uptakeSecretionItem, 'compound', $event)
+                        "
+                        @paste="paste(1, index, selectedTable, $event)"
+                        :forceSearchQuery="
+                          uptakeSecretionItem.compound &&
+                            uptakeSecretionItem.compound._pastedText
+                        "
+                        :modelIds="uptakeSecretionItem.modelIds"
+                        :rules="[
+                          requiredIfHasMain(
+                            'uptakeSecretion',
+                            uptakeSecretionItem.compound,
+                            uptakeSecretionItem
+                          )
+                        ]"
+                      ></AutocompleteMnxMetabolite>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="uptakeSecretionItem.measurement"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(2, index, selectedTable, $event)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'uptakeSecretion',
+                            uptakeSecretionItem.measurement,
+                            uptakeSecretionItem
+                          )
+                        ]"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="uptakeSecretionItem.uncertainty"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(3, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'uptakeSecretion',
+                            uptakeSecretionItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('uptakeSecretion')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Molar Yields table -->
+              <div v-show="selectedTableKey === 'molarYields'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.molarYields.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template
+                    v-slot:items="{ item: molarYieldsItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="molarYieldsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                        @change="getRelevantModelIds(molarYieldsItem)"
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <AutocompleteMnxMetabolite
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                        @change="onChange(molarYieldsItem, 'product', $event)"
+                        @paste="paste(1, index, selectedTable, $event)"
+                        :forceSearchQuery="
+                          molarYieldsItem.product &&
+                            molarYieldsItem.product._pastedText
+                        "
+                        :modelIds="molarYieldsItem.modelIds"
+                        :rules="[
+                          requiredIfHasMain(
+                            'molarYields',
+                            molarYieldsItem.product,
+                            molarYieldsItem
+                          )
+                        ]"
+                      ></AutocompleteMnxMetabolite>
+                    </td>
+                    <td>
+                      <AutocompleteMnxMetabolite
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                        @change="onChange(molarYieldsItem, 'substrate', $event)"
+                        @paste="paste(2, index, selectedTable, $event)"
+                        :forceSearchQuery="
+                          molarYieldsItem.substrate &&
+                            molarYieldsItem.substrate._pastedText
+                        "
+                        :modelIds="molarYieldsItem.modelIds"
+                        :rules="[
+                          requiredIfHasMain(
+                            'molarYields',
+                            molarYieldsItem.substrate,
+                            molarYieldsItem
+                          )
+                        ]"
+                      ></AutocompleteMnxMetabolite>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="molarYieldsItem.measurement"
+                        hint="mmol-product / mmol-substrate"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(3, index, selectedTable, $event)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'molarYields',
+                            molarYieldsItem.measurement,
+                            molarYieldsItem
+                          )
+                        ]"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="molarYieldsItem.uncertainty"
+                        hint="mmol-product / mmol-substrate"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(4, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'molarYields',
+                            molarYieldsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('molarYields')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+
+              <!-- Growth table -->
+              <div v-show="selectedTableKey === 'growth'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.growth.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template v-slot:items="{ item: growthItem, index: index }">
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="growthItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="growthItem.measurement"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        :rules="[
+                          requiredIfHasMain(
+                            'growth',
+                            growthItem.measurement,
+                            growthItem
+                          )
+                        ]"
+                        @paste="paste(1, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-text-field
+                        v-model="growthItem.uncertainty"
+                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                        persistent-hint
+                        type="number"
+                        step="any"
+                        @paste="paste(2, index, selectedTable, $event)"
+                      ></v-text-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement('growth', growthItem.temporaryId)
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('growth')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+            </v-card>
+          </v-flex>
+
+          <v-divider vertical></v-divider>
+
+          <!-- Selection area -->
+          <v-flex md2>
+            <v-card class="pa-4" height="100%" elevation="0">
+              <v-text-field
+                v-model="experiment.name"
+                label="Experiment name"
+                :rules="[requiredIfHasCondition(experiment.name)]"
+              ></v-text-field>
+              <v-textarea
+                v-model="experiment.description"
+                label="Description"
+                :rules="[requiredIfHasCondition(experiment.description)]"
+                auto-grow
+                rows="1"
+              ></v-textarea>
+              <v-autocomplete-extended
+                item-text="name"
+                item-value="id"
+                v-model="experiment.project_id"
+                :items="availableProjects"
+                :rules="[requiredIfHasCondition(experiment.project_id)]"
+                name="project"
+                label="Project"
+                type="text"
+                ref="projectAutocomplete"
+              >
+                <template v-slot:prepend-item>
+                  <v-list-tile
+                    ripple
+                    @click="
+                      isProjectCreationDialogVisible = true;
+                      $refs.projectAutocomplete.isMenuActive = false;
+                    "
+                  >
+                    <v-icon class="mr-3" color="primary">add_circle</v-icon>
+                    <v-list-tile-title>
+                      New project
+                    </v-list-tile-title>
+                  </v-list-tile>
+                  <v-divider class="my-2"></v-divider>
+                </template>
+              </v-autocomplete-extended>
+              <v-radio-group v-model="selectedTableKey">
+                <v-radio
+                  v-for="(table, key) in tables"
+                  :key="key"
+                  :label="table.name"
+                  :value="key"
+                  color="primary"
+                ></v-radio>
+              </v-radio-group>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="secondary" flat @click="clear()">
+                  Clear
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  @click="createExperiment()"
+                  :loading="isSubmitting"
+                  >Submit
+                </v-btn>
+              </v-card-actions>
+              <div class="my-5" v-if="isSubmitting">
+                <em>Submitting...</em>
+                <v-progress-linear
+                  v-model="submitProgressValue"
+                  class="my-2"
+                ></v-progress-linear>
+              </div>
+            </v-card>
+          </v-flex>
+        </v-layout>
       </v-dialog>
       <v-snackbar
         color="success"
         v-model="isExperimentCreationSuccess"
-        :timeout="3000"
+        :timeout="5000"
       >
         {{ experiment.name }} successfully created.
       </v-snackbar>
@@ -884,15 +794,8 @@ import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
 
-export default Vue.extend({
-  name: "NewExperiment",
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    }
-  },
-  data: () => ({
+function getInitialState() {
+  return {
     experiment: {
       name: null,
       description: null,
@@ -902,17 +805,21 @@ export default Vue.extend({
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
-    isLoading: false,
+    isSubmitting: false,
     isExperimentCreationSuccess: false,
     isValid: false,
     isMoreDataRequired: false,
-    // We are relying on data table's `index` (for currentRowIndex and @paste)
-    // but that only works correctly on the first page.
-    disabledToPreventWrongIndexOnSecondPage: undefined,
     currentRowIndex: null,
+    submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
+    // Display all rows on a single page
+    // We are relying on data table's `index` (for currentRowIndex and @paste)
+    // but that only works correctly on the first page
+    pagination: {
+      rowsPerPage: -1
+    },
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -923,10 +830,10 @@ export default Vue.extend({
          */
         mainField: "name",
         headers: [
-          { text: "Name", value: "name", width: "30%" },
+          { text: "Name", value: "name", width: "35%" },
           { text: "Strain", value: "strain", width: "30%" },
           { text: "Medium", value: "medium", width: "30%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           name: str => str,
@@ -945,11 +852,11 @@ export default Vue.extend({
         name: "Samples",
         mainField: "name",
         headers: [
-          { text: "Condition", value: "condition", width: "25%" },
+          { text: "Condition", value: "condition", width: "30%" },
           { text: "Name", value: "name", width: "25%" },
           { text: "Start time", value: "startTime", width: "20%" },
           { text: "End time", value: "endTime", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           name: str => str,
@@ -963,10 +870,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Reaction", value: "reaction", width: "25%" },
+          { text: "Reaction", value: "reaction", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           // Temporarily create mock reaction object and use forceSearchQuery;
@@ -982,10 +889,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Compound", value: "compound", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           compound: str => ({ _pastedText: str }),
@@ -999,10 +906,10 @@ export default Vue.extend({
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "25%" },
+          { text: "Compound", value: "compound", width: "30%" },
           { text: "Measurement", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
-          { value: "actions", width: "10%" }
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           compound: str => ({ _pastedText: str }),
@@ -1019,16 +926,16 @@ export default Vue.extend({
           {
             text: "Product",
             value: "product",
-            width: "20%"
+            width: "25%"
           },
           {
             text: "Substrate",
             value: "substrate",
-            width: "20%"
+            width: "25%"
           },
-          { text: "Measurement", value: "measurement", width: "15%" },
-          { text: "Uncertainty", value: "uncertainty", width: "15%" },
-          { value: "actions", width: "10%" }
+          { text: "Measurement", value: "measurement", width: "12.5%" },
+          { text: "Uncertainty", value: "uncertainty", width: "12.5%" },
+          { value: "actions", width: "5%" }
         ],
         parsePasted: {
           product: str => ({ _pastedText: str }),
@@ -1054,7 +961,18 @@ export default Vue.extend({
         items: [{ temporaryId: uuidv4() }]
       }
     }
-  }),
+  };
+}
+
+export default Vue.extend({
+  name: "NewExperiment",
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    }
+  },
+  data: () => getInitialState(),
   computed: {
     availableStrains() {
       return this.$store.state.strains.strains;
@@ -1078,6 +996,27 @@ export default Vue.extend({
     },
     selectedTable() {
       return this.tables[this.selectedTableKey];
+    },
+    // Needed to provide a real progress status while submitting data
+    itemsToPostAmount() {
+      let result = 1; // counting experiment that should be posted
+      [
+        "conditions",
+        "samples",
+        "fluxomics",
+        "metabolomics",
+        "uptakeSecretion",
+        "molarYields",
+        "growth"
+      ].forEach(tableKey => {
+        const mainField = this.tables[tableKey].mainField;
+        result += this.tables[tableKey].items.filter(item => item[mainField])
+          .length;
+      });
+      return result;
+    },
+    itemWeight() {
+      return Math.round(100 / this.itemsToPostAmount);
     }
   },
   mounted() {
@@ -1100,14 +1039,16 @@ export default Vue.extend({
         sample =>
           sample.condition && sample.condition.temporaryId === conditionId
       );
-      const isConfirmationRequired = relatedSamples.length > 0;
 
-      const confirmation = !isConfirmationRequired
-        ? Promise.resolve(true)
-        : this.$promisedDialog(ConfirmDialog, {
-            message: ` Are you sure you want to delete the condition?
-            All related samples and measurements will be deleted.`
-          });
+      const message =
+        "Are you sure you want to delete the condition?" +
+        (relatedSamples.length
+          ? " All related samples and measurements will be deleted."
+          : " This condition is not associated with any related data.");
+
+      const confirmation = this.$promisedDialog(ConfirmDialog, {
+        message: message
+      });
 
       confirmation.then(isConfirmed => {
         if (!isConfirmed) {
@@ -1142,11 +1083,16 @@ export default Vue.extend({
         )
       );
 
+      const message =
+        "Are you sure you want to delete the sample?" +
+        (relatedMeasurements.length
+          ? " All related measurements will be deleted."
+          : " This sample is not associated with any related data.");
+
       const confirmation = !isConfirmationRequired
         ? Promise.resolve(true)
         : this.$promisedDialog(ConfirmDialog, {
-            message: ` Are you sure you want to delete the sample?
-            All related measurements will be deleted.`
+            message: message
           });
 
       confirmation.then(isConfirmed => {
@@ -1317,6 +1263,10 @@ export default Vue.extend({
     onChange(item, property, value) {
       Vue.set(item, property, value);
     },
+    clear() {
+      this.$refs.newExperimentForm.resetValidation();
+      Object.assign(this.$data, getInitialState());
+    },
     createExperiment() {
       const hasACondition = this.tables.conditions.items.some(
         item => item[this.tables.conditions.mainField]
@@ -1347,11 +1297,12 @@ export default Vue.extend({
       this.$refs.newExperimentForm.validate();
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
-      this.isLoading = true;
+      this.isSubmitting = true;
       axios
         .post(`${settings.apis.warehouse}/experiments`, this.experiment)
         .then((response: AxiosResponse) => {
           this.experiment.id = response.data.id;
+          this.updateProgressValue();
           return Promise.all(this.postConditions());
         })
         .then(() => {
@@ -1379,9 +1330,10 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isLoading = false;
+          this.isSubmitting = false;
           this.isExperimentCreationSuccess = true;
           this.isDialogVisible = false;
+          this.clear();
         });
     },
     postConditions() {
@@ -1396,11 +1348,11 @@ export default Vue.extend({
           };
           return axios
             .post(`${settings.apis.warehouse}/conditions`, payload)
-            .then(
-              (response: AxiosResponse) =>
-                (this.conditionTempIdsMap[condition.temporaryId] =
-                  response.data.id)
-            );
+            .then((response: AxiosResponse) => {
+              this.updateProgressValue();
+              this.conditionTempIdsMap[condition.temporaryId] =
+                response.data.id;
+            });
         });
     },
     postSamples() {
@@ -1423,6 +1375,7 @@ export default Vue.extend({
           return axios
             .post(`${settings.apis.warehouse}/samples`, payload)
             .then((response: AxiosResponse) => {
+              this.updateProgressValue();
               this.sampleTempIdsMap[sample.temporaryId] = response.data.id;
             });
         });
@@ -1437,9 +1390,11 @@ export default Vue.extend({
             reaction_identifier: fluxomicsItem.reaction.id,
             reaction_namespace: fluxomicsItem.reaction.namespace,
             measurement: fluxomicsItem.measurement,
-            uncertainty: fluxomicsItem.uncertainty
+            uncertainty: fluxomicsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/fluxomics`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/fluxomics`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postMetabolomics() {
@@ -1454,9 +1409,11 @@ export default Vue.extend({
             compound_identifier: metabolomicsItem.compound.id,
             compound_namespace: metabolomicsItem.compound.namespace,
             measurement: metabolomicsItem.measurement,
-            uncertainty: metabolomicsItem.uncertainty
+            uncertainty: metabolomicsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/metabolomics`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/metabolomics`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postUptakeSecretionRates() {
@@ -1471,12 +1428,11 @@ export default Vue.extend({
             compound_identifier: uptakeSecretionItem.compound.id,
             compound_namespace: uptakeSecretionItem.compound.namespace,
             measurement: uptakeSecretionItem.measurement,
-            uncertainty: uptakeSecretionItem.uncertainty
+            uncertainty: uptakeSecretionItem.uncertainty || 0
           };
-          return axios.post(
-            `${settings.apis.warehouse}/uptake-secretion-rates`,
-            payload
-          );
+          return axios
+            .post(`${settings.apis.warehouse}/uptake-secretion-rates`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postMolarYields() {
@@ -1494,9 +1450,11 @@ export default Vue.extend({
             substrate_identifier: molarYieldsItem.substrate.id,
             substrate_namespace: molarYieldsItem.substrate.namespace,
             measurement: molarYieldsItem.measurement,
-            uncertainty: molarYieldsItem.uncertainty
+            uncertainty: molarYieldsItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/molar-yields`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/molar-yields`, payload)
+            .then(() => this.updateProgressValue());
         });
     },
     postGrowthRates() {
@@ -1506,10 +1464,15 @@ export default Vue.extend({
           const payload = {
             sample_id: this.sampleTempIdsMap[growthItem.sample.temporaryId],
             measurement: growthItem.measurement,
-            uncertainty: growthItem.uncertainty
+            uncertainty: growthItem.uncertainty || 0
           };
-          return axios.post(`${settings.apis.warehouse}/growth-rates`, payload);
+          return axios
+            .post(`${settings.apis.warehouse}/growth-rates`, payload)
+            .then(() => this.updateProgressValue());
         });
+    },
+    updateProgressValue() {
+      this.submitProgressValue += this.itemWeight;
     }
   }
 });
@@ -1519,7 +1482,7 @@ export default Vue.extend({
 .full-height-dialog {
   height: 90%;
 }
-.hidden-bottom-border {
-  border-bottom: hidden;
+.scroll {
+  overflow-y: auto;
 }
 </style>
