@@ -87,14 +87,6 @@ export default Vue.extend({
     requestError: false,
     debouncedQuery: null,
     metabolitesInModelsMap: {},
-    namespaceMap: {
-      seed: "seed.compound",
-      bigg: "bigg.metabolite",
-      kegg: "kegg.compound",
-      metacyc: "metacyc.compound",
-      rhea: "rhea",
-      sabiork: "sabiork.compound"
-    },
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -201,8 +193,7 @@ export default Vue.extend({
                     isMetaboliteFound = true;
                     metabolite.modelNames!.add(modelName);
                     metabolite.foundId = metaboliteId;
-                    metabolite.namespace =
-                      this.namespaceMap[namespace] || namespace;
+                    metabolite.namespace = namespace;
                   }
                 });
               }
