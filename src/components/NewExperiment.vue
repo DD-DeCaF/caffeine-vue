@@ -10,7 +10,7 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-form ref="newExperimentForm">
+    <v-form v-model="isValid" ref="newExperimentForm">
       <v-dialog
         v-model="isDialogVisible"
         full-width
@@ -33,7 +33,10 @@
                 >
                   <template v-slot:items="{ item: condition, index: index }">
                     <td>
-                      <v-text-field v-model="condition.name"></v-text-field>
+                      <v-text-field
+                        v-model="condition.name"
+                        @paste="paste(0, index, selectedTable, $event)"
+                      ></v-text-field>
                     </td>
                     <td>
                       <v-autocomplete-extended
@@ -44,11 +47,19 @@
                         :items="availableStrains"
                         name="strain"
                         type="text"
+                        :placeholder="
+                          condition.strain && condition.strain._pastedText
+                        "
                         ref="strainAutocomplete"
                         :rules="[
-                          requiredIfHasMain(condition.strain, condition)
+                          requiredIfHasMain(
+                            'conditions',
+                            condition.strain,
+                            condition
+                          )
                         ]"
                         @change="updateRelevantModels(condition)"
+                        @paste="paste(1, index, selectedTable, $event)"
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
@@ -79,10 +90,18 @@
                         :items="availableMedia"
                         name="medium"
                         type="text"
+                        :placeholder="
+                          condition.medium && condition.medium._pastedText
+                        "
                         ref="mediumAutocomplete"
                         :rules="[
-                          requiredIfHasMain(condition.medium, condition)
+                          requiredIfHasMain(
+                            'conditions',
+                            condition.medium,
+                            condition
+                          )
                         ]"
+                        @paste="paste(2, index, selectedTable, $event)"
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
@@ -143,14 +162,19 @@
                         item-text="name"
                         v-model="sample.condition"
                         no-data-text="No data available. You can add it in Conditions table."
-                        :rules="[requiredIfHasMain(sample.condition, sample)]"
+                        :rules="[
+                          requiredIfHasMain('samples', sample.condition, sample)
+                        ]"
                       >
                       </v-select>
                     </td>
                     <!-- Name field was added, so user can distinguish -->
                     <!-- samples in other tables -->
                     <td>
-                      <v-text-field v-model="sample.name"></v-text-field>
+                      <v-text-field
+                        v-model="sample.name"
+                        @paste="paste(1, index, selectedTable, $event)"
+                      ></v-text-field>
                     </td>
                     <td>
                       <v-text-field
@@ -159,7 +183,10 @@
                         return-masked-value
                         placeholder="dd/mm/yyyy hh:mm"
                         hint="dd/mm/yyyy hh:mm"
-                        :rules="[requiredIfHasMain(sample.startTime, sample)]"
+                        :rules="[
+                          requiredIfHasMain('samples', sample.startTime, sample)
+                        ]"
+                        @paste="paste(2, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
                     <td>
@@ -169,6 +196,7 @@
                         return-masked-value
                         placeholder="dd/mm/yyyy hh:mm"
                         hint="dd/mm/yyyy hh:mm"
+                        @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
                     <td>
@@ -224,6 +252,7 @@
                         :modelIds="fluxomicsItem.modelIds"
                         :rules="[
                           requiredIfHasMain(
+                            'fluxomics',
                             fluxomicsItem.reaction,
                             fluxomicsItem
                           )
@@ -244,6 +273,7 @@
                         step="any"
                         :rules="[
                           requiredIfHasMain(
+                            'fluxomics',
                             fluxomicsItem.measurement,
                             fluxomicsItem
                           )
@@ -322,6 +352,7 @@
                         :modelIds="metabolomicsItem.modelIds"
                         :rules="[
                           requiredIfHasMain(
+                            'metabolomics',
                             metabolomicsItem.compound,
                             metabolomicsItem
                           )
@@ -338,6 +369,7 @@
                         @paste="paste(2, index, selectedTable, $event)"
                         :rules="[
                           requiredIfHasMain(
+                            'metabolomics',
                             metabolomicsItem.measurement,
                             metabolomicsItem
                           )
@@ -417,6 +449,7 @@
                         :modelIds="uptakeSecretionItem.modelIds"
                         :rules="[
                           requiredIfHasMain(
+                            'uptakeSecretion',
                             uptakeSecretionItem.compound,
                             uptakeSecretionItem
                           )
@@ -433,6 +466,7 @@
                         @paste="paste(2, index, selectedTable, $event)"
                         :rules="[
                           requiredIfHasMain(
+                            'uptakeSecretion',
                             uptakeSecretionItem.measurement,
                             uptakeSecretionItem
                           )
@@ -510,6 +544,7 @@
                         :modelIds="molarYieldsItem.modelIds"
                         :rules="[
                           requiredIfHasMain(
+                            'molarYields',
                             molarYieldsItem.product,
                             molarYieldsItem
                           )
@@ -528,6 +563,7 @@
                         :modelIds="molarYieldsItem.modelIds"
                         :rules="[
                           requiredIfHasMain(
+                            'molarYields',
                             molarYieldsItem.substrate,
                             molarYieldsItem
                           )
@@ -544,6 +580,7 @@
                         @paste="paste(3, index, selectedTable, $event)"
                         :rules="[
                           requiredIfHasMain(
+                            'molarYields',
                             molarYieldsItem.measurement,
                             molarYieldsItem
                           )
@@ -614,7 +651,11 @@
                         type="number"
                         step="any"
                         :rules="[
-                          requiredIfHasMain(growthItem.measurement, growthItem)
+                          requiredIfHasMain(
+                            'growth',
+                            growthItem.measurement,
+                            growthItem
+                          )
                         ]"
                         @paste="paste(1, index, selectedTable, $event)"
                       ></v-text-field>
@@ -660,10 +701,12 @@
               <v-text-field
                 v-model="experiment.name"
                 label="Experiment name"
+                :rules="[requiredIfHasCondition(experiment.name)]"
               ></v-text-field>
               <v-textarea
                 v-model="experiment.description"
                 label="Description"
+                :rules="[requiredIfHasCondition(experiment.description)]"
                 auto-grow
                 rows="1"
               ></v-textarea>
@@ -672,6 +715,7 @@
                 item-value="id"
                 v-model="experiment.project_id"
                 :items="availableProjects"
+                :rules="[requiredIfHasCondition(experiment.project_id)]"
                 name="project"
                 label="Project"
                 type="text"
@@ -732,6 +776,9 @@
       >
         {{ experiment.name }} successfully created.
       </v-snackbar>
+      <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
+        Please enter condition, sample and at least one measurement.
+      </v-snackbar>
     </v-form>
   </div>
 </template>
@@ -745,6 +792,7 @@ import { tsvParseRows } from "d3-dsv";
 import { flatten } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import SelectDialog from "@/components/SelectDialog.vue";
 
 function getInitialState() {
   return {
@@ -759,6 +807,8 @@ function getInitialState() {
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
     isExperimentCreationSuccess: false,
+    isValid: false,
+    isMoreDataRequired: false,
     currentRowIndex: null,
     submitProgressValue: 0,
     conditionTempIdsMap: {},
@@ -785,6 +835,17 @@ function getInitialState() {
           { text: "Medium", value: "medium", width: "30%" },
           { value: "actions", width: "5%" }
         ],
+        parsePasted: {
+          name: str => str,
+          strain: (str, { availableStrains }) => {
+            const match = availableStrains.find(({ name }) => name === str);
+            return match || { _pastedText: str };
+          },
+          medium: (str, { availableMedia }) => {
+            const match = availableMedia.find(({ name }) => name === str);
+            return match || { _pastedText: str };
+          }
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       samples: {
@@ -797,6 +858,11 @@ function getInitialState() {
           { text: "End time", value: "endTime", width: "20%" },
           { value: "actions", width: "5%" }
         ],
+        parsePasted: {
+          name: str => str,
+          startTime: str => parseFloat(str),
+          endTime: str => parseFloat(str)
+        },
         items: [{ temporaryId: uuidv4() }]
       },
       fluxomics: {
@@ -1101,8 +1167,8 @@ export default Vue.extend({
         .filter(model => model.organism_id === organismId)
         .map(model => model.id);
     },
-    requiredIfHasMain(value, row) {
-      const mainField = this.selectedTable.mainField;
+    requiredIfHasMain(tableKey, value, row) {
+      const mainField = this.tables[tableKey].mainField;
       if (row[mainField]) {
         if (!value && value !== 0) {
           return "Required.";
@@ -1110,6 +1176,17 @@ export default Vue.extend({
         if (value && value._pastedText) {
           return "Required.";
         }
+      }
+      return true;
+    },
+    requiredIfHasCondition(value) {
+      const mainField = this.tables.conditions.mainField;
+      if (
+        this.tables.conditions.items.filter(item => item[mainField]).length &&
+        !value &&
+        value !== 0
+      ) {
+        return "Required.";
       }
       return true;
     },
@@ -1138,7 +1215,9 @@ export default Vue.extend({
               // Parse cell.
               value = table.parsePasted[property](cell, {
                 // Extra parameters for parsePasted:
-                tables: this.tables
+                tables: this.tables,
+                availableStrains: this.availableStrains,
+                availableMedia: this.availableMedia
               });
             } else {
               // Empty cell clears existing value.
@@ -1149,16 +1228,36 @@ export default Vue.extend({
           });
       });
 
-      // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
-      parsedRows.forEach((rowPairs, rowIx) => {
-        if (!table.items[rowOffset + rowIx]) {
-          // Create excess rows.
-          table.items.push({ temporaryId: uuidv4() });
-        }
+      // Ask which condition/sample pasted data belongs to
+      let dialogSelection;
+      if (table.name === "Samples") {
+        dialogSelection = this.$promisedDialog(SelectDialog, {
+          itemType: "condition",
+          items: this.tables.conditions.items.filter(({ name }) => name)
+        }).then(selected => (selected ? [["condition", selected]] : []));
+      } else if (table.name === "Conditions") {
+        dialogSelection = Promise.resolve([]);
+      } else {
+        dialogSelection = this.$promisedDialog(SelectDialog, {
+          itemType: "sample",
+          items: this.tables.samples.items.filter(({ name }) => name)
+        }).then(selected => (selected ? [["sample", selected]] : []));
+      }
 
-        rowPairs.forEach(([property, value]) => {
-          Vue.set(table.items[rowOffset + rowIx], property, value);
+      dialogSelection.then(rowPairsFromDialog => {
+        // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+        parsedRows.forEach((rowPairs, rowIx) => {
+          if (!table.items[rowOffset + rowIx]) {
+            // Create excess rows.
+            table.items.push({ temporaryId: uuidv4() });
+          }
+          [...rowPairs, ...rowPairsFromDialog].forEach(([property, value]) => {
+            Vue.set(table.items[rowOffset + rowIx], property, value);
+          });
         });
+        setTimeout(() => {
+          this.$refs.newExperimentForm.validate();
+        }, 0);
       });
     },
     onChange(item, property, value) {
@@ -1169,6 +1268,33 @@ export default Vue.extend({
       Object.assign(this.$data, getInitialState());
     },
     createExperiment() {
+      const hasACondition = this.tables.conditions.items.some(
+        item => item[this.tables.conditions.mainField]
+      );
+      const hasASample = this.tables.samples.items.some(
+        item => item[this.tables.samples.mainField]
+      );
+      const hasAMeasurement = [
+        "fluxomics",
+        "metabolomics",
+        "uptakeSecretion",
+        "molarYields",
+        "growth"
+      ].some(tableKey =>
+        this.tables[tableKey].items.some(
+          item => item[this.tables[tableKey].mainField]
+        )
+      );
+
+      // Check that all required data is entered:
+      // condition, sample and at least one measurement
+      this.isMoreDataRequired =
+        !hasACondition || !hasASample || !hasAMeasurement;
+      if (this.isMoreDataRequired) {
+        return;
+      }
+
+      this.$refs.newExperimentForm.validate();
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
       this.isSubmitting = true;
