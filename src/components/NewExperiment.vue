@@ -10,22 +10,21 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-form-extended
-      v-model="isValid"
-      ref="newExperimentForm"
-      immediatelyValidated
+    <v-dialog
+      v-model="isDialogVisible"
+      full-width
+      content-class="full-height-dialog"
+      scrollable
     >
-      <v-dialog
-        v-model="isDialogVisible"
-        full-width
-        content-class="full-height-dialog"
-        scrollable
-      >
-        <v-layout>
-          <v-flex md10>
-            <v-card class="pa-4 scroll" height="100%" elevation="0">
-              <div class="display-1 mb-2">{{ selectedTable.name }}</div>
-              <!-- Conditions table -->
+      <v-layout>
+        <v-flex md10>
+          <v-card class="pa-4 scroll" height="100%" elevation="0">
+            <div class="display-1 mb-2">{{ selectedTable.name }}</div>
+            <!-- Conditions table -->
+            <v-form-extended
+              v-model="isTableValid.conditions"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'conditions'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -146,8 +145,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Samples table -->
+            <!-- Samples table -->
+            <v-form-extended
+              v-model="isTableValid.samples"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'samples'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -221,8 +225,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Fluxomics table -->
+            <!-- Fluxomics table -->
+            <v-form-extended
+              v-model="isTableValid.fluxomics"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'fluxomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -318,8 +327,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Metabolomics table -->
+            <!-- Metabolomics table -->
+            <v-form-extended
+              v-model="isTableValid.metabolomics"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'metabolomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -413,8 +427,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Uptake/Secretion rates table -->
+            <!-- Uptake/Secretion rates table -->
+            <v-form-extended
+              v-model="isTableValid.uptakeSecretion"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -510,8 +529,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Molar Yields table -->
+            <!-- Molar Yields table -->
+            <v-form-extended
+              v-model="isTableValid.molarYields"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'molarYields'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -624,8 +648,10 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Growth table -->
+            <!-- Growth table -->
+            <v-form-extended v-model="isTableValid.growth" immediatelyValidated>
               <div v-show="selectedTableKey === 'growth'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -694,14 +720,19 @@
                   >Add row</v-btn
                 >
               </div>
-            </v-card>
-          </v-flex>
+            </v-form-extended>
+          </v-card>
+        </v-flex>
 
-          <v-divider vertical></v-divider>
+        <v-divider vertical></v-divider>
 
-          <!-- Selection area -->
-          <v-flex md2>
-            <v-card class="pa-4" height="100%" elevation="0">
+        <!-- Selection area -->
+        <v-flex md2>
+          <v-card class="pa-4" height="100%" elevation="0">
+            <v-form-extended
+              v-model="isTableValid.experiment"
+              immediatelyValidated
+            >
               <v-text-field
                 v-model="experiment.name"
                 label="Experiment name"
@@ -742,13 +773,27 @@
                 </template>
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
-                <v-radio
-                  v-for="(table, key) in tables"
-                  :key="key"
-                  :label="table.name"
-                  :value="key"
-                  color="primary"
-                ></v-radio>
+                <div v-for="(table, key) in tables" :key="key">
+                  <v-layout>
+                    <v-radio
+                      :label="table.name"
+                      :value="key"
+                      color="primary"
+                      class="mb-1"
+                    ></v-radio>
+                    <v-icon
+                      v-if="
+                        isTableValid[table.value] &&
+                          table.items.some(item => item[table.mainField])
+                      "
+                      color="success"
+                      >done</v-icon
+                    >
+                    <v-icon v-if="!isTableValid[table.value]" color="error"
+                      >error_outline</v-icon
+                    >
+                  </v-layout>
+                </div>
               </v-radio-group>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -770,21 +815,21 @@
                   class="my-2"
                 ></v-progress-linear>
               </div>
-            </v-card>
-          </v-flex>
-        </v-layout>
-      </v-dialog>
-      <v-snackbar
-        color="success"
-        v-model="isExperimentCreationSuccess"
-        :timeout="5000"
-      >
-        {{ experiment.name }} successfully created.
-      </v-snackbar>
-      <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
-        Please enter condition, sample and at least one measurement.
-      </v-snackbar>
-    </v-form-extended>
+            </v-form-extended>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-dialog>
+    <v-snackbar
+      color="success"
+      v-model="isExperimentCreationSuccess"
+      :timeout="5000"
+    >
+      {{ experiment.name }} successfully created.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
+      Please enter condition, sample and at least one measurement.
+    </v-snackbar>
   </div>
 </template>
 
@@ -812,13 +857,22 @@ function getInitialState() {
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
     isExperimentCreationSuccess: false,
-    isValid: false,
     isMoreDataRequired: false,
     currentRowIndex: null,
     submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
+    isTableValid: {
+      experiment: true,
+      conditions: true,
+      samples: true,
+      fluxomics: true,
+      metabolomics: true,
+      updateSecretition: true,
+      molarYields: true,
+      growth: true
+    },
     // Display all rows on a single page
     // We are relying on data table's `index` (for currentRowIndex and @paste)
     // but that only works correctly on the first page
@@ -829,6 +883,7 @@ function getInitialState() {
     tables: {
       conditions: {
         name: "Conditions",
+        value: "conditions",
         /**
          * Until mainField is defined, the row should be ignored when submitting
          * and validating.
@@ -855,6 +910,7 @@ function getInitialState() {
       },
       samples: {
         name: "Samples",
+        value: "samples",
         mainField: "name",
         headers: [
           { text: "Condition", value: "condition", width: "30%" },
@@ -872,6 +928,7 @@ function getInitialState() {
       },
       fluxomics: {
         name: "Fluxomics",
+        value: "fluxomics",
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
@@ -891,6 +948,7 @@ function getInitialState() {
       },
       metabolomics: {
         name: "Metabolomics",
+        value: "metabolomics",
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
@@ -908,6 +966,7 @@ function getInitialState() {
       },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
+        value: "uptakeSecretion",
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "25%" },
@@ -925,6 +984,7 @@ function getInitialState() {
       },
       molarYields: {
         name: "Molar Yields",
+        value: "molarYields",
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "20%" },
@@ -952,6 +1012,7 @@ function getInitialState() {
       },
       growth: {
         name: "Growth",
+        value: "growth",
         mainField: "sample",
         headers: [
           { text: "Sample", value: "sample", width: "30%" },
@@ -1022,6 +1083,9 @@ export default Vue.extend({
     },
     itemWeight() {
       return Math.round(100 / this.itemsToPostAmount);
+    },
+    isValid() {
+      return Object.values(this.isTableValid).every(Boolean);
     }
   },
   methods: {
@@ -1283,9 +1347,6 @@ export default Vue.extend({
       this.isMoreDataRequired =
         !hasACondition || !hasASample || !hasAMeasurement;
       if (this.isMoreDataRequired) {
-        return;
-      }
-      if (!this.$refs.newExperimentForm.validate()) {
         return;
       }
       this.conditionTempIdsMap = {};
