@@ -10,7 +10,11 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-form v-model="isValid" ref="newExperimentForm">
+    <v-form-extended
+      v-model="isValid"
+      ref="newExperimentForm"
+      immediatelyValidated
+    >
       <v-dialog
         v-model="isDialogVisible"
         full-width
@@ -755,6 +759,7 @@
                   color="primary"
                   @click="createExperiment()"
                   :loading="isSubmitting"
+                  :disabled="!isValid"
                   >Submit
                 </v-btn>
               </v-card-actions>
@@ -779,7 +784,7 @@
       <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
         Please enter condition, sample and at least one measurement.
       </v-snackbar>
-    </v-form>
+    </v-form-extended>
   </div>
 </template>
 
@@ -1019,20 +1024,11 @@ export default Vue.extend({
       return Math.round(100 / this.itemsToPostAmount);
     }
   },
-  mounted() {
-    setTimeout(() => {
-      // Show validation messages before user activates each input.
-      this.$refs.newExperimentForm.validate();
-    }, 0);
-  },
   methods: {
     addRow(tableKey) {
       this.tables[tableKey].items.push({
         temporaryId: uuidv4()
       });
-      setTimeout(() => {
-        this.$refs.newExperimentForm.validate();
-      }, 0);
     },
     deleteCondition(conditionId) {
       const relatedSamples = this.tables.samples.items.filter(
@@ -1255,16 +1251,12 @@ export default Vue.extend({
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
         });
-        setTimeout(() => {
-          this.$refs.newExperimentForm.validate();
-        }, 0);
       });
     },
     onChange(item, property, value) {
       Vue.set(item, property, value);
     },
     clear() {
-      this.$refs.newExperimentForm.resetValidation();
       Object.assign(this.$data, getInitialState());
     },
     createExperiment() {
@@ -1293,8 +1285,9 @@ export default Vue.extend({
       if (this.isMoreDataRequired) {
         return;
       }
-
-      this.$refs.newExperimentForm.validate();
+      if (!this.$refs.newExperimentForm.validate()) {
+        return;
+      }
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
       this.isSubmitting = true;
