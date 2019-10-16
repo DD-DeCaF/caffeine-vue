@@ -299,34 +299,30 @@ export default Vue.extend({
       if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (
-          (this.card.method === "fba" || this.card.method == "pfba") &&
-          !this.showDiffFVAScore
-        ) {
-          const fluxesFiltered = this.fluxFilter(this.card.fluxes);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
-          // Set FVA data with the current fluxes. This resets opacity in case a
-          // previous FVA simulation has been set on the map.
-          // TODO: We should improve the escher API here.
-          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
-        } else if (
-          (this.card.method === "fva" || this.card.method == "pfba-fva") &&
-          !this.showDiffFVAScore
-        ) {
-          // Render a flux distribution using the average values from the FVA
-          // data.
-          const fluxesAverage = {};
-          Object.keys(this.card.fluxes).map(reaction => {
-            const rxn = this.card.fluxes[reaction];
-            const average = (rxn.upper_bound + rxn.lower_bound) / 2;
-            fluxesAverage[reaction] = average;
-          });
-          const fluxesFiltered = this.fluxFilter(fluxesAverage);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
-          // Set the FVA data for transparency visualization.
-          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
-        } else if (this.showDiffFVAScore) {
-          // Set the scores instead of the cards fluxes.
+        if (!this.showDiffFVAScore) {
+          if (this.card.method === "fba" || this.card.method == "pfba") {
+            const fluxesFiltered = this.fluxFilter(this.card.fluxes);
+            this.escherBuilder.set_reaction_data(fluxesFiltered);
+            // Set FVA data with the current fluxes. This resets opacity in case
+            // a previous FVA simulation has been set on the map.
+            // TODO: We should improve the escher API here.
+            this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
+          } else if (["fva", "pfba-fva"].includes(this.card.method)) {
+            // Render a flux distribution using the average values from the FVA
+            // data.
+            const fluxesAverage = {};
+            Object.keys(this.card.fluxes).map(reaction => {
+              const rxn = this.card.fluxes[reaction];
+              const average = (rxn.upper_bound + rxn.lower_bound) / 2;
+              fluxesAverage[reaction] = average;
+            });
+            const fluxesFiltered = this.fluxFilter(fluxesAverage);
+            this.escherBuilder.set_reaction_data(fluxesFiltered);
+            // Set the FVA data for transparency visualization.
+            this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
+          }
+        } else {
+          // Set the DiffFVA scores instead of the cards fluxes.
           // (calculated from a diffFVA card's manipulations)
           this.escherBuilder.set_reaction_data(this.diffFVAScores);
           // Set the FVA data for transparency visualization as above.
