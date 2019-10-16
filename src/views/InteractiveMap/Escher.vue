@@ -27,7 +27,7 @@
         equal to the lower bound.
       </v-snackbar>
     </div>
-    <Legend :card="card" />
+    <Legend :card="card" :ecModel="model && model.ec_model" />
   </div>
 </template>
 
@@ -250,6 +250,13 @@ export default Vue.extend({
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
       }
+
+      // We cannot highlight missing reactions for ecModels, since most of the
+      // identifiers on the map would not match those in the model.
+      this.escherBuilder.settings.set(
+        "highlight_missing",
+        !this.model.ec_model
+      );
     },
     setReactionAdditions() {
       if (!this.card) {

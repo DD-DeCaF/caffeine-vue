@@ -45,7 +45,7 @@
             No flux
           </p>
         </v-layout>
-        <v-layout align-center class="mb-4">
+        <v-layout v-if="!ecModel" align-center class="mb-4">
           <div class="not-in-model"></div>
           <p class="mb-0 ml-3">
             Not in the model
@@ -67,7 +67,7 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "Legend",
-  props: ["card"],
+  props: ["card", "ecModel"],
   data: () => ({
     isExpanded: true
   }),
