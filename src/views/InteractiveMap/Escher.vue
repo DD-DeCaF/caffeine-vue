@@ -307,26 +307,34 @@ export default Vue.extend({
         this.escherBuilder.set_reaction_data(null);
       } else {
         if (!this.showDiffFVAScore) {
+          // For ecModels, map the simulated flux distribution back to the
+          // original reaction identifiers for the non-ec model, so that they
+          // match with the escher maps.
+          let fluxes = this.card.fluxes;
+          if (this.model.ec_model) {
+            fluxes = this.ecModelFluxes(fluxes);
+          }
+
           if (this.card.method === "fba" || this.card.method == "pfba") {
-            const fluxesFiltered = this.fluxFilter(this.card.fluxes);
+            const fluxesFiltered = this.fluxFilter(fluxes);
             this.escherBuilder.set_reaction_data(fluxesFiltered);
             // Set FVA data with the current fluxes. This resets opacity in case
             // a previous FVA simulation has been set on the map.
             // TODO: We should improve the escher API here.
-            this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
+            this.escherBuilder.set_reaction_fva_data(fluxes);
           } else if (["fva", "pfba-fva"].includes(this.card.method)) {
             // Render a flux distribution using the average values from the FVA
             // data.
             const fluxesAverage = {};
-            Object.keys(this.card.fluxes).map(reaction => {
-              const rxn = this.card.fluxes[reaction];
+            Object.keys(fluxes).map(reaction => {
+              const rxn = fluxes[reaction];
               const average = (rxn.upper_bound + rxn.lower_bound) / 2;
               fluxesAverage[reaction] = average;
             });
             const fluxesFiltered = this.fluxFilter(fluxesAverage);
             this.escherBuilder.set_reaction_data(fluxesFiltered);
             // Set the FVA data for transparency visualization.
-            this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
+            this.escherBuilder.set_reaction_fva_data(fluxes);
           }
         } else {
           // Set the DiffFVA scores instead of the cards fluxes.
@@ -351,6 +359,20 @@ export default Vue.extend({
         }
       });
       return fluxesFiltered;
+    },
+    ecModelFluxes(fluxes) {
+      // TODO
+      const originalFluxes = {};
+      Object.keys(fluxes).forEach(rxn => {
+        if (rxn.startsWith("arm_")) {
+          // For isozymes, use the flux in the armed reaction
+          originalFluxes[rxn.substring(4)] = fluxes[rxn];
+        } else {
+          // Normal reaction, use the flux as-is
+          originalFluxes[rxn] = fluxes[rxn];
+        }
+      });
+      return originalFluxes;
     },
     getObjectState(id: string, type: string) {
       if (
