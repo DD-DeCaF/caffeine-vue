@@ -64,7 +64,7 @@
                     <div v-for="(compound, index) in compounds" :key="index">
                       <v-layout>
                         <v-flex xs3>
-                          <v-text-field
+                          <v-number-field
                             v-model.number="compound.mass_concentration"
                             :rules="[
                               rules.conditionallyRequired(
@@ -76,10 +76,9 @@
                             label="Mass Concentration"
                             hint="mmol l <sup>-1</sup>"
                             persistent-hint
-                            type="number"
                             step="any"
                             class="mx-2"
-                          ></v-text-field>
+                          ></v-number-field>
                         </v-flex>
 
                         <v-flex xs8>
