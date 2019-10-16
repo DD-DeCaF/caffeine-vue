@@ -22,7 +22,7 @@
             <div class="display-1 mb-2">{{ selectedTable.name }}</div>
             <!-- Conditions table -->
             <v-form-extended
-              v-model="isTableValid.conditions"
+              v-model="tables.conditions.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'conditions'">
@@ -149,7 +149,7 @@
 
             <!-- Samples table -->
             <v-form-extended
-              v-model="isTableValid.samples"
+              v-model="tables.samples.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'samples'">
@@ -229,7 +229,7 @@
 
             <!-- Fluxomics table -->
             <v-form-extended
-              v-model="isTableValid.fluxomics"
+              v-model="tables.fluxomics.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'fluxomics'">
@@ -331,7 +331,7 @@
 
             <!-- Metabolomics table -->
             <v-form-extended
-              v-model="isTableValid.metabolomics"
+              v-model="tables.metabolomics.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'metabolomics'">
@@ -431,7 +431,7 @@
 
             <!-- Uptake/Secretion rates table -->
             <v-form-extended
-              v-model="isTableValid.uptakeSecretion"
+              v-model="tables.uptakeSecretion.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'uptakeSecretion'">
@@ -533,7 +533,7 @@
 
             <!-- Molar Yields table -->
             <v-form-extended
-              v-model="isTableValid.molarYields"
+              v-model="tables.molarYields.isValid"
               immediatelyValidated
             >
               <div v-show="selectedTableKey === 'molarYields'">
@@ -651,7 +651,10 @@
             </v-form-extended>
 
             <!-- Growth table -->
-            <v-form-extended v-model="isTableValid.growth" immediatelyValidated>
+            <v-form-extended
+              v-model="tables.growth.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'growth'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -730,7 +733,7 @@
         <v-flex md2>
           <v-card class="pa-4" height="100%" elevation="0">
             <v-form-extended
-              v-model="isTableValid.experiment"
+              v-model="isExperimentDataValid"
               immediatelyValidated
             >
               <v-text-field
@@ -783,13 +786,13 @@
                     ></v-radio>
                     <v-icon
                       v-if="
-                        isTableValid[table.value] &&
+                        table.isValid &&
                           table.items.some(item => item[table.mainField])
                       "
                       color="success"
                       >done</v-icon
                     >
-                    <v-icon v-if="!isTableValid[table.value]" color="error"
+                    <v-icon v-if="!table.isValid" color="error"
                       >error_outline</v-icon
                     >
                   </v-layout>
@@ -857,22 +860,13 @@ function getInitialState() {
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
     isExperimentCreationSuccess: false,
+    isExperimentDataValid: true,
     isMoreDataRequired: false,
     currentRowIndex: null,
     submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
-    isTableValid: {
-      experiment: true,
-      conditions: true,
-      samples: true,
-      fluxomics: true,
-      metabolomics: true,
-      updateSecretition: true,
-      molarYields: true,
-      growth: true
-    },
     // Display all rows on a single page
     // We are relying on data table's `index` (for currentRowIndex and @paste)
     // but that only works correctly on the first page
@@ -883,7 +877,6 @@ function getInitialState() {
     tables: {
       conditions: {
         name: "Conditions",
-        value: "conditions",
         /**
          * Until mainField is defined, the row should be ignored when submitting
          * and validating.
@@ -906,11 +899,11 @@ function getInitialState() {
             return match || { _pastedText: str };
           }
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       samples: {
         name: "Samples",
-        value: "samples",
         mainField: "name",
         headers: [
           { text: "Condition *", value: "condition", width: "30%" },
@@ -924,11 +917,11 @@ function getInitialState() {
           startTime: str => parseFloat(str),
           endTime: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       fluxomics: {
         name: "Fluxomics",
-        value: "fluxomics",
         mainField: "sample",
         headers: [
           { text: "Sample *", value: "sample", width: "25%" },
@@ -944,11 +937,11 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       metabolomics: {
         name: "Metabolomics",
-        value: "metabolomics",
         mainField: "sample",
         headers: [
           { text: "Sample *", value: "sample", width: "25%" },
@@ -962,11 +955,11 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
-        value: "uptakeSecretion",
         mainField: "sample",
         headers: [
           { text: "Sample *", value: "sample", width: "25%" },
@@ -980,11 +973,11 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       molarYields: {
         name: "Molar Yields",
-        value: "molarYields",
         mainField: "sample",
         headers: [
           { text: "Sample *", value: "sample", width: "20%" },
@@ -1008,11 +1001,11 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       growth: {
         name: "Growth",
-        value: "growth",
         mainField: "sample",
         headers: [
           { text: "Sample *", value: "sample", width: "30%" },
@@ -1024,7 +1017,8 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       }
     }
   };
@@ -1085,7 +1079,10 @@ export default Vue.extend({
       return Math.round(100 / this.itemsToPostAmount);
     },
     isValid() {
-      return Object.values(this.isTableValid).every(Boolean);
+      return (
+        Object.values(this.tables).every((table: any) => table.isValid) &&
+        this.isExperimentDataValid
+      );
     }
   },
   methods: {
