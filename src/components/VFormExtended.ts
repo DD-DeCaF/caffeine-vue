@@ -11,7 +11,6 @@ export default Vue.extend({
     inputs: {
       immediate: true,
       handler() {
-        debugger;
         if (this.immediatelyValidated) {
           this.validate();
         }

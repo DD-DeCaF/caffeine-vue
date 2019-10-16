@@ -735,12 +735,12 @@
             >
               <v-text-field
                 v-model="experiment.name"
-                label="Experiment name"
+                label="Experiment name *"
                 :rules="[requiredIfHasCondition(experiment.name)]"
               ></v-text-field>
               <v-textarea
                 v-model="experiment.description"
-                label="Description"
+                label="Description *"
                 :rules="[requiredIfHasCondition(experiment.description)]"
                 auto-grow
                 rows="1"
@@ -752,7 +752,7 @@
                 :items="availableProjects"
                 :rules="[requiredIfHasCondition(experiment.project_id)]"
                 name="project"
-                label="Project"
+                label="Project *"
                 type="text"
                 ref="projectAutocomplete"
               >
@@ -890,9 +890,9 @@ function getInitialState() {
          */
         mainField: "name",
         headers: [
-          { text: "Name", value: "name", width: "35%" },
-          { text: "Strain", value: "strain", width: "30%" },
-          { text: "Medium", value: "medium", width: "30%" },
+          { text: "Name *", value: "name", width: "35%" },
+          { text: "Strain *", value: "strain", width: "30%" },
+          { text: "Medium *", value: "medium", width: "30%" },
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
@@ -913,9 +913,9 @@ function getInitialState() {
         value: "samples",
         mainField: "name",
         headers: [
-          { text: "Condition", value: "condition", width: "30%" },
-          { text: "Name", value: "name", width: "25%" },
-          { text: "Start time", value: "startTime", width: "20%" },
+          { text: "Condition *", value: "condition", width: "30%" },
+          { text: "Name *", value: "name", width: "25%" },
+          { text: "Start time *", value: "startTime", width: "20%" },
           { text: "End time", value: "endTime", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -931,9 +931,9 @@ function getInitialState() {
         value: "fluxomics",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Reaction", value: "reaction", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Reaction *", value: "reaction", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -951,9 +951,9 @@ function getInitialState() {
         value: "metabolomics",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Compound *", value: "compound", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -969,9 +969,9 @@ function getInitialState() {
         value: "uptakeSecretion",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Compound *", value: "compound", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -987,18 +987,18 @@ function getInitialState() {
         value: "molarYields",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "20%" },
+          { text: "Sample *", value: "sample", width: "20%" },
           {
-            text: "Product",
+            text: "Product *",
             value: "product",
             width: "25%"
           },
           {
-            text: "Substrate",
+            text: "Substrate *",
             value: "substrate",
             width: "25%"
           },
-          { text: "Measurement", value: "measurement", width: "12.5%" },
+          { text: "Measurement *", value: "measurement", width: "12.5%" },
           { text: "Uncertainty", value: "uncertainty", width: "12.5%" },
           { value: "actions", width: "5%" }
         ],
@@ -1015,8 +1015,8 @@ function getInitialState() {
         value: "growth",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "30%" },
+          { text: "Sample *", value: "sample", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "30%" },
           { text: "Uncertainty", value: "uncertainty", width: "30%" },
           { value: "actions", width: "10%" }
         ],
