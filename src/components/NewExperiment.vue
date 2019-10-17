@@ -10,18 +10,21 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <v-form v-model="isValid" ref="newExperimentForm">
-      <v-dialog
-        v-model="isDialogVisible"
-        full-width
-        content-class="full-height-dialog"
-        scrollable
-      >
-        <v-layout>
-          <v-flex md10>
-            <v-card class="pa-4 scroll" height="100%" elevation="0">
-              <div class="display-1 mb-2">{{ selectedTable.name }}</div>
-              <!-- Conditions table -->
+    <v-dialog
+      v-model="isDialogVisible"
+      full-width
+      content-class="full-height-dialog"
+      scrollable
+    >
+      <v-layout>
+        <v-flex md10>
+          <v-card class="pa-4 scroll" height="100%" elevation="0">
+            <div class="display-1 mb-2">{{ selectedTable.name }}</div>
+            <!-- Conditions table -->
+            <v-form-extended
+              v-model="tables.conditions.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'conditions'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -142,8 +145,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Samples table -->
+            <!-- Samples table -->
+            <v-form-extended
+              v-model="tables.samples.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'samples'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -217,8 +225,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Fluxomics table -->
+            <!-- Fluxomics table -->
+            <v-form-extended
+              v-model="tables.fluxomics.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'fluxomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -312,8 +325,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Metabolomics table -->
+            <!-- Metabolomics table -->
+            <v-form-extended
+              v-model="tables.metabolomics.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'metabolomics'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -405,8 +423,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Uptake/Secretion rates table -->
+            <!-- Uptake/Secretion rates table -->
+            <v-form-extended
+              v-model="tables.uptakeSecretion.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -500,8 +523,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Molar Yields table -->
+            <!-- Molar Yields table -->
+            <v-form-extended
+              v-model="tables.molarYields.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'molarYields'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -612,8 +640,13 @@
                   >Add row</v-btn
                 >
               </div>
+            </v-form-extended>
 
-              <!-- Growth table -->
+            <!-- Growth table -->
+            <v-form-extended
+              v-model="tables.growth.isValid"
+              immediatelyValidated
+            >
               <div v-show="selectedTableKey === 'growth'">
                 <v-data-table
                   :headers="selectedTable.headers"
@@ -680,22 +713,27 @@
                   >Add row</v-btn
                 >
               </div>
-            </v-card>
-          </v-flex>
+            </v-form-extended>
+          </v-card>
+        </v-flex>
 
-          <v-divider vertical></v-divider>
+        <v-divider vertical></v-divider>
 
-          <!-- Selection area -->
-          <v-flex md2>
-            <v-card class="pa-4" height="100%" elevation="0">
+        <!-- Selection area -->
+        <v-flex md2>
+          <v-card class="pa-4" height="100%" elevation="0">
+            <v-form-extended
+              v-model="isExperimentDataValid"
+              immediatelyValidated
+            >
               <v-text-field
                 v-model="experiment.name"
-                label="Experiment name"
+                label="Experiment name *"
                 :rules="[requiredIfHasCondition(experiment.name)]"
               ></v-text-field>
               <v-textarea
                 v-model="experiment.description"
-                label="Description"
+                label="Description *"
                 :rules="[requiredIfHasCondition(experiment.description)]"
                 auto-grow
                 rows="1"
@@ -707,7 +745,7 @@
                 :items="availableProjects"
                 :rules="[requiredIfHasCondition(experiment.project_id)]"
                 name="project"
-                label="Project"
+                label="Project *"
                 type="text"
                 ref="projectAutocomplete"
               >
@@ -728,13 +766,27 @@
                 </template>
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
-                <v-radio
-                  v-for="(table, key) in tables"
-                  :key="key"
-                  :label="table.name"
-                  :value="key"
-                  color="primary"
-                ></v-radio>
+                <div v-for="(table, key) in tables" :key="key">
+                  <v-layout>
+                    <v-radio
+                      :label="table.name"
+                      :value="key"
+                      color="primary"
+                      class="mb-1"
+                    ></v-radio>
+                    <v-icon
+                      v-if="
+                        table.isValid &&
+                          table.items.some(item => item[table.mainField])
+                      "
+                      color="success"
+                      >done</v-icon
+                    >
+                    <v-icon v-if="!table.isValid" color="error"
+                      >error_outline</v-icon
+                    >
+                  </v-layout>
+                </div>
               </v-radio-group>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -745,6 +797,7 @@
                   color="primary"
                   @click="createExperiment()"
                   :loading="isSubmitting"
+                  :disabled="!isValid"
                   >Submit
                 </v-btn>
               </v-card-actions>
@@ -755,21 +808,21 @@
                   class="my-2"
                 ></v-progress-linear>
               </div>
-            </v-card>
-          </v-flex>
-        </v-layout>
-      </v-dialog>
-      <v-snackbar
-        color="success"
-        v-model="isExperimentCreationSuccess"
-        :timeout="5000"
-      >
-        {{ experiment.name }} successfully created.
-      </v-snackbar>
-      <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
-        Please enter condition, sample and at least one measurement.
-      </v-snackbar>
-    </v-form>
+            </v-form-extended>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-dialog>
+    <v-snackbar
+      color="success"
+      v-model="isExperimentCreationSuccess"
+      :timeout="5000"
+    >
+      {{ experiment.name }} successfully created.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
+      Please enter condition, sample and at least one measurement.
+    </v-snackbar>
   </div>
 </template>
 
@@ -797,7 +850,7 @@ function getInitialState() {
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
     isExperimentCreationSuccess: false,
-    isValid: false,
+    isExperimentDataValid: true,
     isMoreDataRequired: false,
     currentRowIndex: null,
     submitProgressValue: 0,
@@ -820,9 +873,9 @@ function getInitialState() {
          */
         mainField: "name",
         headers: [
-          { text: "Name", value: "name", width: "35%" },
-          { text: "Strain", value: "strain", width: "30%" },
-          { text: "Medium", value: "medium", width: "30%" },
+          { text: "Name *", value: "name", width: "35%" },
+          { text: "Strain *", value: "strain", width: "30%" },
+          { text: "Medium *", value: "medium", width: "30%" },
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
@@ -836,15 +889,16 @@ function getInitialState() {
             return match || { _pastedText: str };
           }
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       samples: {
         name: "Samples",
         mainField: "name",
         headers: [
-          { text: "Condition", value: "condition", width: "30%" },
-          { text: "Name", value: "name", width: "25%" },
-          { text: "Start time", value: "startTime", width: "20%" },
+          { text: "Condition *", value: "condition", width: "30%" },
+          { text: "Name *", value: "name", width: "25%" },
+          { text: "Start time *", value: "startTime", width: "20%" },
           { text: "End time", value: "endTime", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -853,15 +907,16 @@ function getInitialState() {
           startTime: str => parseFloat(str),
           endTime: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       fluxomics: {
         name: "Fluxomics",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Reaction", value: "reaction", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Reaction *", value: "reaction", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -872,15 +927,16 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       metabolomics: {
         name: "Metabolomics",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Compound *", value: "compound", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -889,15 +945,16 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "25%" },
-          { text: "Compound", value: "compound", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "20%" },
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Compound *", value: "compound", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
           { text: "Uncertainty", value: "uncertainty", width: "20%" },
           { value: "actions", width: "5%" }
         ],
@@ -906,24 +963,25 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       molarYields: {
         name: "Molar Yields",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "20%" },
+          { text: "Sample *", value: "sample", width: "20%" },
           {
-            text: "Product",
+            text: "Product *",
             value: "product",
             width: "25%"
           },
           {
-            text: "Substrate",
+            text: "Substrate *",
             value: "substrate",
             width: "25%"
           },
-          { text: "Measurement", value: "measurement", width: "12.5%" },
+          { text: "Measurement *", value: "measurement", width: "12.5%" },
           { text: "Uncertainty", value: "uncertainty", width: "12.5%" },
           { value: "actions", width: "5%" }
         ],
@@ -933,14 +991,15 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       },
       growth: {
         name: "Growth",
         mainField: "sample",
         headers: [
-          { text: "Sample", value: "sample", width: "30%" },
-          { text: "Measurement", value: "measurement", width: "30%" },
+          { text: "Sample *", value: "sample", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "30%" },
           { text: "Uncertainty", value: "uncertainty", width: "30%" },
           { value: "actions", width: "10%" }
         ],
@@ -948,7 +1007,8 @@ function getInitialState() {
           measurement: str => parseFloat(str),
           uncertainty: str => parseFloat(str)
         },
-        items: [{ temporaryId: uuidv4() }]
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
       }
     }
   };
@@ -1007,22 +1067,19 @@ export default Vue.extend({
     },
     itemWeight() {
       return Math.round(100 / this.itemsToPostAmount);
+    },
+    isValid() {
+      return (
+        Object.values(this.tables).every((table: any) => table.isValid) &&
+        this.isExperimentDataValid
+      );
     }
-  },
-  mounted() {
-    setTimeout(() => {
-      // Show validation messages before user activates each input.
-      this.$refs.newExperimentForm.validate();
-    }, 0);
   },
   methods: {
     addRow(tableKey) {
       this.tables[tableKey].items.push({
         temporaryId: uuidv4()
       });
-      setTimeout(() => {
-        this.$refs.newExperimentForm.validate();
-      }, 0);
     },
     deleteCondition(conditionId) {
       const relatedSamples = this.tables.samples.items.filter(
@@ -1245,16 +1302,12 @@ export default Vue.extend({
             Vue.set(table.items[rowOffset + rowIx], property, value);
           });
         });
-        setTimeout(() => {
-          this.$refs.newExperimentForm.validate();
-        }, 0);
       });
     },
     onChange(item, property, value) {
       Vue.set(item, property, value);
     },
     clear() {
-      this.$refs.newExperimentForm.resetValidation();
       Object.assign(this.$data, getInitialState());
     },
     createExperiment() {
@@ -1283,8 +1336,6 @@ export default Vue.extend({
       if (this.isMoreDataRequired) {
         return;
       }
-
-      this.$refs.newExperimentForm.validate();
       this.conditionTempIdsMap = {};
       this.sampleTempIdsMap = {};
       this.isSubmitting = true;
