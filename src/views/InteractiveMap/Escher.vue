@@ -361,18 +361,35 @@ export default Vue.extend({
       return fluxesFiltered;
     },
     ecModelFluxes(fluxes) {
-      // TODO
-      const originalFluxes = {};
+      // Map fluxes from an enzyme-constrained model to the corresponding
+      // escher map, as reaction ids from ecModels have additional prefixes
+      // and/or suffixes.
+      const fluxesMapped = {};
       Object.keys(fluxes).forEach(rxn => {
+        var newRxn = rxn;
+        var newFlux = fluxes[rxn];
         if (rxn.startsWith("arm_")) {
-          // For isozymes, use the flux in the armed reaction
-          originalFluxes[rxn.substring(4)] = fluxes[rxn];
-        } else {
-          // Normal reaction, use the flux as-is
-          originalFluxes[rxn] = fluxes[rxn];
+          // For isozymes, use the flux in the reaction "arm_XXX".
+          newRxn = rxn.substring(4);
+        } else if (rxn.endsWith("No1")) {
+          // For single enzymes, use the flux in the reaction "XXXNo1" (for
+          // this, check first that no arm reaction is already present).
+          const rootRxn = rxn.substring(0, rxn.length - 3);
+          if (!Object.keys(fluxesMapped).includes(rootRxn)) {
+            newRxn = rootRxn;
+          }
+        }
+        fluxesMapped[newRxn] = newFlux;
+        if (newRxn.endsWith("_REV") && fluxes[rxn] > 0) {
+          // For reversible enzymes ("XXX_REV") that are active in the backwards
+          // direction, replace the existing flux in the forward reaction by the
+          // negative value.
+          newRxn = newRxn.substring(0, newRxn.length - 4);
+          newFlux = newFlux * -1;
+          fluxesMapped[newRxn] = newFlux;
         }
       });
-      return originalFluxes;
+      return fluxesMapped;
     },
     getObjectState(id: string, type: string) {
       if (
