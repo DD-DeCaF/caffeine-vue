@@ -5,14 +5,13 @@
       @return-object="passMetabolite"
     />
     <v-flex xs1>
-      <v-text-field
+      <v-number-field
         v-model.number="metabolite.stoichiometry"
         :rules="[stoichiometryRules(metabolite)]"
         solo
         class="mx-1"
-        type="number"
         step="any"
-      ></v-text-field></v-flex
+      ></v-number-field></v-flex
     ><v-flex xs8>
       <v-autocomplete-extended
         v-model="metabolite.metabolite"

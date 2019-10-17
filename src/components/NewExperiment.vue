@@ -278,11 +278,10 @@
                       ></AutocompleteMnxReaction>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="fluxomicsItem.measurement"
+                      <v-number-field
+                        v-model.number="fluxomicsItem.measurement"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         :rules="[
                           requiredIfHasMain(
@@ -292,17 +291,16 @@
                           )
                         ]"
                         @paste="paste(2, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="fluxomicsItem.uncertainty"
+                      <v-number-field
+                        v-model.number="fluxomicsItem.uncertainty"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(3, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
                       <v-btn
@@ -378,11 +376,10 @@
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="metabolomicsItem.measurement"
+                      <v-number-field
+                        v-model.number="metabolomicsItem.measurement"
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(2, index, selectedTable, $event)"
                         :rules="[
@@ -392,17 +389,16 @@
                             metabolomicsItem
                           )
                         ]"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="metabolomicsItem.uncertainty"
+                      <v-number-field
+                        v-model.number="metabolomicsItem.uncertainty"
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(3, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
                       <v-btn
@@ -480,11 +476,10 @@
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="uptakeSecretionItem.measurement"
+                      <v-number-field
+                        v-model.number="uptakeSecretionItem.measurement"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(2, index, selectedTable, $event)"
                         :rules="[
@@ -494,17 +489,16 @@
                             uptakeSecretionItem
                           )
                         ]"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="uptakeSecretionItem.uncertainty"
+                      <v-number-field
+                        v-model.number="uptakeSecretionItem.uncertainty"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(3, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
                       <v-btn
@@ -599,11 +593,10 @@
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="molarYieldsItem.measurement"
+                      <v-number-field
+                        v-model.number="molarYieldsItem.measurement"
                         hint="mmol-product / mmol-substrate"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(3, index, selectedTable, $event)"
                         :rules="[
@@ -613,17 +606,16 @@
                             molarYieldsItem
                           )
                         ]"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="molarYieldsItem.uncertainty"
+                      <v-number-field
+                        v-model.number="molarYieldsItem.uncertainty"
                         hint="mmol-product / mmol-substrate"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(4, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
                       <v-btn
@@ -677,11 +669,10 @@
                       </v-select>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="growthItem.measurement"
+                      <v-number-field
+                        v-model.number="growthItem.measurement"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         :rules="[
                           requiredIfHasMain(
@@ -691,17 +682,16 @@
                           )
                         ]"
                         @paste="paste(1, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
-                      <v-text-field
-                        v-model="growthItem.uncertainty"
+                      <v-number-field
+                        v-model.number="growthItem.uncertainty"
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
-                        type="number"
                         step="any"
                         @paste="paste(2, index, selectedTable, $event)"
-                      ></v-text-field>
+                      ></v-number-field>
                     </td>
                     <td>
                       <v-btn

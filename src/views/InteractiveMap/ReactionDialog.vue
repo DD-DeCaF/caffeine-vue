@@ -22,22 +22,20 @@
         <v-layout align-center>
           <div class="mr-3 body-2">Bounds:</div>
           <v-flex xs2 mx-2>
-            <v-text-field
+            <v-number-field
               v-model.number="lowerBound"
-              type="number"
               step="any"
               label="Lower bound"
               :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
-            ></v-text-field>
+            ></v-number-field>
           </v-flex>
           <v-flex xs2 mx-2>
-            <v-text-field
+            <v-number-field
               v-model.number="upperBound"
-              type="number"
               step="any"
               label="Upper bound"
               :rules="[singleBoundRules, boundRules(lowerBound, upperBound)]"
-            ></v-text-field>
+            ></v-number-field>
           </v-flex>
         </v-layout>
         <div class="body-2 my-2">

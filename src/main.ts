@@ -21,6 +21,7 @@ import VAutocompleteExtended from "@/components/VAutocompleteExtended";
 import VFormExtended from "@/components/VFormExtended";
 import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
 import AutocompleteMnxMetabolite from "@/components/AutocompleteMnxMetabolite.vue";
+import VNumberField from "@/components/VNumberField.vue";
 import { initFromStorage } from "@/utils/startup";
 import promisedDialog from "@/utils/promisedDialog";
 import * as Sentry from "@sentry/browser";
@@ -73,6 +74,7 @@ Vue.component("AutocompleteMnxMetabolite", AutocompleteMnxMetabolite);
 Vue.component("v-select-extended", VSelectExtended);
 Vue.component("v-autocomplete-extended", VAutocompleteExtended);
 Vue.component("v-form-extended", VFormExtended);
+Vue.component("v-number-field", VNumberField);
 
 // Synchronously initialize values from local storage before the main Vue
 // instance is created.

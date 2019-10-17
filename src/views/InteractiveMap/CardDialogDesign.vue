@@ -111,22 +111,20 @@
           ></v-autocomplete-extended>
         </v-flex>
         <v-flex shrink mr-2>
-          <v-text-field
+          <v-number-field
             v-model.number="editBoundsLowerBound"
-            type="number"
             step="any"
             label="Lower bound"
             :rules="[editBoundsBoundRule]"
-          ></v-text-field>
+          ></v-number-field>
         </v-flex>
         <v-flex shrink mr-2>
-          <v-text-field
+          <v-number-field
             v-model.number="editBoundsUpperBound"
-            type="number"
             step="any"
             label="Upper bound"
             :rules="[editBoundsBoundRule]"
-          ></v-text-field>
+          ></v-number-field>
         </v-flex>
         <v-flex shrink>
           <v-btn
