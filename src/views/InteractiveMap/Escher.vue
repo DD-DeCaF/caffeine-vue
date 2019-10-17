@@ -369,11 +369,11 @@ export default Vue.extend({
         let newRxn = rxn;
         if (rxn.startsWith("arm_")) {
           // For isozymes, use the flux in the reaction "arm_XXX".
-          newRxn = rxn.substring(4);
+          newRxn = rxn.slice(4);
         } else if (rxn.endsWith("No1")) {
           // For single enzymes, use the flux in the reaction "XXXNo1" (for
           // this, check first that no arm reaction is already present).
-          const rootRxn = rxn.substring(0, rxn.length - 3);
+          const rootRxn = rxn.slice(0, -3);
           if (!("arm_" + rootRxn in fluxes)) {
             newRxn = rootRxn;
           }
@@ -385,7 +385,7 @@ export default Vue.extend({
           // For reversible enzymes ("XXX_REV") that are active in the backwards
           // direction, replace the existing flux in the forward reaction by the
           // negative value.
-          const forwardRxn = rxn.substring(0, rxn.length - 4);
+          const forwardRxn = rxn.slice(0, -4);
           fluxesMapped[forwardRxn] = -fluxesMapped[rxn];
         }
       });
