@@ -366,8 +366,7 @@ export default Vue.extend({
       // and/or suffixes.
       const fluxesMapped = {};
       Object.keys(fluxes).forEach(rxn => {
-        var newRxn = rxn;
-        var newFlux = fluxes[rxn];
+        let newRxn = rxn;
         if (rxn.startsWith("arm_")) {
           // For isozymes, use the flux in the reaction "arm_XXX".
           newRxn = rxn.substring(4);
@@ -375,18 +374,17 @@ export default Vue.extend({
           // For single enzymes, use the flux in the reaction "XXXNo1" (for
           // this, check first that no arm reaction is already present).
           const rootRxn = rxn.substring(0, rxn.length - 3);
-          if (!Object.keys(fluxesMapped).includes(rootRxn)) {
+          if (!(rootRxn in fluxesMapped)) {
             newRxn = rootRxn;
           }
         }
-        fluxesMapped[newRxn] = newFlux;
+        fluxesMapped[newRxn] = fluxes[rxn];
         if (newRxn.endsWith("_REV") && fluxes[rxn] > 0) {
           // For reversible enzymes ("XXX_REV") that are active in the backwards
           // direction, replace the existing flux in the forward reaction by the
           // negative value.
           newRxn = newRxn.substring(0, newRxn.length - 4);
-          newFlux = newFlux * -1;
-          fluxesMapped[newRxn] = newFlux;
+          fluxesMapped[newRxn] = -fluxes[rxn];
         }
       });
       return fluxesMapped;
