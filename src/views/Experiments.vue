@@ -1,73 +1,87 @@
 <template>
-  <v-container fluid>
-    <DeletionDialog
-      v-model="isDeletionDialogVisible"
-      :items="[experimentToDelete]"
-      itemsType="experiments"
-      @toggleLoader="toggleLoader()"
-    />
-    <NewExperiment v-model="isNewExperimentDialogVisible" />
-    <v-layout justify-center>
-      <v-flex md9>
-        <h1 class="mb-2">Experiments</h1>
-        <v-data-table
-          :headers="headers"
-          :items="availableExperiments"
-          class="elevation-8"
-          :loading="isLoading || isDeleting"
-          :pagination.sync="pagination"
-        >
-          <template v-slot:items="{ item: experiment }">
-            <td>{{ experiment.name }}</td>
-            <td>{{ experiment.description }}</td>
-            <td>{{ experiment.created | moment("D MMM YYYY, HH:mm") }}</td>
-            <td>
-              <v-tooltip
-                bottom
-                :disabled="isAuthenticated && experiment.project_id !== null"
-              >
-                <div v-if="!isAuthenticated">
-                  <span>
-                    {{ $store.state.commonTooltipMessages.unauthenticated }}
-                  </span>
-                </div>
-                <div v-else-if="experiment.project_id === null">
-                  <span>
-                    {{ $store.state.commonTooltipMessages.publicData }}
-                  </span>
-                </div>
-                <v-icon
-                  slot="activator"
-                  @click="deleteItem(experiment)"
-                  :disabled="!isAuthenticated || experiment.project_id === null"
-                >
-                  delete
-                </v-icon>
-              </v-tooltip>
-            </td>
-          </template>
-        </v-data-table>
-        <v-tooltip bottom :disabled="isAuthenticated">
-          <span>
-            {{ $store.state.commonTooltipMessages.unauthenticated }}
-          </span>
-          <v-btn
-            slot="activator"
-            fixed
-            fab
-            bottom
-            right
-            :disabled="!isAuthenticated"
-            @click.stop="isNewExperimentDialogVisible = true"
-            color="primary"
-            v-bind:style="styleObject"
+  <div>
+    <v-container fluid>
+      <DeletionDialog
+        v-model="isDeletionDialogVisible"
+        :items="[experimentToDelete]"
+        itemsType="experiments"
+        @toggleLoader="toggleLoader()"
+      />
+      <NewExperiment
+        v-model="isNewExperimentDialogVisible"
+        @new-experiment-success="onNewExperimentSuccess"
+      />
+      <v-layout justify-center>
+        <v-flex md9>
+          <h1 class="mb-2">Experiments</h1>
+          <v-data-table
+            :headers="headers"
+            :items="availableExperiments"
+            class="elevation-8"
+            :loading="isLoading || isDeleting"
+            :pagination.sync="pagination"
           >
-            <v-icon>add</v-icon>
-          </v-btn>
-        </v-tooltip>
-      </v-flex>
-    </v-layout>
-  </v-container>
+            <template v-slot:items="{ item: experiment }">
+              <td>{{ experiment.name }}</td>
+              <td>{{ experiment.description }}</td>
+              <td>{{ experiment.created | moment("D MMM YYYY, HH:mm") }}</td>
+              <td>
+                <v-tooltip
+                  bottom
+                  :disabled="isAuthenticated && experiment.project_id !== null"
+                >
+                  <div v-if="!isAuthenticated">
+                    <span>
+                      {{ $store.state.commonTooltipMessages.unauthenticated }}
+                    </span>
+                  </div>
+                  <div v-else-if="experiment.project_id === null">
+                    <span>
+                      {{ $store.state.commonTooltipMessages.publicData }}
+                    </span>
+                  </div>
+                  <v-icon
+                    slot="activator"
+                    @click="deleteItem(experiment)"
+                    :disabled="
+                      !isAuthenticated || experiment.project_id === null
+                    "
+                  >
+                    delete
+                  </v-icon>
+                </v-tooltip>
+              </td>
+            </template>
+          </v-data-table>
+          <v-tooltip bottom :disabled="isAuthenticated">
+            <span>
+              {{ $store.state.commonTooltipMessages.unauthenticated }}
+            </span>
+            <v-btn
+              slot="activator"
+              fixed
+              fab
+              bottom
+              right
+              :disabled="!isAuthenticated"
+              @click.stop="isNewExperimentDialogVisible = true"
+              color="primary"
+              v-bind:style="styleObject"
+            >
+              <v-icon>add</v-icon>
+            </v-btn>
+          </v-tooltip>
+        </v-flex>
+      </v-layout>
+    </v-container>
+    <v-snackbar
+      color="success"
+      v-model="isNewExperimentSuccess"
+      :timeout="5000"
+    >
+      {{ newExperimentName }} successfully created.
+    </v-snackbar>
+  </div>
 </template>
 
 <script lang="ts">
@@ -81,6 +95,8 @@ export default Vue.extend({
   },
   data: () => ({
     isLoading: true,
+    isNewExperimentSuccess: false,
+    newExperimentName: null,
     headers: [
       { text: "Name", value: "name", width: "20%" },
       { text: "Description", value: "description", width: "50%" },
@@ -120,6 +136,10 @@ export default Vue.extend({
     },
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
+    },
+    onNewExperimentSuccess(experimentName) {
+      this.newExperimentName = experimentName;
+      this.isNewExperimentSuccess = true;
     }
   }
 });
