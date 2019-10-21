@@ -61,7 +61,6 @@
                             condition
                           )
                         ]"
-                        @change="updateRelevantModels(condition)"
                         @paste="paste(1, index, selectedTable, $event)"
                       >
                         <template v-slot:prepend-item>
@@ -252,7 +251,6 @@
                         item-value="temporaryId"
                         v-model="fluxomicsItem.sample"
                         no-data-text="No data available. You can add it in Samples table."
-                        @change="getRelevantModelIds(fluxomicsItem)"
                       >
                       </v-select>
                     </td>
@@ -262,7 +260,7 @@
                         @change="
                           onChange(fluxomicsItem, 'reaction', $event.reaction)
                         "
-                        :modelIds="fluxomicsItem.modelIds"
+                        :modelIds="getRelevantModelIds(fluxomicsItem)"
                         :rules="[
                           requiredIfHasMain(
                             'fluxomics',
@@ -353,7 +351,6 @@
                         item-value="temporaryId"
                         v-model="metabolomicsItem.sample"
                         no-data-text="No data available. You can add it in Samples table."
-                        @change="getRelevantModelIds(metabolomicsItem)"
                       >
                       </v-select>
                     </td>
@@ -366,7 +363,7 @@
                           metabolomicsItem.compound &&
                             metabolomicsItem.compound._pastedText
                         "
-                        :modelIds="metabolomicsItem.modelIds"
+                        :modelIds="getRelevantModelIds(metabolomicsItem)"
                         :rules="[
                           requiredIfHasMain(
                             'metabolomics',
@@ -452,7 +449,6 @@
                         item-value="temporaryId"
                         v-model="uptakeSecretionItem.sample"
                         no-data-text="No data available. You can add it in Samples table."
-                        @change="getRelevantModelIds(uptakeSecretionItem)"
                       >
                       </v-select>
                     </td>
@@ -467,7 +463,7 @@
                           uptakeSecretionItem.compound &&
                             uptakeSecretionItem.compound._pastedText
                         "
-                        :modelIds="uptakeSecretionItem.modelIds"
+                        :modelIds="getRelevantModelIds(uptakeSecretionItem)"
                         :rules="[
                           requiredIfHasMain(
                             'uptakeSecretion',
@@ -553,7 +549,6 @@
                         item-value="temporaryId"
                         v-model="molarYieldsItem.sample"
                         no-data-text="No data available. You can add it in Samples table."
-                        @change="getRelevantModelIds(molarYieldsItem)"
                       >
                       </v-select>
                     </td>
@@ -566,7 +561,7 @@
                           molarYieldsItem.product &&
                             molarYieldsItem.product._pastedText
                         "
-                        :modelIds="molarYieldsItem.modelIds"
+                        :modelIds="getRelevantModelIds(molarYieldsItem)"
                         :rules="[
                           requiredIfHasMain(
                             'molarYields',
@@ -586,7 +581,7 @@
                           molarYieldsItem.substrate &&
                             molarYieldsItem.substrate._pastedText
                         "
-                        :modelIds="molarYieldsItem.modelIds"
+                        :modelIds="getRelevantModelIds(molarYieldsItem)"
                         :rules="[
                           requiredIfHasMain(
                             'molarYields',
@@ -1175,43 +1170,19 @@ export default Vue.extend({
     passProject(project) {
       this.experiment.project_id = project.id;
     },
-    updateRelevantModels(condition) {
-      const conditionId = condition.temporaryId;
-      this.tables.samples.items
-        .filter(
-          sample =>
-            sample.condition && sample.condition.temporaryId === conditionId
-        )
-        .forEach(sample => {
-          const sampleId = sample.temporaryId;
-          [
-            "fluxomics",
-            "metabolomics",
-            "uptakeSecretion",
-            "molarYields"
-          ].forEach(tableKey => {
-            this.tables[tableKey].items
-              .filter(
-                item => item.sample && item.sample.temporaryId === sampleId
-              )
-              .forEach(item => this.getRelevantModelIds(item));
-          });
-        });
-    },
     getRelevantModelIds(item) {
       // Get ids of the models the selected organism belongs to
       // in order to prioritize reaction and compound results from autocomplete
       const organismId =
-        item.sample.condition && item.sample.condition.strain
+        item.sample && item.sample.condition && item.sample.condition.strain
           ? item.sample.condition.strain.organism_id
           : null;
-      item.modelIds = this.modelIdsByOrganism[organismId] || [];
+      return this.modelIdsByOrganism[organismId] || [];
     },
     getRelevantModelIdsForNewMedium(condition) {
       const organismId = condition.strain ? condition.strain.organism_id : null;
-      this.selectedMediumRelevantModelIds = this.models
-        .filter(model => model.organism_id === organismId)
-        .map(model => model.id);
+      this.selectedMediumRelevantModelIds =
+        this.modelIdsByOrganism[organismId] || [];
     },
     requiredIfHasMain(tableKey, value, row) {
       const mainField = this.tables[tableKey].mainField;
