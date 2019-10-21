@@ -27,7 +27,7 @@
         equal to the lower bound.
       </v-snackbar>
     </div>
-    <Legend :card="card" />
+    <Legend :card="card" :ecModel="model && model.ec_model" />
   </div>
 </template>
 
@@ -250,6 +250,13 @@ export default Vue.extend({
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
       }
+
+      // We cannot highlight missing reactions for ecModels, since most of the
+      // identifiers on the map would not match those in the model.
+      this.escherBuilder.settings.set(
+        "highlight_missing",
+        !this.model.ec_model
+      );
     },
     setReactionAdditions() {
       if (!this.card) {
@@ -299,34 +306,38 @@ export default Vue.extend({
       if (this.card === null || this.card.fluxes === null) {
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (
-          (this.card.method === "fba" || this.card.method == "pfba") &&
-          !this.showDiffFVAScore
-        ) {
-          const fluxesFiltered = this.fluxFilter(this.card.fluxes);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
-          // Set FVA data with the current fluxes. This resets opacity in case a
-          // previous FVA simulation has been set on the map.
-          // TODO: We should improve the escher API here.
-          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
-        } else if (
-          (this.card.method === "fva" || this.card.method == "pfba-fva") &&
-          !this.showDiffFVAScore
-        ) {
-          // Render a flux distribution using the average values from the FVA
-          // data.
-          const fluxesAverage = {};
-          Object.keys(this.card.fluxes).map(reaction => {
-            const rxn = this.card.fluxes[reaction];
-            const average = (rxn.upper_bound + rxn.lower_bound) / 2;
-            fluxesAverage[reaction] = average;
-          });
-          const fluxesFiltered = this.fluxFilter(fluxesAverage);
-          this.escherBuilder.set_reaction_data(fluxesFiltered);
-          // Set the FVA data for transparency visualization.
-          this.escherBuilder.set_reaction_fva_data(this.card.fluxes);
-        } else if (this.showDiffFVAScore) {
-          // Set the scores instead of the cards fluxes.
+        if (!this.showDiffFVAScore) {
+          // For ecModels, map the simulated flux distribution back to the
+          // original reaction identifiers for the non-ec model, so that they
+          // match with the escher maps.
+          let fluxes = this.card.fluxes;
+          if (this.model.ec_model) {
+            fluxes = this.ecModelFluxes(fluxes);
+          }
+
+          if (this.card.method === "fba" || this.card.method == "pfba") {
+            const fluxesFiltered = this.fluxFilter(fluxes);
+            this.escherBuilder.set_reaction_data(fluxesFiltered);
+            // Set FVA data with the current fluxes. This resets opacity in case
+            // a previous FVA simulation has been set on the map.
+            // TODO: We should improve the escher API here.
+            this.escherBuilder.set_reaction_fva_data(fluxes);
+          } else if (["fva", "pfba-fva"].includes(this.card.method)) {
+            // Render a flux distribution using the average values from the FVA
+            // data.
+            const fluxesAverage = {};
+            Object.keys(fluxes).map(reaction => {
+              const rxn = fluxes[reaction];
+              const average = (rxn.upper_bound + rxn.lower_bound) / 2;
+              fluxesAverage[reaction] = average;
+            });
+            const fluxesFiltered = this.fluxFilter(fluxesAverage);
+            this.escherBuilder.set_reaction_data(fluxesFiltered);
+            // Set the FVA data for transparency visualization.
+            this.escherBuilder.set_reaction_fva_data(fluxes);
+          }
+        } else {
+          // Set the DiffFVA scores instead of the cards fluxes.
           // (calculated from a diffFVA card's manipulations)
           this.escherBuilder.set_reaction_data(this.diffFVAScores);
           // Set the FVA data for transparency visualization as above.
@@ -348,6 +359,37 @@ export default Vue.extend({
         }
       });
       return fluxesFiltered;
+    },
+    ecModelFluxes(fluxes) {
+      // Map fluxes from an enzyme-constrained model to the corresponding
+      // escher map, as reaction ids from ecModels have additional prefixes
+      // and/or suffixes.
+      const fluxesMapped = {};
+      Object.keys(fluxes).forEach(rxn => {
+        let newRxn = rxn;
+        if (rxn.startsWith("arm_")) {
+          // For isozymes, use the flux in the reaction "arm_XXX".
+          newRxn = rxn.slice(4);
+        } else if (rxn.endsWith("No1")) {
+          // For single enzymes, use the flux in the reaction "XXXNo1" (for
+          // this, check first that no arm reaction is already present).
+          const rootRxn = rxn.slice(0, -3);
+          if (!("arm_" + rootRxn in fluxes)) {
+            newRxn = rootRxn;
+          }
+        }
+        fluxesMapped[newRxn] = fluxes[rxn];
+      });
+      Object.keys(fluxesMapped).forEach(rxn => {
+        if (rxn.endsWith("_REV") && fluxesMapped[rxn] > 0) {
+          // For reversible enzymes ("XXX_REV") that are active in the backwards
+          // direction, replace the existing flux in the forward reaction by the
+          // negative value.
+          const forwardRxn = rxn.slice(0, -4);
+          fluxesMapped[forwardRxn] = -fluxesMapped[rxn];
+        }
+      });
+      return fluxesMapped;
     },
     getObjectState(id: string, type: string) {
       if (
