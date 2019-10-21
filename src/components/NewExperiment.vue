@@ -275,6 +275,7 @@
                           fluxomicsItem.reaction &&
                             fluxomicsItem.reaction._pastedText
                         "
+                        validate-on-blur
                       ></AutocompleteMnxReaction>
                     </td>
                     <td>
@@ -373,6 +374,7 @@
                             metabolomicsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -473,6 +475,7 @@
                             uptakeSecretionItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -571,6 +574,7 @@
                             molarYieldsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -590,6 +594,7 @@
                             molarYieldsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -1213,7 +1218,7 @@ export default Vue.extend({
           return "Required.";
         }
         if (value && value._pastedText) {
-          return "Required.";
+          return "No match was found.";
         }
       }
       return true;
