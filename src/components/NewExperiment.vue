@@ -830,7 +830,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows } from "d3-dsv";
-import { flatten } from "lodash";
+import { flatten, groupBy, mapValues } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
@@ -1030,8 +1030,12 @@ export default Vue.extend({
     availableProjects() {
       return this.$store.state.projects.projects;
     },
-    models() {
-      return this.$store.getters["models/getModels"];
+    modelIdsByOrganism() {
+      const models = this.$store.getters["models/getModels"];
+      const modelsByOrganism = groupBy(models, model => model.organism_id);
+      return mapValues(modelsByOrganism, models => {
+        return models.map(model => model.id);
+      });
     },
     isDialogVisible: {
       get() {
@@ -1201,9 +1205,7 @@ export default Vue.extend({
         item.sample.condition && item.sample.condition.strain
           ? item.sample.condition.strain.organism_id
           : null;
-      item.modelIds = this.models
-        .filter(model => model.organism_id === organismId)
-        .map(model => model.id);
+      item.modelIds = this.modelIdsByOrganism[organismId] || [];
     },
     getRelevantModelIdsForNewMedium(condition) {
       const organismId = condition.strain ? condition.strain.organism_id : null;
