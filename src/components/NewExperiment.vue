@@ -275,6 +275,7 @@
                           fluxomicsItem.reaction &&
                             fluxomicsItem.reaction._pastedText
                         "
+                        validate-on-blur
                       ></AutocompleteMnxReaction>
                     </td>
                     <td>
@@ -373,6 +374,7 @@
                             metabolomicsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -473,6 +475,7 @@
                             uptakeSecretionItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -571,6 +574,7 @@
                             molarYieldsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -590,6 +594,7 @@
                             molarYieldsItem
                           )
                         ]"
+                        validate-on-blur
                       ></AutocompleteMnxMetabolite>
                     </td>
                     <td>
@@ -813,13 +818,6 @@
         </v-flex>
       </v-layout>
     </v-dialog>
-    <v-snackbar
-      color="success"
-      v-model="isExperimentCreationSuccess"
-      :timeout="5000"
-    >
-      {{ experiment.name }} successfully created.
-    </v-snackbar>
     <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
       Please enter condition, sample and at least one measurement.
     </v-snackbar>
@@ -849,7 +847,6 @@ function getInitialState() {
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
     isSubmitting: false,
-    isExperimentCreationSuccess: false,
     isExperimentDataValid: true,
     isMoreDataRequired: false,
     currentRowIndex: null,
@@ -1221,7 +1218,7 @@ export default Vue.extend({
           return "Required.";
         }
         if (value && value._pastedText) {
-          return "Required.";
+          return "No match was found.";
         }
       }
       return true;
@@ -1372,7 +1369,7 @@ export default Vue.extend({
         })
         .then(() => {
           this.isSubmitting = false;
-          this.isExperimentCreationSuccess = true;
+          this.$emit("new-experiment-success", this.experiment.name);
           this.isDialogVisible = false;
           this.clear();
         });
