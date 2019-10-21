@@ -901,8 +901,8 @@ function getInitialState() {
         ],
         parsePasted: {
           name: str => str,
-          startTime: str => parseFloat(str),
-          endTime: str => parseFloat(str)
+          startTime: str => str,
+          endTime: str => str
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true
