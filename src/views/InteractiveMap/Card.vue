@@ -465,15 +465,16 @@ export default Vue.extend({
   mounted() {
     if (this.card.withDialog) {
       this.isCardDialogVisible = true;
+      // Now that we've opened the dialog, disable the toggle. Otherwise, it
+      // would reactivate and show the dialog again if the user navigates away
+      // (destroys the component) and re-navigates back to the interactive map.
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: {
+          withDialog: false
+        }
+      });
     }
-  },
-  destroyed() {
-    this.updateCard({
-      uuid: this.card.uuid,
-      props: {
-        withDialog: false
-      }
-    });
   },
   methods: {
     selectCard() {
