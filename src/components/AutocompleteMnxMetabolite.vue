@@ -97,8 +97,15 @@ export default Vue.extend({
     })
   },
   watch: {
-    searchQuery() {
-      this.debouncedQuery();
+    searchQuery: {
+      handler(newValue, oldValue) {
+        // Catch cases when vuetify internally sets the search query to null
+        // to prevent sending extra requests to the metanetx service
+        if (newValue === null) {
+          this.searchQuery = oldValue;
+        }
+        this.debouncedQuery();
+      }
     },
     forceSearchQuery: {
       // Watcher needs to be immediate to trigger when copy-paste creates
