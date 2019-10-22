@@ -186,10 +186,10 @@
                     <td>
                       <v-text-field
                         v-model="sample.startTime"
-                        mask="date-with-time"
+                        mask="####-##-## ##:##"
                         return-masked-value
-                        placeholder="dd/mm/yyyy hh:mm"
-                        hint="dd/mm/yyyy hh:mm"
+                        placeholder="yyyy-mm-dd hh:mm"
+                        hint="yyyy-mm-dd hh:mm"
                         :rules="[
                           requiredIfHasMain('samples', sample.startTime, sample)
                         ]"
@@ -199,10 +199,10 @@
                     <td>
                       <v-text-field
                         v-model="sample.endTime"
-                        mask="date-with-time"
+                        mask="####-##-## ##:##"
                         return-masked-value
-                        placeholder="dd/mm/yyyy hh:mm"
-                        hint="dd/mm/yyyy hh:mm"
+                        placeholder="yyyy-mm-dd hh:mm"
+                        hint="yyyy-mm-dd hh:mm"
                         @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
@@ -896,8 +896,8 @@ function getInitialState() {
         ],
         parsePasted: {
           name: str => str,
-          startTime: str => parseFloat(str),
-          endTime: str => parseFloat(str)
+          startTime: str => str,
+          endTime: str => str
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true
@@ -1377,10 +1377,10 @@ export default Vue.extend({
             condition_id: conditionId,
             start_time: this.$moment(
               sample.startTime,
-              "DD/MM/YYYY HH:mm"
+              "YYYY-MM-DD HH:mm"
             ).toDate(),
             end_time: sample.endTime
-              ? this.$moment(sample.endTime, "DD/MM/YYYY HH:mm").toDate()
+              ? this.$moment(sample.endTime, "YYYY-MM-DD HH:mm").toDate()
               : null
           };
           return axios
