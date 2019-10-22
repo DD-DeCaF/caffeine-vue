@@ -150,6 +150,7 @@ export default Vue.extend({
       // Skip if search results exist (in which case pasted data didn't
       // match result from metanetx service) to avoid infinite requests
       if (this.forceSearchQuery && !this.searchResults.length) {
+        // Using vuetify internals: focus, isFocused
         this.$refs.reactionAutocomplete.focus();
       }
       this.searchResults = [];

@@ -8,6 +8,7 @@ export default Vue.extend({
     immediatelyValidated: Boolean
   },
   watch: {
+    // Using vuetify internals: inputs
     inputs: {
       immediate: true,
       handler() {

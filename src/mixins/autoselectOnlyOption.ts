@@ -10,6 +10,7 @@ export const autoselectOnlyOptionMixin: Vue.ComponentOptions<VSelect> = {
     autoselectOnlyOption() {
       this.selectOnlyOption();
     },
+    // Using vuetify internals: allItems
     allItems() {
       this.selectOnlyOption();
     }
@@ -18,7 +19,7 @@ export const autoselectOnlyOptionMixin: Vue.ComponentOptions<VSelect> = {
     this.selectOnlyOption();
   },
   methods: {
-    selectOnlyOption(vselect: VSelect): void {
+    selectOnlyOption(): void {
       if (!this.autoselectOnlyOption) {
         return;
       }
@@ -30,6 +31,7 @@ export const autoselectOnlyOptionMixin: Vue.ComponentOptions<VSelect> = {
       const isOnlyOption = this.allItems.length === 1;
 
       if (isSelectionEmpty && isOnlyOption) {
+        // Using vuetify internals: returnObject, setValue, getValue
         this.setValue(
           this.returnObject ? firstOption : this.getValue(firstOption)
         );

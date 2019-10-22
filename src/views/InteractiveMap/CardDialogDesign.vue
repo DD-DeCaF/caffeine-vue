@@ -41,7 +41,7 @@
       label="Add a reaction..."
       hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions. Search by MNX ID, EC number or the reaction name."
       prepend-icon="add"
-      clear-on-change
+      clearOnChange
       @change="addReaction"
     ></AutocompleteMnxReaction>
     <ReactionDialog
