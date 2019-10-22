@@ -767,26 +767,31 @@
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
                 <div v-for="(table, key) in tables" :key="key">
-                  <v-layout>
-                    <v-radio
-                      :label="table.name"
-                      :value="key"
-                      color="primary"
-                      class="mb-1"
-                      :disabled="isTableDisabled(key)"
-                    ></v-radio>
-                    <v-icon
-                      v-if="
-                        table.isValid &&
-                          table.items.some(item => item[table.mainField])
-                      "
-                      color="success"
-                      >done</v-icon
-                    >
-                    <v-icon v-if="!table.isValid" color="error"
-                      >error_outline</v-icon
-                    >
-                  </v-layout>
+                  <v-tooltip bottom :disabled="!isTableDisabled(key)">
+                    <template v-slot:activator="{ on }">
+                      <v-layout v-on="on">
+                        <v-radio
+                          :label="table.name"
+                          :value="key"
+                          color="primary"
+                          class="mb-1"
+                          :disabled="isTableDisabled(key)"
+                        ></v-radio>
+                        <v-icon
+                          v-if="
+                            table.isValid &&
+                              table.items.some(item => item[table.mainField])
+                          "
+                          color="success"
+                          >done</v-icon
+                        >
+                        <v-icon v-if="!table.isValid" color="error"
+                          >error_outline</v-icon
+                        >
+                      </v-layout>
+                    </template>
+                    <span>{{ getMessageforDisabledTable(key) }}</span>
+                  </v-tooltip>
                 </div>
               </v-radio-group>
               <v-card-actions>
@@ -1507,6 +1512,12 @@ export default Vue.extend({
         }
       }
       return true;
+    },
+    getMessageforDisabledTable(key) {
+      if (key === "samples") {
+        return "You should enter valid condition first";
+      }
+      return "You should enter valid sample first";
     }
   }
 });
