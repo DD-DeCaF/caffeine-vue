@@ -44,7 +44,7 @@
                     <td>
                       <v-autocomplete-extended
                         return-object
-                        item-text="name"
+                        :item-text="strainDisplay"
                         item-value="id"
                         v-model="condition.strain"
                         :items="availableStrains"
@@ -829,6 +829,7 @@ import { flatten, groupBy, mapValues } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
+import { mapGetters } from "vuex";
 
 function getInitialState() {
   return {
@@ -1016,6 +1017,9 @@ export default Vue.extend({
   },
   data: () => getInitialState(),
   computed: {
+    ...mapGetters({
+      getOrganismById: "organisms/getOrganismById"
+    }),
     availableStrains() {
       return this.$store.state.strains.strains;
     },
@@ -1484,6 +1488,11 @@ export default Vue.extend({
     },
     updateProgressValue() {
       this.submitProgressValue += this.itemWeight;
+    },
+    strainDisplay(strain) {
+      return `${strain.name} (${
+        this.getOrganismById(strain.organism_id).name
+      })`;
     }
   }
 });
