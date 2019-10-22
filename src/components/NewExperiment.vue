@@ -767,7 +767,7 @@
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
                 <div v-for="(table, key) in tables" :key="key">
-                  <v-tooltip bottom :disabled="!isTableDisabled(key)">
+                  <v-tooltip bottom :disabled="Boolean(!isTableDisabled(key))">
                     <template v-slot:activator="{ on }">
                       <v-layout v-on="on">
                         <v-radio
@@ -775,7 +775,7 @@
                           :value="key"
                           color="primary"
                           class="mb-1"
-                          :disabled="isTableDisabled(key)"
+                          :disabled="Boolean(isTableDisabled(key))"
                         ></v-radio>
                         <v-icon
                           v-if="
@@ -790,7 +790,7 @@
                         >
                       </v-layout>
                     </template>
-                    <span>{{ getMessageforDisabledTable(key) }}</span>
+                    <span>{{ isTableDisabled(key) }}</span>
                   </v-tooltip>
                 </div>
               </v-radio-group>
@@ -1491,7 +1491,7 @@ export default Vue.extend({
     updateProgressValue() {
       this.submitProgressValue += this.itemWeight;
     },
-    isTableDisabled(key) {
+    isTableDisabled(key): false | string {
       if (key === "conditions") {
         return false;
       } else if (key === "samples") {
@@ -1501,6 +1501,8 @@ export default Vue.extend({
           this.tables.conditions.isValid
         ) {
           return false;
+        } else {
+          return "You should enter valid condition first";
         }
       } else {
         const mainField = this.tables.samples.mainField;
@@ -1509,15 +1511,10 @@ export default Vue.extend({
           this.tables.samples.isValid
         ) {
           return false;
+        } else {
+          return "You should enter valid sample first";
         }
       }
-      return true;
-    },
-    getMessageforDisabledTable(key) {
-      if (key === "samples") {
-        return "You should enter valid condition first";
-      }
-      return "You should enter valid sample first";
     }
   }
 });
