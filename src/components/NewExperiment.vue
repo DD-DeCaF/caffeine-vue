@@ -773,6 +773,7 @@
                       :value="key"
                       color="primary"
                       class="mb-1"
+                      :disabled="isTableDisabled(key)"
                     ></v-radio>
                     <v-icon
                       v-if="
@@ -1484,6 +1485,28 @@ export default Vue.extend({
     },
     updateProgressValue() {
       this.submitProgressValue += this.itemWeight;
+    },
+    isTableDisabled(key) {
+      if (key === "conditions") {
+        return false;
+      } else if (key === "samples") {
+        const mainField = this.tables.conditions.mainField;
+        if (
+          this.tables.conditions.items[0][mainField] &&
+          this.tables.conditions.isValid
+        ) {
+          return false;
+        }
+      } else {
+        const mainField = this.tables.samples.mainField;
+        if (
+          this.tables.samples.items[0][mainField] &&
+          this.tables.samples.isValid
+        ) {
+          return false;
+        }
+      }
+      return true;
     }
   }
 });
