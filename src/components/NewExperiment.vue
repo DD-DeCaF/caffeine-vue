@@ -767,25 +767,31 @@
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
                 <div v-for="(table, key) in tables" :key="key">
-                  <v-layout>
-                    <v-radio
-                      :label="table.name"
-                      :value="key"
-                      color="primary"
-                      class="mb-1"
-                    ></v-radio>
-                    <v-icon
-                      v-if="
-                        table.isValid &&
-                          table.items.some(item => item[table.mainField])
-                      "
-                      color="success"
-                      >done</v-icon
-                    >
-                    <v-icon v-if="!table.isValid" color="error"
-                      >error_outline</v-icon
-                    >
-                  </v-layout>
+                  <v-tooltip bottom :disabled="Boolean(!isTableDisabled(key))">
+                    <template v-slot:activator="{ on }">
+                      <v-layout v-on="on">
+                        <v-radio
+                          :label="table.name"
+                          :value="key"
+                          color="primary"
+                          class="mb-1"
+                          :disabled="Boolean(isTableDisabled(key))"
+                        ></v-radio>
+                        <v-icon
+                          v-if="
+                            table.isValid &&
+                              table.items.some(item => item[table.mainField])
+                          "
+                          color="success"
+                          >done</v-icon
+                        >
+                        <v-icon v-if="!table.isValid" color="error"
+                          >error_outline</v-icon
+                        >
+                      </v-layout>
+                    </template>
+                    <span>{{ isTableDisabled(key) }}</span>
+                  </v-tooltip>
                 </div>
               </v-radio-group>
               <v-card-actions>
@@ -1488,6 +1494,31 @@ export default Vue.extend({
     },
     updateProgressValue() {
       this.submitProgressValue += this.itemWeight;
+    },
+    isTableDisabled(key): false | string {
+      if (key === "conditions") {
+        return false;
+      } else if (key === "samples") {
+        const mainField = this.tables.conditions.mainField;
+        if (
+          this.tables.conditions.items[0][mainField] &&
+          this.tables.conditions.isValid
+        ) {
+          return false;
+        } else {
+          return "You should enter valid condition first";
+        }
+      } else {
+        const mainField = this.tables.samples.mainField;
+        if (
+          this.tables.samples.items[0][mainField] &&
+          this.tables.samples.isValid
+        ) {
+          return false;
+        } else {
+          return "You should enter valid sample first";
+        }
+      }
     },
     strainDisplay(strain) {
       return `${strain.name} (${
