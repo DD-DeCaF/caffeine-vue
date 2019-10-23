@@ -247,16 +247,17 @@ export default Vue.extend({
     setModel() {
       if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.load_model(null);
+        this.escherBuilder.settings.set("highlight_missing", true);
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
-      }
 
-      // We cannot highlight missing reactions for ecModels, since most of the
-      // identifiers on the map would not match those in the model.
-      this.escherBuilder.settings.set(
-        "highlight_missing",
-        !this.model.ec_model
-      );
+        // We cannot highlight missing reactions for ecModels, since most of the
+        // identifiers on the map would not match those in the model.
+        this.escherBuilder.settings.set(
+          "highlight_missing",
+          !this.model.ec_model
+        );
+      }
     },
     setReactionAdditions() {
       if (!this.card) {
