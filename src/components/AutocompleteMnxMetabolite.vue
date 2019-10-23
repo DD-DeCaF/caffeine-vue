@@ -142,6 +142,14 @@ export default Vue.extend({
   },
   created() {
     this.debouncedQuery = debounce(() => {
+      // Create a unique reference for this search, to be compared when results return.
+      // If `activeSearchID` has changed by the time the results are ready, then a new
+      // request has been triggered, so the results for this search are irrelevant and
+      // will be ignored. This ensures that we don't overwrite the search results with
+      // results from a stale request.
+      const searchId = uuidv4();
+      this.activeSearchID = searchId;
+
       // Trigger focus event when pasting data to autoselect metabolite with
       // the exact match (without focus vuetify internally clears the search
       // query when items are an empty array)
@@ -168,13 +176,6 @@ export default Vue.extend({
 
       this.isLoading = true;
       this.requestError = false;
-      // Create a unique reference for this search, to be compared when results return.
-      // If `activeSearchID` has changed by the time the results are ready, then a new
-      // request has been triggered, so the results for this search are irrelevant and
-      // will be ignored. This ensures that we don't overwrite the search results with
-      // results from a stale request.
-      const searchId = uuidv4();
-      this.activeSearchID = searchId;
       axios
         .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
         .then(response => {
