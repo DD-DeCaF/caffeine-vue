@@ -163,8 +163,8 @@ export default Vue.extend({
         // Using vuetify internals: focus, isFocused
         this.$refs.reactionAutocomplete.focus();
       }
-      this.searchResults = [];
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
+        this.searchResults = [];
         return;
       }
       if (
@@ -218,17 +218,18 @@ export default Vue.extend({
               searchResultsNotInTheModel.push(reaction);
             }
           });
-          if (this.modelIds && this.modelIds.length) {
-            this.searchResults.push({ header: "Found in the models" });
-          }
-          this.searchResults.push(...searchResultsInTheModel);
-          if (this.modelIds && this.modelIds.length) {
-            this.searchResults.push(
-              { divider: true },
-              { header: "Other reactions" }
-            );
-          }
-          this.searchResults.push(...searchResultsNotInTheModel);
+
+          this.searchResults =
+            searchResultsInTheModel.length > 0
+              ? [
+                  { header: "Found in the models" },
+                  ...searchResultsInTheModel,
+                  { divider: true },
+                  { header: "Other reactions" },
+                  ...searchResultsNotInTheModel
+                ]
+              : searchResultsNotInTheModel;
+
           // If pasted reaction has the exact match with the first result
           // from metanetx service, it should be autoselected
           if (this.searchQuery === this.forceSearchQuery) {
