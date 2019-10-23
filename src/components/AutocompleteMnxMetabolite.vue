@@ -144,67 +144,92 @@ export default Vue.extend({
       // results from a stale request.
       const searchId = uuidv4();
       this.activeSearchID = searchId;
-      this.isLoading = false;
-      this.requestError = false;
-      this.skipVuetifyClearSearch = false;
 
-      if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
-        this.searchResults = [];
-        return;
-      }
-      if (
-        this.selectedItem &&
-        this.searchQuery === this.selectedItem.displayValue
-      ) {
-        // In order to keep selected metabolite displayed after clicking
-        // outside of the v-autocomplete, this metabolite should be
-        // listed in the items prop
-        this.searchResults = [this.selectedItem];
-        return;
-      }
-
-      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
       this.isLoading = true;
-      axios
-        .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
-        .then(response => {
+      this.requestError = false;
+      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
+
+      Promise.resolve()
+        // Fetch search results
+        .then(() => {
+          if (
+            this.searchQuery === null ||
+            this.searchQuery.trim().length === 0
+          ) {
+            return {
+              searchResultsInTheModel: [],
+              searchResultsNotInTheModel: []
+            };
+          }
+
+          if (
+            this.selectedItem &&
+            this.searchQuery === this.selectedItem.displayValue
+          ) {
+            // In order to keep selected metabolite displayed after clicking
+            // outside of the v-autocomplete, this metabolite should be
+            // listed in the items prop
+            return {
+              searchResultsInTheModel: [],
+              searchResultsNotInTheModel: [this.selectedItem]
+            };
+          }
+
+          return axios
+            .get(
+              `${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`
+            )
+            .then(response => {
+              if (searchId !== this.activeSearchID) {
+                throw "stale response";
+              }
+              // Prioritize metabolites that exist in the passed models
+              const searchResultsInTheModel = [] as MetaNetXMetabolite[];
+              const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
+              response.data.forEach((metabolite: MetaNetXMetabolite) => {
+                const deprecatedIds = metabolite.annotation["deprecated"] || [];
+                const metaboliteIdsMap = {
+                  ...metabolite.annotation,
+                  "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
+                };
+                delete metaboliteIdsMap["deprecated"];
+                let isMetaboliteFound = false;
+                metabolite.modelNames = new Set([]);
+                for (const model in this.metabolitesInModelsMap) {
+                  const [modelId, modelName] = JSON.parse(model);
+                  for (const namespace in metaboliteIdsMap) {
+                    metaboliteIdsMap[namespace].forEach(metaboliteId => {
+                      if (
+                        this.metabolitesInModelsMap[model].has(metaboliteId)
+                      ) {
+                        isMetaboliteFound = true;
+                        metabolite.modelNames!.add(modelName);
+                        metabolite.foundId = metaboliteId;
+                        metabolite.namespace = namespace;
+                      }
+                    });
+                  }
+                }
+                metabolite.displayValue = this.metaboliteDisplay(metabolite);
+                if (isMetaboliteFound) {
+                  searchResultsInTheModel.push(metabolite);
+                } else {
+                  metabolite.namespace = "metanetx.chemical";
+                  searchResultsNotInTheModel.push(metabolite);
+                }
+              });
+
+              return {
+                searchResultsInTheModel: searchResultsInTheModel,
+                searchResultsNotInTheModel: searchResultsNotInTheModel
+              };
+            });
+        })
+        // Use results
+        .then(({ searchResultsInTheModel, searchResultsNotInTheModel }) => {
           if (searchId !== this.activeSearchID) {
             return;
           }
-          // Prioritize metabolites that exist in the passed models
-          const searchResultsInTheModel = [] as MetaNetXMetabolite[];
-          const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
-          response.data.forEach((metabolite: MetaNetXMetabolite) => {
-            const deprecatedIds = metabolite.annotation["deprecated"] || [];
-            const metaboliteIdsMap = {
-              ...metabolite.annotation,
-              "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
-            };
-            delete metaboliteIdsMap["deprecated"];
-            let isMetaboliteFound = false;
-            metabolite.modelNames = new Set([]);
-            for (const model in this.metabolitesInModelsMap) {
-              const [modelId, modelName] = JSON.parse(model);
-              for (const namespace in metaboliteIdsMap) {
-                metaboliteIdsMap[namespace].forEach(metaboliteId => {
-                  if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
-                    isMetaboliteFound = true;
-                    metabolite.modelNames!.add(modelName);
-                    metabolite.foundId = metaboliteId;
-                    metabolite.namespace = namespace;
-                  }
-                });
-              }
-            }
-            metabolite.displayValue = this.metaboliteDisplay(metabolite);
-            if (isMetaboliteFound) {
-              searchResultsInTheModel.push(metabolite);
-            } else {
-              metabolite.namespace = "metanetx.chemical";
-              searchResultsNotInTheModel.push(metabolite);
-            }
-          });
-
           this.searchResults =
             searchResultsInTheModel.length > 0
               ? [

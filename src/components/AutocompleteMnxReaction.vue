@@ -146,67 +146,94 @@ export default Vue.extend({
       // results from a stale request.
       const searchId = uuidv4();
       this.activeSearchID = searchId;
-      this.isLoading = false;
-      this.requestError = false;
-      this.skipVuetifyClearSearch = false;
 
-      if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
-        this.searchResults = [];
-        return;
-      }
-      if (
-        this.selectedItem &&
-        this.searchQuery === this.selectedItem.displayValue
-      ) {
-        // In order to keep selected reaction displayed after clicking
-        // outside of the v-autocomplete, this reaction should be
-        // listed in the items prop
-        this.searchResults = [this.selectedItem];
-        return;
-      }
-
-      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
       this.isLoading = true;
-      axios
-        .get(`${settings.apis.metanetx}/reactions?query=${this.searchQuery}`)
-        .then(response => {
+      this.requestError = false;
+      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
+
+      Promise.resolve()
+        // Fetch search results
+        .then(() => {
+          if (
+            this.searchQuery === null ||
+            this.searchQuery.trim().length === 0
+          ) {
+            return {
+              searchResultsInTheModel: [],
+              searchResultsNotInTheModel: []
+            };
+          }
+
+          if (
+            this.selectedItem &&
+            this.searchQuery === this.selectedItem.displayValue
+          ) {
+            // In order to keep selected reaction displayed after clicking
+            // outside of the v-autocomplete, this reaction should be
+            // listed in the items prop
+            return {
+              searchResultsInTheModel: [],
+              searchResultsNotInTheModel: [this.selectedItem]
+            };
+          }
+
+          return axios
+            .get(
+              `${settings.apis.metanetx}/reactions?query=${this.searchQuery}`
+            )
+            .then(response => {
+              if (searchId !== this.activeSearchID) {
+                throw "stale response";
+              }
+              // Prioritize reactions that exist in the passed models
+              const searchResultsInTheModel = [] as MetaNetXReaction[];
+              const searchResultsNotInTheModel = [] as MetaNetXReaction[];
+              response.data.forEach((reaction: MetaNetXReaction) => {
+                const deprecatedIds =
+                  reaction.reaction.annotation["deprecated"] || [];
+                const reactionIdsMap = {
+                  ...reaction.reaction.annotation,
+                  "metanetx.reaction": [
+                    reaction.reaction.mnx_id,
+                    ...deprecatedIds
+                  ]
+                };
+                delete reactionIdsMap["deprecated"];
+                let isReactionFound = false;
+                reaction.modelNames = new Set([]);
+                for (const model in this.reactionsInModelsMap) {
+                  const [modelId, modelName] = JSON.parse(model);
+                  for (const namespace in reactionIdsMap) {
+                    reactionIdsMap[namespace].forEach(reactionId => {
+                      if (this.reactionsInModelsMap[model].has(reactionId)) {
+                        isReactionFound = true;
+                        reaction.modelNames!.add(modelName);
+                        reaction.foundId = reactionId;
+                        reaction.namespace = namespace;
+                      }
+                    });
+                  }
+                }
+                reaction.displayValue = this.reactionDisplay(reaction);
+                if (isReactionFound) {
+                  searchResultsInTheModel.push(reaction);
+                } else {
+                  reaction.namespace = "metanetx.reaction";
+                  searchResultsNotInTheModel.push(reaction);
+                }
+              });
+
+              return {
+                searchResultsInTheModel: searchResultsInTheModel,
+                searchResultsNotInTheModel: searchResultsNotInTheModel
+              };
+            });
+        })
+        // Use results
+        .then(({ searchResultsInTheModel, searchResultsNotInTheModel }) => {
           if (searchId !== this.activeSearchID) {
             return;
           }
-          // Prioritize reactions that exist in the passed models
-          const searchResultsInTheModel = [] as MetaNetXReaction[];
-          const searchResultsNotInTheModel = [] as MetaNetXReaction[];
-          response.data.forEach((reaction: MetaNetXReaction) => {
-            const deprecatedIds =
-              reaction.reaction.annotation["deprecated"] || [];
-            const reactionIdsMap = {
-              ...reaction.reaction.annotation,
-              "metanetx.reaction": [reaction.reaction.mnx_id, ...deprecatedIds]
-            };
-            delete reactionIdsMap["deprecated"];
-            let isReactionFound = false;
-            reaction.modelNames = new Set([]);
-            for (const model in this.reactionsInModelsMap) {
-              const [modelId, modelName] = JSON.parse(model);
-              for (const namespace in reactionIdsMap) {
-                reactionIdsMap[namespace].forEach(reactionId => {
-                  if (this.reactionsInModelsMap[model].has(reactionId)) {
-                    isReactionFound = true;
-                    reaction.modelNames!.add(modelName);
-                    reaction.foundId = reactionId;
-                    reaction.namespace = namespace;
-                  }
-                });
-              }
-            }
-            reaction.displayValue = this.reactionDisplay(reaction);
-            if (isReactionFound) {
-              searchResultsInTheModel.push(reaction);
-            } else {
-              reaction.namespace = "metanetx.reaction";
-              searchResultsNotInTheModel.push(reaction);
-            }
-          });
 
           this.searchResults =
             searchResultsInTheModel.length > 0
