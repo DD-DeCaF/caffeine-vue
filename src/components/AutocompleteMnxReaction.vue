@@ -151,6 +151,8 @@ export default Vue.extend({
       // results from a stale request.
       const searchId = uuidv4();
       this.activeSearchID = searchId;
+      this.isLoading = false;
+      this.requestError = false;
 
       // Trigger focus event when pasting data to autoselect reaction with
       // the exact match (without focus vuetify internally clears the search
@@ -176,7 +178,6 @@ export default Vue.extend({
         return;
       }
       this.isLoading = true;
-      this.requestError = false;
       axios
         .get(`${settings.apis.metanetx}/reactions?query=${this.searchQuery}`)
         .then(response => {
