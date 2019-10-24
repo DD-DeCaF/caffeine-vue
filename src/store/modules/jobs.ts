@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface JobItem {
   id: number;
@@ -15,12 +16,12 @@ export interface JobItem {
   aerobic: boolean;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    jobs: [],
+    jobs: [] as JobItem[],
     isPolling: false,
-    jobsPromise: null
+    jobsPromise: null as Promise<void> | null
   },
   mutations: {
     setJobs(state, jobs: JobItem[]) {
@@ -70,4 +71,4 @@ export default {
       return state.jobs.find(job => job.id === id);
     }
   }
-};
+});

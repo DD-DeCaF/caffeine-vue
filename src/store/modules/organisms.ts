@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface OrganismItem {
   id: number;
@@ -10,11 +11,11 @@ export interface OrganismItem {
   updated: string;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    organisms: [],
-    organismsPromise: null
+    organisms: [] as OrganismItem[],
+    organismsPromise: null as Promise<void> | null
   },
   mutations: {
     setOrganisms(state, organisms: OrganismItem[]) {
@@ -48,4 +49,4 @@ export default {
       return state.organisms;
     }
   }
-};
+});

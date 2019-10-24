@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface DesignItem {
   design: {
@@ -22,11 +23,11 @@ export interface DesignItem {
   method: string;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    designs: [],
-    designsPromise: null
+    designs: [] as DesignItem[],
+    designsPromise: null as Promise<void> | null
   },
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
@@ -97,4 +98,4 @@ export default {
       return state.designs.find(design => design.id === id);
     }
   }
-};
+});

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface ExperimentItem {
   created: string;
@@ -11,11 +12,11 @@ export interface ExperimentItem {
   updated: string;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    experiments: [],
-    experimentsPromise: null
+    experiments: [] as ExperimentItem[],
+    experimentsPromise: null as Promise<void> | null
   },
   mutations: {
     setExperiments(state, experiments: ExperimentItem[]) {
@@ -46,4 +47,4 @@ export default {
       commit("setExperimentsPromise", experimentsPromise);
     }
   }
-};
+});
