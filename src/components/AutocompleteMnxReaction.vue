@@ -5,7 +5,8 @@
     :items="searchResults"
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
-    :search-input.sync="searchQuery"
+    :search-input="searchQuery"
+    @update:searchInput="onSearchQueryChange"
     :placeholder="forceSearchQuery"
     hide-no-data
     hide-selected
@@ -87,6 +88,7 @@ export default Vue.extend({
     searchResults: [] as MetaNetXReaction[],
     isLoading: false,
     searchQuery: null,
+    skipVuetifyClearSearch: false,
     activeSearchID: null,
     requestError: false,
     debouncedQuery: null,
@@ -101,15 +103,8 @@ export default Vue.extend({
     })
   },
   watch: {
-    searchQuery: {
-      handler(newValue, oldValue) {
-        // Catch cases when vuetify internally sets the search query to null
-        // to prevent sending extra requests to the metanetx service
-        if (newValue === null) {
-          this.searchQuery = oldValue;
-        }
-        this.debouncedQuery();
-      }
+    searchQuery() {
+      this.debouncedQuery();
     },
     forceSearchQuery: {
       // Watcher needs to be immediate to trigger when copy-paste creates
@@ -153,16 +148,8 @@ export default Vue.extend({
       this.activeSearchID = searchId;
       this.isLoading = false;
       this.requestError = false;
+      this.skipVuetifyClearSearch = false;
 
-      // Trigger focus event when pasting data to autoselect reaction with
-      // the exact match (without focus vuetify internally clears the search
-      // query when items are an empty array)
-      // Skip if search results exist (in which case pasted data didn't
-      // match result from metanetx service) to avoid infinite requests
-      if (this.forceSearchQuery && !this.searchResults.length) {
-        // Using vuetify internals: focus, isFocused
-        this.$refs.reactionAutocomplete.focus();
-      }
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         this.searchResults = [];
         return;
@@ -177,6 +164,8 @@ export default Vue.extend({
         this.searchResults = [this.selectedItem];
         return;
       }
+
+      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
       this.isLoading = true;
       axios
         .get(`${settings.apis.metanetx}/reactions?query=${this.searchQuery}`)
@@ -268,6 +257,7 @@ export default Vue.extend({
             return;
           }
           this.isLoading = false;
+          this.skipVuetifyClearSearch = false;
         });
     }, 500);
   },
@@ -308,6 +298,14 @@ export default Vue.extend({
       return (
         (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
       );
+    },
+    onSearchQueryChange(value: string | null): void {
+      // Catch cases when vuetify internally sets the search query to null
+      // to prevent sending extra requests to the metanetx service
+      if (value === null && this.skipVuetifyClearSearch) {
+        return;
+      }
+      this.searchQuery = value;
     },
     onChange(selectedReaction: MetaNetXReaction): void {
       if (this.clearOnChange) {
@@ -354,6 +352,9 @@ export default Vue.extend({
       if (!this.forceSearchQuery) {
         return;
       }
+      // Assign early, before debounced query because species selection dialog
+      // takes away focus and vuetify tries to clear search.
+      this.skipVuetifyClearSearch = true;
       this.searchQuery = this.forceSearchQuery;
     }
   }

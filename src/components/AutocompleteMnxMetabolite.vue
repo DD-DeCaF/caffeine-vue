@@ -5,7 +5,8 @@
     :items="searchResults"
     :filter="dontFilterByDisplayedText"
     :loading="isLoading"
-    :search-input.sync="searchQuery"
+    :search-input="searchQuery"
+    @update:searchInput="onSearchQueryChange"
     :placeholder="forceSearchQuery"
     hide-no-data
     hide-selected
@@ -83,6 +84,7 @@ export default Vue.extend({
     searchResults: [] as MetaNetXMetabolite[],
     isLoading: false,
     searchQuery: null,
+    skipVuetifyClearSearch: false,
     activeSearchID: null,
     requestError: false,
     debouncedQuery: null,
@@ -97,15 +99,8 @@ export default Vue.extend({
     })
   },
   watch: {
-    searchQuery: {
-      handler(newValue, oldValue) {
-        // Catch cases when vuetify internally sets the search query to null
-        // to prevent sending extra requests to the metanetx service
-        if (newValue === null) {
-          this.searchQuery = oldValue;
-        }
-        this.debouncedQuery();
-      }
+    searchQuery() {
+      this.debouncedQuery();
     },
     forceSearchQuery: {
       // Watcher needs to be immediate to trigger when copy-paste creates
@@ -151,16 +146,8 @@ export default Vue.extend({
       this.activeSearchID = searchId;
       this.isLoading = false;
       this.requestError = false;
+      this.skipVuetifyClearSearch = false;
 
-      // Trigger focus event when pasting data to autoselect metabolite with
-      // the exact match (without focus vuetify internally clears the search
-      // query when items are an empty array)
-      // Skip if search results exist (in which case pasted data didn't
-      // match result from metanetx service) to avoid infinite requests
-      if (this.forceSearchQuery && !this.searchResults.length) {
-        // Using vuetify internals: focus, isFocused
-        this.$refs.metaboliteAutocomplete.focus();
-      }
       if (this.searchQuery === null || this.searchQuery.trim().length === 0) {
         this.searchResults = [];
         return;
@@ -176,6 +163,7 @@ export default Vue.extend({
         return;
       }
 
+      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
       this.isLoading = true;
       axios
         .get(`${settings.apis.metanetx}/metabolites?query=${this.searchQuery}`)
@@ -265,6 +253,7 @@ export default Vue.extend({
             return;
           }
           this.isLoading = false;
+          this.skipVuetifyClearSearch = false;
         });
     }, 500);
   },
@@ -272,6 +261,14 @@ export default Vue.extend({
     metaboliteDisplay(metabolite: MetaNetXMetabolite): string {
       const { name, mnx_id, formula } = metabolite;
       return `${name || "N/A"} (${mnx_id}) – ${formula}`;
+    },
+    onSearchQueryChange(value: string | null): void {
+      // Catch cases when vuetify internally sets the search query to null
+      // to prevent sending extra requests to the metanetx service
+      if (value === null && this.skipVuetifyClearSearch) {
+        return;
+      }
+      this.searchQuery = value;
     },
     onChange(selectedMetabolite: MetaNetXMetabolite): void {
       if (this.clearOnChange) {
@@ -295,6 +292,9 @@ export default Vue.extend({
       if (!this.forceSearchQuery) {
         return;
       }
+      // Assign early, before debounced query because species selection dialog
+      // takes away focus and vuetify tries to clear search.
+      this.skipVuetifyClearSearch = true;
       this.searchQuery = this.forceSearchQuery;
     }
   }
