@@ -424,6 +424,97 @@
               </div>
             </v-form-extended>
 
+            <!-- Proteomics table -->
+            <v-form-extended
+              v-model="tables.proteomics.isValid"
+              immediatelyValidated
+            >
+              <div v-show="selectedTableKey === 'proteomics'">
+                <v-data-table
+                  :headers="selectedTable.headers"
+                  :items="tables.proteomics.items"
+                  :pagination.sync="pagination"
+                  hide-actions
+                  disable-initial-sort
+                  item-key="temporaryId"
+                >
+                  <template
+                    v-slot:items="{ item: proteomicsItem, index: index }"
+                  >
+                    <td>
+                      <v-select
+                        return-object
+                        :items="tables.samples.items.filter(s => s.name)"
+                        item-text="name"
+                        item-value="temporaryId"
+                        v-model="proteomicsItem.sample"
+                        no-data-text="No data available. You can add it in Samples table."
+                      >
+                      </v-select>
+                    </td>
+                    <td>
+                      <UniprotInput
+                        @paste="paste(1, index, selectedTable, $event)"
+                        @change="onChange(proteomicsItem, 'protein', $event)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'proteomics',
+                            proteomicsItem.protein,
+                            proteomicsItem
+                          )
+                        ]"
+                      />
+                    </td>
+                    <td>
+                      <v-number-field
+                        v-model.number="proteomicsItem.measurement"
+                        hint="mmol l <sup>-1</sup>"
+                        persistent-hint
+                        step="any"
+                        @paste="paste(2, index, selectedTable, $event)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'proteomics',
+                            proteomicsItem.measurement,
+                            proteomicsItem
+                          )
+                        ]"
+                      ></v-number-field>
+                    </td>
+                    <td>
+                      <v-number-field
+                        v-model.number="proteomicsItem.uncertainty"
+                        hint="mmol l <sup>-1</sup>"
+                        persistent-hint
+                        step="any"
+                        @paste="paste(3, index, selectedTable, $event)"
+                      ></v-number-field>
+                    </td>
+                    <td>
+                      <v-btn
+                        icon
+                        @click="
+                          deleteMeasurement(
+                            'proteomics',
+                            proteomicsItem.temporaryId
+                          )
+                        "
+                      >
+                        <v-icon color="primary">delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </template>
+                </v-data-table>
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addRow('proteomics')"
+                  class="mt-3"
+                  >Add row</v-btn
+                >
+              </div>
+            </v-form-extended>
+
             <!-- Uptake/Secretion rates table -->
             <v-form-extended
               v-model="tables.uptakeSecretion.isValid"
@@ -835,6 +926,7 @@ import { flatten, groupBy, mapValues } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
+import UniprotInput from "@/components/UniprotInput.vue";
 import { mapGetters } from "vuex";
 
 function getInitialState() {
@@ -947,6 +1039,24 @@ function getInitialState() {
         items: [{ temporaryId: uuidv4() }],
         isValid: true
       },
+      proteomics: {
+        name: "Proteomics",
+        mainField: "sample",
+        headers: [
+          { text: "Sample *", value: "sample", width: "25%" },
+          { text: "Protein *", value: "protein", width: "30%" },
+          { text: "Measurement *", value: "measurement", width: "20%" },
+          { text: "Uncertainty", value: "uncertainty", width: "20%" },
+          { value: "actions", width: "5%" }
+        ],
+        parsePasted: {
+          protein: str => ({ _pastedText: str }),
+          measurement: str => parseFloat(str),
+          uncertainty: str => parseFloat(str)
+        },
+        items: [{ temporaryId: uuidv4() }],
+        isValid: true
+      },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
         mainField: "sample",
@@ -1015,6 +1125,9 @@ function getInitialState() {
 
 export default Vue.extend({
   name: "NewExperiment",
+  components: {
+    UniprotInput
+  },
   props: {
     value: {
       type: Boolean,
@@ -1061,6 +1174,7 @@ export default Vue.extend({
         "samples",
         "fluxomics",
         "metabolomics",
+        "proteomics",
         "uptakeSecretion",
         "molarYields",
         "growth"
@@ -1123,6 +1237,7 @@ export default Vue.extend({
         [
           "fluxomics",
           "metabolomics",
+          "proteomics",
           "uptakeSecretion",
           "molarYields",
           "growth"
@@ -1300,6 +1415,7 @@ export default Vue.extend({
       const hasAMeasurement = [
         "fluxomics",
         "metabolomics",
+        "proteomics",
         "uptakeSecretion",
         "molarYields",
         "growth"
@@ -1334,6 +1450,9 @@ export default Vue.extend({
         })
         .then(() => {
           return Promise.all(this.postMetabolomics());
+        })
+        .then(() => {
+          return Promise.all(this.postProteomics());
         })
         .then(() => {
           return Promise.all(this.postUptakeSecretionRates());
@@ -1434,6 +1553,23 @@ export default Vue.extend({
           };
           return axios
             .post(`${settings.apis.warehouse}/metabolomics`, payload)
+            .then(() => this.updateProgressValue());
+        });
+    },
+    postProteomics() {
+      return this.tables.proteomics.items
+        .filter(proteomicsItem => proteomicsItem.sample)
+        .map(proteomicsItem => {
+          const payload = {
+            sample_id: this.sampleTempIdsMap[proteomicsItem.sample.temporaryId],
+            name: proteomicsItem.protein.name,
+            identifier: proteomicsItem.protein.identifier,
+            gene: proteomicsItem.protein.gene,
+            measurement: proteomicsItem.measurement,
+            uncertainty: proteomicsItem.uncertainty || 0
+          };
+          return axios
+            .post(`${settings.apis.warehouse}/proteomics`, payload)
             .then(() => this.updateProgressValue());
         });
     },
