@@ -1,36 +1,78 @@
 <template>
-  <v-autocomplete-extended
-    v-bind="$attrs"
-    v-model="selectedItem"
-    :items="searchResults"
-    :filter="dontFilterByDisplayedText"
-    :loading="isLoading"
-    :search-input.sync="searchQuery"
-    :placeholder="forceSearchQuery"
-    hide-no-data
-    hide-selected
-    item-text="displayValue"
-    item-value="mnx_id"
-    return-object
-    :rules="[...(rules || []), requestErrorRule(requestError)]"
-    @change="onChange"
-    @focus="loadForcedSearchQuery"
-    @paste="$emit('paste', $event)"
-    ref="metaboliteAutocomplete"
-  >
-    <template v-slot:item="{ item: metabolite }">
-      <v-list-tile-content>
-        <v-list-tile-title v-text="metabolite.displayValue"></v-list-tile-title>
-        <v-list-tile-sub-title v-if="metabolite.modelNames.size">
-          <span
-            v-for="(modelName, index) of metabolite.modelNames"
-            :key="modelName + index"
-            >{{ modelName }}&nbsp;&nbsp;</span
-          ></v-list-tile-sub-title
-        >
-      </v-list-tile-content>
+  <v-tooltip bottom :disabled="!selectedItem">
+    <template v-slot:activator="{ on }">
+      <v-autocomplete-extended
+        v-bind="$attrs"
+        v-model="selectedItem"
+        :items="searchResults"
+        :filter="dontFilterByDisplayedText"
+        :loading="isLoading"
+        :search-input.sync="searchQuery"
+        :placeholder="forceSearchQuery"
+        hide-no-data
+        hide-selected
+        item-text="displayValue"
+        item-value="mnx_id"
+        return-object
+        :rules="[...(rules || []), requestErrorRule(requestError)]"
+        @change="onChange"
+        @focus="loadForcedSearchQuery"
+        @paste="$emit('paste', $event)"
+        ref="metaboliteAutocomplete"
+        v-on="on"
+      >
+        <template v-slot:item="{ item: metabolite }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-list-tile-content v-on="on">
+                <v-list-tile-title
+                  v-text="metabolite.displayValue"
+                ></v-list-tile-title>
+                <v-list-tile-sub-title v-if="metabolite.modelNames.size">
+                  <span
+                    v-for="(modelName, index) of metabolite.modelNames"
+                    :key="modelName + index"
+                    >{{ modelName }}&nbsp;&nbsp;</span
+                  ></v-list-tile-sub-title
+                >
+              </v-list-tile-content>
+            </template>
+            <span>
+              <em>Name: </em>{{ metabolite.name }}<br />
+              <em>ID found in the model: </em
+              >{{ metabolite.foundId ? metabolite.foundId : "-" }}<br />
+              <em>Formula: </em>{{ metabolite.formula }}<br />
+              <em>MetaNetX ID: </em>{{ metabolite.mnx_id }}<br />
+              <em>Annotation:</em><br />
+              <span
+                v-for="(ids, namespace) in metabolite.annotation"
+                :key="namespace"
+              >
+                &nbsp;&nbsp;{{ namespace }}:
+                <span v-for="(id, index) of ids" :key="index"
+                  >{{ id }}&nbsp;&nbsp;</span
+                ><br />
+              </span>
+            </span>
+          </v-tooltip>
+        </template>
+      </v-autocomplete-extended>
     </template>
-  </v-autocomplete-extended>
+    <span v-if="selectedItem">
+      <em>Name: </em>{{ selectedItem.name }}<br />
+      <em>ID found in the model: </em
+      >{{ selectedItem.foundId ? selectedItem.foundId : "-" }}<br />
+      <em>Formula: </em>{{ selectedItem.formula }}<br />
+      <em>MetaNetX ID: </em>{{ selectedItem.mnx_id }}<br />
+      <em>Annotation:</em><br />
+      <span
+        v-for="(ids, namespace) in selectedItem.annotation"
+        :key="namespace"
+      >
+        &nbsp;&nbsp;{{ namespace }}: {{ ids.join(" ") }} <br />
+      </span>
+    </span>
+  </v-tooltip>
 </template>
 
 <script lang="ts">
