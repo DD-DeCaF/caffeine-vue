@@ -68,7 +68,7 @@
       <v-flex mb-1>
         <v-card>
           <v-subheader>Strain {{ card.conditionData.strain.name }}</v-subheader>
-          <v-card-text>
+          <v-card-text v-if="card.conditionData.strain.genotype">
             <code class="px-2">{{ card.conditionData.strain.genotype }}</code>
             <p class="mt-2">
               The genotype above is described in
@@ -76,6 +76,9 @@
               grammar to represent genotypes and phenotypes developed at DTU
               Biosustain.
             </p>
+          </v-card-text>
+          <v-card-text v-else>
+            There are no genotype modifications in this strain.
           </v-card-text>
         </v-card>
       </v-flex>
