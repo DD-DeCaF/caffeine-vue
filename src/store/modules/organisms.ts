@@ -32,7 +32,9 @@ export default {
       const organismsPromise = axios
         .get(`${settings.apis.warehouse}/organisms`)
         .then((response: AxiosResponse<OrganismItem[]>) => {
-          commit("setOrganisms", response.data);
+          setTimeout(() => {
+            commit("setOrganisms", response.data);
+          }, 10000);
         })
         .catch(error => {
           dispatch("setFetchError", error, { root: true });

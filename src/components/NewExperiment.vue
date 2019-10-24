@@ -1521,9 +1521,10 @@ export default Vue.extend({
       }
     },
     strainDisplay(strain) {
-      return `${strain.name} (${
-        this.getOrganismById(strain.organism_id).name
-      })`;
+      return `${strain.name +
+        (this.getOrganismById(strain.organism_id)
+          ? " (" + this.getOrganismById(strain.organism_id).name + ")"
+          : "")}`;
     }
   }
 });
