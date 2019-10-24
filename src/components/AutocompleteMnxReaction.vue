@@ -63,7 +63,7 @@
       <em>ID found in the model: </em
       >{{ selectedItem.foundId ? selectedItem.foundId : "-" }}<br />
       <em>Reaction string: </em>{{ equationDisplay(selectedItem) }}<br />
-      <em>MetanetX id: </em>{{ selectedItem.reaction.mnx_id }}<br />
+      <em>MetaNetX ID: </em>{{ selectedItem.reaction.mnx_id }}<br />
       <em>Annotation:</em><br />
       <span
         v-for="(ids, namespace) in selectedItem.reaction.annotation"
