@@ -177,6 +177,46 @@
         </v-card>
       </v-flex>
 
+      <v-flex mb-1 v-if="card.sample.proteomics.length > 0">
+        <v-card>
+          <v-subheader>Proteomics</v-subheader>
+          <v-data-table
+            :headers="proteomicsHeaders"
+            :items="card.sample.proteomics"
+            class="elevation-1"
+          >
+            <template v-slot:items="{ item: protein }">
+              <td>{{ protein.name }}</td>
+              <td>
+                <a
+                  :href="
+                    `https://www.uniprot.org/uniprot/${protein.identifier}`
+                  "
+                  target="_blank"
+                  >{{ protein.identifier }}</a
+                >
+              </td>
+              <td>
+                {{ protein.gene }}
+              </td>
+              <td>
+                {{ protein.measurement }}
+                <em>mmol/l</em>
+              </td>
+              <td>
+                <span v-if="protein.uncertainty">
+                  {{ protein.uncertainty }}
+                  <em>mmol/l</em>
+                </span>
+                <span v-else>
+                  No uncertainty
+                </span>
+              </td>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-flex>
+
       <v-flex mb-1 v-if="card.sample.uptake_secretion_rates.length > 0">
         <v-card>
           <v-subheader>Uptake secretion rates</v-subheader>
@@ -379,6 +419,13 @@ export default Vue.extend({
     metabolomicsHeaders: [
       { text: "Metabolite", sortable: false },
       { text: "Identifier", sortable: false },
+      { text: "Measurement", sortable: false },
+      { text: "Uncertainty", sortable: false }
+    ],
+    proteomicsHeaders: [
+      { text: "Protein", sortable: false },
+      { text: "Identifier", sortable: false },
+      { text: "Gene", sortable: false },
       { text: "Measurement", sortable: false },
       { text: "Uncertainty", sortable: false }
     ],
