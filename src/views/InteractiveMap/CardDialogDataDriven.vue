@@ -592,6 +592,14 @@ export default Vue.extend({
         measurement: m.measurement,
         uncertainty: m.uncertainty
       }));
+      // TODO: Should proteomics be excluded if chosen model is not
+      // enzyme-constrained? Currently, the backend will give a warning and
+      // ignore the data if that happens.
+      const proteomics = this.card.sample.proteomics.map(p => ({
+        identifier: p.identifier,
+        measurement: p.measurement,
+        uncertainty: p.uncertainty
+      }));
       const uptakeSecretionRates = this.card.sample.uptake_secretion_rates.map(
         u => ({
           name: u.compound_name,
@@ -627,6 +635,7 @@ export default Vue.extend({
             genotype: genotype,
             fluxomics: fluxomics,
             metabolomics: metabolomics,
+            proteomics: proteomics,
             uptake_secretion_rates: uptakeSecretionRates,
             molar_yields: molarYields,
             growth_rate: growthRate
