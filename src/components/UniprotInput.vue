@@ -97,7 +97,14 @@ export default Vue.extend({
         if (!this.forceSearchQuery) {
           return;
         }
-        this.searchQuery = this.forceSearchQuery;
+        if (this.forceSearchQuery === this.searchQuery) {
+          // User re-pasted the same query string. Trigger a search directly,
+          // because the `searchQuery` watcher won't trigger when it hasn't
+          // changed.
+          this.triggerQuery();
+        } else {
+          this.searchQuery = this.forceSearchQuery;
+        }
       }
     },
     searchQuery: {
@@ -105,24 +112,7 @@ export default Vue.extend({
       // new rows with forceSearchQuery already set
       immediate: true,
       handler() {
-        // Reset state
-        this.protein = null;
-        this.requestError = false;
-        this.$emit("change", this.protein);
-        // For empty query; no need to make request
-        if (!this.searchQuery) {
-          return;
-        }
-        // Pretend we already started searching, even though it's debounced
-        this.isLoading = true;
-        // Note: Didn't yet implement cancelling stale requests here. Should
-        // rarely results in wrong response order though, because of the 500ms
-        // debounce.
-        // Note 2: Needs to happen during next tick, since `created` lifecycle
-        // event hasn't occurred when this watcher triggers immediately.
-        this.$nextTick(() => {
-          this.debouncedQuery(this.searchQuery);
-        });
+        this.triggerQuery();
       }
     }
   },
@@ -133,6 +123,26 @@ export default Vue.extend({
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }
+    },
+    triggerQuery() {
+      // Reset state
+      this.protein = null;
+      this.requestError = false;
+      this.$emit("change", this.protein);
+      // For empty query; no need to make request
+      if (!this.searchQuery) {
+        return;
+      }
+      // Pretend we already started searching, even though it's debounced
+      this.isLoading = true;
+      // Note: Didn't yet implement cancelling stale requests here. Should
+      // rarely results in wrong response order though, because of the 500ms
+      // debounce.
+      // Note 2: Needs to happen during next tick, since `created` lifecycle
+      // event hasn't occurred when this watcher triggers immediately.
+      this.$nextTick(() => {
+        this.debouncedQuery(this.searchQuery);
+      });
     },
     query(identifier: string) {
       axios
