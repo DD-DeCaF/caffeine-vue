@@ -191,7 +191,12 @@
                         placeholder="yyyy-mm-dd hh:mm"
                         hint="yyyy-mm-dd hh:mm"
                         :rules="[
-                          requiredIfHasMain('samples', sample.startTime, sample)
+                          requiredIfHasMain(
+                            'samples',
+                            sample.startTime,
+                            sample
+                          ),
+                          singleDateTimeRule
                         ]"
                         @paste="paste(2, index, selectedTable, $event)"
                       ></v-text-field>
@@ -203,6 +208,10 @@
                         return-masked-value
                         placeholder="yyyy-mm-dd hh:mm"
                         hint="yyyy-mm-dd hh:mm"
+                        :rules="[
+                          singleDateTimeRule,
+                          dateTimeRules(sample.startTime, sample.endTime)
+                        ]"
                         @paste="paste(3, index, selectedTable, $event)"
                       ></v-text-field>
                     </td>
@@ -1214,6 +1223,22 @@ export default Vue.extend({
         value !== 0
       ) {
         return "Required.";
+      }
+      return true;
+    },
+    singleDateTimeRule(value) {
+      if (!value || this.$moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
+        return true;
+      }
+      return `Invalid datetime <br> yyyy-mm-dd hh:mm`;
+    },
+    dateTimeRules(startTime, endTime) {
+      if (
+        this.$moment(endTime, "YYYY-MM-DD HH:mm").isBefore(
+          this.$moment(startTime, "YYYY-MM-DD HH:mm")
+        )
+      ) {
+        return "End Time cannot be earlier than Start Time";
       }
       return true;
     },
