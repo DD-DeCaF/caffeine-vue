@@ -14,7 +14,7 @@
         item-text="displayValue"
         item-value="mnx_id"
         return-object
-        :rules="[...(rules || []), requestErrorRule(requestError)]"
+        :rules="[requestErrorRule(requestError), ...(rules || [])]"
         @change="onChange"
         @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
