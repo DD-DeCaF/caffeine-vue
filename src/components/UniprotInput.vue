@@ -101,6 +101,9 @@ export default Vue.extend({
       this.requestError = false;
       // Pretend we already started searching, even though it's debounced
       this.isLoading = true;
+      // Note: Didn't yet implement cancelling stale requests here. Should
+      // rarely results in wrong response order though, because of the 500ms
+      // debounce.
       this.debouncedQuery(identifier);
     },
     query(identifier: string) {
