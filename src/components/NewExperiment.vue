@@ -463,6 +463,10 @@
                             proteomicsItem
                           )
                         ]"
+                        :forceSearchQuery="
+                          proteomicsItem.protein &&
+                            proteomicsItem.protein._pastedText
+                        "
                       />
                     </td>
                     <td>

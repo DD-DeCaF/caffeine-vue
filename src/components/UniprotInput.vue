@@ -2,12 +2,12 @@
   <div>
     <v-text-field
       label="Protein"
+      v-model="searchQuery"
       :loading="isLoading"
       :hint="hint()"
       persistent-hint
       :append-outer-icon="protein ? 'info' : ''"
       :rules="[requestErrorRule(requestError), ...(rules || [])]"
-      @input="inputChanged"
       @click:append-outer="dialog = true"
       @paste="$emit('paste', $event)"
     ></v-text-field>
@@ -70,10 +70,12 @@ import { debounce } from "lodash";
 export default Vue.extend({
   name: "UniprotInput",
   props: {
-    rules: [Array, Object]
+    rules: [Array, Object],
+    forceSearchQuery: String
   },
   data: () => ({
     debouncedQuery: null,
+    searchQuery: "",
     isLoading: false,
     requestError: false,
     requestErrorRule: error =>
@@ -86,6 +88,44 @@ export default Vue.extend({
   created() {
     this.debouncedQuery = debounce(this.query, 500);
   },
+  watch: {
+    forceSearchQuery: {
+      // Watcher needs to be immediate to trigger when copy-paste creates
+      // new rows with forceSearchQuery already set
+      immediate: true,
+      handler() {
+        if (!this.forceSearchQuery) {
+          return;
+        }
+        this.searchQuery = this.forceSearchQuery;
+      }
+    },
+    searchQuery: {
+      // Watcher needs to be immediate to trigger when copy-paste creates
+      // new rows with forceSearchQuery already set
+      immediate: true,
+      handler() {
+        // Reset state
+        this.protein = null;
+        this.requestError = false;
+        this.$emit("change", this.protein);
+        // For empty query; no need to make request
+        if (!this.searchQuery) {
+          return;
+        }
+        // Pretend we already started searching, even though it's debounced
+        this.isLoading = true;
+        // Note: Didn't yet implement cancelling stale requests here. Should
+        // rarely results in wrong response order though, because of the 500ms
+        // debounce.
+        // Note 2: Needs to happen during next tick, since `created` lifecycle
+        // event hasn't occurred when this watcher triggers immediately.
+        this.$nextTick(() => {
+          this.debouncedQuery(this.searchQuery);
+        });
+      }
+    }
+  },
   methods: {
     hint() {
       if (this.protein) {
@@ -93,18 +133,6 @@ export default Vue.extend({
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }
-    },
-    inputChanged(identifier: string) {
-      // Reset state
-      this.protein = null;
-      this.$emit("change", this.protein);
-      this.requestError = false;
-      // Pretend we already started searching, even though it's debounced
-      this.isLoading = true;
-      // Note: Didn't yet implement cancelling stale requests here. Should
-      // rarely results in wrong response order though, because of the 500ms
-      // debounce.
-      this.debouncedQuery(identifier);
     },
     query(identifier: string) {
       axios
