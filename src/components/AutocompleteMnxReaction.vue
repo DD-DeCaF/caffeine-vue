@@ -1,37 +1,79 @@
 <template>
-  <v-autocomplete-extended
-    v-bind="$attrs"
-    v-model="selectedItem"
-    :items="searchResults"
-    :filter="dontFilterByDisplayedText"
-    :loading="isLoading"
-    :search-input="searchQuery"
-    @update:searchInput="onSearchQueryChange"
-    :placeholder="forceSearchQuery"
-    hide-no-data
-    hide-selected
-    item-text="displayValue"
-    item-value="reaction.mnx_id"
-    return-object
-    :rules="[...(rules || []), requestErrorRule(requestError)]"
-    @change="onChange"
-    @focus="loadForcedSearchQuery"
-    @paste="$emit('paste', $event)"
-    ref="reactionAutocomplete"
-  >
-    <template v-slot:item="{ item: reaction }">
-      <v-list-tile-content>
-        <v-list-tile-title v-text="reaction.displayValue"></v-list-tile-title>
-        <v-list-tile-sub-title v-if="reaction.modelNames.size">
-          <span
-            v-for="(modelName, index) of reaction.modelNames"
-            :key="modelName + index"
-            >{{ modelName }}&nbsp;&nbsp;</span
-          ></v-list-tile-sub-title
-        >
-      </v-list-tile-content>
+  <v-tooltip bottom :disabled="!selectedItem">
+    <template v-slot:activator="{ on }">
+      <v-autocomplete-extended
+        v-bind="$attrs"
+        v-model="selectedItem"
+        :items="searchResults"
+        :filter="dontFilterByDisplayedText"
+        :loading="isLoading"
+        :search-input="searchQuery"
+        @update:searchInput="onSearchQueryChange"
+        :placeholder="forceSearchQuery"
+        hide-no-data
+        hide-selected
+        item-text="displayValue"
+        item-value="reaction.mnx_id"
+        return-object
+        :rules="[requestErrorRule(requestError), ...(rules || [])]"
+        @change="onChange"
+        @focus="loadForcedSearchQuery"
+        @paste="$emit('paste', $event)"
+        ref="reactionAutocomplete"
+        v-on="on"
+      >
+        <template v-slot:item="{ item: reaction }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-list-tile-content v-on="on">
+                <v-list-tile-title
+                  v-text="reaction.displayValue"
+                ></v-list-tile-title>
+                <v-list-tile-sub-title v-if="reaction.modelNames.size">
+                  <span
+                    v-for="(modelName, index) of reaction.modelNames"
+                    :key="modelName + index"
+                    >{{ modelName }}&nbsp;&nbsp;</span
+                  ></v-list-tile-sub-title
+                >
+              </v-list-tile-content>
+            </template>
+            <span>
+              <em>Name: </em>{{ reaction.reaction.name }}<br />
+              <em>ID found in the model: </em
+              >{{ reaction.foundId ? reaction.foundId : "-" }}<br />
+              <em>Reaction string: </em>{{ equationDisplay(reaction) }}<br />
+              <em>MetaNetX ID: </em>{{ reaction.reaction.mnx_id }}<br />
+              <em>Annotation:</em><br />
+              <span
+                v-for="(ids, namespace) in reaction.reaction.annotation"
+                :key="namespace"
+              >
+                &nbsp;&nbsp;{{ namespace }}:
+                <span v-for="(id, index) of ids" :key="index"
+                  >{{ id }}&nbsp;&nbsp;</span
+                ><br />
+              </span>
+            </span>
+          </v-tooltip>
+        </template>
+      </v-autocomplete-extended>
     </template>
-  </v-autocomplete-extended>
+    <span v-if="selectedItem">
+      <em>Name: </em>{{ selectedItem.reaction.name }}<br />
+      <em>ID found in the model: </em
+      >{{ selectedItem.foundId ? selectedItem.foundId : "-" }}<br />
+      <em>Reaction string: </em>{{ equationDisplay(selectedItem) }}<br />
+      <em>MetaNetX ID: </em>{{ selectedItem.reaction.mnx_id }}<br />
+      <em>Annotation:</em><br />
+      <span
+        v-for="(ids, namespace) in selectedItem.reaction.annotation"
+        :key="namespace"
+      >
+        &nbsp;&nbsp;{{ namespace }}: {{ ids.join(" ") }} <br />
+      </span>
+    </span>
+  </v-tooltip>
 </template>
 
 <script lang="ts">
