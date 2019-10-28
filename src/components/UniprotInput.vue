@@ -85,9 +85,6 @@ export default Vue.extend({
     dialog: false
   }),
   computed: {},
-  created() {
-    this.debouncedQuery = debounce(this.query, 500);
-  },
   watch: {
     forceSearchQuery: {
       // Watcher needs to be immediate to trigger when copy-paste creates
@@ -115,6 +112,9 @@ export default Vue.extend({
         this.triggerQuery();
       }
     }
+  },
+  created() {
+    this.debouncedQuery = debounce(this.query, 500);
   },
   methods: {
     hint() {
