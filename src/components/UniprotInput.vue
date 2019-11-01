@@ -1,67 +1,25 @@
 <template>
-  <div>
-    <v-text-field
-      label="Protein"
-      v-model="searchQuery"
-      :loading="isLoading"
-      :hint="hint()"
-      persistent-hint
-      :append-outer-icon="protein ? 'info' : ''"
-      :rules="[requestErrorRule(requestError), ...(rules || [])]"
-      clearable
-      @click:append-outer="dialog = true"
-      @paste="$emit('paste', $event)"
-      @click:clear="onClear"
-    ></v-text-field>
-    <v-dialog v-model="dialog" width="500">
-      <v-card v-if="protein">
-        <v-card-title
-          class="headline primary lighten-2 white--text"
-          primary-title
-        >
-          {{ protein.identifier }}
-        </v-card-title>
-
-        <v-card-text>
-          <table class="protein-table">
-            <tr>
-              <th>Name</th>
-              <td>{{ protein.name }}</td>
-            </tr>
-            <tr>
-              <th>Identifier</th>
-              <td>{{ protein.identifier }}</td>
-            </tr>
-            <tr>
-              <th>Gene</th>
-              <td>{{ protein.gene }}</td>
-            </tr>
-            <tr>
-              <th>External link</th>
-              <td>
-                <a
-                  :href="
-                    `https://www.uniprot.org/uniprot/${protein.identifier}`
-                  "
-                  target="_blank"
-                  >Open in UniProtKB</a
-                >
-              </td>
-            </tr>
-          </table>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" flat @click="dialog = false">
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
+  <v-tooltip bottom :disabled="!protein">
+    <template v-slot:activator="{ on }">
+      <v-text-field
+        label="Protein"
+        v-model="searchQuery"
+        :loading="isLoading"
+        :hint="hint()"
+        persistent-hint
+        :rules="[requestErrorRule(requestError), ...(rules || [])]"
+        clearable
+        @paste="$emit('paste', $event)"
+        @click:clear="onClear"
+        v-on="on"
+      ></v-text-field>
+    </template>
+    <span v-if="protein">
+      <em>Name: </em>{{ protein.name }}<br />
+      <em>Identifier: </em>{{ protein.identifier }}<br />
+      <em>Gene: </em>{{ protein.gene }}<br />
+    </span>
+  </v-tooltip>
 </template>
 
 <script lang="ts">
@@ -83,8 +41,7 @@ export default Vue.extend({
     requestErrorRule: error =>
       !error ||
       "Could not query UniProtKB. Their service or your internet connection might be down.",
-    protein: null,
-    dialog: false
+    protein: null
   }),
   computed: {},
   watch: {
@@ -121,7 +78,11 @@ export default Vue.extend({
   methods: {
     hint() {
       if (this.protein) {
-        return `${this.protein.identifier} (${this.protein.name})`;
+        return `<a href="https://www.uniprot.org/uniprot/${
+          this.protein.identifier
+        }" target="_blank">${this.protein.identifier}</a> (${
+          this.protein.name
+        })`;
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }
