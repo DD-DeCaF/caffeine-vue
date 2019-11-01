@@ -8,8 +8,10 @@
       persistent-hint
       :append-outer-icon="protein ? 'info' : ''"
       :rules="[requestErrorRule(requestError), ...(rules || [])]"
+      clearable
       @click:append-outer="dialog = true"
       @paste="$emit('paste', $event)"
+      @click:clear="onClear"
     ></v-text-field>
     <v-dialog v-model="dialog" width="500">
       <v-card v-if="protein">
@@ -176,6 +178,9 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
+    },
+    onClear() {
+      this.$emit("clear");
     }
   }
 });

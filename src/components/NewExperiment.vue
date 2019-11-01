@@ -323,14 +323,6 @@
                         @change="
                           onChange(fluxomicsItem, 'reaction', $event.reaction)
                         "
-                        :modelIds="getRelevantModelIds(fluxomicsItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'fluxomics',
-                            fluxomicsItem.reaction,
-                            fluxomicsItem
-                          )
-                        ]"
                         @paste="
                           paste(
                             1,
@@ -341,6 +333,23 @@
                             $event
                           )
                         "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'reaction'
+                          )
+                        "
+                        :modelIds="getRelevantModelIds(fluxomicsItem)"
+                        :rules="[
+                          requiredIfHasMain(
+                            'fluxomics',
+                            fluxomicsItem.reaction,
+                            fluxomicsItem
+                          )
+                        ]"
                         :forceSearchQuery="
                           fluxomicsItem.reaction &&
                             fluxomicsItem.reaction._pastedText
@@ -456,6 +465,15 @@
                                 selectedTable.pagination.rowsPerPage,
                             selectedTable,
                             $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'compound'
                           )
                         "
                         :forceSearchQuery="
@@ -582,6 +600,15 @@
                           )
                         "
                         @change="onChange(proteomicsItem, 'protein', $event)"
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'protein'
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'proteomics',
@@ -705,6 +732,15 @@
                                 selectedTable.pagination.rowsPerPage,
                             selectedTable,
                             $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'compound'
                           )
                         "
                         :forceSearchQuery="
@@ -832,6 +868,15 @@
                             $event
                           )
                         "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'product'
+                          )
+                        "
                         :forceSearchQuery="
                           molarYieldsItem.product &&
                             molarYieldsItem.product._pastedText
@@ -859,6 +904,15 @@
                                 selectedTable.pagination.rowsPerPage,
                             selectedTable,
                             $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'substrate'
                           )
                         "
                         :forceSearchQuery="
@@ -1936,6 +1990,9 @@ export default Vue.extend({
         (this.getOrganismById(strain.organism_id)
           ? " (" + this.getOrganismById(strain.organism_id).name + ")"
           : "")}`;
+    },
+    onMeasurementClear(index, table, property) {
+      table.items[index][property] = null;
     }
   }
 });

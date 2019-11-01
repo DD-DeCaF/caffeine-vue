@@ -16,9 +16,11 @@
         item-value="mnx_id"
         return-object
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
+        clearable
         @change="onChange"
         @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
+        @click:clear="onClear"
         ref="metaboliteAutocomplete"
         v-on="on"
       >
@@ -338,6 +340,9 @@ export default Vue.extend({
       this.searchQuery = value;
     },
     onChange(selectedMetabolite: MetaNetXMetabolite): void {
+      if (!selectedMetabolite) {
+        return;
+      }
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
@@ -363,6 +368,9 @@ export default Vue.extend({
       // takes away focus and vuetify tries to clear search.
       this.skipVuetifyClearSearch = true;
       this.searchQuery = this.forceSearchQuery;
+    },
+    onClear() {
+      this.$emit("clear");
     }
   }
 });
