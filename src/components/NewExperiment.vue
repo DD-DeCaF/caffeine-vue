@@ -33,135 +33,131 @@
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                 >
-                  <template v-slot:items="{ item: condition, index: index }">
-                    <tr :key="temporaryId">
-                      <td>
-                        <v-text-field
-                          v-model="condition.name"
-                          @paste="
-                            paste(
-                              0,
-                              index +
-                                (selectedTable.pagination.page - 1) *
-                                  selectedTable.pagination.rowsPerPage,
-                              selectedTable,
-                              $event
-                            )
-                          "
-                        ></v-text-field>
-                      </td>
-                      <td>
-                        <v-autocomplete-extended
-                          return-object
-                          :item-text="strainDisplay"
-                          item-value="id"
-                          v-model="condition.strain"
-                          :items="availableStrains"
-                          name="strain"
-                          type="text"
-                          :placeholder="
-                            condition.strain && condition.strain._pastedText
-                          "
-                          ref="strainAutocomplete"
-                          :rules="[
-                            requiredIfHasMain(
-                              'conditions',
-                              condition.strain,
-                              condition
-                            )
-                          ]"
-                          @paste="
-                            paste(
-                              1,
-                              index +
-                                (selectedTable.pagination.page - 1) *
-                                  selectedTable.pagination.rowsPerPage,
-                              selectedTable,
-                              $event
-                            )
-                          "
-                        >
-                          <template v-slot:prepend-item>
-                            <v-list-tile
-                              ripple
-                              @click="
-                                isNewStrainDialogVisible = true;
-                                tables.conditions.rowIndexOnThePage = index;
-                                $refs.strainAutocomplete.isMenuActive = false;
-                              "
-                            >
-                              <v-icon class="mr-3" color="primary"
-                                >add_circle</v-icon
+                  <template v-slot:items="{ item: condition, index: relativeIndex }">
+                    <Var :absoluteIndex="index + (tables.conditions.pagination.page - 1) * tables.conditions.pagination.rowsPerPage">
+                      <tr :key="temporaryId" slot-scope="{ absoluteIndex: absoluteIndex }">
+                        <td>
+                          <v-text-field
+                            v-model="condition.name"
+                            @paste="
+                              paste(
+                                0,
+                                absoluteIndex,
+                                selectedTable,
+                                $event
+                              )
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-autocomplete-extended
+                            return-object
+                            :item-text="strainDisplay"
+                            item-value="id"
+                            v-model="condition.strain"
+                            :items="availableStrains"
+                            name="strain"
+                            type="text"
+                            :placeholder="
+                              condition.strain && condition.strain._pastedText
+                            "
+                            ref="strainAutocomplete"
+                            :rules="[
+                              requiredIfHasMain(
+                                'conditions',
+                                condition.strain,
+                                condition
+                              )
+                            ]"
+                            @paste="
+                              paste(
+                                1,
+                                absoluteIndex,
+                                selectedTable,
+                                $event
+                              )
+                            "
+                          >
+                            <template v-slot:prepend-item>
+                              <v-list-tile
+                                ripple
+                                @click="
+                                  isNewStrainDialogVisible = true;
+                                  tables.conditions.rowIndexOnThePage = index;
+                                  $refs.strainAutocomplete.isMenuActive = false;
+                                "
                               >
-                              <v-list-tile-title>
-                                New Strain
-                              </v-list-tile-title>
-                            </v-list-tile>
-                            <v-divider class="my-2"></v-divider>
-                          </template>
-                        </v-autocomplete-extended>
-                      </td>
-                      <td>
-                        <v-autocomplete-extended
-                          return-object
-                          item-text="name"
-                          item-value="id"
-                          v-model="condition.medium"
-                          :items="availableMedia"
-                          name="medium"
-                          type="text"
-                          :placeholder="
-                            condition.medium && condition.medium._pastedText
-                          "
-                          ref="mediumAutocomplete"
-                          :rules="[
-                            requiredIfHasMain(
-                              'conditions',
-                              condition.medium,
-                              condition
-                            )
-                          ]"
-                          @paste="
-                            paste(
-                              2,
-                              index +
-                                (selectedTable.pagination.page - 1) *
-                                  selectedTable.pagination.rowsPerPage,
-                              selectedTable,
-                              $event
-                            )
-                          "
-                        >
-                          <template v-slot:prepend-item>
-                            <v-list-tile
-                              ripple
-                              @click="
-                                getRelevantModelIdsForNewMedium(condition);
-                                isNewMediumDialogVisible = true;
-                                tables.conditions.rowIndexOnThePage = index;
-                                $refs.mediumAutocomplete.isMenuActive = false;
-                              "
-                            >
-                              <v-icon class="mr-3" color="primary"
-                                >add_circle</v-icon
+                                <v-icon class="mr-3" color="primary"
+                                  >add_circle</v-icon
+                                >
+                                <v-list-tile-title>
+                                  New Strain
+                                </v-list-tile-title>
+                              </v-list-tile>
+                              <v-divider class="my-2"></v-divider>
+                            </template>
+                          </v-autocomplete-extended>
+                        </td>
+                        <td>
+                          <v-autocomplete-extended
+                            return-object
+                            item-text="name"
+                            item-value="id"
+                            v-model="condition.medium"
+                            :items="availableMedia"
+                            name="medium"
+                            type="text"
+                            :placeholder="
+                              condition.medium && condition.medium._pastedText
+                            "
+                            ref="mediumAutocomplete"
+                            :rules="[
+                              requiredIfHasMain(
+                                'conditions',
+                                condition.medium,
+                                condition
+                              )
+                            ]"
+                            @paste="
+                              paste(
+                                2,
+                                absoluteIndex,
+                                selectedTable,
+                                $event
+                              )
+                            "
+                          >
+                            <template v-slot:prepend-item>
+                              <v-list-tile
+                                ripple
+                                @click="
+                                  getRelevantModelIdsForNewMedium(condition);
+                                  isNewMediumDialogVisible = true;
+                                  tables.conditions.rowIndexOnThePage = index;
+                                  $refs.mediumAutocomplete.isMenuActive = false;
+                                "
                               >
-                              <v-list-tile-title>
-                                New Medium
-                              </v-list-tile-title>
-                            </v-list-tile>
-                            <v-divider class="my-2"></v-divider>
-                          </template>
-                        </v-autocomplete-extended>
-                      </td>
-                      <td>
-                        <v-btn
-                          icon
-                          @click="deleteCondition(condition.temporaryId)"
-                        >
-                          <v-icon color="primary">delete</v-icon>
-                        </v-btn>
-                      </td>
-                    </tr>
+                                <v-icon class="mr-3" color="primary"
+                                  >add_circle</v-icon
+                                >
+                                <v-list-tile-title>
+                                  New Medium
+                                </v-list-tile-title>
+                              </v-list-tile>
+                              <v-divider class="my-2"></v-divider>
+                            </template>
+                          </v-autocomplete-extended>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="deleteCondition(condition.temporaryId)"
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
