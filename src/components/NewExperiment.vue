@@ -35,7 +35,7 @@
                 >
                   <template v-slot:items="{ item: condition, index: relativeIndex }">
                     <Var :absoluteIndex="index + (tables.conditions.pagination.page - 1) * tables.conditions.pagination.rowsPerPage">
-                      <tr :key="temporaryId" slot-scope="{ absoluteIndex: absoluteIndex }">
+                      <tr :key="temporaryId" slot-scope="{ absoluteIndex }">
                         <td>
                           <v-text-field
                             v-model="condition.name"
@@ -83,7 +83,7 @@
                                 ripple
                                 @click="
                                   isNewStrainDialogVisible = true;
-                                  tables.conditions.rowIndexOnThePage = index;
+                                  tables.conditions.rowIndex = absoluteIndex;
                                   $refs.strainAutocomplete.isMenuActive = false;
                                 "
                               >
@@ -133,7 +133,7 @@
                                 @click="
                                   getRelevantModelIdsForNewMedium(condition);
                                   isNewMediumDialogVisible = true;
-                                  tables.conditions.rowIndexOnThePage = index;
+                                  tables.conditions.rowIndex = absoluteIndex;
                                   $refs.mediumAutocomplete.isMenuActive = false;
                                 "
                               >
@@ -1255,7 +1255,7 @@ function getInitialState() {
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
-        rowIndexOnThePage: null,
+        rowIndex: null,
         // We should control pagination for every table separately
         // When using pagination, data table's indeces on every page start from 0
         // To get the correct index, we need to take into account also page and
@@ -1589,18 +1589,10 @@ export default Vue.extend({
       }
     },
     passStrain(strain) {
-      const index =
-        this.tables.conditions.rowIndexOnThePage +
-        (this.tables.conditions.pagination.page - 1) *
-          this.tables.conditions.pagination.rowsPerPage;
-      this.tables.conditions.items[index].strain = strain;
+      this.tables.conditions.items[this.tables.conditions.rowIndex].strain = strain;
     },
     passMedium(medium) {
-      const index =
-        this.tables.conditions.rowIndexOnThePage +
-        (this.tables.conditions.pagination.page - 1) *
-          this.tables.conditions.pagination.rowsPerPage;
-      this.tables.conditions.items[index].medium = medium;
+      this.tables.conditions.items[this.tables.conditions.rowIndex].medium = medium;
     },
     passProject(project) {
       this.experiment.project_id = project.id;
