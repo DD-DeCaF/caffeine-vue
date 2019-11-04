@@ -29,8 +29,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.conditions.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.conditions.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -38,7 +38,16 @@
                     <td>
                       <v-text-field
                         v-model="condition.name"
-                        @paste="paste(0, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            0,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-text-field>
                     </td>
                     <td>
@@ -61,14 +70,23 @@
                             condition
                           )
                         ]"
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
                             ripple
                             @click="
                               isNewStrainDialogVisible = true;
-                              currentRowIndex = index;
+                              tables.conditions.rowIndexOnThePage = index;
                               $refs.strainAutocomplete.isMenuActive = false;
                             "
                           >
@@ -103,7 +121,16 @@
                             condition
                           )
                         ]"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       >
                         <template v-slot:prepend-item>
                           <v-list-tile
@@ -111,7 +138,7 @@
                             @click="
                               getRelevantModelIdsForNewMedium(condition);
                               isNewMediumDialogVisible = true;
-                              currentRowIndex = index;
+                              tables.conditions.rowIndexOnThePage = index;
                               $refs.mediumAutocomplete.isMenuActive = false;
                             "
                           >
@@ -155,8 +182,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.samples.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.samples.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -180,7 +207,16 @@
                     <td>
                       <v-text-field
                         v-model="sample.name"
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-text-field>
                     </td>
                     <td>
@@ -198,7 +234,16 @@
                           ),
                           singleDateTimeRule
                         ]"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-text-field>
                     </td>
                     <td>
@@ -212,7 +257,16 @@
                           singleDateTimeRule,
                           dateTimeRules(sample.startTime, sample.endTime)
                         ]"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-text-field>
                     </td>
                     <td>
@@ -244,8 +298,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.fluxomics.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.fluxomics.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -269,6 +323,25 @@
                         @change="
                           onChange(fluxomicsItem, 'reaction', $event.reaction)
                         "
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'reaction'
+                          )
+                        "
                         :modelIds="getRelevantModelIds(fluxomicsItem)"
                         :rules="[
                           requiredIfHasMain(
@@ -277,7 +350,6 @@
                             fluxomicsItem
                           )
                         ]"
-                        @paste="paste(1, index, selectedTable, $event)"
                         :forceSearchQuery="
                           fluxomicsItem.reaction &&
                             fluxomicsItem.reaction._pastedText
@@ -298,7 +370,16 @@
                             fluxomicsItem
                           )
                         ]"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -307,7 +388,16 @@
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            inindex +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPagedex,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -344,8 +434,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.metabolomics.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.metabolomics.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -367,7 +457,25 @@
                       <AutocompleteMnxMetabolite
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                         @change="onChange(metabolomicsItem, 'compound', $event)"
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'compound'
+                          )
+                        "
                         :forceSearchQuery="
                           metabolomicsItem.compound &&
                             metabolomicsItem.compound._pastedText
@@ -389,7 +497,16 @@
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'metabolomics',
@@ -405,7 +522,16 @@
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -442,8 +568,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.proteomics.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.proteomics.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -463,8 +589,26 @@
                     </td>
                     <td>
                       <UniprotInput
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                         @change="onChange(proteomicsItem, 'protein', $event)"
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'protein'
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'proteomics',
@@ -484,7 +628,16 @@
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'proteomics',
@@ -500,7 +653,16 @@
                         hint="mmol l <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -537,8 +699,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.uptakeSecretion.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.uptakeSecretion.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -562,7 +724,25 @@
                         @change="
                           onChange(uptakeSecretionItem, 'compound', $event)
                         "
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'compound'
+                          )
+                        "
                         :forceSearchQuery="
                           uptakeSecretionItem.compound &&
                             uptakeSecretionItem.compound._pastedText
@@ -584,7 +764,16 @@
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'uptakeSecretion',
@@ -600,7 +789,16 @@
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -637,8 +835,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.molarYields.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.molarYields.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -660,7 +858,25 @@
                       <AutocompleteMnxMetabolite
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                         @change="onChange(molarYieldsItem, 'product', $event)"
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'product'
+                          )
+                        "
                         :forceSearchQuery="
                           molarYieldsItem.product &&
                             molarYieldsItem.product._pastedText
@@ -680,7 +896,25 @@
                       <AutocompleteMnxMetabolite
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
                         @change="onChange(molarYieldsItem, 'substrate', $event)"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
+                        @clear="
+                          onMeasurementClear(
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            'substrate'
+                          )
+                        "
                         :forceSearchQuery="
                           molarYieldsItem.substrate &&
                             molarYieldsItem.substrate._pastedText
@@ -702,7 +936,16 @@
                         hint="mmol-product / mmol-substrate"
                         persistent-hint
                         step="any"
-                        @paste="paste(3, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            3,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                         :rules="[
                           requiredIfHasMain(
                             'molarYields',
@@ -718,7 +961,16 @@
                         hint="mmol-product / mmol-substrate"
                         persistent-hint
                         step="any"
-                        @paste="paste(4, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            4,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -755,8 +1007,8 @@
                 <v-data-table
                   :headers="selectedTable.headers"
                   :items="tables.growth.items"
-                  :pagination.sync="pagination"
-                  hide-actions
+                  :pagination.sync="tables.growth.pagination"
+                  :rows-per-page-items="[10, 25]"
                   disable-initial-sort
                   item-key="temporaryId"
                 >
@@ -785,7 +1037,16 @@
                             growthItem
                           )
                         ]"
-                        @paste="paste(1, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            1,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -794,7 +1055,16 @@
                         hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                         persistent-hint
                         step="any"
-                        @paste="paste(2, index, selectedTable, $event)"
+                        @paste="
+                          paste(
+                            2,
+                            index +
+                              (selectedTable.pagination.page - 1) *
+                                selectedTable.pagination.rowsPerPage,
+                            selectedTable,
+                            $event
+                          )
+                        "
                       ></v-number-field>
                     </td>
                     <td>
@@ -956,17 +1226,10 @@ function getInitialState() {
     isSubmitting: false,
     isExperimentDataValid: true,
     isMoreDataRequired: false,
-    currentRowIndex: null,
     submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
-    // Display all rows on a single page
-    // We are relying on data table's `index` (for currentRowIndex and @paste)
-    // but that only works correctly on the first page
-    pagination: {
-      rowsPerPage: -1
-    },
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -994,7 +1257,15 @@ function getInitialState() {
           }
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        rowIndexOnThePage: null,
+        // We should control pagination for every table separately
+        // When using pagination, data table's indeces on every page start from 0
+        // To get the correct index, we need to take into account also page and
+        // rowsPerPage properties of the pagination object
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       samples: {
         name: "Samples",
@@ -1012,7 +1283,10 @@ function getInitialState() {
           endTime: str => str
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       fluxomics: {
         name: "Fluxomics",
@@ -1032,7 +1306,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       metabolomics: {
         name: "Metabolomics",
@@ -1050,7 +1327,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       proteomics: {
         name: "Proteomics",
@@ -1068,7 +1348,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       uptakeSecretion: {
         name: "Uptake/Secretion rates",
@@ -1086,7 +1369,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       molarYields: {
         name: "Molar Yields",
@@ -1114,7 +1400,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       },
       growth: {
         name: "Growth",
@@ -1130,7 +1419,10 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true
+        isValid: true,
+        pagination: {
+          rowsPerPage: 10
+        }
       }
     }
   };
@@ -1300,10 +1592,18 @@ export default Vue.extend({
       }
     },
     passStrain(strain) {
-      this.selectedTable.items[this.currentRowIndex].strain = strain;
+      const index =
+        this.tables.conditions.rowIndexOnThePage +
+        (this.tables.conditions.pagination.page - 1) *
+          this.tables.conditions.pagination.rowsPerPage;
+      this.tables.conditions.items[index].strain = strain;
     },
     passMedium(medium) {
-      this.selectedTable.items[this.currentRowIndex].medium = medium;
+      const index =
+        this.tables.conditions.rowIndexOnThePage +
+        (this.tables.conditions.pagination.page - 1) *
+          this.tables.conditions.pagination.rowsPerPage;
+      this.tables.conditions.items[index].medium = medium;
     },
     passProject(project) {
       this.experiment.project_id = project.id;
@@ -1690,6 +1990,9 @@ export default Vue.extend({
         (this.getOrganismById(strain.organism_id)
           ? " (" + this.getOrganismById(strain.organism_id).name + ")"
           : "")}`;
+    },
+    onMeasurementClear(index, table, property) {
+      table.items[index][property] = null;
     }
   }
 });

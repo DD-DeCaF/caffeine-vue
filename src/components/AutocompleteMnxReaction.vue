@@ -16,9 +16,11 @@
         item-value="reaction.mnx_id"
         return-object
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
+        clearable
         @change="onChange"
         @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
+        @click:clear="$emit('clear')"
         ref="reactionAutocomplete"
         v-on="on"
       >
@@ -377,6 +379,9 @@ export default Vue.extend({
       this.searchQuery = value;
     },
     onChange(selectedReaction: MetaNetXReaction): void {
+      if (!selectedReaction) {
+        return;
+      }
       if (this.clearOnChange) {
         this.searchQuery = null;
         this.$nextTick(() => {
