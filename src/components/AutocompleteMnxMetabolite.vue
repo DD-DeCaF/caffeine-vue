@@ -20,7 +20,7 @@
         @change="onChange"
         @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
-        @click:clear="onClear"
+        @click:clear="$emit('clear')"
         ref="metaboliteAutocomplete"
         v-on="on"
       >
@@ -368,9 +368,6 @@ export default Vue.extend({
       // takes away focus and vuetify tries to clear search.
       this.skipVuetifyClearSearch = true;
       this.searchQuery = this.forceSearchQuery;
-    },
-    onClear() {
-      this.$emit("clear");
     }
   }
 });
