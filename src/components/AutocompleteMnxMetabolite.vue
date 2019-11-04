@@ -327,6 +327,20 @@ export default Vue.extend({
     }, 500);
   },
   methods: {
+    onVModel(model) {
+      if (model !== pastedText) {
+        this.selectedItem = model;
+        // if Vuetify notices that selecteItem is not in searchResults
+        // or that searchResults changed, it will clear selection (null).
+        // solve with    this.skipVuetifyClearSearch = true;
+        // // maybe issue:
+        // //   when we show sample selection dialog, we take focus away from autocomplete
+        // //   this also triggers clear search.
+        //
+        // maybe it doesn't notice. Try.
+        this.searchResults = [model];
+      }
+    }
     metaboliteDisplay(metabolite: MetaNetXMetabolite): string {
       const { name, mnx_id, formula } = metabolite;
       return `${name || "N/A"} (${mnx_id}) – ${formula}`;
