@@ -75,6 +75,11 @@ Vue.component("v-select-extended", VSelectExtended);
 Vue.component("v-autocomplete-extended", VAutocompleteExtended);
 Vue.component("v-form-extended", VFormExtended);
 Vue.component("v-number-field", VNumberField);
+Vue.component('Var', {
+  render() {
+    return this.$scopedSlots.default(this.$attrs)
+  }
+});
 
 // Synchronously initialize values from local storage before the main Vue
 // instance is created.
