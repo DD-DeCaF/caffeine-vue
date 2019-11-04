@@ -27,7 +27,7 @@
             >
               <div v-show="selectedTableKey === 'conditions'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.conditions.headers"
                   :items="tables.conditions.items"
                   :pagination.sync="tables.conditions.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -43,7 +43,7 @@
                               paste(
                                 0,
                                 absoluteIndex,
-                                selectedTable,
+                                tables.conditions,
                                 $event
                               )
                             "
@@ -73,7 +73,7 @@
                               paste(
                                 1,
                                 absoluteIndex,
-                                selectedTable,
+                                tables.conditions,
                                 $event
                               )
                             "
@@ -122,7 +122,7 @@
                               paste(
                                 2,
                                 absoluteIndex,
-                                selectedTable,
+                                tables.conditions,
                                 $event
                               )
                             "
