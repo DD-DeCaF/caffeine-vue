@@ -62,13 +62,7 @@
                               condition.strain && condition.strain._pastedText
                             "
                             ref="strainAutocomplete"
-                            :rules="[
-                              requiredIfHasMain(
-                                'conditions',
-                                condition.strain,
-                                condition
-                              )
-                            ]"
+                            :rules="tables.conditions.rules.strain(condition.strain)"
                             @paste="
                               paste(
                                 1,
@@ -1252,6 +1246,39 @@ function getInitialState() {
             const match = availableMedia.find(({ name }) => name === str);
             return match || { _pastedText: str };
           }
+        },
+        rules: {
+          name: () => [],
+          strain: (item) => [
+            requiredIfHasMain(
+              'conditions',
+              item.strain,
+              item
+            )
+          ],
+          medium: () => []
+/*
+          startTime: (item) => [
+            singleDateTimeRule(item.startTime),
+            dateTimeRules(item.startTime, item.endTime)
+          ],
+
+
+        on paste:
+          all pasted items
+            parsePasted
+
+            validate each full table
+              tables.conditions.items.map(item =>
+                Object.keys(rules).map(key =>
+                  const rulesResults = rules[key](item);
+
+                  rulesResults.map(valid =>
+                    // true or string
+                    if (typeof valid === 'string') {
+                      invalid
+                    }
+*/
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
