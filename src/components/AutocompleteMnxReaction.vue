@@ -426,10 +426,19 @@ export default Vue.extend({
       if (!this.forceSearchQuery) {
         return;
       }
+
       // Assign early, before debounced query because species selection dialog
       // takes away focus and vuetify tries to clear search.
       this.skipVuetifyClearSearch = true;
-      this.searchQuery = this.forceSearchQuery;
+
+      if (this.forceSearchQuery === this.searchQuery) {
+        // User re-pasted the same query string. Trigger a search directly,
+        // because the `searchQuery` watcher won't trigger when it hasn't
+        // changed.
+        this.debouncedQuery();
+      } else {
+        this.searchQuery = this.forceSearchQuery;
+      }
     }
   }
 });
