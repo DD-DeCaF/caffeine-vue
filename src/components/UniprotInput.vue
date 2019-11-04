@@ -10,7 +10,7 @@
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
         clearable
         @paste="$emit('paste', $event)"
-        @click:clear="onClear"
+        @click:clear="$emit('clear')"
         v-on="on"
       ></v-text-field>
     </template>
@@ -139,9 +139,6 @@ export default Vue.extend({
         .then(() => {
           this.isLoading = false;
         });
-    },
-    onClear() {
-      this.$emit("clear");
     }
   }
 });
