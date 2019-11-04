@@ -1236,8 +1236,54 @@ function getInitialState() {
           { text: "Medium *", value: "medium", width: "30%" },
           { value: "actions", width: "5%" }
         ],
+/*
+        before:
+        on paste
+          all pasted rows
+            each pasted column
+              value = parsePasted(txt)
+
+        after:
+        on paste
+          lodash.invert/transpose
+            so that strain1,reaction1 \n strain2,reaction2   becomes   reaction1,reaction2 \n strain1,strain2
+
+          Promise.all(
+            all pasted columns
+              valuesOrPromise = parsePasted(reactionNames[])
+              Promise.resolve(valuesOrPromise)
+                .then(values => {
+                  lodash.invert/transpose
+                })
+          ).then(() =>
+            do the same as before
+          )
+
+
         parsePasted: {
-          name: str => str,
+          name: (strs: string[]) => strs, [a,b,c,d] => [a1,b1,c1,d1]
+          date: (strs[]) => strs.map(str => $moment(str)),
+          reaction: (strs: string[]) => {
+            axios.get('bulk', strs)
+              .then(result => {
+                const dict = result.data
+                return strs.map((str) => {
+                  return dict[str] || || { _pastedText: str }
+                });
+              }),
+          },
+
+          optional/later
+            // issue: how to call it even despite user not pasting first column
+          sample: (strs: string[]) => {
+            return this.$promisedDialog(SelectDialog, {
+              itemType: "sample",
+              items: this.tables.samples.items.filter(({ name }) => name)
+            }).then((selected) => {
+              strs.length x [selected, selected, selected, selected, selected, selected, selected, selected]
+            });
+          }
+*/
           strain: (str, { availableStrains }) => {
             const match = availableStrains.find(({ name }) => name === str);
             return match || { _pastedText: str };
@@ -1302,9 +1348,9 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          name: str => str,
-          startTime: str => str,
-          endTime: str => str
+          name: strs => strs,
+          startTime: strs => strs,
+          endTime: strs => strs
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1347,8 +1393,8 @@ function getInitialState() {
         ],
         parsePasted: {
           compound: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
