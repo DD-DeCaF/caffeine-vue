@@ -34,133 +34,124 @@
                   disable-initial-sort
                   item-key="temporaryId"
                 >
-                  <template v-slot:items="{ item: condition, index: index }">
-                    <td>
-                      <v-text-field
-                        v-model="condition.name"
-                        @paste="
-                          paste(
-                            0,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-text-field>
-                    </td>
-                    <td>
-                      <v-autocomplete-extended
-                        return-object
-                        :item-text="strainDisplay"
-                        item-value="id"
-                        v-model="condition.strain"
-                        :items="availableStrains"
-                        name="strain"
-                        type="text"
-                        :placeholder="
-                          condition.strain && condition.strain._pastedText
-                        "
-                        ref="strainAutocomplete"
-                        :rules="[
-                          requiredIfHasMain(
-                            'conditions',
-                            condition.strain,
-                            condition
-                          )
-                        ]"
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      >
-                        <template v-slot:prepend-item>
-                          <v-list-tile
-                            ripple
-                            @click="
-                              isNewStrainDialogVisible = true;
-                              tables.conditions.rowIndexOnThePage = index;
-                              $refs.strainAutocomplete.isMenuActive = false;
+                  <template
+                    v-slot:items="{ item: condition, index: relativeIndex }"
+                  >
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.conditions.pagination.page - 1) *
+                            tables.conditions.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-text-field
+                            v-model="condition.name"
+                            @paste="
+                              paste(0, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-autocomplete-extended
+                            return-object
+                            :item-text="strainDisplay"
+                            item-value="id"
+                            v-model="condition.strain"
+                            :items="availableStrains"
+                            name="strain"
+                            type="text"
+                            :placeholder="
+                              condition.strain && condition.strain._pastedText
+                            "
+                            ref="strainAutocomplete"
+                            :rules="[
+                              requiredIfHasMain(
+                                'conditions',
+                                condition.strain,
+                                condition
+                              )
+                            ]"
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
                             "
                           >
-                            <v-icon class="mr-3" color="primary"
-                              >add_circle</v-icon
-                            >
-                            <v-list-tile-title>
-                              New Strain
-                            </v-list-tile-title>
-                          </v-list-tile>
-                          <v-divider class="my-2"></v-divider>
-                        </template>
-                      </v-autocomplete-extended>
-                    </td>
-                    <td>
-                      <v-autocomplete-extended
-                        return-object
-                        item-text="name"
-                        item-value="id"
-                        v-model="condition.medium"
-                        :items="availableMedia"
-                        name="medium"
-                        type="text"
-                        :placeholder="
-                          condition.medium && condition.medium._pastedText
-                        "
-                        ref="mediumAutocomplete"
-                        :rules="[
-                          requiredIfHasMain(
-                            'conditions',
-                            condition.medium,
-                            condition
-                          )
-                        ]"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      >
-                        <template v-slot:prepend-item>
-                          <v-list-tile
-                            ripple
-                            @click="
-                              getRelevantModelIdsForNewMedium(condition);
-                              isNewMediumDialogVisible = true;
-                              tables.conditions.rowIndexOnThePage = index;
-                              $refs.mediumAutocomplete.isMenuActive = false;
+                            <template v-slot:prepend-item>
+                              <v-list-tile
+                                ripple
+                                @click="
+                                  isNewStrainDialogVisible = true;
+                                  tables.conditions.rowIndex = absoluteIndex;
+                                  $refs.strainAutocomplete.isMenuActive = false;
+                                "
+                              >
+                                <v-icon class="mr-3" color="primary"
+                                  >add_circle</v-icon
+                                >
+                                <v-list-tile-title>
+                                  New Strain
+                                </v-list-tile-title>
+                              </v-list-tile>
+                              <v-divider class="my-2"></v-divider>
+                            </template>
+                          </v-autocomplete-extended>
+                        </td>
+                        <td>
+                          <v-autocomplete-extended
+                            return-object
+                            item-text="name"
+                            item-value="id"
+                            v-model="condition.medium"
+                            :items="availableMedia"
+                            name="medium"
+                            type="text"
+                            :placeholder="
+                              condition.medium && condition.medium._pastedText
+                            "
+                            ref="mediumAutocomplete"
+                            :rules="[
+                              requiredIfHasMain(
+                                'conditions',
+                                condition.medium,
+                                condition
+                              )
+                            ]"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
                             "
                           >
-                            <v-icon class="mr-3" color="primary"
-                              >add_circle</v-icon
-                            >
-                            <v-list-tile-title>
-                              New Medium
-                            </v-list-tile-title>
-                          </v-list-tile>
-                          <v-divider class="my-2"></v-divider>
-                        </template>
-                      </v-autocomplete-extended>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="deleteCondition(condition.temporaryId)"
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                            <template v-slot:prepend-item>
+                              <v-list-tile
+                                ripple
+                                @click="
+                                  getRelevantModelIdsForNewMedium(condition);
+                                  isNewMediumDialogVisible = true;
+                                  tables.conditions.rowIndex = absoluteIndex;
+                                  $refs.mediumAutocomplete.isMenuActive = false;
+                                "
+                              >
+                                <v-icon class="mr-3" color="primary"
+                                  >add_circle</v-icon
+                                >
+                                <v-list-tile-title>
+                                  New Medium
+                                </v-list-tile-title>
+                              </v-list-tile>
+                              <v-divider class="my-2"></v-divider>
+                            </template>
+                          </v-autocomplete-extended>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="deleteCondition(condition.temporaryId)"
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -187,96 +178,91 @@
                   disable-initial-sort
                   item-key="temporaryId"
                 >
-                  <template v-slot:items="{ item: sample, index: index }">
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.conditions.items.filter(c => c.name)"
-                        item-value="temporaryId"
-                        item-text="name"
-                        v-model="sample.condition"
-                        no-data-text="No data available. You can add it in Conditions table."
-                        :rules="[
-                          requiredIfHasMain('samples', sample.condition, sample)
-                        ]"
-                      >
-                      </v-select>
-                    </td>
-                    <!-- Name field was added, so user can distinguish -->
-                    <!-- samples in other tables -->
-                    <td>
-                      <v-text-field
-                        v-model="sample.name"
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-text-field>
-                    </td>
-                    <td>
-                      <v-text-field
-                        v-model="sample.startTime"
-                        mask="####-##-## ##:##"
-                        return-masked-value
-                        placeholder="yyyy-mm-dd hh:mm"
-                        hint="yyyy-mm-dd hh:mm"
-                        :rules="[
-                          requiredIfHasMain(
-                            'samples',
-                            sample.startTime,
-                            sample
-                          ),
-                          singleDateTimeRule
-                        ]"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-text-field>
-                    </td>
-                    <td>
-                      <v-text-field
-                        v-model="sample.endTime"
-                        mask="####-##-## ##:##"
-                        return-masked-value
-                        placeholder="yyyy-mm-dd hh:mm"
-                        hint="yyyy-mm-dd hh:mm"
-                        :rules="[
-                          singleDateTimeRule,
-                          dateTimeRules(sample.startTime, sample.endTime)
-                        ]"
-                        @paste="
-                          paste(
-                            3,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-text-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="deleteSample(sample.temporaryId, true)"
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                  <template
+                    v-slot:items="{ item: sample, index: relativeIndex }"
+                  >
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.samples.pagination.page - 1) *
+                            tables.samples.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.conditions.items.filter(c => c.name)"
+                            item-value="temporaryId"
+                            item-text="name"
+                            v-model="sample.condition"
+                            no-data-text="No data available. You can add it in Conditions table."
+                            :rules="[
+                              requiredIfHasMain(
+                                'samples',
+                                sample.condition,
+                                sample
+                              )
+                            ]"
+                          >
+                          </v-select>
+                        </td>
+                        <!-- Name field was added, so user can distinguish -->
+                        <!-- samples in other tables -->
+                        <td>
+                          <v-text-field
+                            v-model="sample.name"
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field
+                            v-model="sample.startTime"
+                            mask="####-##-## ##:##"
+                            return-masked-value
+                            placeholder="yyyy-mm-dd hh:mm"
+                            hint="yyyy-mm-dd hh:mm"
+                            :rules="[
+                              requiredIfHasMain(
+                                'samples',
+                                sample.startTime,
+                                sample
+                              ),
+                              singleDateTimeRule
+                            ]"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field
+                            v-model="sample.endTime"
+                            mask="####-##-## ##:##"
+                            return-masked-value
+                            placeholder="yyyy-mm-dd hh:mm"
+                            hint="yyyy-mm-dd hh:mm"
+                            :rules="[
+                              singleDateTimeRule,
+                              dateTimeRules(sample.startTime, sample.endTime)
+                            ]"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="deleteSample(sample.temporaryId, true)"
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -304,115 +290,106 @@
                   item-key="temporaryId"
                 >
                   <template
-                    v-slot:items="{ item: fluxomicsItem, index: index }"
+                    v-slot:items="{ item: fluxomicsItem, index: relativeIndex }"
                   >
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="fluxomicsItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <AutocompleteMnxReaction
-                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
-                        @change="
-                          onChange(fluxomicsItem, 'reaction', $event.reaction)
-                        "
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'reaction'
-                          )
-                        "
-                        :modelIds="getRelevantModelIds(fluxomicsItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'fluxomics',
-                            fluxomicsItem.reaction,
-                            fluxomicsItem
-                          )
-                        ]"
-                        :forceSearchQuery="
-                          fluxomicsItem.reaction &&
-                            fluxomicsItem.reaction._pastedText
-                        "
-                        validate-on-blur
-                      ></AutocompleteMnxReaction>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="fluxomicsItem.measurement"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        :rules="[
-                          requiredIfHasMain(
-                            'fluxomics',
-                            fluxomicsItem.measurement,
-                            fluxomicsItem
-                          )
-                        ]"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="fluxomicsItem.uncertainty"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            3,
-                            inindex +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPagedex,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement(
-                            'fluxomics',
-                            fluxomicsItem.temporaryId
-                          )
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.fluxomics.pagination.page - 1) *
+                            tables.fluxomics.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="fluxomicsItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <AutocompleteMnxReaction
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
+                            @change="
+                              onChange(
+                                fluxomicsItem,
+                                'reaction',
+                                $event.reaction
+                              )
+                            "
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'reaction'
+                              )
+                            "
+                            :modelIds="getRelevantModelIds(fluxomicsItem)"
+                            :rules="[
+                              requiredIfHasMain(
+                                'fluxomics',
+                                fluxomicsItem.reaction,
+                                fluxomicsItem
+                              )
+                            ]"
+                            :forceSearchQuery="
+                              fluxomicsItem.reaction &&
+                                fluxomicsItem.reaction._pastedText
+                            "
+                            validate-on-blur
+                          ></AutocompleteMnxReaction>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="fluxomicsItem.measurement"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            :rules="[
+                              requiredIfHasMain(
+                                'fluxomics',
+                                fluxomicsItem.measurement,
+                                fluxomicsItem
+                              )
+                            ]"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="fluxomicsItem.uncertainty"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'fluxomics',
+                                fluxomicsItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -440,113 +417,105 @@
                   item-key="temporaryId"
                 >
                   <template
-                    v-slot:items="{ item: metabolomicsItem, index: index }"
+                    v-slot:items="{
+                      item: metabolomicsItem,
+                      index: relativeIndex
+                    }"
                   >
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="metabolomicsItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <AutocompleteMnxMetabolite
-                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                        @change="onChange(metabolomicsItem, 'compound', $event)"
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'compound'
-                          )
-                        "
-                        :forceSearchQuery="
-                          metabolomicsItem.compound &&
-                            metabolomicsItem.compound._pastedText
-                        "
-                        :modelIds="getRelevantModelIds(metabolomicsItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'metabolomics',
-                            metabolomicsItem.compound,
-                            metabolomicsItem
-                          )
-                        ]"
-                        validate-on-blur
-                      ></AutocompleteMnxMetabolite>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="metabolomicsItem.measurement"
-                        hint="mmol l <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        :rules="[
-                          requiredIfHasMain(
-                            'metabolomics',
-                            metabolomicsItem.measurement,
-                            metabolomicsItem
-                          )
-                        ]"
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="metabolomicsItem.uncertainty"
-                        hint="mmol l <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            3,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement(
-                            'metabolomics',
-                            metabolomicsItem.temporaryId
-                          )
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.metabolomics.pagination.page - 1) *
+                            tables.metabolomics.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="metabolomicsItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <AutocompleteMnxMetabolite
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            @change="
+                              onChange(metabolomicsItem, 'compound', $event)
+                            "
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'compound'
+                              )
+                            "
+                            :forceSearchQuery="
+                              metabolomicsItem.compound &&
+                                metabolomicsItem.compound._pastedText
+                            "
+                            :modelIds="getRelevantModelIds(metabolomicsItem)"
+                            :rules="[
+                              requiredIfHasMain(
+                                'metabolomics',
+                                metabolomicsItem.compound,
+                                metabolomicsItem
+                              )
+                            ]"
+                            validate-on-blur
+                          ></AutocompleteMnxMetabolite>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="metabolomicsItem.measurement"
+                            hint="mmol l <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                            :rules="[
+                              requiredIfHasMain(
+                                'metabolomics',
+                                metabolomicsItem.measurement,
+                                metabolomicsItem
+                              )
+                            ]"
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="metabolomicsItem.uncertainty"
+                            hint="mmol l <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'metabolomics',
+                                metabolomicsItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -574,110 +543,102 @@
                   item-key="temporaryId"
                 >
                   <template
-                    v-slot:items="{ item: proteomicsItem, index: index }"
+                    v-slot:items="{
+                      item: proteomicsItem,
+                      index: relativeIndex
+                    }"
                   >
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="proteomicsItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <UniprotInput
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @change="onChange(proteomicsItem, 'protein', $event)"
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'protein'
-                          )
-                        "
-                        :rules="[
-                          requiredIfHasMain(
-                            'proteomics',
-                            proteomicsItem.protein,
-                            proteomicsItem
-                          )
-                        ]"
-                        :forceSearchQuery="
-                          proteomicsItem.protein &&
-                            proteomicsItem.protein._pastedText
-                        "
-                      />
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="proteomicsItem.measurement"
-                        hint="mmol l <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        :rules="[
-                          requiredIfHasMain(
-                            'proteomics',
-                            proteomicsItem.measurement,
-                            proteomicsItem
-                          )
-                        ]"
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="proteomicsItem.uncertainty"
-                        hint="mmol l <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            3,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement(
-                            'proteomics',
-                            proteomicsItem.temporaryId
-                          )
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.proteomics.pagination.page - 1) *
+                            tables.proteomics.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="proteomicsItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <UniprotInput
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                            @change="
+                              onChange(proteomicsItem, 'protein', $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'protein'
+                              )
+                            "
+                            :rules="[
+                              requiredIfHasMain(
+                                'proteomics',
+                                proteomicsItem.protein,
+                                proteomicsItem
+                              )
+                            ]"
+                            :forceSearchQuery="
+                              proteomicsItem.protein &&
+                                proteomicsItem.protein._pastedText
+                            "
+                          />
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="proteomicsItem.measurement"
+                            hint="mmol l <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                            :rules="[
+                              requiredIfHasMain(
+                                'proteomics',
+                                proteomicsItem.measurement,
+                                proteomicsItem
+                              )
+                            ]"
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="proteomicsItem.uncertainty"
+                            hint="mmol l <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'proteomics',
+                                proteomicsItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -705,115 +666,105 @@
                   item-key="temporaryId"
                 >
                   <template
-                    v-slot:items="{ item: uptakeSecretionItem, index: index }"
+                    v-slot:items="{
+                      item: uptakeSecretionItem,
+                      index: relativeIndex
+                    }"
                   >
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="uptakeSecretionItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <AutocompleteMnxMetabolite
-                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                        @change="
-                          onChange(uptakeSecretionItem, 'compound', $event)
-                        "
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'compound'
-                          )
-                        "
-                        :forceSearchQuery="
-                          uptakeSecretionItem.compound &&
-                            uptakeSecretionItem.compound._pastedText
-                        "
-                        :modelIds="getRelevantModelIds(uptakeSecretionItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'uptakeSecretion',
-                            uptakeSecretionItem.compound,
-                            uptakeSecretionItem
-                          )
-                        ]"
-                        validate-on-blur
-                      ></AutocompleteMnxMetabolite>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="uptakeSecretionItem.measurement"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        :rules="[
-                          requiredIfHasMain(
-                            'uptakeSecretion',
-                            uptakeSecretionItem.measurement,
-                            uptakeSecretionItem
-                          )
-                        ]"
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="uptakeSecretionItem.uncertainty"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            3,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement(
-                            'uptakeSecretion',
-                            uptakeSecretionItem.temporaryId
-                          )
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.uptakeSecretion.pagination.page - 1) *
+                            tables.uptakeSecretion.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="uptakeSecretionItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <AutocompleteMnxMetabolite
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            @change="
+                              onChange(uptakeSecretionItem, 'compound', $event)
+                            "
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'compound'
+                              )
+                            "
+                            :forceSearchQuery="
+                              uptakeSecretionItem.compound &&
+                                uptakeSecretionItem.compound._pastedText
+                            "
+                            :modelIds="getRelevantModelIds(uptakeSecretionItem)"
+                            :rules="[
+                              requiredIfHasMain(
+                                'uptakeSecretion',
+                                uptakeSecretionItem.compound,
+                                uptakeSecretionItem
+                              )
+                            ]"
+                            validate-on-blur
+                          ></AutocompleteMnxMetabolite>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="uptakeSecretionItem.measurement"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                            :rules="[
+                              requiredIfHasMain(
+                                'uptakeSecretion',
+                                uptakeSecretionItem.measurement,
+                                uptakeSecretionItem
+                              )
+                            ]"
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="uptakeSecretionItem.uncertainty"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'uptakeSecretion',
+                                uptakeSecretionItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -841,151 +792,136 @@
                   item-key="temporaryId"
                 >
                   <template
-                    v-slot:items="{ item: molarYieldsItem, index: index }"
+                    v-slot:items="{
+                      item: molarYieldsItem,
+                      index: relativeIndex
+                    }"
                   >
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="molarYieldsItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <AutocompleteMnxMetabolite
-                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                        @change="onChange(molarYieldsItem, 'product', $event)"
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'product'
-                          )
-                        "
-                        :forceSearchQuery="
-                          molarYieldsItem.product &&
-                            molarYieldsItem.product._pastedText
-                        "
-                        :modelIds="getRelevantModelIds(molarYieldsItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'molarYields',
-                            molarYieldsItem.product,
-                            molarYieldsItem
-                          )
-                        ]"
-                        validate-on-blur
-                      ></AutocompleteMnxMetabolite>
-                    </td>
-                    <td>
-                      <AutocompleteMnxMetabolite
-                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
-                        @change="onChange(molarYieldsItem, 'substrate', $event)"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        @clear="
-                          onMeasurementClear(
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            'substrate'
-                          )
-                        "
-                        :forceSearchQuery="
-                          molarYieldsItem.substrate &&
-                            molarYieldsItem.substrate._pastedText
-                        "
-                        :modelIds="getRelevantModelIds(molarYieldsItem)"
-                        :rules="[
-                          requiredIfHasMain(
-                            'molarYields',
-                            molarYieldsItem.substrate,
-                            molarYieldsItem
-                          )
-                        ]"
-                        validate-on-blur
-                      ></AutocompleteMnxMetabolite>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="molarYieldsItem.measurement"
-                        hint="mmol-product / mmol-substrate"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            3,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                        :rules="[
-                          requiredIfHasMain(
-                            'molarYields',
-                            molarYieldsItem.measurement,
-                            molarYieldsItem
-                          )
-                        ]"
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="molarYieldsItem.uncertainty"
-                        hint="mmol-product / mmol-substrate"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            4,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement(
-                            'molarYields',
-                            molarYieldsItem.temporaryId
-                          )
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.molarYields.pagination.page - 1) *
+                            tables.molarYields.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="molarYieldsItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <AutocompleteMnxMetabolite
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            @change="
+                              onChange(molarYieldsItem, 'product', $event)
+                            "
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'product'
+                              )
+                            "
+                            :forceSearchQuery="
+                              molarYieldsItem.product &&
+                                molarYieldsItem.product._pastedText
+                            "
+                            :modelIds="getRelevantModelIds(molarYieldsItem)"
+                            :rules="[
+                              requiredIfHasMain(
+                                'molarYields',
+                                molarYieldsItem.product,
+                                molarYieldsItem
+                              )
+                            ]"
+                            validate-on-blur
+                          ></AutocompleteMnxMetabolite>
+                        </td>
+                        <td>
+                          <AutocompleteMnxMetabolite
+                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known metabolites."
+                            @change="
+                              onChange(molarYieldsItem, 'substrate', $event)
+                            "
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                            @clear="
+                              onMeasurementClear(
+                                absoluteIndex,
+                                selectedTable,
+                                'substrate'
+                              )
+                            "
+                            :forceSearchQuery="
+                              molarYieldsItem.substrate &&
+                                molarYieldsItem.substrate._pastedText
+                            "
+                            :modelIds="getRelevantModelIds(molarYieldsItem)"
+                            :rules="[
+                              requiredIfHasMain(
+                                'molarYields',
+                                molarYieldsItem.substrate,
+                                molarYieldsItem
+                              )
+                            ]"
+                            validate-on-blur
+                          ></AutocompleteMnxMetabolite>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="molarYieldsItem.measurement"
+                            hint="mmol-product / mmol-substrate"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(3, absoluteIndex, selectedTable, $event)
+                            "
+                            :rules="[
+                              requiredIfHasMain(
+                                'molarYields',
+                                molarYieldsItem.measurement,
+                                molarYieldsItem
+                              )
+                            ]"
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="molarYieldsItem.uncertainty"
+                            hint="mmol-product / mmol-substrate"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(4, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'molarYields',
+                                molarYieldsItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -1012,71 +948,72 @@
                   disable-initial-sort
                   item-key="temporaryId"
                 >
-                  <template v-slot:items="{ item: growthItem, index: index }">
-                    <td>
-                      <v-select
-                        return-object
-                        :items="tables.samples.items.filter(s => s.name)"
-                        item-text="name"
-                        item-value="temporaryId"
-                        v-model="growthItem.sample"
-                        no-data-text="No data available. You can add it in Samples table."
-                      >
-                      </v-select>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="growthItem.measurement"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        :rules="[
-                          requiredIfHasMain(
-                            'growth',
-                            growthItem.measurement,
-                            growthItem
-                          )
-                        ]"
-                        @paste="
-                          paste(
-                            1,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-number-field
-                        v-model.number="growthItem.uncertainty"
-                        hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
-                        persistent-hint
-                        step="any"
-                        @paste="
-                          paste(
-                            2,
-                            index +
-                              (selectedTable.pagination.page - 1) *
-                                selectedTable.pagination.rowsPerPage,
-                            selectedTable,
-                            $event
-                          )
-                        "
-                      ></v-number-field>
-                    </td>
-                    <td>
-                      <v-btn
-                        icon
-                        @click="
-                          deleteMeasurement('growth', growthItem.temporaryId)
-                        "
-                      >
-                        <v-icon color="primary">delete</v-icon>
-                      </v-btn>
-                    </td>
+                  <template
+                    v-slot:items="{ item: growthItem, index: relativeIndex }"
+                  >
+                    <Var
+                      :absoluteIndex="
+                        relativeIndex +
+                          (tables.growth.pagination.page - 1) *
+                            tables.growth.pagination.rowsPerPage
+                      "
+                    >
+                      <tr slot-scope="{ absoluteIndex }">
+                        <td>
+                          <v-select
+                            return-object
+                            :items="tables.samples.items.filter(s => s.name)"
+                            item-text="name"
+                            item-value="temporaryId"
+                            v-model="growthItem.sample"
+                            no-data-text="No data available. You can add it in Samples table."
+                          >
+                          </v-select>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="growthItem.measurement"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            :rules="[
+                              requiredIfHasMain(
+                                'growth',
+                                growthItem.measurement,
+                                growthItem
+                              )
+                            ]"
+                            @paste="
+                              paste(1, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-number-field
+                            v-model.number="growthItem.uncertainty"
+                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            persistent-hint
+                            step="any"
+                            @paste="
+                              paste(2, absoluteIndex, selectedTable, $event)
+                            "
+                          ></v-number-field>
+                        </td>
+                        <td>
+                          <v-btn
+                            icon
+                            @click="
+                              deleteMeasurement(
+                                'growth',
+                                growthItem.temporaryId
+                              )
+                            "
+                          >
+                            <v-icon color="primary">delete</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </Var>
                   </template>
                 </v-data-table>
                 <v-btn
@@ -1258,7 +1195,8 @@ function getInitialState() {
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
-        rowIndexOnThePage: null,
+        // Needed to pass created strain or medium to the appropriate condition
+        rowIndex: null,
         // We should control pagination for every table separately
         // When using pagination, data table's indeces on every page start from 0
         // To get the correct index, we need to take into account also page and
@@ -1592,18 +1530,14 @@ export default Vue.extend({
       }
     },
     passStrain(strain) {
-      const index =
-        this.tables.conditions.rowIndexOnThePage +
-        (this.tables.conditions.pagination.page - 1) *
-          this.tables.conditions.pagination.rowsPerPage;
-      this.tables.conditions.items[index].strain = strain;
+      this.tables.conditions.items[
+        this.tables.conditions.rowIndex
+      ].strain = strain;
     },
     passMedium(medium) {
-      const index =
-        this.tables.conditions.rowIndexOnThePage +
-        (this.tables.conditions.pagination.page - 1) *
-          this.tables.conditions.pagination.rowsPerPage;
-      this.tables.conditions.items[index].medium = medium;
+      this.tables.conditions.items[
+        this.tables.conditions.rowIndex
+      ].medium = medium;
     },
     passProject(project) {
       this.experiment.project_id = project.id;
