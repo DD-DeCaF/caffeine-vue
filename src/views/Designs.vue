@@ -360,7 +360,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import uuidv4 from "uuid/v4";
-import orderBy from "lodash/fp/orderBy";
+import { orderBy } from "lodash";
 import { Card } from "@/store/modules/interactiveMap";
 import { DesignItem } from "@/store/modules/designs";
 
@@ -406,6 +406,7 @@ export default Vue.extend({
   methods: {
     customSort(items: DesignItem[], index: string, isDesc: boolean) {
       return orderBy(
+        items,
         (item: DesignItem) => {
           if (
             index === "reactionKnockins" ||
@@ -419,8 +420,7 @@ export default Vue.extend({
           }
           return item[index];
         },
-        isDesc ? "desc" : "asc",
-        items
+        isDesc ? "desc" : "asc"
       );
     },
     reactionLink(reactionId, method) {

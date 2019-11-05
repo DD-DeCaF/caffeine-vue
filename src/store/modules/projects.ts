@@ -3,6 +3,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import colors from "vuetify/es5/util/colors";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface ProjectItem {
   id: number;
@@ -15,8 +16,8 @@ export interface ColoredProjectItem extends ProjectItem {
 
 interface ProjectStore {
   projects: ColoredProjectItem[];
-  activeProject?: ColoredProjectItem;
-  projectsPromise?: Promise<void>;
+  activeProject: ColoredProjectItem | null | undefined;
+  projectsPromise: Promise<void> | null;
 }
 
 const sensibleColors = {};
@@ -34,32 +35,32 @@ for (let color in colors) {
 const sortedColors = Object.values(sensibleColors).sort();
 const numColors = Object.keys(sortedColors).length;
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
     projects: [],
     activeProject: null,
     projectsPromise: null
-  },
+  } as ProjectStore,
   mutations: {
-    setProjects(state: ProjectStore, projects: ColoredProjectItem[]) {
+    setProjects(state, projects: ColoredProjectItem[]) {
       state.projects = projects;
     },
-    addProject(state: ProjectStore, project: ColoredProjectItem) {
+    addProject(state, project: ColoredProjectItem) {
       state.projects.push(project);
     },
-    editProject(state: ProjectStore, payload: any) {
+    editProject(state, payload: any) {
       Vue.set(state.projects, payload.index, payload.item);
     },
-    delete(state: ProjectStore, ids) {
+    delete(state, ids) {
       state.projects = state.projects.filter(
         project => !ids.includes(project.id)
       );
     },
-    setActiveProject(state: ProjectStore, id: number) {
+    setActiveProject(state, id: number) {
       state.activeProject = state.projects.find(project => project.id === id);
     },
-    setProjectsPromise(state: ProjectStore, projectsPromise: Promise<void>) {
+    setProjectsPromise(state, projectsPromise: Promise<void>) {
       state.projectsPromise = projectsPromise;
     }
   },
@@ -94,4 +95,4 @@ export default {
       return state.projects;
     }
   }
-};
+});

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface StrainItem {
   id: number;
@@ -13,11 +14,11 @@ export interface StrainItem {
   updated: string;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    strains: [],
-    strainsPromise: null
+    strains: [] as StrainItem[],
+    strainsPromise: null as Promise<void> | null
   },
   mutations: {
     setStrains(state, strains: StrainItem[]) {
@@ -43,4 +44,4 @@ export default {
       commit("setStrainsPromise", strainsPromise);
     }
   }
-};
+});

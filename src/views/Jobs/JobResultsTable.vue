@@ -665,7 +665,7 @@ import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import orderBy from "lodash/fp/orderBy";
+import { orderBy } from "lodash";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
@@ -888,6 +888,7 @@ export default Vue.extend({
     },
     customSort(items, index, isDesc) {
       return orderBy(
+        items,
         item => {
           if (
             index === "manipulations" ||
@@ -898,8 +899,7 @@ export default Vue.extend({
           }
           return item[index];
         },
-        isDesc ? "desc" : "asc",
-        items
+        isDesc ? "desc" : "asc"
       );
     },
     toggleAll() {
