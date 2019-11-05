@@ -19,7 +19,9 @@
       <v-layout>
         <v-flex md10>
           <v-card class="pa-4 scroll" height="100%" elevation="0">
-            <div class="display-1 mb-2">{{ selectedTable.name }}</div>
+            <div class="display-1 mb-2">
+              {{ tables[selectedTableKey].name }}
+            </div>
             <!-- Conditions table -->
             <v-form-extended
               v-model="tables.conditions.isValid"
@@ -27,7 +29,7 @@
             >
               <div v-show="selectedTableKey === 'conditions'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.conditions.headers"
                   :items="tables.conditions.items"
                   :pagination.sync="tables.conditions.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -49,7 +51,7 @@
                           <v-text-field
                             v-model="condition.name"
                             @paste="
-                              paste(0, absoluteIndex, selectedTable, $event)
+                              paste(0, absoluteIndex, tables.conditions, $event)
                             "
                           ></v-text-field>
                         </td>
@@ -74,7 +76,7 @@
                               )
                             ]"
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(1, absoluteIndex, tables.conditions, $event)
                             "
                           >
                             <template v-slot:prepend-item>
@@ -118,7 +120,7 @@
                               )
                             ]"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(2, absoluteIndex, tables.conditions, $event)
                             "
                           >
                             <template v-slot:prepend-item>
@@ -171,7 +173,7 @@
             >
               <div v-show="selectedTableKey === 'samples'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.samples.headers"
                   :items="tables.samples.items"
                   :pagination.sync="tables.samples.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -213,7 +215,7 @@
                           <v-text-field
                             v-model="sample.name"
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(1, absoluteIndex, tables.samples, $event)
                             "
                           ></v-text-field>
                         </td>
@@ -233,7 +235,7 @@
                               singleDateTimeRule
                             ]"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(2, absoluteIndex, tables.samples, $event)
                             "
                           ></v-text-field>
                         </td>
@@ -249,7 +251,7 @@
                               dateTimeRules(sample.startTime, sample.endTime)
                             ]"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(3, absoluteIndex, tables.samples, $event)
                             "
                           ></v-text-field>
                         </td>
@@ -282,7 +284,7 @@
             >
               <div v-show="selectedTableKey === 'fluxomics'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.fluxomics.headers"
                   :items="tables.fluxomics.items"
                   :pagination.sync="tables.fluxomics.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -322,12 +324,12 @@
                               )
                             "
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(1, absoluteIndex, tables.fluxomics, $event)
                             "
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.fluxomics,
                                 'reaction'
                               )
                             "
@@ -360,7 +362,7 @@
                               )
                             ]"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(2, absoluteIndex, tables.fluxomics, $event)
                             "
                           ></v-number-field>
                         </td>
@@ -371,7 +373,7 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(3, absoluteIndex, tables.fluxomics, $event)
                             "
                           ></v-number-field>
                         </td>
@@ -409,7 +411,7 @@
             >
               <div v-show="selectedTableKey === 'metabolomics'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.metabolomics.headers"
                   :items="tables.metabolomics.items"
                   :pagination.sync="tables.metabolomics.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -448,12 +450,17 @@
                               onChange(metabolomicsItem, 'compound', $event)
                             "
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(
+                                1,
+                                absoluteIndex,
+                                tables.metabolomics,
+                                $event
+                              )
                             "
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.metabolomics,
                                 'compound'
                               )
                             "
@@ -479,7 +486,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(
+                                2,
+                                absoluteIndex,
+                                tables.metabolomics,
+                                $event
+                              )
                             "
                             :rules="[
                               requiredIfHasMain(
@@ -497,7 +509,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(
+                                3,
+                                absoluteIndex,
+                                tables.metabolomics,
+                                $event
+                              )
                             "
                           ></v-number-field>
                         </td>
@@ -535,7 +552,7 @@
             >
               <div v-show="selectedTableKey === 'proteomics'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.proteomics.headers"
                   :items="tables.proteomics.items"
                   :pagination.sync="tables.proteomics.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -570,7 +587,7 @@
                         <td>
                           <UniprotInput
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(1, absoluteIndex, tables.proteomics, $event)
                             "
                             @change="
                               onChange(proteomicsItem, 'protein', $event)
@@ -578,7 +595,7 @@
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.proteomics,
                                 'protein'
                               )
                             "
@@ -602,7 +619,7 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(2, absoluteIndex, tables.proteomics, $event)
                             "
                             :rules="[
                               requiredIfHasMain(
@@ -620,7 +637,7 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(3, absoluteIndex, tables.proteomics, $event)
                             "
                           ></v-number-field>
                         </td>
@@ -658,7 +675,7 @@
             >
               <div v-show="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.uptakeSecretion.headers"
                   :items="tables.uptakeSecretion.items"
                   :pagination.sync="tables.uptakeSecretion.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -697,12 +714,17 @@
                               onChange(uptakeSecretionItem, 'compound', $event)
                             "
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(
+                                1,
+                                absoluteIndex,
+                                tables.uptakeSecretion,
+                                $event
+                              )
                             "
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.uptakeSecretion,
                                 'compound'
                               )
                             "
@@ -728,7 +750,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(
+                                2,
+                                absoluteIndex,
+                                tables.uptakeSecretion,
+                                $event
+                              )
                             "
                             :rules="[
                               requiredIfHasMain(
@@ -746,7 +773,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(
+                                3,
+                                absoluteIndex,
+                                tables.uptakeSecretion,
+                                $event
+                              )
                             "
                           ></v-number-field>
                         </td>
@@ -784,7 +816,7 @@
             >
               <div v-show="selectedTableKey === 'molarYields'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.molarYields.headers"
                   :items="tables.molarYields.items"
                   :pagination.sync="tables.molarYields.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -823,12 +855,17 @@
                               onChange(molarYieldsItem, 'product', $event)
                             "
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(
+                                1,
+                                absoluteIndex,
+                                tables.molarYields,
+                                $event
+                              )
                             "
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.molarYields,
                                 'product'
                               )
                             "
@@ -854,12 +891,17 @@
                               onChange(molarYieldsItem, 'substrate', $event)
                             "
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(
+                                2,
+                                absoluteIndex,
+                                tables.molarYields,
+                                $event
+                              )
                             "
                             @clear="
                               onMeasurementClear(
                                 absoluteIndex,
-                                selectedTable,
+                                tables.molarYields,
                                 'substrate'
                               )
                             "
@@ -885,7 +927,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(3, absoluteIndex, selectedTable, $event)
+                              paste(
+                                3,
+                                absoluteIndex,
+                                tables.molarYields,
+                                $event
+                              )
                             "
                             :rules="[
                               requiredIfHasMain(
@@ -903,7 +950,12 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(4, absoluteIndex, selectedTable, $event)
+                              paste(
+                                4,
+                                absoluteIndex,
+                                tables.molarYields,
+                                $event
+                              )
                             "
                           ></v-number-field>
                         </td>
@@ -941,7 +993,7 @@
             >
               <div v-show="selectedTableKey === 'growth'">
                 <v-data-table
-                  :headers="selectedTable.headers"
+                  :headers="tables.growth.headers"
                   :items="tables.growth.items"
                   :pagination.sync="tables.growth.pagination"
                   :rows-per-page-items="[10, 25]"
@@ -984,7 +1036,7 @@
                               )
                             ]"
                             @paste="
-                              paste(1, absoluteIndex, selectedTable, $event)
+                              paste(1, absoluteIndex, tables.growth, $event)
                             "
                           ></v-number-field>
                         </td>
@@ -995,7 +1047,7 @@
                             persistent-hint
                             step="any"
                             @paste="
-                              paste(2, absoluteIndex, selectedTable, $event)
+                              paste(2, absoluteIndex, tables.growth, $event)
                             "
                           ></v-number-field>
                         </td>
@@ -1405,9 +1457,6 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
-    },
-    selectedTable() {
-      return this.tables[this.selectedTableKey];
     },
     // Needed to provide a real progress status while submitting data
     itemsToPostAmount() {
