@@ -30,8 +30,7 @@ import { debounce } from "lodash";
 export default Vue.extend({
   name: "UniprotInput",
   props: {
-    rules: [Array, Object],
-    forceSearchQuery: String
+    rules: [Array, Object]
   },
   data: () => ({
     debouncedQuery: null,
@@ -45,31 +44,8 @@ export default Vue.extend({
   }),
   computed: {},
   watch: {
-    forceSearchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
-      immediate: true,
-      handler() {
-        if (!this.forceSearchQuery) {
-          return;
-        }
-        if (this.forceSearchQuery === this.searchQuery) {
-          // User re-pasted the same query string. Trigger a search directly,
-          // because the `searchQuery` watcher won't trigger when it hasn't
-          // changed.
-          this.triggerQuery();
-        } else {
-          this.searchQuery = this.forceSearchQuery;
-        }
-      }
-    },
-    searchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
-      immediate: true,
-      handler() {
-        this.triggerQuery();
-      }
+    searchQuery() {
+      this.triggerQuery();
     }
   },
   created() {

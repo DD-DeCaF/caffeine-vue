@@ -606,10 +606,6 @@
                                 proteomicsItem
                               )
                             ]"
-                            :forceSearchQuery="
-                              proteomicsItem.protein &&
-                                proteomicsItem.protein._pastedText
-                            "
                           />
                         </td>
                         <td>
@@ -1193,8 +1189,8 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
-import { tsvParseRows } from "d3-dsv";
-import { flatten, groupBy, mapValues } from "lodash";
+import { tsvParseRows, tsvParse } from "d3-dsv";
+import { flatten, groupBy, mapValues, zip, keyBy } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
@@ -1333,9 +1329,43 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          protein: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          protein: strs => {
+            const bodyFormData = new FormData();
+            bodyFormData.set("uploadQuery", strs.join(" "));
+            bodyFormData.set(
+              "columns",
+              "id,protein_names,entry_name,genes(PREFERRED)"
+            );
+            bodyFormData.set("format", "tab");
+            bodyFormData.set("from", "ACC,ID");
+            bodyFormData.set("to", "ACC");
+            return axios({
+              url: "https://www.uniprot.org/uploadlists/",
+              method: "POST",
+              data: bodyFormData,
+              headers: {
+                "Content-Type": "multipart/form-data"
+              }
+            }).then(response => {
+              const parsedResponse = keyBy(
+                tsvParse(response.data),
+                item => item.Entry
+              );
+              return strs.map(str => {
+                if (str in parsedResponse) {
+                  return {
+                    identifier: parsedResponse[str]["Entry name"] || "Unknown",
+                    name: parsedResponse[str]["Protein names"] || "Unknown",
+                    gene:
+                      parsedResponse[str]["Gene names  (primary )"] || "Unknown"
+                  };
+                }
+                return { _pastedText: str };
+              });
+            });
+          },
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1655,33 +1685,6 @@ export default Vue.extend({
       // Tabular data pasted.
       $event.preventDefault();
 
-      // rows = [["a", "5", ""]]
-      const parsedRows = rows.map(row => {
-        return row
-          .filter((cell, columnIx) => {
-            // Ignore excess columns.
-            return !!table.headers[columnOffset + columnIx];
-          })
-          .map((cell, columnIx) => {
-            const property = table.headers[columnOffset + columnIx].value;
-            let value;
-            if (cell) {
-              // Parse cell.
-              value = table.parsePasted[property](cell, {
-                // Extra parameters for parsePasted:
-                tables: this.tables,
-                availableStrains: this.availableStrains,
-                availableMedia: this.availableMedia
-              });
-            } else {
-              // Empty cell clears existing value.
-              value = null;
-            }
-
-            return [property, value];
-          });
-      });
-
       // Ask which condition/sample pasted data belongs to
       let dialogSelection;
       if (table.name === "Samples") {
@@ -1699,14 +1702,40 @@ export default Vue.extend({
       }
 
       dialogSelection.then(rowPairsFromDialog => {
-        // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
-        parsedRows.forEach((rowPairs, rowIx) => {
-          if (!table.items[rowOffset + rowIx]) {
-            // Create excess rows.
-            table.items.push({ temporaryId: uuidv4() });
-          }
-          [...rowPairs, ...rowPairsFromDialog].forEach(([property, value]) => {
-            Vue.set(table.items[rowOffset + rowIx], property, value);
+        // Transpose the array, so we can make batch requests
+        const columns = zip(...rows);
+        // TODO: handle excess columns
+        const parsedColumnsPromises = columns.map((column, columnIx) => {
+          const property = table.headers[columnOffset + columnIx].value;
+          const parsedColumnPromise = table.parsePasted[property](column, {
+            // Extra parameters for parsePasted:
+            tables: this.tables,
+            availableStrains: this.availableStrains,
+            availableMedia: this.availableMedia
+          });
+          return parsedColumnPromise;
+        });
+
+        Promise.all(parsedColumnsPromises).then(parsedColumns => {
+          // Transpose the array back
+          const parsedRows = zip(...parsedColumns).map(row => {
+            return row.map((value, columnIx) => {
+              const property = table.headers[columnOffset + columnIx].value;
+              return [property, value];
+            });
+          });
+
+          // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+          parsedRows.forEach((rowPairs, rowIx) => {
+            if (!table.items[rowOffset + rowIx]) {
+              // Create excess rows.
+              table.items.push({ temporaryId: uuidv4() });
+            }
+            [...rowPairs, ...rowPairsFromDialog].forEach(
+              ([property, value]) => {
+                Vue.set(table.items[rowOffset + rowIx], property, value);
+              }
+            );
           });
         });
       });
