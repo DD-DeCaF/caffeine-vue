@@ -606,6 +606,7 @@
                                 proteomicsItem
                               )
                             ]"
+                            :passedProtein="proteomicsItem.protein"
                           />
                         </td>
                         <td>
@@ -1357,7 +1358,9 @@ function getInitialState() {
                     identifier: parsedResponse[str]["Entry name"] || "Unknown",
                     name: parsedResponse[str]["Protein names"] || "Unknown",
                     gene:
-                      parsedResponse[str]["Gene names  (primary )"] || "Unknown"
+                      parsedResponse[str]["Gene names  (primary )"] ||
+                      "Unknown",
+                    uniprotId: str
                   };
                 }
                 return { _pastedText: str };

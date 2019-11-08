@@ -2,8 +2,8 @@
   <v-tooltip bottom :disabled="!protein">
     <template v-slot:activator="{ on }">
       <v-text-field
-        label="Protein"
         v-model="searchQuery"
+        :placeholder="protein ? protein._pastedText : ''"
         :loading="isLoading"
         :hint="hint()"
         persistent-hint
@@ -30,13 +30,15 @@ import { debounce } from "lodash";
 export default Vue.extend({
   name: "UniprotInput",
   props: {
-    rules: [Array, Object]
+    rules: [Array, Object],
+    passedProtein: Object
   },
   data: () => ({
     debouncedQuery: null,
     searchQuery: "",
     isLoading: false,
     requestError: false,
+    skipQueryTrigger: false,
     requestErrorRule: error =>
       !error ||
       "Could not query UniProtKB. Their service or your internet connection might be down.",
@@ -45,7 +47,22 @@ export default Vue.extend({
   computed: {},
   watch: {
     searchQuery() {
-      this.triggerQuery();
+      if (!this.skipQueryTrigger) {
+        this.triggerQuery();
+      }
+      this.skipQueryTrigger = false;
+    },
+    passedProtein: {
+      immediate: true,
+      handler() {
+        if (this.passedProtein) {
+          // To display pasted uniprot id, we need to assign it to searchQuery
+          // and skip sending request to the UniProt service
+          this.skipQueryTrigger = true;
+          this.searchQuery = this.passedProtein.uniprotId;
+          this.protein = this.passedProtein;
+        }
+      }
     }
   },
   created() {
@@ -83,9 +100,9 @@ export default Vue.extend({
         this.debouncedQuery(this.searchQuery);
       });
     },
-    query(identifier: string) {
+    query(uniprotId: string) {
       axios
-        .get(`https://www.uniprot.org/uniprot/${identifier}.xml`)
+        .get(`https://www.uniprot.org/uniprot/${uniprotId}.xml`)
         .then(response => {
           // Parse the XML response, looking for name, identifier and gene.
           const doc = new DOMParser().parseFromString(
@@ -100,7 +117,8 @@ export default Vue.extend({
           this.protein = {
             name: name ? name.innerHTML : "Unknown",
             identifier: identifier ? identifier.innerHTML : "Unknown",
-            gene: gene ? gene.innerHTML : "Unknown"
+            gene: gene ? gene.innerHTML : "Unknown",
+            uniprotId: uniprotId
           };
           this.$emit("change", this.protein);
         })
@@ -119,13 +137,3 @@ export default Vue.extend({
   }
 });
 </script>
-
-<style lang="scss" scoped>
-.protein-table {
-  width: 100%;
-
-  th {
-    text-align: left;
-  }
-}
-</style>
