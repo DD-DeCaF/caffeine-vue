@@ -34,7 +34,6 @@
                   :pagination.sync="tables.conditions.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: condition, index: relativeIndex }"
@@ -46,7 +45,10 @@
                             tables.conditions.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="condition.temporaryId"
+                      >
                         <td>
                           <v-text-field
                             v-model="condition.name"
@@ -178,7 +180,6 @@
                   :pagination.sync="tables.samples.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: sample, index: relativeIndex }"
@@ -190,7 +191,10 @@
                             tables.samples.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="sample.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -289,7 +293,6 @@
                   :pagination.sync="tables.fluxomics.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: fluxomicsItem, index: relativeIndex }"
@@ -301,7 +304,10 @@
                             tables.fluxomics.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="fluxomicsItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -416,7 +422,6 @@
                   :pagination.sync="tables.metabolomics.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{
@@ -431,7 +436,10 @@
                             tables.metabolomics.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="metabolomicsItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -557,7 +565,6 @@
                   :pagination.sync="tables.proteomics.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{
@@ -572,7 +579,10 @@
                             tables.proteomics.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="proteomicsItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -677,7 +687,6 @@
                   :pagination.sync="tables.uptakeSecretion.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{
@@ -692,7 +701,10 @@
                             tables.uptakeSecretion.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="uptakeSecretionItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -818,7 +830,6 @@
                   :pagination.sync="tables.molarYields.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{
@@ -833,7 +844,10 @@
                             tables.molarYields.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="molarYieldsItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
@@ -995,7 +1009,6 @@
                   :pagination.sync="tables.growth.pagination"
                   :rows-per-page-items="[10, 25]"
                   disable-initial-sort
-                  item-key="temporaryId"
                 >
                   <template
                     v-slot:items="{ item: growthItem, index: relativeIndex }"
@@ -1007,7 +1020,10 @@
                             tables.growth.pagination.rowsPerPage
                       "
                     >
-                      <tr slot-scope="{ absoluteIndex }">
+                      <tr
+                        slot-scope="{ absoluteIndex }"
+                        :key="growthItem.temporaryId"
+                      >
                         <td>
                           <v-select
                             return-object
