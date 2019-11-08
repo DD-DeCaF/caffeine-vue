@@ -1143,7 +1143,7 @@
               </v-autocomplete-extended>
               <v-radio-group v-model="selectedTableKey">
                 <div v-for="(table, key) in tables" :key="key">
-                  <v-tooltip bottom :disabled="Boolean(!isTableDisabled(key))">
+                  <v-tooltip bottom :disabled="!whyIsTableDisabled(key)">
                     <template v-slot:activator="{ on }">
                       <v-layout v-on="on">
                         <v-radio
@@ -1151,7 +1151,7 @@
                           :value="key"
                           color="primary"
                           class="mb-1"
-                          :disabled="Boolean(isTableDisabled(key))"
+                          :disabled="!!whyIsTableDisabled(key)"
                         ></v-radio>
                         <v-icon
                           v-if="
@@ -1166,7 +1166,7 @@
                         >
                       </v-layout>
                     </template>
-                    <span>{{ isTableDisabled(key) }}</span>
+                    <span>{{ whyIsTableDisabled(key) }}</span>
                   </v-tooltip>
                 </div>
               </v-radio-group>
@@ -1992,7 +1992,7 @@ export default Vue.extend({
     updateProgressValue() {
       this.submitProgressValue += this.itemWeight;
     },
-    isTableDisabled(key): false | string {
+    whyIsTableDisabled(key): false | string {
       if (key === "conditions") {
         return false;
       } else if (key === "samples") {
