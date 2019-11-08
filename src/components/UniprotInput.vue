@@ -2,8 +2,8 @@
   <v-tooltip bottom :disabled="!protein">
     <template v-slot:activator="{ on }">
       <v-text-field
-        label="Protein"
         v-model="searchQuery"
+        :placeholder="protein ? protein._pastedText : ''"
         :loading="isLoading"
         :hint="hint()"
         persistent-hint
@@ -31,7 +31,7 @@ export default Vue.extend({
   name: "UniprotInput",
   props: {
     rules: [Array, Object],
-    forceSearchQuery: String
+    passedProtein: Object
   },
   data: () => ({
     debouncedQuery: null,
@@ -45,30 +45,23 @@ export default Vue.extend({
   }),
   computed: {},
   watch: {
-    forceSearchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
-      immediate: true,
-      handler() {
-        if (!this.forceSearchQuery) {
-          return;
-        }
-        if (this.forceSearchQuery === this.searchQuery) {
-          // User re-pasted the same query string. Trigger a search directly,
-          // because the `searchQuery` watcher won't trigger when it hasn't
-          // changed.
-          this.triggerQuery();
-        } else {
-          this.searchQuery = this.forceSearchQuery;
-        }
+    searchQuery() {
+      if (
+        this.passedProtein &&
+        this.searchQuery === this.passedProtein.uniprotId
+      ) {
+        return;
       }
+      this.triggerQuery();
     },
-    searchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
+    passedProtein: {
       immediate: true,
       handler() {
-        this.triggerQuery();
+        if (this.passedProtein) {
+          // To display pasted uniprot id, we need to assign it to searchQuery
+          this.searchQuery = this.passedProtein.uniprotId;
+          this.protein = this.passedProtein;
+        }
       }
     }
   },
@@ -107,9 +100,9 @@ export default Vue.extend({
         this.debouncedQuery(this.searchQuery);
       });
     },
-    query(identifier: string) {
+    query(uniprotId: string) {
       axios
-        .get(`https://www.uniprot.org/uniprot/${identifier}.xml`)
+        .get(`https://www.uniprot.org/uniprot/${uniprotId}.xml`)
         .then(response => {
           // Parse the XML response, looking for name, identifier and gene.
           const doc = new DOMParser().parseFromString(
@@ -124,7 +117,8 @@ export default Vue.extend({
           this.protein = {
             name: name ? name.innerHTML : "Unknown",
             identifier: identifier ? identifier.innerHTML : "Unknown",
-            gene: gene ? gene.innerHTML : "Unknown"
+            gene: gene ? gene.innerHTML : "Unknown",
+            uniprotId: uniprotId
           };
           this.$emit("change", this.protein);
         })
@@ -143,13 +137,3 @@ export default Vue.extend({
   }
 });
 </script>
-
-<style lang="scss" scoped>
-.protein-table {
-  width: 100%;
-
-  th {
-    text-align: left;
-  }
-}
-</style>
