@@ -1207,7 +1207,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows, tsvParse } from "d3-dsv";
-import { flatten, groupBy, mapValues, zip, keyBy } from "lodash";
+import { flatten, groupBy, mapValues, unzip, keyBy } from "lodash";
 import * as settings from "@/utils/settings";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
@@ -1348,14 +1348,14 @@ function getInitialState() {
         parsePasted: {
           protein: strs => {
             const bodyFormData = new FormData();
-            bodyFormData.set("uploadQuery", strs.join(" "));
-            bodyFormData.set(
+            bodyFormData.append("uploadQuery", strs.join(" "));
+            bodyFormData.append(
               "columns",
               "id,protein_names,entry_name,genes(PREFERRED)"
             );
-            bodyFormData.set("format", "tab");
-            bodyFormData.set("from", "ACC,ID");
-            bodyFormData.set("to", "ACC");
+            bodyFormData.append("format", "tab");
+            bodyFormData.append("from", "ACC,ID");
+            bodyFormData.append("to", "ACC");
             return axios({
               url: "https://www.uniprot.org/uploadlists/",
               method: "POST",
@@ -1722,8 +1722,9 @@ export default Vue.extend({
 
       dialogSelection.then(rowPairsFromDialog => {
         // Transpose the array, so we can make batch requests
-        const columns = zip(...rows);
+        const columns = unzip(rows);
         // TODO: handle excess columns
+        // TODO: handle pasting empty cells
         const parsedColumnsPromises = columns.map((column, columnIx) => {
           const property = table.headers[columnOffset + columnIx].value;
           const parsedColumnPromise = table.parsePasted[property](column, {
@@ -1737,7 +1738,7 @@ export default Vue.extend({
 
         Promise.all(parsedColumnsPromises).then(parsedColumns => {
           // Transpose the array back
-          const parsedRows = zip(...parsedColumns).map(row => {
+          const parsedRows = unzip(parsedColumns).map(row => {
             return row.map((value, columnIx) => {
               const property = table.headers[columnOffset + columnIx].value;
               return [property, value];

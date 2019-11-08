@@ -38,7 +38,6 @@ export default Vue.extend({
     searchQuery: "",
     isLoading: false,
     requestError: false,
-    skipQueryTrigger: false,
     requestErrorRule: error =>
       !error ||
       "Could not query UniProtKB. Their service or your internet connection might be down.",
@@ -47,18 +46,19 @@ export default Vue.extend({
   computed: {},
   watch: {
     searchQuery() {
-      if (!this.skipQueryTrigger) {
-        this.triggerQuery();
+      if (
+        this.passedProtein &&
+        this.searchQuery === this.passedProtein.uniprotId
+      ) {
+        return;
       }
-      this.skipQueryTrigger = false;
+      this.triggerQuery();
     },
     passedProtein: {
       immediate: true,
       handler() {
         if (this.passedProtein) {
           // To display pasted uniprot id, we need to assign it to searchQuery
-          // and skip sending request to the UniProt service
-          this.skipQueryTrigger = true;
           this.searchQuery = this.passedProtein.uniprotId;
           this.protein = this.passedProtein;
         }
