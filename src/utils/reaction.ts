@@ -1,4 +1,5 @@
-import { Metabolite } from "@/store/modules/interactiveMap";
+import { Metabolite, Reaction } from "@/store/modules/interactiveMap";
+import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
 
 // Produces reaction string based on:
 // sign of stoichiometry (positive/negative -> products/substrates)
@@ -7,7 +8,8 @@ import { Metabolite } from "@/store/modules/interactiveMap";
 export function buildReactionString(
   metabolites: Metabolite[],
   lowerBound: number,
-  upperBound: number
+  upperBound: number,
+  propertyToDisplay: string = "id"
 ) {
   const substrates: Object[] = [];
   const products: Object[] = [];
@@ -15,9 +17,8 @@ export function buildReactionString(
     const serializedMetabolite =
       Math.abs(metabolite.stoichiometry) +
       " " +
-      metabolite.id +
-      "_" +
-      metabolite.compartment;
+      metabolite[propertyToDisplay] +
+      (metabolite.compartment ? "_" + metabolite.compartment : "");
     if (metabolite.stoichiometry < 0) {
       substrates.push(serializedMetabolite);
     } else {
@@ -44,4 +45,47 @@ function direction(lowerBound, upperBound) {
     return " ⟵ ";
   }
   return " ⇌ ";
+}
+
+export function mapMnxReactionToReaction(
+  mnxReaction: MetaNetXReaction
+): Reaction {
+  const metabolites: Metabolite[] = mnxReaction.reaction.equation_parsed.map(
+    m => {
+      const fullMetabolite = mnxReaction.metabolites.find(
+        ({ mnx_id }) => mnx_id === m.metabolite_id
+      );
+      return {
+        id: m.metabolite_id,
+        name: fullMetabolite ? fullMetabolite.name : "",
+        formula: fullMetabolite ? fullMetabolite.formula : "",
+        // TODO: use m.compartment_id, mapped through selectedReaction.annotations
+        compartment: "",
+        stoichiometry: m.coefficient
+      };
+    }
+  );
+  // Note: Assuming all reactions in the universal model are
+  // reversible, but this might not be the case. Could potentially use
+  // the reaction string to check reversibility.
+  const lowerBound = -1000;
+  const upperBound = 1000;
+  const reaction: Reaction = {
+    id: mnxReaction.foundId || mnxReaction.reaction.mnx_id,
+    name: mnxReaction.reaction.name || "",
+    reactionString: buildReactionString(
+      metabolites,
+      lowerBound,
+      upperBound,
+      "name"
+    ),
+    lowerBound: lowerBound,
+    upperBound: upperBound,
+    metabolites: metabolites,
+    namespace: mnxReaction.namespace || "metanetx.reaction",
+    annotation: mnxReaction.reaction.annotation,
+    ec: mnxReaction.reaction.ec || "",
+    mnxId: mnxReaction.reaction.mnx_id
+  };
+  return reaction;
 }

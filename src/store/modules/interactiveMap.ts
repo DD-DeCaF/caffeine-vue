@@ -26,6 +26,9 @@ export interface Reaction {
   lowerBound?: number; // Used when editing bounds
   upperBound?: number; // Used when editing bounds
   namespace?: string;
+  annotation?: Object;
+  ec?: string;
+  mnxId?: string;
 }
 
 export interface Card {
