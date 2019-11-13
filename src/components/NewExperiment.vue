@@ -323,11 +323,7 @@
                           <AutocompleteMnxReaction
                             hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
                             @change="
-                              onChange(
-                                fluxomicsItem,
-                                'reaction',
-                                $event.reaction
-                              )
+                              onChange(fluxomicsItem, 'reaction', $event)
                             "
                             @paste="
                               paste(1, absoluteIndex, tables.fluxomics, $event)
@@ -347,10 +343,7 @@
                                 fluxomicsItem
                               )
                             ]"
-                            :forceSearchQuery="
-                              fluxomicsItem.reaction &&
-                                fluxomicsItem.reaction._pastedText
-                            "
+                            :passedReaction="fluxomicsItem.reaction"
                             validate-on-blur
                           ></AutocompleteMnxReaction>
                         </td>
@@ -1207,8 +1200,11 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows, tsvParse } from "d3-dsv";
-import { flatten, groupBy, mapValues, unzip, keyBy } from "lodash";
+import { flatten, groupBy, mapValues, unzip, keyBy, isEmpty } from "lodash";
 import * as settings from "@/utils/settings";
+import { mapMnxReactionToReaction } from "@/utils/reaction";
+import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
+import { getMetaboliteId } from "@/utils/metabolite";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
 import UniprotInput from "@/components/UniprotInput.vue";
@@ -1232,6 +1228,8 @@ function getInitialState() {
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
+    reactionsInModelsMap: {},
+    metabolitesInModelsMap: {},
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -1248,14 +1246,18 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          name: str => str,
-          strain: (str, { availableStrains }) => {
-            const match = availableStrains.find(({ name }) => name === str);
-            return match || { _pastedText: str };
+          name: strs => strs,
+          strain: (strs, { availableStrains }) => {
+            return strs.map(str => {
+              const match = availableStrains.find(({ name }) => name === str);
+              return match || { _pastedText: str };
+            });
           },
-          medium: (str, { availableMedia }) => {
-            const match = availableMedia.find(({ name }) => name === str);
-            return match || { _pastedText: str };
+          medium: (strs, { availableMedia }) => {
+            return strs.map(str => {
+              const match = availableMedia.find(({ name }) => name === str);
+              return match || { _pastedText: str };
+            });
           }
         },
         items: [{ temporaryId: uuidv4() }],
@@ -1281,9 +1283,9 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          name: str => str,
-          startTime: str => str,
-          endTime: str => str
+          name: strs => strs,
+          startTime: strs => strs,
+          endTime: strs => strs
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1302,11 +1304,34 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          // Temporarily create mock reaction object and use forceSearchQuery;
-          // selecting a reaction then clears forceSearchQuery.
-          reaction: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          reaction: (strs, { reactionsInModelsMap }) =>
+            axios
+              .get(`${settings.apis.metanetx}/reactions/batch?query=${strs}`)
+              .then(response => {
+                const mnxReactions: MetaNetXReaction[] = response.data;
+                return mnxReactions.map((mnxReaction, index) => {
+                  debugger;
+                  if (isEmpty(mnxReaction)) {
+                    return { _pastedText: strs[index] };
+                  }
+                  for (const model in reactionsInModelsMap) {
+                    const [modelId, modelName] = JSON.parse(model);
+                    for (const namespace in mnxReaction.reaction.annotation) {
+                      mnxReaction.reaction.annotation[namespace].forEach(
+                        reactionId => {
+                          if (reactionsInModelsMap[model].has(reactionId)) {
+                            mnxReaction.foundId = reactionId;
+                            mnxReaction.namespace = namespace;
+                          }
+                        }
+                      );
+                    }
+                  }
+                  return mapMnxReactionToReaction(mnxReaction);
+                });
+              }),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1481,7 +1506,8 @@ export default Vue.extend({
   data: () => getInitialState(),
   computed: {
     ...mapGetters({
-      getOrganismById: "organisms/getOrganismById"
+      getOrganismById: "organisms/getOrganismById",
+      getModelById: "models/getModelById"
     }),
     availableStrains() {
       return this.$store.state.strains.strains;
@@ -1717,7 +1743,32 @@ export default Vue.extend({
         dialogSelection = this.$promisedDialog(SelectDialog, {
           itemType: "sample",
           items: this.tables.samples.items.filter(({ name }) => name)
-        }).then(selected => (selected ? [["sample", selected]] : []));
+        }).then(selected => {
+          // Fetch models related to the selected organism
+          let organismId = selected.condition.strain.organism_id;
+          let modelIds = this.modelIdsByOrganism[organismId];
+          return Promise.all(
+            modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
+            )
+          ).then(() => {
+            modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.reactionsInModelsMap[key] = new Set([]);
+              model.model_serialized.reactions.forEach(reaction =>
+                this.reactionsInModelsMap[key].add(reaction.id)
+              );
+              this.metabolitesInModelsMap[key] = new Set([]);
+              model.model_serialized.metabolites.forEach(metabolite =>
+                this.metabolitesInModelsMap[key].add(
+                  getMetaboliteId(metabolite.id, metabolite.compartment)
+                )
+              );
+            });
+            return selected ? [["sample", selected]] : [];
+          });
+        });
       }
 
       dialogSelection.then(rowPairsFromDialog => {
@@ -1731,7 +1782,8 @@ export default Vue.extend({
             // Extra parameters for parsePasted:
             tables: this.tables,
             availableStrains: this.availableStrains,
-            availableMedia: this.availableMedia
+            availableMedia: this.availableMedia,
+            reactionsInModelsMap: this.reactionsInModelsMap
           });
           return parsedColumnPromise;
         });
