@@ -1,5 +1,5 @@
 <template>
-  <v-dialog @input="change" value="true" max-width="500px">
+  <v-dialog @input="change" value="true" max-width="500px" persistent>
     <v-card class="text-xs-center pa-3">
       <v-card-text class="headline"
         >Please choose which {{ itemType }} the pasted data belongs
@@ -16,9 +16,6 @@
       </v-select>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" flat="flat" @click="choose(false)">
-          Cancel
-        </v-btn>
         <v-btn color="primary" flat="flat" @click="choose(true)">
           Ok
         </v-btn>
@@ -43,10 +40,12 @@ export default Vue.extend({
       required: true
     }
   },
-  data: () => ({
-    value: null,
-    selectedItem: null
-  }),
+  data: function() {
+    return {
+      value: null,
+      selectedItem: this.items[0]
+    };
+  },
   methods: {
     choose(value: boolean) {
       this.value = value ? this.selectedItem : null;
