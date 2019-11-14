@@ -144,9 +144,7 @@ export default Vue.extend({
     },
     modificationsHint() {
       if (this.modifications.length > 0) {
-        return `Changing this will reset ${
-          this.modifications.length
-        } modifications`;
+        return `Changing this will reset ${this.modifications.length} modifications`;
       } else {
         return null;
       }

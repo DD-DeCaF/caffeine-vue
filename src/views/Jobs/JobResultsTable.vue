@@ -363,9 +363,7 @@
                               <template v-slot:activator="{ on }">
                                 <a
                                   :href="
-                                    `http://bigg.ucsd.edu/search?query=${
-                                      manipulation.id
-                                    }`
+                                    `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
                                   class="link"
                                   target="_blank"
@@ -392,9 +390,7 @@
                               <template v-slot:activator="{ on }">
                                 <a
                                   :href="
-                                    `http://bigg.ucsd.edu/search?query=${
-                                      manipulation.id
-                                    }`
+                                    `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
                                   class="link"
                                   target="_blank"
@@ -430,9 +426,7 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  manipulation.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
                               class="link"
                               target="_blank"
@@ -456,9 +450,7 @@
                           >
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  manipulation.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
                               class="link"
                               target="_blank"
@@ -550,10 +542,7 @@
                                   "
                                   class="link caption"
                                   :href="
-                                    `https://www.uniprot.org/uniprot/?query=${
-                                      prediction.result.reactions[reactionId]
-                                        .annotation.EC
-                                    }`
+                                    `https://www.uniprot.org/uniprot/?query=${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
                                   >UniProt</a
@@ -567,10 +556,7 @@
                                   "
                                   class="link caption"
                                   :href="
-                                    `http://gmgc.embl.de/search/${
-                                      prediction.result.reactions[reactionId]
-                                        .annotation.EC
-                                    }`
+                                    `http://gmgc.embl.de/search/${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
                                   >GMGC</a
@@ -1047,9 +1033,7 @@ export default Vue.extend({
                       oldUpperBound = reactionFromModel.upper_bound;
                     } else {
                       throw new Error(
-                        `Reaction ${
-                          manipulation.id
-                        } is neither added or in the original model`
+                        `Reaction ${manipulation.id} is neither added or in the original model`
                       );
                     }
                   }
@@ -1285,9 +1269,7 @@ export default Vue.extend({
       // Sending HTTP request headers is not possible through links like <a href="...">
       // This approach is used in order to send Authorization header
       axios({
-        url: `${settings.apis.metabolicNinja}/predictions/export/${
-          this.prediction.id
-        }`,
+        url: `${settings.apis.metabolicNinja}/predictions/export/${this.prediction.id}`,
         method: "GET",
         params: {
           prediction_ids: predictionIds

@@ -359,9 +359,7 @@
         <template v-slot:header>
           <div>
             <v-badge color="error">
-              <template v-slot:badge
-                >{{ card.sampleErrors.length }}
-              </template>
+              <template v-slot:badge>{{ card.sampleErrors.length }} </template>
               <span>Errors</span>
             </v-badge>
           </div>
@@ -524,9 +522,7 @@ export default Vue.extend({
       this.isLoadingConditionData = true;
       axios
         .get(
-          `${settings.apis.warehouse}/conditions/${
-            this.selectedCondition.id
-          }/data`
+          `${settings.apis.warehouse}/conditions/${this.selectedCondition.id}/data`
         )
         .then(response => {
           this.updateCard({

@@ -296,9 +296,7 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  geneKnockout.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
                               class="link"
                               target="_blank"
@@ -312,9 +310,7 @@
                           >
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  geneKnockout.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
                               class="link"
                               target="_blank"
