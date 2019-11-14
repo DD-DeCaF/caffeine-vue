@@ -1175,17 +1175,25 @@
           </v-card>
         </v-flex>
       </v-layout>
+      <v-container fluid fill-height class="overlay" v-if="isPasting">
+        <v-layout align-center justify-center>
+          <v-progress-circular
+            indeterminate
+            size="40"
+            :width="2"
+            class="mr-2"
+            color="white"
+          ></v-progress-circular>
+          <p class="display-1 white--text mb-0">Loading...</p>
+        </v-layout>
+      </v-container>
     </v-dialog>
     <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
       Please enter condition, sample and at least one measurement.
     </v-snackbar>
-    <v-snackbar color="error" v-model="hasMnxRequestError" :timeout="7000">
-      Could not search MetaNetX for reactions, please check your internet
-      connection.
-    </v-snackbar>
-    <v-snackbar color="error" v-model="hasUniprotRequestError" :timeout="7000">
-      Could not query UniProtKB. Their service or your internet connection might
-      be down.
+    <v-snackbar color="error" v-model="hasRequestError" :timeout="7000">
+      |Could not search for pasted data. The service or your internet connection
+      might be down.
     </v-snackbar>
   </div>
 </template>
@@ -1227,8 +1235,8 @@ function getInitialState() {
     selectedMediumRelevantModelIds: [],
     reactionsInModelsMap: {},
     metabolitesInModelsMap: {},
-    hasMnxRequestError: false,
-    hasUniprotRequestError: false,
+    hasRequestError: false,
+    isPasting: false,
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -1535,8 +1543,7 @@ export default Vue.extend({
             }
             return mapMnxReactionToReaction(mnxReaction);
           });
-        })
-        .catch(error => (this.hasMnxRequestError = true));
+        });
     },
     parsePastedMetabolites(strs) {
       return axios
@@ -1567,8 +1574,7 @@ export default Vue.extend({
               annotation: mnxMetabolite.annotation
             };
           });
-        })
-        .catch(error => (this.hasMnxRequestError = true));
+        });
     },
     parsePastedProteins(strs) {
       const bodyFormData = new FormData();
@@ -1587,26 +1593,23 @@ export default Vue.extend({
         headers: {
           "Content-Type": "multipart/form-data"
         }
-      })
-        .then(response => {
-          const parsedResponse = keyBy(
-            tsvParse(response.data),
-            item => item.Entry
-          );
-          return strs.map(str => {
-            if (str in parsedResponse) {
-              return {
-                identifier: parsedResponse[str]["Entry name"] || "Unknown",
-                name: parsedResponse[str]["Protein names"] || "Unknown",
-                gene:
-                  parsedResponse[str]["Gene names  (primary )"] || "Unknown",
-                uniprotId: str
-              };
-            }
-            return { _pastedText: str };
-          });
-        })
-        .catch(error => (this.hasUniprotRequestError = true));
+      }).then(response => {
+        const parsedResponse = keyBy(
+          tsvParse(response.data),
+          item => item.Entry
+        );
+        return strs.map(str => {
+          if (str in parsedResponse) {
+            return {
+              identifier: parsedResponse[str]["Entry name"] || "Unknown",
+              name: parsedResponse[str]["Protein names"] || "Unknown",
+              gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
+              uniprotId: str
+            };
+          }
+          return { _pastedText: str };
+        });
+      });
     },
     deleteCondition(conditionId) {
       const relatedSamples = this.tables.samples.items.filter(
@@ -1760,6 +1763,7 @@ export default Vue.extend({
       return true;
     },
     paste(columnOffset, rowOffset, table, $event) {
+      this.isPasting = true;
       const text = $event.clipboardData.getData("text/plain");
       const rows = tsvParseRows(text);
       const isSingleValue = rows.length === 1 && rows[0].length === 1;
@@ -1830,28 +1834,31 @@ export default Vue.extend({
           return parsedColumnPromise;
         });
 
-        Promise.all(parsedColumnsPromises).then(parsedColumns => {
-          // Transpose the array back
-          const parsedRows = unzip(parsedColumns).map(row => {
-            return row.map((value, columnIx) => {
-              const property = table.headers[columnOffset + columnIx].value;
-              return [property, value];
+        Promise.all(parsedColumnsPromises)
+          .then(parsedColumns => {
+            // Transpose the array back
+            const parsedRows = unzip(parsedColumns).map(row => {
+              return row.map((value, columnIx) => {
+                const property = table.headers[columnOffset + columnIx].value;
+                return [property, value];
+              });
             });
-          });
 
-          // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
-          parsedRows.forEach((rowPairs, rowIx) => {
-            if (!table.items[rowOffset + rowIx]) {
-              // Create excess rows.
-              table.items.push({ temporaryId: uuidv4() });
-            }
-            [...rowPairs, ...rowPairsFromDialog].forEach(
-              ([property, value]) => {
-                Vue.set(table.items[rowOffset + rowIx], property, value);
+            // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+            parsedRows.forEach((rowPairs, rowIx) => {
+              if (!table.items[rowOffset + rowIx]) {
+                // Create excess rows.
+                table.items.push({ temporaryId: uuidv4() });
               }
-            );
-          });
-        });
+              [...rowPairs, ...rowPairsFromDialog].forEach(
+                ([property, value]) => {
+                  Vue.set(table.items[rowOffset + rowIx], property, value);
+                }
+              );
+            });
+          })
+          .catch(error => (this.hasRequestError = true))
+          .then(() => (this.isPasting = false));
       });
     },
     onChange(item, property, value) {
