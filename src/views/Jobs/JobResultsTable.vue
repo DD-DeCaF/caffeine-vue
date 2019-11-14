@@ -341,7 +341,7 @@
                 hide-actions
                 hide-headers
               >
-                <template>
+                <template v-slot:items="">
                   <td width="5%"></td>
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">

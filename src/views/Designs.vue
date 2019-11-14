@@ -198,7 +198,7 @@
                   hide-headers
                   :headers-length="7"
                 >
-                  <template>
+                  <template v-slot:items="">
                     <td width="55%"></td>
                     <td width="15%">
                       <div class="link-list">
