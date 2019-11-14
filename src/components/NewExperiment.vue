@@ -465,10 +465,7 @@
                                 'compound'
                               )
                             "
-                            :forceSearchQuery="
-                              metabolomicsItem.compound &&
-                                metabolomicsItem.compound._pastedText
-                            "
+                            :passedMetabolite="metabolomicsItem.compound"
                             :modelIds="getRelevantModelIds(metabolomicsItem)"
                             :rules="[
                               requiredIfHasMain(
@@ -730,10 +727,7 @@
                                 'compound'
                               )
                             "
-                            :forceSearchQuery="
-                              uptakeSecretionItem.compound &&
-                                uptakeSecretionItem.compound._pastedText
-                            "
+                            :passedMetabolite="uptakeSecretionItem.compound"
                             :modelIds="getRelevantModelIds(uptakeSecretionItem)"
                             :rules="[
                               requiredIfHasMain(
@@ -873,10 +867,7 @@
                                 'product'
                               )
                             "
-                            :forceSearchQuery="
-                              molarYieldsItem.product &&
-                                molarYieldsItem.product._pastedText
-                            "
+                            :passedMetabolite="molarYieldsItem.product"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
                             :rules="[
                               requiredIfHasMain(
@@ -909,10 +900,7 @@
                                 'substrate'
                               )
                             "
-                            :forceSearchQuery="
-                              molarYieldsItem.substrate &&
-                                molarYieldsItem.substrate._pastedText
-                            "
+                            :passedMetabolite="molarYieldsItem.substrate"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
                             :rules="[
                               requiredIfHasMain(
@@ -1191,6 +1179,14 @@
     <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
       Please enter condition, sample and at least one measurement.
     </v-snackbar>
+    <v-snackbar color="error" v-model="hasMnxRequestError" :timeout="7000">
+      Could not search MetaNetX for reactions, please check your internet
+      connection.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasUniprotRequestError" :timeout="7000">
+      Could not query UniProtKB. Their service or your internet connection might
+      be down.
+    </v-snackbar>
   </div>
 </template>
 
@@ -1204,6 +1200,7 @@ import { flatten, groupBy, mapValues, unzip, keyBy, isEmpty } from "lodash";
 import * as settings from "@/utils/settings";
 import { mapMnxReactionToReaction } from "@/utils/reaction";
 import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
+import { MetaNetXMetabolite } from "@/components/AutocompleteMnxMetabolite.vue";
 import { getMetaboliteId } from "@/utils/metabolite";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
@@ -1230,6 +1227,8 @@ function getInitialState() {
     selectedMediumRelevantModelIds: [],
     reactionsInModelsMap: {},
     metabolitesInModelsMap: {},
+    hasMnxRequestError: false,
+    hasUniprotRequestError: false,
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -1304,32 +1303,8 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          reaction: (strs, { reactionsInModelsMap }) =>
-            axios
-              .get(`${settings.apis.metanetx}/reactions/batch?query=${strs}`)
-              .then(response => {
-                const mnxReactions: MetaNetXReaction[] = response.data;
-                return mnxReactions.map((mnxReaction, index) => {
-                  debugger;
-                  if (isEmpty(mnxReaction)) {
-                    return { _pastedText: strs[index] };
-                  }
-                  for (const model in reactionsInModelsMap) {
-                    const [modelId, modelName] = JSON.parse(model);
-                    for (const namespace in mnxReaction.reaction.annotation) {
-                      mnxReaction.reaction.annotation[namespace].forEach(
-                        reactionId => {
-                          if (reactionsInModelsMap[model].has(reactionId)) {
-                            mnxReaction.foundId = reactionId;
-                            mnxReaction.namespace = namespace;
-                          }
-                        }
-                      );
-                    }
-                  }
-                  return mapMnxReactionToReaction(mnxReaction);
-                });
-              }),
+          reaction: (strs, { parsePastedReactions }) =>
+            parsePastedReactions(strs),
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
@@ -1350,9 +1325,10 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          compound: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          compound: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1371,43 +1347,7 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          protein: strs => {
-            const bodyFormData = new FormData();
-            bodyFormData.append("uploadQuery", strs.join(" "));
-            bodyFormData.append(
-              "columns",
-              "id,protein_names,entry_name,genes(PREFERRED)"
-            );
-            bodyFormData.append("format", "tab");
-            bodyFormData.append("from", "ACC,ID");
-            bodyFormData.append("to", "ACC");
-            return axios({
-              url: "https://www.uniprot.org/uploadlists/",
-              method: "POST",
-              data: bodyFormData,
-              headers: {
-                "Content-Type": "multipart/form-data"
-              }
-            }).then(response => {
-              const parsedResponse = keyBy(
-                tsvParse(response.data),
-                item => item.Entry
-              );
-              return strs.map(str => {
-                if (str in parsedResponse) {
-                  return {
-                    identifier: parsedResponse[str]["Entry name"] || "Unknown",
-                    name: parsedResponse[str]["Protein names"] || "Unknown",
-                    gene:
-                      parsedResponse[str]["Gene names  (primary )"] ||
-                      "Unknown",
-                    uniprotId: str
-                  };
-                }
-                return { _pastedText: str };
-              });
-            });
-          },
+          protein: (strs, { parsePastedProteins }) => parsePastedProteins(strs),
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
@@ -1428,9 +1368,10 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          compound: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          compound: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1458,10 +1399,12 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          product: str => ({ _pastedText: str }),
-          substrate: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          product: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          substrate: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1479,8 +1422,8 @@ function getInitialState() {
           { value: "actions", width: "10%" }
         ],
         parsePasted: {
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1567,6 +1510,103 @@ export default Vue.extend({
       this.tables[tableKey].items.push({
         temporaryId: uuidv4()
       });
+    },
+    parsePastedReactions(strs) {
+      return axios
+        .get(`${settings.apis.metanetx}/reactions/batch?query=${strs}`)
+        .then(response => {
+          const mnxReactions: MetaNetXReaction[] = response.data;
+          return mnxReactions.map((mnxReaction, index) => {
+            if (isEmpty(mnxReaction)) {
+              return { _pastedText: strs[index] };
+            }
+            for (const model in this.reactionsInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in mnxReaction.reaction.annotation) {
+                mnxReaction.reaction.annotation[namespace].forEach(
+                  reactionId => {
+                    if (this.reactionsInModelsMap[model].has(reactionId)) {
+                      mnxReaction.foundId = reactionId;
+                      mnxReaction.namespace = namespace;
+                    }
+                  }
+                );
+              }
+            }
+            return mapMnxReactionToReaction(mnxReaction);
+          });
+        })
+        .catch(error => (this.hasMnxRequestError = true));
+    },
+    parsePastedMetabolites(strs) {
+      return axios
+        .get(`${settings.apis.metanetx}/metabolites/batch?query=${strs}`)
+        .then(response => {
+          const mnxMetabolites: MetaNetXMetabolite[] = response.data;
+          return mnxMetabolites.map((mnxMetabolite, index) => {
+            if (isEmpty(mnxMetabolite)) {
+              return { _pastedText: strs[index] };
+            }
+            for (const model in this.metabolitesInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in mnxMetabolite.annotation) {
+                mnxMetabolite.annotation[namespace].forEach(metaboliteId => {
+                  if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
+                    mnxMetabolite.foundId = metaboliteId;
+                    mnxMetabolite.namespace = namespace;
+                  }
+                });
+              }
+            }
+            return {
+              id: mnxMetabolite.foundId || mnxMetabolite.mnx_id,
+              name: mnxMetabolite.name,
+              formula: mnxMetabolite.formula,
+              namespace: mnxMetabolite.namespace || "metanetx.chemical",
+              mnxId: mnxMetabolite.mnx_id,
+              annotation: mnxMetabolite.annotation
+            };
+          });
+        })
+        .catch(error => (this.hasMnxRequestError = true));
+    },
+    parsePastedProteins(strs) {
+      const bodyFormData = new FormData();
+      bodyFormData.append("uploadQuery", strs.join(" "));
+      bodyFormData.append(
+        "columns",
+        "id,protein_names,entry_name,genes(PREFERRED)"
+      );
+      bodyFormData.append("format", "tab");
+      bodyFormData.append("from", "ACC,ID");
+      bodyFormData.append("to", "ACC");
+      return axios({
+        url: "https://www.uniprot.org/uploadlists/",
+        method: "POST",
+        data: bodyFormData,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+        .then(response => {
+          const parsedResponse = keyBy(
+            tsvParse(response.data),
+            item => item.Entry
+          );
+          return strs.map(str => {
+            if (str in parsedResponse) {
+              return {
+                identifier: parsedResponse[str]["Entry name"] || "Unknown",
+                name: parsedResponse[str]["Protein names"] || "Unknown",
+                gene:
+                  parsedResponse[str]["Gene names  (primary )"] || "Unknown",
+                uniprotId: str
+              };
+            }
+            return { _pastedText: str };
+          });
+        })
+        .catch(error => (this.hasUniprotRequestError = true));
     },
     deleteCondition(conditionId) {
       const relatedSamples = this.tables.samples.items.filter(
@@ -1783,7 +1823,9 @@ export default Vue.extend({
             tables: this.tables,
             availableStrains: this.availableStrains,
             availableMedia: this.availableMedia,
-            reactionsInModelsMap: this.reactionsInModelsMap
+            parsePastedReactions: this.parsePastedReactions,
+            parsePastedMetabolites: this.parsePastedMetabolites,
+            parsePastedProteins: this.parsePastedProteins
           });
           return parsedColumnPromise;
         });
