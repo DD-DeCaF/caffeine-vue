@@ -23,11 +23,8 @@
               {{ tables[selectedTableKey].name }}
             </div>
             <!-- Conditions table -->
-            <v-form-extended
-              v-model="tables.conditions.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'conditions'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'conditions'">
                 <v-data-table
                   :headers="tables.conditions.headers"
                   :items="tables.conditions.items"
@@ -173,11 +170,8 @@
             </v-form-extended>
 
             <!-- Samples table -->
-            <v-form-extended
-              v-model="tables.samples.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'samples'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'samples'">
                 <v-data-table
                   :headers="tables.samples.headers"
                   :items="tables.samples.items"
@@ -290,11 +284,8 @@
             </v-form-extended>
 
             <!-- Fluxomics table -->
-            <v-form-extended
-              v-model="tables.fluxomics.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'fluxomics'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'fluxomics'">
                 <v-data-table
                   :headers="tables.fluxomics.headers"
                   :items="tables.fluxomics.items"
@@ -423,11 +414,8 @@
             </v-form-extended>
 
             <!-- Metabolomics table -->
-            <v-form-extended
-              v-model="tables.metabolomics.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'metabolomics'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'metabolomics'">
                 <v-data-table
                   :headers="tables.metabolomics.headers"
                   :items="tables.metabolomics.items"
@@ -570,11 +558,8 @@
             </v-form-extended>
 
             <!-- Proteomics table -->
-            <v-form-extended
-              v-model="tables.proteomics.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'proteomics'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'proteomics'">
                 <v-data-table
                   :headers="tables.proteomics.headers"
                   :items="tables.proteomics.items"
@@ -607,12 +592,9 @@
                             item-value="temporaryId"
                             v-model="proteomicsItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.proteomics,
-                                proteomicsItem.sample
-                              )
-                            ]"
+                            :rules="
+                              tables.proteomics.rules.sample(proteomicsItem)
+                            "
                           >
                           </v-select>
                         </td>
@@ -631,12 +613,9 @@
                                 'protein'
                               )
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.proteomics,
-                                proteomicsItem.protein
-                              )
-                            ]"
+                            :rules="
+                              tables.proteomics.rules.protein(proteomicsItem)
+                            "
                             :passedProtein="proteomicsItem.protein"
                           />
                         </td>
@@ -649,12 +628,11 @@
                             @paste="
                               paste(2, absoluteIndex, tables.proteomics, $event)
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.proteomics,
-                                proteomicsItem.measurement
+                            :rules="
+                              tables.proteomics.rules.measurement(
+                                proteomicsItem
                               )
-                            ]"
+                            "
                           ></v-number-field>
                         </td>
                         <td>
@@ -665,6 +643,11 @@
                             step="any"
                             @paste="
                               paste(3, absoluteIndex, tables.proteomics, $event)
+                            "
+                            :rules="
+                              tables.proteomics.rules.uncertainty(
+                                proteomicsItem
+                              )
                             "
                           ></v-number-field>
                         </td>
@@ -696,11 +679,8 @@
             </v-form-extended>
 
             <!-- Uptake/Secretion rates table -->
-            <v-form-extended
-              v-model="tables.uptakeSecretion.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'uptakeSecretion'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'uptakeSecretion'">
                 <v-data-table
                   :headers="tables.uptakeSecretion.headers"
                   :items="tables.uptakeSecretion.items"
@@ -843,11 +823,8 @@
             </v-form-extended>
 
             <!-- Molar Yields table -->
-            <v-form-extended
-              v-model="tables.molarYields.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'molarYields'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'molarYields'">
                 <v-data-table
                   :headers="tables.molarYields.headers"
                   :items="tables.molarYields.items"
@@ -1025,11 +1002,8 @@
             </v-form-extended>
 
             <!-- Growth table -->
-            <v-form-extended
-              v-model="tables.growth.isValid"
-              immediatelyValidated
-            >
-              <div v-show="selectedTableKey === 'growth'">
+            <v-form-extended immediatelyValidated>
+              <div v-if="selectedTableKey === 'growth'">
                 <v-data-table
                   :headers="tables.growth.headers"
                   :items="tables.growth.items"
@@ -1186,11 +1160,11 @@
                           :disabled="!!whyIsTableDisabled(key)"
                         ></v-radio>
                         <v-icon
-                          v-if="table.isValid && !isTableUnchanged(table)"
+                          v-if="table.isValid() && !isTableUnchanged(table)"
                           color="success"
                           >done</v-icon
                         >
-                        <v-icon v-if="!table.isValid" color="error"
+                        <v-icon v-if="!table.isValid()" color="error"
                           >error_outline</v-icon
                         >
                       </v-layout>
@@ -1283,7 +1257,9 @@ function getInitialState() {
           }
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         // Needed to pass created strain or medium to the appropriate condition
         rowIndex: null,
         // We should control pagination for every table separately
@@ -1309,7 +1285,9 @@ function getInitialState() {
           endTime: str => str
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1331,7 +1309,9 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1351,7 +1331,9 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1406,8 +1388,37 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
+        rules: {
+          sample: proteomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.proteomics,
+              proteomicsItem.sample
+            )
+          ],
+          protein: proteomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.proteomics,
+              proteomicsItem.protein
+            )
+          ],
+          measurement: proteomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.proteomics,
+              proteomicsItem.measurement
+            )
+          ],
+          uncertainty: proteomicsItem => []
+        },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          const rules = this.rules;
+          const keys = Object.keys(rules);
+          return this.items.every(item =>
+            keys.every(key =>
+              rules[key](item).every(valid => typeof valid === "boolean")
+            )
+          );
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1427,7 +1438,9 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1457,7 +1470,9 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1475,7 +1490,9 @@ function getInitialState() {
           uncertainty: str => parseFloat(str)
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid: true,
+        isValid() {
+          return true;
+        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1495,7 +1512,7 @@ export default Vue.extend({
       required: true
     }
   },
-  data: () => getInitialState(),
+  data: getInitialState,
   computed: {
     ...mapGetters({
       getOrganismById: "organisms/getOrganismById"
@@ -1546,7 +1563,7 @@ export default Vue.extend({
     },
     isValid() {
       return (
-        Object.values(this.tables).every((table: any) => table.isValid) &&
+        Object.values(this.tables).every((table: any) => table.isValid()) &&
         this.isExperimentDataValid
       );
     }
@@ -1683,7 +1700,7 @@ export default Vue.extend({
     },
     requiredIfHasCondition(value) {
       if (
-        this.tables.conditions.isValid &&
+        this.tables.conditions.isValid() &&
         !this.isTableUnchanged(this.tables.conditions) &&
         !value &&
         value !== 0
@@ -2015,7 +2032,7 @@ export default Vue.extend({
       } else if (key === "samples") {
         if (
           !this.isTableUnchanged(this.tables.conditions) &&
-          this.tables.conditions.isValid
+          this.tables.conditions.isValid()
         ) {
           return false;
         } else {
@@ -2024,7 +2041,7 @@ export default Vue.extend({
       } else {
         if (
           !this.isTableUnchanged(this.tables.samples) &&
-          this.tables.samples.isValid
+          this.tables.samples.isValid()
         ) {
           return false;
         } else {
