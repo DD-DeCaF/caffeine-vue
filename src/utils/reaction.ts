@@ -61,7 +61,9 @@ export function mapMnxReactionToReaction(
         formula: fullMetabolite ? fullMetabolite.formula : "",
         // TODO: use m.compartment_id, mapped through selectedReaction.annotations
         compartment: "",
-        stoichiometry: m.coefficient
+        stoichiometry: m.coefficient,
+        annotation: fullMetabolite ? fullMetabolite.annotation : {},
+        mnxId: fullMetabolite ? fullMetabolite.mnx_id : ""
       };
     }
   );

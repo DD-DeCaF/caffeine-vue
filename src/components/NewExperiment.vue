@@ -1521,7 +1521,9 @@ export default Vue.extend({
     },
     parsePastedReactions(strs) {
       return axios
-        .get(`${settings.apis.metanetx}/reactions/batch?query=${strs}`)
+        .get(
+          `${settings.apis.metanetx}/reactions/batch?query=${strs.join(",")}`
+        )
         .then(response => {
           const mnxReactions: MetaNetXReaction[] = response.data;
           return mnxReactions.map((mnxReaction, index) => {
@@ -1547,7 +1549,9 @@ export default Vue.extend({
     },
     parsePastedMetabolites(strs) {
       return axios
-        .get(`${settings.apis.metanetx}/metabolites/batch?query=${strs}`)
+        .get(
+          `${settings.apis.metanetx}/metabolites/batch?query=${strs.join(",")}`
+        )
         .then(response => {
           const mnxMetabolites: MetaNetXMetabolite[] = response.data;
           return mnxMetabolites.map((mnxMetabolite, index) => {
@@ -1763,7 +1767,6 @@ export default Vue.extend({
       return true;
     },
     paste(columnOffset, rowOffset, table, $event) {
-      this.isPasting = true;
       const text = $event.clipboardData.getData("text/plain");
       const rows = tsvParseRows(text);
       const isSingleValue = rows.length === 1 && rows[0].length === 1;
@@ -1774,6 +1777,7 @@ export default Vue.extend({
       // Tabular data pasted.
       $event.preventDefault();
 
+      this.isPasting = true;
       // Ask which condition/sample pasted data belongs to
       let dialogSelection;
       if (table.name === "Samples") {
@@ -1796,6 +1800,8 @@ export default Vue.extend({
               this.$store.dispatch("models/withFullModel", modelId)
             )
           ).then(() => {
+            this.reactionsInModelsMap = {};
+            this.metabolitesInModelsMap = {};
             modelIds.forEach(modelId => {
               const model = this.getModelById(modelId);
               const key = JSON.stringify([model.id, model.name]);

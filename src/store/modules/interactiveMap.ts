@@ -16,6 +16,8 @@ export interface Metabolite {
   formula: string;
   compartment: string;
   stoichiometry: number;
+  annotation?: Object;
+  mnxId?: string;
 }
 
 export interface Reaction {
