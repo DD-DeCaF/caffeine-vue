@@ -7,18 +7,16 @@
         :items="searchResults"
         :filter="dontFilterByDisplayedText"
         :loading="isLoading"
-        :search-input="searchQuery"
-        @update:searchInput="onSearchQueryChange"
-        :placeholder="forceSearchQuery"
+        :search-input.sync="searchQuery"
+        :placeholder="passedMetabolite ? passedMetabolite._pastedText : ''"
         hide-no-data
         hide-selected
-        item-text="displayValue"
-        item-value="mnx_id"
+        :item-text="metaboliteDisplay"
+        item-value="mnxId"
         return-object
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
         clearable
         @change="onChange"
-        @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
         @click:clear="$emit('clear')"
         ref="metaboliteAutocomplete"
@@ -29,11 +27,15 @@
             <template v-slot:activator="{ on }">
               <v-list-tile-content v-on="on">
                 <v-list-tile-title
-                  v-text="metabolite.displayValue"
+                  v-text="metaboliteDisplay(metabolite)"
                 ></v-list-tile-title>
-                <v-list-tile-sub-title v-if="metabolite.modelNames.size">
+                <v-list-tile-sub-title
+                  v-if="metaboliteModelNamesMap[metabolite.mnxId].size"
+                >
                   <span
-                    v-for="(modelName, index) of metabolite.modelNames"
+                    v-for="(modelName, index) of metaboliteModelNamesMap[
+                      metabolite.mnxId
+                    ]"
                     :key="modelName + index"
                     >{{ modelName }}&nbsp;&nbsp;</span
                   ></v-list-tile-sub-title
@@ -42,19 +44,15 @@
             </template>
             <span>
               <em>Name: </em>{{ metabolite.name }}<br />
-              <em>ID found in the model: </em
-              >{{ metabolite.foundId ? metabolite.foundId : "-" }}<br />
+              <em>ID: </em>{{ metabolite.id }}<br />
               <em>Formula: </em>{{ metabolite.formula }}<br />
-              <em>MetaNetX ID: </em>{{ metabolite.mnx_id }}<br />
+              <em>MetaNetX ID: </em>{{ metabolite.mnxId }}<br />
               <em>Annotation:</em><br />
               <span
                 v-for="(ids, namespace) in metabolite.annotation"
                 :key="namespace"
               >
-                &nbsp;&nbsp;{{ namespace }}:
-                <span v-for="(id, index) of ids" :key="index"
-                  >{{ id }}&nbsp;&nbsp;</span
-                ><br />
+                &nbsp;&nbsp;{{ namespace }}: {{ ids.join(" ") }}<br />
               </span>
             </span>
           </v-tooltip>
@@ -63,10 +61,9 @@
     </template>
     <span v-if="selectedItem">
       <em>Name: </em>{{ selectedItem.name }}<br />
-      <em>ID found in the model: </em
-      >{{ selectedItem.foundId ? selectedItem.foundId : "-" }}<br />
+      <em>ID: </em>{{ selectedItem.id }}<br />
       <em>Formula: </em>{{ selectedItem.formula }}<br />
-      <em>MetaNetX ID: </em>{{ selectedItem.mnx_id }}<br />
+      <em>MetaNetX ID: </em>{{ selectedItem.mnxId }}<br />
       <em>Annotation:</em><br />
       <span
         v-for="(ids, namespace) in selectedItem.annotation"
@@ -93,8 +90,6 @@ export interface MetaNetXMetabolite {
   name: string;
   mnx_id: string;
   formula: string;
-  modelNames?: Set<string>;
-  displayValue?: string;
   foundId?: string; // exists if was found in the passed models
   namespace?: string;
 }
@@ -120,7 +115,7 @@ export default Vue.extend({
   props: {
     rules: [Array, Object],
     clearOnChange: Boolean,
-    forceSearchQuery: String,
+    passedMetabolite: Object as Prop<Object>,
     modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
@@ -128,11 +123,11 @@ export default Vue.extend({
     searchResults: [] as MetaNetXMetabolite[],
     isLoading: false,
     searchQuery: null,
-    skipVuetifyClearSearch: false,
     activeSearchID: null,
     requestError: false,
     debouncedQuery: null,
     metabolitesInModelsMap: {},
+    metaboliteModelNamesMap: {},
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for compounds, please check your internet connection."
@@ -146,12 +141,16 @@ export default Vue.extend({
     searchQuery() {
       this.debouncedQuery();
     },
-    forceSearchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
+    passedMetabolite: {
       immediate: true,
       handler() {
-        this.loadForcedSearchQuery();
+        if (
+          this.passedMetabolite &&
+          !this.passedMetabolite.hasOwnProperty("_pastedText")
+        ) {
+          this.selectedItem = this.passedMetabolite;
+          this.searchResults = [this.selectedItem];
+        }
       }
     },
     modelIds: {
@@ -191,7 +190,6 @@ export default Vue.extend({
 
       this.isLoading = true;
       this.requestError = false;
-      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
 
       Promise.resolve()
         // Fetch search results
@@ -208,7 +206,7 @@ export default Vue.extend({
 
           if (
             this.selectedItem &&
-            this.searchQuery === this.selectedItem.displayValue
+            this.searchQuery === this.metaboliteDisplay(this.selectedItem)
           ) {
             // In order to keep selected metabolite displayed after clicking
             // outside of the v-autocomplete, this metabolite should be
@@ -228,37 +226,43 @@ export default Vue.extend({
                 throw "stale response";
               }
               // Prioritize metabolites that exist in the passed models
-              const searchResultsInTheModel = [] as MetaNetXMetabolite[];
-              const searchResultsNotInTheModel = [] as MetaNetXMetabolite[];
-              response.data.forEach((metabolite: MetaNetXMetabolite) => {
-                const deprecatedIds = metabolite.annotation["deprecated"] || [];
-                const metaboliteIdsMap = {
-                  ...metabolite.annotation,
-                  "metanetx.chemical": [metabolite.mnx_id, ...deprecatedIds]
-                };
-                delete metaboliteIdsMap["deprecated"];
+              const searchResultsInTheModel = [] as Object[];
+              const searchResultsNotInTheModel = [] as Object[];
+              response.data.forEach((mnxMetabolite: MetaNetXMetabolite) => {
                 let isMetaboliteFound = false;
-                metabolite.modelNames = new Set([]);
+                this.metaboliteModelNamesMap[mnxMetabolite.mnx_id] = new Set(
+                  []
+                );
                 for (const model in this.metabolitesInModelsMap) {
                   const [modelId, modelName] = JSON.parse(model);
-                  for (const namespace in metaboliteIdsMap) {
-                    metaboliteIdsMap[namespace].forEach(metaboliteId => {
-                      if (
-                        this.metabolitesInModelsMap[model].has(metaboliteId)
-                      ) {
-                        isMetaboliteFound = true;
-                        metabolite.modelNames!.add(modelName);
-                        metabolite.foundId = metaboliteId;
-                        metabolite.namespace = namespace;
+                  for (const namespace in mnxMetabolite.annotation) {
+                    mnxMetabolite.annotation[namespace].forEach(
+                      metaboliteId => {
+                        if (
+                          this.metabolitesInModelsMap[model].has(metaboliteId)
+                        ) {
+                          isMetaboliteFound = true;
+                          this.metaboliteModelNamesMap[
+                            mnxMetabolite.mnx_id
+                          ].add(modelName);
+                          mnxMetabolite.foundId = metaboliteId;
+                          mnxMetabolite.namespace = namespace;
+                        }
                       }
-                    });
+                    );
                   }
                 }
-                metabolite.displayValue = this.metaboliteDisplay(metabolite);
+                const metabolite = {
+                  id: mnxMetabolite.foundId || mnxMetabolite.mnx_id,
+                  name: mnxMetabolite.name,
+                  formula: mnxMetabolite.formula,
+                  namespace: mnxMetabolite.namespace || "metanetx.chemical",
+                  mnxId: mnxMetabolite.mnx_id,
+                  annotation: mnxMetabolite.annotation
+                };
                 if (isMetaboliteFound) {
                   searchResultsInTheModel.push(metabolite);
                 } else {
-                  metabolite.namespace = "metanetx.chemical";
                   searchResultsNotInTheModel.push(metabolite);
                 }
               });
@@ -284,32 +288,6 @@ export default Vue.extend({
                   ...searchResultsNotInTheModel
                 ]
               : searchResultsNotInTheModel;
-
-          // If pasted metabolite has the exact match with the first result
-          // from metanetx service, it should be autoselected
-          if (this.searchQuery === this.forceSearchQuery) {
-            const exactMatch = [
-              searchResultsInTheModel[0],
-              searchResultsNotInTheModel[0]
-            ].find(searchResult => {
-              if (!searchResult) {
-                return false;
-              }
-              const metaboliteIds = flatten(
-                Object.values(searchResult.annotation)
-              );
-              const exactValues = new Set(metaboliteIds);
-              exactValues.add(searchResult.mnx_id);
-              exactValues.add(searchResult.name);
-
-              return exactValues.has(this.searchQuery);
-            });
-
-            if (exactMatch) {
-              this.selectedItem = exactMatch;
-              this.onChange(this.selectedItem);
-            }
-          }
         })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
@@ -322,24 +300,15 @@ export default Vue.extend({
             return;
           }
           this.isLoading = false;
-          this.skipVuetifyClearSearch = false;
         });
     }, 500);
   },
   methods: {
-    metaboliteDisplay(metabolite: MetaNetXMetabolite): string {
-      const { name, mnx_id, formula } = metabolite;
-      return `${name || "N/A"} (${mnx_id}) – ${formula}`;
+    metaboliteDisplay(metabolite): string {
+      const { name, id, formula } = metabolite;
+      return `${name || "N/A"} (${id}) – ${formula}`;
     },
-    onSearchQueryChange(value: string | null): void {
-      // Catch cases when vuetify internally sets the search query to null
-      // to prevent sending extra requests to the metanetx service
-      if (value === null && this.skipVuetifyClearSearch) {
-        return;
-      }
-      this.searchQuery = value;
-    },
-    onChange(selectedMetabolite: MetaNetXMetabolite): void {
+    onChange(selectedMetabolite): void {
       if (!selectedMetabolite) {
         return;
       }
@@ -349,34 +318,10 @@ export default Vue.extend({
           this.selectedItem = null;
         });
       }
-      const metabolite = {
-        id: selectedMetabolite.foundId || selectedMetabolite.mnx_id,
-        name: selectedMetabolite.name,
-        formula: selectedMetabolite.formula,
-        namespace: selectedMetabolite.namespace
-      };
-      this.$emit("change", metabolite);
+      this.$emit("change", selectedMetabolite);
     },
     dontFilterByDisplayedText(): boolean {
       return true;
-    },
-    loadForcedSearchQuery(): void {
-      if (!this.forceSearchQuery) {
-        return;
-      }
-
-      // Assign early, before debounced query because species selection dialog
-      // takes away focus and vuetify tries to clear search.
-      this.skipVuetifyClearSearch = true;
-
-      if (this.forceSearchQuery === this.searchQuery) {
-        // User re-pasted the same query string. Trigger a search directly,
-        // because the `searchQuery` watcher won't trigger when it hasn't
-        // changed.
-        this.debouncedQuery();
-      } else {
-        this.searchQuery = this.forceSearchQuery;
-      }
     }
   }
 });

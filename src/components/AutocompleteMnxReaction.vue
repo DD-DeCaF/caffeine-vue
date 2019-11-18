@@ -7,18 +7,16 @@
         :items="searchResults"
         :filter="dontFilterByDisplayedText"
         :loading="isLoading"
-        :search-input="searchQuery"
-        @update:searchInput="onSearchQueryChange"
-        :placeholder="forceSearchQuery"
+        :search-input.sync="searchQuery"
+        :placeholder="passedReaction ? passedReaction._pastedText : ''"
         hide-no-data
         hide-selected
-        item-text="displayValue"
-        item-value="reaction.mnx_id"
+        :item-text="reactionDisplay"
+        item-value="mnxId"
         return-object
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
         clearable
         @change="onChange"
-        @focus="loadForcedSearchQuery"
         @paste="$emit('paste', $event)"
         @click:clear="$emit('clear')"
         ref="reactionAutocomplete"
@@ -29,11 +27,15 @@
             <template v-slot:activator="{ on }">
               <v-list-tile-content v-on="on">
                 <v-list-tile-title
-                  v-text="reaction.displayValue"
+                  v-text="reactionDisplay(reaction)"
                 ></v-list-tile-title>
-                <v-list-tile-sub-title v-if="reaction.modelNames.size">
+                <v-list-tile-sub-title
+                  v-if="reactionModelNamesMap[reaction.mnxId].size"
+                >
                   <span
-                    v-for="(modelName, index) of reaction.modelNames"
+                    v-for="(modelName, index) of reactionModelNamesMap[
+                      reaction.mnxId
+                    ]"
                     :key="modelName + index"
                     >{{ modelName }}&nbsp;&nbsp;</span
                   ></v-list-tile-sub-title
@@ -41,20 +43,16 @@
               </v-list-tile-content>
             </template>
             <span>
-              <em>Name: </em>{{ reaction.reaction.name }}<br />
-              <em>ID found in the model: </em
-              >{{ reaction.foundId ? reaction.foundId : "-" }}<br />
-              <em>Reaction string: </em>{{ equationDisplay(reaction) }}<br />
-              <em>MetaNetX ID: </em>{{ reaction.reaction.mnx_id }}<br />
+              <em>Name: </em>{{ reaction.name }}<br />
+              <em>ID: </em>{{ reaction.id }}<br />
+              <em>Reaction string: </em>{{ reaction.reactionString }}<br />
+              <em>MetaNetX ID: </em>{{ reaction.mnxId }}<br />
               <em>Annotation:</em><br />
               <span
-                v-for="(ids, namespace) in reaction.reaction.annotation"
+                v-for="(ids, namespace) in reaction.annotation"
                 :key="namespace"
               >
-                &nbsp;&nbsp;{{ namespace }}:
-                <span v-for="(id, index) of ids" :key="index"
-                  >{{ id }}&nbsp;&nbsp;</span
-                ><br />
+                &nbsp;&nbsp;{{ namespace }}: {{ ids.join(" ") }}<br />
               </span>
             </span>
           </v-tooltip>
@@ -62,14 +60,13 @@
       </v-autocomplete-extended>
     </template>
     <span v-if="selectedItem">
-      <em>Name: </em>{{ selectedItem.reaction.name }}<br />
-      <em>ID found in the model: </em
-      >{{ selectedItem.foundId ? selectedItem.foundId : "-" }}<br />
-      <em>Reaction string: </em>{{ equationDisplay(selectedItem) }}<br />
-      <em>MetaNetX ID: </em>{{ selectedItem.reaction.mnx_id }}<br />
+      <em>Name: </em>{{ selectedItem.name }}<br />
+      <em>ID: </em>{{ selectedItem.id }}<br />
+      <em>Reaction string: </em>{{ selectedItem.reactionString }}<br />
+      <em>MetaNetX ID: </em>{{ selectedItem.mnxId }}<br />
       <em>Annotation:</em><br />
       <span
-        v-for="(ids, namespace) in selectedItem.reaction.annotation"
+        v-for="(ids, namespace) in selectedItem.annotation"
         :key="namespace"
       >
         &nbsp;&nbsp;{{ namespace }}: {{ ids.join(" ") }} <br />
@@ -85,6 +82,7 @@ import { debounce, flatten } from "lodash";
 import uuidv4 from "uuid/v4";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
+import { mapMnxReactionToReaction } from "@/utils/reaction";
 import { Reaction } from "@/store/modules/interactiveMap";
 import {
   MetaNetXMetabolite,
@@ -112,8 +110,6 @@ export interface MetaNetXReaction {
     }[];
     annotation: Annotation;
   };
-  modelNames?: Set<string>;
-  displayValue?: string;
   foundId?: string; // exists if was found in the passed models
   namespace?: string;
 }
@@ -124,7 +120,7 @@ export default Vue.extend({
   props: {
     rules: [Array, Object],
     clearOnChange: Boolean,
-    forceSearchQuery: String,
+    passedReaction: Object as Prop<Reaction>,
     modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
@@ -132,11 +128,11 @@ export default Vue.extend({
     searchResults: [] as MetaNetXReaction[],
     isLoading: false,
     searchQuery: null,
-    skipVuetifyClearSearch: false,
     activeSearchID: null,
     requestError: false,
     debouncedQuery: null,
     reactionsInModelsMap: {},
+    reactionModelNamesMap: {},
     requestErrorRule: error =>
       !error ||
       "Could not search MetaNetX for reactions, please check your internet connection."
@@ -150,12 +146,16 @@ export default Vue.extend({
     searchQuery() {
       this.debouncedQuery();
     },
-    forceSearchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
+    passedReaction: {
       immediate: true,
       handler() {
-        this.loadForcedSearchQuery();
+        if (
+          this.passedReaction &&
+          !this.passedReaction.hasOwnProperty("_pastedText")
+        ) {
+          this.selectedItem = this.passedReaction;
+          this.searchResults = [this.selectedItem];
+        }
       }
     },
     modelIds: {
@@ -193,7 +193,6 @@ export default Vue.extend({
 
       this.isLoading = true;
       this.requestError = false;
-      this.skipVuetifyClearSearch = !!this.forceSearchQuery;
 
       Promise.resolve()
         // Fetch search results
@@ -210,7 +209,7 @@ export default Vue.extend({
 
           if (
             this.selectedItem &&
-            this.searchQuery === this.selectedItem.displayValue
+            this.searchQuery === this.reactionDisplay(this.selectedItem)
           ) {
             // In order to keep selected reaction displayed after clicking
             // outside of the v-autocomplete, this reaction should be
@@ -230,39 +229,36 @@ export default Vue.extend({
                 throw "stale response";
               }
               // Prioritize reactions that exist in the passed models
-              const searchResultsInTheModel = [] as MetaNetXReaction[];
-              const searchResultsNotInTheModel = [] as MetaNetXReaction[];
-              response.data.forEach((reaction: MetaNetXReaction) => {
-                const deprecatedIds =
-                  reaction.reaction.annotation["deprecated"] || [];
-                const reactionIdsMap = {
-                  ...reaction.reaction.annotation,
-                  "metanetx.reaction": [
-                    reaction.reaction.mnx_id,
-                    ...deprecatedIds
-                  ]
-                };
-                delete reactionIdsMap["deprecated"];
+              const searchResultsInTheModel = [] as Reaction[];
+              const searchResultsNotInTheModel = [] as Reaction[];
+              response.data.forEach((mnxReaction: MetaNetXReaction) => {
                 let isReactionFound = false;
-                reaction.modelNames = new Set([]);
+                this.reactionModelNamesMap[
+                  mnxReaction.reaction.mnx_id
+                ] = new Set([]);
                 for (const model in this.reactionsInModelsMap) {
                   const [modelId, modelName] = JSON.parse(model);
-                  for (const namespace in reactionIdsMap) {
-                    reactionIdsMap[namespace].forEach(reactionId => {
-                      if (this.reactionsInModelsMap[model].has(reactionId)) {
-                        isReactionFound = true;
-                        reaction.modelNames!.add(modelName);
-                        reaction.foundId = reactionId;
-                        reaction.namespace = namespace;
+                  for (const namespace in mnxReaction.reaction.annotation) {
+                    mnxReaction.reaction.annotation[namespace].forEach(
+                      reactionId => {
+                        if (this.reactionsInModelsMap[model].has(reactionId)) {
+                          isReactionFound = true;
+                          this.reactionModelNamesMap[
+                            mnxReaction.reaction.mnx_id
+                          ].add(modelName);
+                          mnxReaction.foundId = reactionId;
+                          mnxReaction.namespace = namespace;
+                        }
                       }
-                    });
+                    );
                   }
                 }
-                reaction.displayValue = this.reactionDisplay(reaction);
+                const reaction: Reaction = mapMnxReactionToReaction(
+                  mnxReaction
+                );
                 if (isReactionFound) {
                   searchResultsInTheModel.push(reaction);
                 } else {
-                  reaction.namespace = "metanetx.reaction";
                   searchResultsNotInTheModel.push(reaction);
                 }
               });
@@ -278,7 +274,6 @@ export default Vue.extend({
           if (searchId !== this.activeSearchID) {
             return;
           }
-
           this.searchResults =
             searchResultsInTheModel.length > 0
               ? [
@@ -289,33 +284,6 @@ export default Vue.extend({
                   ...searchResultsNotInTheModel
                 ]
               : searchResultsNotInTheModel;
-
-          // If pasted reaction has the exact match with the first result
-          // from metanetx service, it should be autoselected
-          if (this.searchQuery === this.forceSearchQuery) {
-            const exactMatch = [
-              searchResultsInTheModel[0],
-              searchResultsNotInTheModel[0]
-            ].find(searchResult => {
-              if (!searchResult) {
-                return false;
-              }
-              const reactionIds = flatten(
-                Object.values(searchResult.reaction.annotation)
-              );
-              const exactValues = new Set(reactionIds);
-              exactValues.add(searchResult.reaction.mnx_id);
-              exactValues.add(searchResult.reaction.name);
-              exactValues.add(searchResult.reaction.ec);
-
-              return exactValues.has(this.searchQuery);
-            });
-
-            if (exactMatch) {
-              this.selectedItem = exactMatch;
-              this.onChange(this.selectedItem);
-            }
-          }
         })
         .catch(error => {
           if (searchId !== this.activeSearchID) {
@@ -328,57 +296,16 @@ export default Vue.extend({
             return;
           }
           this.isLoading = false;
-          this.skipVuetifyClearSearch = false;
         });
     }, 500);
   },
   methods: {
-    reactionDisplay(reaction: MetaNetXReaction): string {
-      const { name, mnx_id, ec, equation_parsed } = reaction.reaction;
-      return `${name || "N/A"} (${mnx_id}) ${
-        ec ? `EC:${ec}` : ""
-      } – ${this.equationDisplay(reaction)}`;
+    reactionDisplay(reaction: Reaction): string {
+      return `${reaction.name || "N/A"} (${reaction.id}) ${
+        reaction.ec ? `EC:${reaction.ec}` : ""
+      } – ${reaction.reactionString}`;
     },
-    equationDisplay(reaction: MetaNetXReaction): string {
-      const { equation_parsed } = reaction.reaction;
-
-      const substrates = equation_parsed
-        .filter(e => e.coefficient < 0)
-        .map(e => ({ ...e, coefficient: -e.coefficient }));
-      const products = equation_parsed.filter(e => e.coefficient > 0);
-
-      const substratesSerialized = substrates
-        .map(({ coefficient, metabolite_id }) => {
-          const fullMetabolite = reaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === metabolite_id
-          );
-          // TODO: print compartment_id, mapped through annotations
-          return `${coefficient} \`${fullMetabolite!.name}\``;
-        })
-        .join(" + ");
-      const productsSerialized = products
-        .map(({ coefficient, metabolite_id }) => {
-          const fullMetabolite = reaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === metabolite_id
-          );
-          // TODO: print compartment_id, mapped through annotations
-          return `${coefficient} \`${fullMetabolite!.name}\``;
-        })
-        .join(" + ");
-
-      return (
-        (substratesSerialized || "Ø") + " ⇌ " + (productsSerialized || "Ø")
-      );
-    },
-    onSearchQueryChange(value: string | null): void {
-      // Catch cases when vuetify internally sets the search query to null
-      // to prevent sending extra requests to the metanetx service
-      if (value === null && this.skipVuetifyClearSearch) {
-        return;
-      }
-      this.searchQuery = value;
-    },
-    onChange(selectedReaction: MetaNetXReaction): void {
+    onChange(selectedReaction: Reaction): void {
       if (!selectedReaction) {
         return;
       }
@@ -388,57 +315,10 @@ export default Vue.extend({
           this.selectedItem = null;
         });
       }
-      const reaction: Reaction = {
-        id: selectedReaction.foundId || selectedReaction.reaction.mnx_id,
-        name: selectedReaction.reaction.name || "",
-        // TODO: rebuild reaction string more consistently, from equation_parsed
-        reactionString: this.equationDisplay(selectedReaction),
-        // Note: Assuming all reactions in the universal model are
-        // reversible, but this might not be the case. Could potentially use
-        // the reaction string to check reversibility.
-        lowerBound: -1000,
-        upperBound: 1000,
-        metabolites: selectedReaction.reaction.equation_parsed.map(m => {
-          const fullMetabolite = selectedReaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === m.metabolite_id
-          );
-          return {
-            id: m.metabolite_id,
-            name: fullMetabolite ? fullMetabolite.name : "",
-            formula: fullMetabolite ? fullMetabolite.formula : "",
-            // TODO: use m.compartment_id, mapped through selectedReaction.annotations
-            compartment: "",
-            stoichiometry: m.coefficient
-          };
-        }),
-        namespace: selectedReaction.namespace
-      };
-
-      this.$emit("change", {
-        reaction: reaction,
-        mnxReaction: selectedReaction
-      });
+      this.$emit("change", selectedReaction);
     },
     dontFilterByDisplayedText(): boolean {
       return true;
-    },
-    loadForcedSearchQuery(): void {
-      if (!this.forceSearchQuery) {
-        return;
-      }
-
-      // Assign early, before debounced query because species selection dialog
-      // takes away focus and vuetify tries to clear search.
-      this.skipVuetifyClearSearch = true;
-
-      if (this.forceSearchQuery === this.searchQuery) {
-        // User re-pasted the same query string. Trigger a search directly,
-        // because the `searchQuery` watcher won't trigger when it hasn't
-        // changed.
-        this.debouncedQuery();
-      } else {
-        this.searchQuery = this.forceSearchQuery;
-      }
     }
   }
 });

@@ -16,6 +16,8 @@ export interface Metabolite {
   formula: string;
   compartment: string;
   stoichiometry: number;
+  annotation?: Object;
+  mnxId?: string;
 }
 
 export interface Reaction {
@@ -26,6 +28,9 @@ export interface Reaction {
   lowerBound?: number; // Used when editing bounds
   upperBound?: number; // Used when editing bounds
   namespace?: string;
+  annotation?: Object;
+  ec?: string;
+  mnxId?: string;
 }
 
 export interface Card {

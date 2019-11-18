@@ -337,11 +337,7 @@
                           <AutocompleteMnxReaction
                             hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known reactions."
                             @change="
-                              onChange(
-                                fluxomicsItem,
-                                'reaction',
-                                $event.reaction
-                              )
+                              onChange(fluxomicsItem, 'reaction', $event)
                             "
                             @paste="
                               paste(1, absoluteIndex, tables.fluxomics, $event)
@@ -360,10 +356,7 @@
                                 fluxomicsItem.reaction
                               )
                             ]"
-                            :forceSearchQuery="
-                              fluxomicsItem.reaction &&
-                                fluxomicsItem.reaction._pastedText
-                            "
+                            :passedReaction="fluxomicsItem.reaction"
                             validate-on-blur
                           ></AutocompleteMnxReaction>
                         </td>
@@ -490,10 +483,7 @@
                                 'compound'
                               )
                             "
-                            :forceSearchQuery="
-                              metabolomicsItem.compound &&
-                                metabolomicsItem.compound._pastedText
-                            "
+                            :passedMetabolite="metabolomicsItem.compound"
                             :modelIds="getRelevantModelIds(metabolomicsItem)"
                             :rules="[
                               requiredIfTableHasChanged(
@@ -763,10 +753,7 @@
                                 'compound'
                               )
                             "
-                            :forceSearchQuery="
-                              uptakeSecretionItem.compound &&
-                                uptakeSecretionItem.compound._pastedText
-                            "
+                            :passedMetabolite="uptakeSecretionItem.compound"
                             :modelIds="getRelevantModelIds(uptakeSecretionItem)"
                             :rules="[
                               requiredIfTableHasChanged(
@@ -910,10 +897,7 @@
                                 'product'
                               )
                             "
-                            :forceSearchQuery="
-                              molarYieldsItem.product &&
-                                molarYieldsItem.product._pastedText
-                            "
+                            :passedMetabolite="molarYieldsItem.product"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
                             :rules="[
                               requiredIfTableHasChanged(
@@ -945,10 +929,7 @@
                                 'substrate'
                               )
                             "
-                            :forceSearchQuery="
-                              molarYieldsItem.substrate &&
-                                molarYieldsItem.substrate._pastedText
-                            "
+                            :passedMetabolite="molarYieldsItem.substrate"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
                             :rules="[
                               requiredIfTableHasChanged(
@@ -1223,9 +1204,25 @@
           </v-card>
         </v-flex>
       </v-layout>
+      <v-container fluid fill-height class="overlay" v-if="isPasting">
+        <v-layout align-center justify-center>
+          <v-progress-circular
+            indeterminate
+            size="40"
+            :width="2"
+            class="mr-2"
+            color="white"
+          ></v-progress-circular>
+          <p class="display-1 white--text mb-0">Loading...</p>
+        </v-layout>
+      </v-container>
     </v-dialog>
     <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
       Please enter condition, sample and at least one measurement.
+    </v-snackbar>
+    <v-snackbar color="error" v-model="hasRequestError" :timeout="7000">
+      |Could not search for pasted data. The service or your internet connection
+      might be down.
     </v-snackbar>
   </div>
 </template>
@@ -1236,8 +1233,20 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows, tsvParse } from "d3-dsv";
-import { flatten, groupBy, mapValues, unzip, keyBy, findKey } from "lodash";
+import {
+  flatten,
+  groupBy,
+  mapValues,
+  unzip,
+  keyBy,
+  findKey,
+  isEmpty
+} from "lodash";
 import * as settings from "@/utils/settings";
+import { mapMnxReactionToReaction } from "@/utils/reaction";
+import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
+import { MetaNetXMetabolite } from "@/components/AutocompleteMnxMetabolite.vue";
+import { getMetaboliteId } from "@/utils/metabolite";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
 import UniprotInput from "@/components/UniprotInput.vue";
@@ -1261,6 +1270,10 @@ function getInitialState() {
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
+    reactionsInModelsMap: {},
+    metabolitesInModelsMap: {},
+    hasRequestError: false,
+    isPasting: false,
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -1272,14 +1285,18 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          name: str => str,
-          strain: (str, { availableStrains }) => {
-            const match = availableStrains.find(({ name }) => name === str);
-            return match || { _pastedText: str };
+          name: strs => strs,
+          strain: (strs, { availableStrains }) => {
+            return strs.map(str => {
+              const match = availableStrains.find(({ name }) => name === str);
+              return match || { _pastedText: str };
+            });
           },
-          medium: (str, { availableMedia }) => {
-            const match = availableMedia.find(({ name }) => name === str);
-            return match || { _pastedText: str };
+          medium: (strs, { availableMedia }) => {
+            return strs.map(str => {
+              const match = availableMedia.find(({ name }) => name === str);
+              return match || { _pastedText: str };
+            });
           }
         },
         items: [{ temporaryId: uuidv4() }],
@@ -1304,9 +1321,9 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          name: str => str,
-          startTime: str => str,
-          endTime: str => str
+          name: strs => strs,
+          startTime: strs => strs,
+          endTime: strs => strs
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1324,11 +1341,10 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          // Temporarily create mock reaction object and use forceSearchQuery;
-          // selecting a reaction then clears forceSearchQuery.
-          reaction: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          reaction: (strs, { parsePastedReactions }) =>
+            parsePastedReactions(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1346,9 +1362,10 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          compound: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          compound: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1366,43 +1383,7 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          protein: strs => {
-            const bodyFormData = new FormData();
-            bodyFormData.append("uploadQuery", strs.join(" "));
-            bodyFormData.append(
-              "columns",
-              "id,protein_names,entry_name,genes(PREFERRED)"
-            );
-            bodyFormData.append("format", "tab");
-            bodyFormData.append("from", "ACC,ID");
-            bodyFormData.append("to", "ACC");
-            return axios({
-              url: "https://www.uniprot.org/uploadlists/",
-              method: "POST",
-              data: bodyFormData,
-              headers: {
-                "Content-Type": "multipart/form-data"
-              }
-            }).then(response => {
-              const parsedResponse = keyBy(
-                tsvParse(response.data),
-                item => item.Entry
-              );
-              return strs.map(str => {
-                if (str in parsedResponse) {
-                  return {
-                    identifier: parsedResponse[str]["Entry name"] || "Unknown",
-                    name: parsedResponse[str]["Protein names"] || "Unknown",
-                    gene:
-                      parsedResponse[str]["Gene names  (primary )"] ||
-                      "Unknown",
-                    uniprotId: str
-                  };
-                }
-                return { _pastedText: str };
-              });
-            });
-          },
+          protein: (strs, { parsePastedProteins }) => parsePastedProteins(strs),
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
@@ -1422,9 +1403,10 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          compound: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          compound: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1451,10 +1433,12 @@ function getInitialState() {
           { value: "actions", width: "5%" }
         ],
         parsePasted: {
-          product: str => ({ _pastedText: str }),
-          substrate: str => ({ _pastedText: str }),
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          product: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          substrate: (strs, { parsePastedMetabolites }) =>
+            parsePastedMetabolites(strs),
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1471,8 +1455,8 @@ function getInitialState() {
           { value: "actions", width: "10%" }
         ],
         parsePasted: {
-          measurement: str => parseFloat(str),
-          uncertainty: str => parseFloat(str)
+          measurement: strs => strs.map(str => parseFloat(str)),
+          uncertainty: strs => strs.map(str => parseFloat(str))
         },
         items: [{ temporaryId: uuidv4() }],
         isValid: true,
@@ -1498,7 +1482,8 @@ export default Vue.extend({
   data: () => getInitialState(),
   computed: {
     ...mapGetters({
-      getOrganismById: "organisms/getOrganismById"
+      getOrganismById: "organisms/getOrganismById",
+      getModelById: "models/getModelById"
     }),
     availableStrains() {
       return this.$store.state.strains.strains;
@@ -1555,6 +1540,102 @@ export default Vue.extend({
     addRow(tableKey) {
       this.tables[tableKey].items.push({
         temporaryId: uuidv4()
+      });
+    },
+    parsePastedReactions(strs) {
+      return axios
+        .get(
+          `${settings.apis.metanetx}/reactions/batch?query=${strs.join(",")}`
+        )
+        .then(response => {
+          const mnxReactions: MetaNetXReaction[] = response.data;
+          return mnxReactions.map((mnxReaction, index) => {
+            if (isEmpty(mnxReaction)) {
+              return { _pastedText: strs[index] };
+            }
+            for (const model in this.reactionsInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in mnxReaction.reaction.annotation) {
+                mnxReaction.reaction.annotation[namespace].forEach(
+                  reactionId => {
+                    if (this.reactionsInModelsMap[model].has(reactionId)) {
+                      mnxReaction.foundId = reactionId;
+                      mnxReaction.namespace = namespace;
+                    }
+                  }
+                );
+              }
+            }
+            return mapMnxReactionToReaction(mnxReaction);
+          });
+        });
+    },
+    parsePastedMetabolites(strs) {
+      return axios
+        .get(
+          `${settings.apis.metanetx}/metabolites/batch?query=${strs.join(",")}`
+        )
+        .then(response => {
+          const mnxMetabolites: MetaNetXMetabolite[] = response.data;
+          return mnxMetabolites.map((mnxMetabolite, index) => {
+            if (isEmpty(mnxMetabolite)) {
+              return { _pastedText: strs[index] };
+            }
+            for (const model in this.metabolitesInModelsMap) {
+              const [modelId, modelName] = JSON.parse(model);
+              for (const namespace in mnxMetabolite.annotation) {
+                mnxMetabolite.annotation[namespace].forEach(metaboliteId => {
+                  if (this.metabolitesInModelsMap[model].has(metaboliteId)) {
+                    mnxMetabolite.foundId = metaboliteId;
+                    mnxMetabolite.namespace = namespace;
+                  }
+                });
+              }
+            }
+            return {
+              id: mnxMetabolite.foundId || mnxMetabolite.mnx_id,
+              name: mnxMetabolite.name,
+              formula: mnxMetabolite.formula,
+              namespace: mnxMetabolite.namespace || "metanetx.chemical",
+              mnxId: mnxMetabolite.mnx_id,
+              annotation: mnxMetabolite.annotation
+            };
+          });
+        });
+    },
+    parsePastedProteins(strs) {
+      const bodyFormData = new FormData();
+      bodyFormData.append("uploadQuery", strs.join(" "));
+      bodyFormData.append(
+        "columns",
+        "id,protein_names,entry_name,genes(PREFERRED)"
+      );
+      bodyFormData.append("format", "tab");
+      bodyFormData.append("from", "ACC,ID");
+      bodyFormData.append("to", "ACC");
+      return axios({
+        url: "https://www.uniprot.org/uploadlists/",
+        method: "POST",
+        data: bodyFormData,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }).then(response => {
+        const parsedResponse = keyBy(
+          tsvParse(response.data),
+          item => item.Entry
+        );
+        return strs.map(str => {
+          if (str in parsedResponse) {
+            return {
+              identifier: parsedResponse[str]["Entry name"] || "Unknown",
+              name: parsedResponse[str]["Protein names"] || "Unknown",
+              gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
+              uniprotId: str
+            };
+          }
+          return { _pastedText: str };
+        });
       });
     },
     deleteCondition(conditionId) {
@@ -1719,6 +1800,7 @@ export default Vue.extend({
       // Tabular data pasted.
       $event.preventDefault();
 
+      this.isPasting = true;
       // Ask which condition/sample pasted data belongs to
       let dialogSelection;
       if (table.name === "Samples") {
@@ -1732,7 +1814,34 @@ export default Vue.extend({
         dialogSelection = this.$promisedDialog(SelectDialog, {
           itemType: "sample",
           items: this.tables.samples.items.filter(({ name }) => name)
-        }).then(selected => (selected ? [["sample", selected]] : []));
+        }).then(selected => {
+          // Fetch models related to the selected organism
+          let organismId = selected.condition.strain.organism_id;
+          let modelIds = this.modelIdsByOrganism[organismId];
+          return Promise.all(
+            modelIds.map(modelId =>
+              this.$store.dispatch("models/withFullModel", modelId)
+            )
+          ).then(() => {
+            this.reactionsInModelsMap = {};
+            this.metabolitesInModelsMap = {};
+            modelIds.forEach(modelId => {
+              const model = this.getModelById(modelId);
+              const key = JSON.stringify([model.id, model.name]);
+              this.reactionsInModelsMap[key] = new Set([]);
+              model.model_serialized.reactions.forEach(reaction =>
+                this.reactionsInModelsMap[key].add(reaction.id)
+              );
+              this.metabolitesInModelsMap[key] = new Set([]);
+              model.model_serialized.metabolites.forEach(metabolite =>
+                this.metabolitesInModelsMap[key].add(
+                  getMetaboliteId(metabolite.id, metabolite.compartment)
+                )
+              );
+            });
+            return selected ? [["sample", selected]] : [];
+          });
+        });
       }
 
       dialogSelection.then(rowPairsFromDialog => {
@@ -1746,33 +1855,39 @@ export default Vue.extend({
             // Extra parameters for parsePasted:
             tables: this.tables,
             availableStrains: this.availableStrains,
-            availableMedia: this.availableMedia
+            availableMedia: this.availableMedia,
+            parsePastedReactions: this.parsePastedReactions,
+            parsePastedMetabolites: this.parsePastedMetabolites,
+            parsePastedProteins: this.parsePastedProteins
           });
           return parsedColumnPromise;
         });
 
-        Promise.all(parsedColumnsPromises).then(parsedColumns => {
-          // Transpose the array back
-          const parsedRows = unzip(parsedColumns).map(row => {
-            return row.map((value, columnIx) => {
-              const property = table.headers[columnOffset + columnIx].value;
-              return [property, value];
+        Promise.all(parsedColumnsPromises)
+          .then(parsedColumns => {
+            // Transpose the array back
+            const parsedRows = unzip(parsedColumns).map(row => {
+              return row.map((value, columnIx) => {
+                const property = table.headers[columnOffset + columnIx].value;
+                return [property, value];
+              });
             });
-          });
 
-          // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
-          parsedRows.forEach((rowPairs, rowIx) => {
-            if (!table.items[rowOffset + rowIx]) {
-              // Create excess rows.
-              table.items.push({ temporaryId: uuidv4() });
-            }
-            [...rowPairs, ...rowPairsFromDialog].forEach(
-              ([property, value]) => {
-                Vue.set(table.items[rowOffset + rowIx], property, value);
+            // parsedRows = [[["name", "a"], ["measurement", 5], ["uncertainty", null]]]
+            parsedRows.forEach((rowPairs, rowIx) => {
+              if (!table.items[rowOffset + rowIx]) {
+                // Create excess rows.
+                table.items.push({ temporaryId: uuidv4() });
               }
-            );
-          });
-        });
+              [...rowPairs, ...rowPairsFromDialog].forEach(
+                ([property, value]) => {
+                  Vue.set(table.items[rowOffset + rowIx], property, value);
+                }
+              );
+            });
+          })
+          .catch(error => (this.hasRequestError = true))
+          .then(() => (this.isPasting = false));
       });
     },
     onChange(item, property, value) {

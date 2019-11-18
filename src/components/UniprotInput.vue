@@ -3,7 +3,7 @@
     <template v-slot:activator="{ on }">
       <v-text-field
         v-model="searchQuery"
-        :placeholder="protein ? protein._pastedText : ''"
+        :placeholder="passedProtein ? passedProtein._pastedText : ''"
         :loading="isLoading"
         :hint="hint()"
         persistent-hint
