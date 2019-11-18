@@ -1233,7 +1233,15 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import uuidv4 from "uuid/v4";
 import { tsvParseRows, tsvParse } from "d3-dsv";
-import { flatten, groupBy, mapValues, unzip, keyBy, findKey, isEmpty } from "lodash";
+import {
+  flatten,
+  groupBy,
+  mapValues,
+  unzip,
+  keyBy,
+  findKey,
+  isEmpty
+} from "lodash";
 import * as settings from "@/utils/settings";
 import { mapMnxReactionToReaction } from "@/utils/reaction";
 import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
