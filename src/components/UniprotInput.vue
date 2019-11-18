@@ -71,11 +71,7 @@ export default Vue.extend({
   methods: {
     hint() {
       if (this.protein) {
-        return `<a href="https://www.uniprot.org/uniprot/${
-          this.protein.identifier
-        }" target="_blank">${this.protein.identifier}</a> (${
-          this.protein.name
-        })`;
+        return `<a href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a> (${this.protein.name})`;
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }

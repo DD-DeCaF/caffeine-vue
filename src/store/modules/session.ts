@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface JWT {
   jwt: string;
@@ -9,7 +10,22 @@ export interface JWT {
   };
 }
 
-export default {
+type LinkedJWTAuthenticated =
+  | {
+      isAuthenticated: false;
+      jwt: null;
+    }
+  | {
+      isAuthenticated: true;
+      jwt: JWT;
+    };
+
+type SessionState = LinkedJWTAuthenticated & {
+  refreshError: null;
+  refreshRequest: Promise<void> | null;
+};
+
+export default vuexStoreModule({
   namespaced: true,
   state: {
     isAuthenticated: false,
@@ -18,7 +34,7 @@ export default {
     // While a token refresh request is in progress, the following variable will
     // be set to its promise.
     refreshRequest: null
-  },
+  } as SessionState,
   mutations: {
     login(state, jwt: JWT) {
       state.isAuthenticated = true;
@@ -26,7 +42,7 @@ export default {
       localStorage.setItem("jwt", JSON.stringify(state.jwt));
     },
     updateToken(state, jwt: string) {
-      state.jwt.jwt = jwt;
+      state.jwt!.jwt = jwt;
       localStorage.setItem("jwt", JSON.stringify(state.jwt));
     },
     setRefreshError(state, error) {
@@ -155,4 +171,4 @@ export default {
       }
     }
   }
-};
+});

@@ -21,9 +21,7 @@ export default Vue.extend({
       if (this.namespace === "bigg.metabolite") {
         return `http://bigg.ucsd.edu/universal/metabolites/${this.identifier}`;
       } else if (this.namespace === "chebi") {
-        return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${
-          this.identifier
-        }`;
+        return `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${this.identifier}`;
       } else {
         return null;
       }

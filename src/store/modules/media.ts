@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface MediumItem {
   id: number;
@@ -17,12 +18,12 @@ export interface MediumCompound {
   medium_id: number;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    media: [],
-    mediaPromise: null,
-    _compoundsPromise: null
+    media: [] as MediumItem[],
+    mediaPromise: null as Promise<void> | null,
+    _compoundsPromise: null as Promise<MediumCompound[]> | null
   },
   mutations: {
     setMedia(state, media: MediumItem[]) {
@@ -72,4 +73,4 @@ export default {
       return compoundsPromise;
     }
   }
-};
+});

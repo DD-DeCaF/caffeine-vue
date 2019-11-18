@@ -2,6 +2,7 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface ModelItem {
   id: number;
@@ -22,14 +23,14 @@ export const organism2ModelMapping = {
   "2": 10
 };
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    models: [],
-    modelsPromise: null,
+    models: [] as ModelItem[],
+    modelsPromise: null as Promise<void> | null,
     // `fullModelPromises` contains the promises to request the full model,
     // keyed by model id. See the `withFullModel` action.
-    fullModelPromises: {}
+    fullModelPromises: {} as Record<number, Promise<void>>
   },
   mutations: {
     setModels(state, models: ModelItem[]) {
@@ -108,4 +109,4 @@ export default {
       return state.models;
     }
   }
-};
+});
