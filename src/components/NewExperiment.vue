@@ -1567,6 +1567,10 @@ export default Vue.extend({
         .then(response => {
           const mnxReactions: MetaNetXReaction[] = response.data;
           return mnxReactions.map((mnxReaction, index) => {
+            // Handle pasting empty cells
+            if (strs[index] === "") {
+              return null;
+            }
             if (isEmpty(mnxReaction)) {
               return { _pastedText: strs[index] };
             }
@@ -1595,6 +1599,10 @@ export default Vue.extend({
         .then(response => {
           const mnxMetabolites: MetaNetXMetabolite[] = response.data;
           return mnxMetabolites.map((mnxMetabolite, index) => {
+            // Handle pasting empty cells
+            if (strs[index] === "") {
+              return null;
+            }
             if (isEmpty(mnxMetabolite)) {
               return { _pastedText: strs[index] };
             }
@@ -1643,6 +1651,10 @@ export default Vue.extend({
           item => item.Entry
         );
         return strs.map(str => {
+          // Handle pasting empty cells
+          if (str === "") {
+            return null;
+          }
           if (str in parsedResponse) {
             return {
               identifier: parsedResponse[str]["Entry name"] || "Unknown",
