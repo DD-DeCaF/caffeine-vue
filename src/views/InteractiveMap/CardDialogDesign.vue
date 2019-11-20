@@ -270,13 +270,13 @@ export default Vue.extend({
           if (!fullMetabolite.annotation) {
             return m;
           }
-          if (!fullMetabolite.annotation.bigg) {
+          if (!fullMetabolite.annotation["bigg.metabolite"]) {
             return m;
           }
 
           // TODO: optimize for performance
           let matchingMetaboliteInModel = null as Metabolite | null | undefined;
-          fullMetabolite.annotation.bigg.find(biggId => {
+          fullMetabolite.annotation["bigg.metabolite"].find(biggId => {
             matchingMetaboliteInModel = this.model.model_serialized.metabolites.find(
               m => m.id === biggId + "_" + m.compartment
             );
