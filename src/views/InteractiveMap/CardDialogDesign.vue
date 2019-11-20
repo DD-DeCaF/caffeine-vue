@@ -280,7 +280,10 @@ export default Vue.extend({
 
           // TODO: instead of removing the compartment here and adding it later,
           // we should just pass the metabolite identifiers as they are.
-          const idWithoutCompartment = getMetaboliteId(m.id, m.compartment);
+          const idWithoutCompartment = getMetaboliteId(
+            matchingMetaboliteInModel.id,
+            matchingMetaboliteInModel.compartment
+          );
           return {
             ...m,
             id: idWithoutCompartment,
