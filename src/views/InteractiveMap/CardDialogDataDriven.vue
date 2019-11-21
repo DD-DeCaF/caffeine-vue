@@ -3,7 +3,57 @@
     <v-card class="pa-2">
       <v-form>
         <v-container>
-          <p class="headline">Modify data-driven simulation</p>
+          <v-layout row wrap>
+            <v-flex xs6>
+              <p class="headline">Modify data-driven simulation</p>
+            </v-flex>
+            <v-flex xs6>
+              <p class="text-xs-right subheading mb-0 mt-2 font-italic">
+                Simulation status:
+                <span v-if="card.solverStatus">
+                  <span v-if="card.solverStatus == 'optimal'">Successful</span>
+                  <span v-else-if="card.solverStatus == 'infeasible'"
+                    >Infeasible</span
+                  >
+                </span>
+                <span v-else-if="card.sampleErrors.length > 0"
+                  >Can not integrate data</span
+                >
+                <span v-else-if="card.hasSimulationError"
+                  >Error during simulation</span
+                >
+                <span v-else-if="!model && !card.sample"
+                  >Waiting for model and sample</span
+                >
+                <span v-else-if="!model">Waiting for a model</span>
+                <span v-else-if="!card.sample">Waiting for a sample</span>
+                <span v-else-if="isModifyingModel">
+                  Integrating data...
+                  <v-progress-circular
+                    indeterminate
+                    size="12"
+                    :width="1"
+                  ></v-progress-circular>
+                </span>
+                <span v-else-if="card.isSimulating">
+                  Simulating...
+                  <v-progress-circular
+                    indeterminate
+                    size="12"
+                    :width="1"
+                  ></v-progress-circular>
+                </span>
+                <span v-else>Unknown</span>
+              </p>
+            </v-flex>
+          </v-layout>
+
+          <v-progress-linear
+            v-if="card.isSimulating"
+            :indeterminate="true"
+            class="my-0"
+          ></v-progress-linear>
+          <div v-else style="height: 7px"></div>
 
           <v-layout wrap>
             <v-flex xs12 md3>
@@ -69,7 +119,6 @@
                 item-value="id"
                 :hint="modelHint"
                 persistent-hint
-                :rules="[v => !!v || 'Please choose the metabolic model.']"
                 return-object
                 @change="onModelChange"
               ></v-select-extended>
@@ -88,19 +137,6 @@
               ></v-select-extended>
             </v-flex>
           </v-layout>
-
-          <span
-            v-if="isModifyingModel"
-            class="subheading font-weight-thin text-sm-center mb-2"
-          >
-            We are currently figuring out how to enrich the metabolic model with
-            the experimental data. This takes a few seconds, so please sit
-            tight. Meanwhile, feel free to inspect the data below.
-          </span>
-          <v-progress-linear
-            :indeterminate="true"
-            v-if="isModifyingModel"
-          ></v-progress-linear>
 
           <v-layout v-if="card.conditionData && card.sample" column>
             <v-flex mb-1>
