@@ -60,5 +60,5 @@ kubectl set image deployment/${DEPLOYMENT} web=${IMAGE_REPO}:${TRAVIS_BRANCH}-${
 if [ "${TRAVIS_BRANCH}" = "master" ]; then
   curl -X POST --data-urlencode "payload={\"username\": \"Caffeine Production\", \"text\": \"Deployed <https://github.com/DD-DeCaF/caffeine-vue/commit/${TRAVIS_COMMIT}|*${TRAVIS_COMMIT::8}*> @ <https://caffeine.dd-decaf.eu|caffeine.dd-decaf.eu>\", \"icon_emoji\": \":dd-decaf:\"}" ${SLACK_WEBHOOK_URL}
 elif [ "${TRAVIS_BRANCH}" = "devel" ]; then
-  curl -X POST --data-urlencode "payload={\"username\": \"Caffeine Staging\", \"text\": \"Deployed  <https://github.com/DD-DeCaF/caffeine-vue/commit/${TRAVIS_COMMIT}|*${TRAVIS_COMMIT::8}*> @ <https://staging.dd-decaf.eu|staging.dd-decaf.eu>\", \"icon_emoji\": \":decaf-giraffe:\"}" ${SLACK_WEBHOOK_URL}
+  curl -X POST --data-urlencode "payload={\"username\": \"Caffeine Staging\", \"text\": \"Deployed <https://github.com/DD-DeCaF/caffeine-vue/commit/${TRAVIS_COMMIT}|*${TRAVIS_COMMIT::8}*> @ <https://staging.dd-decaf.eu|staging.dd-decaf.eu>\", \"icon_emoji\": \":decaf-giraffe:\"}" ${SLACK_WEBHOOK_URL}
 fi
