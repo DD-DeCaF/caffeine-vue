@@ -29,6 +29,7 @@
           v-else
           v-model="isCardDialogVisible"
           :card="card"
+          :model="model"
           :modifications="modifications"
           @simulate-card="simulateCard"
           @simulation-error="$emit('simulation-error')"

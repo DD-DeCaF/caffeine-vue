@@ -13,22 +13,53 @@
                 required
               ></v-text-field>
             </v-flex>
+
             <v-flex xs12 md3>
-              <v-select-extended
-                label="Organism"
-                :items="organisms"
-                v-model="cardOrganism"
+              <v-autocomplete-extended
+                label="Experiment"
+                :items="experiments"
+                v-model="cardExperiment"
                 autoselectOnlyOption
                 item-text="name"
                 item-value="id"
-                :hint="modificationsHint"
-                persistent-hint
-                :rules="[v => !!v || 'Please choose the organism.']"
+                placeholder="Choose the experiment you wish to simulate..."
                 return-object
-                @change="onOrganismChange"
-              ></v-select-extended>
+              ></v-autocomplete-extended>
             </v-flex>
+
             <v-flex xs12 md3>
+              <v-autocomplete-extended
+                label="Conditions"
+                :items="conditions"
+                v-model="selectedCondition"
+                autoselectOnlyOption
+                :loading="isLoadingConditions"
+                :disabled="conditions === []"
+                item-text="name"
+                item-value="id"
+                placeholder="Choose the experimental conditions you wish to simulate..."
+                return-object
+              ></v-autocomplete-extended>
+            </v-flex>
+
+            <v-flex xs12 md3>
+              <v-autocomplete-extended
+                label="Sample"
+                :items="samples"
+                v-model="cardSample"
+                autoselectOnlyOption
+                :loading="isLoadingConditionData"
+                :disabled="samples === []"
+                item-text="start_time"
+                item-value="id"
+                placeholder="Choose the sample you wish to simulate..."
+                return-object
+              ></v-autocomplete-extended>
+            </v-flex>
+          </v-layout>
+
+          <v-layout>
+            <v-flex xs12 md6>
               <v-select-extended
                 label="Model"
                 :items="modelsByOrganism"
@@ -36,14 +67,14 @@
                 autoselectOnlyOption
                 item-text="name"
                 item-value="id"
-                :hint="modificationsHint"
+                :hint="modelHint"
                 persistent-hint
                 :rules="[v => !!v || 'Please choose the metabolic model.']"
                 return-object
                 @change="onModelChange"
               ></v-select-extended>
             </v-flex>
-            <v-flex xs12 md3>
+            <v-flex xs12 md6>
               <v-select-extended
                 label="Method"
                 :items="methods"
@@ -58,48 +89,6 @@
             </v-flex>
           </v-layout>
 
-          <v-layout>
-            <v-autocomplete-extended
-              class="mr-2"
-              label="Experiment"
-              :items="experiments"
-              v-model="cardExperiment"
-              autoselectOnlyOption
-              item-text="name"
-              item-value="id"
-              placeholder="Choose the experiment you wish to simulate..."
-              return-object
-            ></v-autocomplete-extended>
-
-            <v-autocomplete-extended
-              class="ml-2 mr-2"
-              label="Conditions"
-              :items="conditions"
-              v-model="selectedCondition"
-              autoselectOnlyOption
-              :loading="isLoadingConditions"
-              :disabled="conditions === []"
-              item-text="name"
-              item-value="id"
-              placeholder="Choose the experimental conditions you wish to simulate..."
-              return-object
-            ></v-autocomplete-extended>
-
-            <v-autocomplete-extended
-              class="ml-2"
-              label="Sample"
-              :items="samples"
-              v-model="cardSample"
-              autoselectOnlyOption
-              :loading="isLoadingConditionData"
-              :disabled="samples === []"
-              item-text="start_time"
-              item-value="id"
-              placeholder="Choose the sample you wish to simulate..."
-              return-object
-            ></v-autocomplete-extended>
-          </v-layout>
-
           <span
             v-if="isModifyingModel"
             class="subheading font-weight-thin text-sm-center mb-2"
@@ -112,15 +101,6 @@
             :indeterminate="true"
             v-if="isModifyingModel"
           ></v-progress-linear>
-
-          <div v-if="organismMismatch" class="mb-2">
-            <v-alert :value="true" type="warning">
-              You are applying experimental data for the strain
-              <em>{{ conditionOrganism.name }}</em> to a model based on a
-              different organism (<em>{{ card.organism.name }}</em
-              >). Some data points may not apply succesfully.
-            </v-alert>
-          </div>
 
           <v-layout v-if="card.conditionData && card.sample" column>
             <v-flex mb-1>
@@ -482,7 +462,7 @@ export default Vue.extend({
     ReactionLink,
     CompoundLink
   },
-  props: ["card", "modifications", "value"],
+  props: ["card", "model", "modifications", "value"],
   data: () => ({
     methods: [
       { id: "fba", name: "Flux Balance Analysis (FBA)" },
@@ -492,7 +472,6 @@ export default Vue.extend({
     ],
     conditions: [],
     selectedCondition: null,
-    conditionOrganism: null,
     isLoadingConditions: false,
     isLoadingConditionData: false,
     isModifyingModel: false,
@@ -543,9 +522,6 @@ export default Vue.extend({
     ]
   }),
   computed: {
-    organisms() {
-      return this.$store.state.organisms.organisms;
-    },
     modelsByOrganism() {
       if (!this.card.organism) {
         return [];
@@ -554,11 +530,11 @@ export default Vue.extend({
         return model.organism_id === this.card.organism.id;
       });
     },
-    modificationsHint() {
-      if (this.modifications.length > 0) {
-        return `Changing this will reset ${this.modifications.length} modifications`;
+    modelHint() {
+      if (!this.card.conditionData) {
+        return "This list will be populated based on the strain used in the experiment.";
       } else {
-        return null;
+        return `Available models for ${this.card.organism.name}.`;
       }
     },
     experiments() {
@@ -570,12 +546,6 @@ export default Vue.extend({
       }
       return this.card.conditionData.samples;
     },
-    organismMismatch() {
-      if (!this.card.organism || !this.conditionOrganism) {
-        return false;
-      }
-      return this.card.organism.id != this.conditionOrganism.id;
-    },
     cardName: {
       get() {
         return this.card.name;
@@ -584,21 +554,6 @@ export default Vue.extend({
         this.updateCard({
           uuid: this.card.uuid,
           props: { name: name }
-        });
-        this.setModified({
-          uuid: this.card.uuid,
-          modified: true
-        });
-      }
-    },
-    cardOrganism: {
-      get() {
-        return this.card.organism;
-      },
-      set(organism) {
-        this.updateCard({
-          uuid: this.card.uuid,
-          props: { organism: organism }
         });
       }
     },
@@ -657,11 +612,15 @@ export default Vue.extend({
   },
   watch: {
     "card.experiment"() {
+      // Experiment changed - reset related condition.
+      this.conditions = [];
+      this.selectedCondition = null;
+
       if (!this.card.experiment) {
-        this.conditions = [];
         return;
       }
-      this.conditions = [];
+
+      // Load the conditions for the selected experiment.
       this.isLoadingConditions = true;
       axios
         .get(`${settings.apis.warehouse}/conditions`)
@@ -678,10 +637,14 @@ export default Vue.extend({
         });
     },
     selectedCondition() {
-      this.conditionOrganism = null;
+      // Selected condition changed - reset related fields.
       this.updateCard({
         uuid: this.card.uuid,
-        props: { conditionData: null, sample: null }
+        props: {
+          conditionData: null,
+          sample: null,
+          organism: null
+        }
       });
 
       if (!this.selectedCondition) {
@@ -695,13 +658,13 @@ export default Vue.extend({
           `${settings.apis.warehouse}/conditions/${this.selectedCondition.id}/data`
         )
         .then(response => {
+          const organism = this.$store.getters["organisms/getOrganismById"](
+            response.data.strain.organism_id
+          );
           this.updateCard({
             uuid: this.card.uuid,
-            props: { conditionData: response.data }
+            props: { conditionData: response.data, organism: organism }
           });
-          this.conditionOrganism = this.$store.getters[
-            "organisms/getOrganismById"
-          ](response.data.strain.organism_id);
         })
         .catch(error => {
           this.$emit("load-data-error");
@@ -710,11 +673,54 @@ export default Vue.extend({
           this.isLoadingConditionData = false;
         });
     },
+    "card.organism"() {
+      // Organism has changed - reset the selected model.
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: { modelId: null }
+      });
+    },
     "card.sample"() {
-      if (!this.card.modelId || !this.card.sample) {
+      // Sample has changed - reset operations and simulation results.
+      this.resetCardSimulation();
+      this.resetCardModifications();
+      if (!this.card.sample) {
         return;
       }
 
+      // Re-run adapter and simulation to get new results.
+      this.integrateData();
+    }
+  },
+  methods: {
+    onModelChange() {
+      // Reset all modifications when the selected model changes.
+      // Note: We cannot simply watch `model` with `immediate: true`, because
+      // that would reset modifications when cards are added from other
+      // components, i.e., when visualizing jobs or designs.
+      this.resetCardSimulation();
+      this.resetCardModifications();
+      this.integrateData();
+    },
+    resetCardModifications() {
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: {
+          // Reset the objective
+          objective: {
+            reaction: null,
+            maximize: true
+          },
+          // Remove any previous operations from the card.
+          reactionDeletions: [],
+          reactionAdditions: [],
+          reactionKnockouts: [],
+          geneKnockouts: [],
+          editedBounds: []
+        }
+      });
+    },
+    resetCardSimulation() {
       this.updateCard({
         uuid: this.card.uuid,
         props: {
@@ -723,16 +729,30 @@ export default Vue.extend({
           sampleErrors: [],
           hasSimulationError: false,
           solverStatus: null,
-          // We'll be modifying the model before simulating, but just re-use the
-          // loading flag for `isSimulating` to indicate that _something_ is
-          // going on.
-          isSimulating: true,
-          // Remove any previous operations from the card.
-          reactionDeletions: [],
-          reactionAdditions: [],
-          reactionKnockouts: [],
-          geneKnockouts: [],
-          editedBounds: []
+          // Reset simulation results
+          fluxes: null,
+          growthRate: null
+        }
+      });
+    },
+    integrateData() {
+      // Post the selected sample data to the simulation adapter backend, and
+      // recieve back a list of operations for the simulation. The operations
+      // are stored on the card and a new simulation is triggered.
+
+      // Callers don't need to check that we're in a valid state for this, so
+      // check here.
+      if (!this.card.modelId || !this.card.sample) {
+        return;
+      }
+
+      // We'll be modifying the model before simulating, but just re-use the
+      // loading flag for `isSimulating` to indicate that _something_ is going
+      // on.
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: {
+          isSimulating: true
         }
       });
 
@@ -907,52 +927,9 @@ export default Vue.extend({
         .then(() => {
           this.isModifyingModel = false;
         });
-    }
-  },
-  methods: {
-    onOrganismChange() {
-      // When selected organism is updated, update the selected model
-      // correspondingly.
-      // TODO: Choose a default preferred model.
-      this.updateCard({
-        uuid: this.card.uuid,
-        props: { modelId: null }
-      });
-      // Since the model was updated, trigger `onModelChange` to make sure card
-      // modifications are reset.
-      this.onModelChange();
-    },
-    onModelChange() {
-      // Reset all modifications when the selected model changes.
-      // Note: We cannot simply watch `model` with `immediate: true`, because
-      // that would reset modifications when cards are added from other
-      // components, i.e., when visualizing jobs or designs.
-      this.updateCard({
-        uuid: this.card.uuid,
-        props: {
-          objective: {
-            reaction: null,
-            maximize: true
-          },
-          reactionDeletions: [],
-          reactionAdditions: [],
-          reactionKnockouts: [],
-          geneKnockouts: [],
-          editedBounds: [],
-          // Reset simulation results too
-          fluxes: null,
-          growthRate: null
-        }
-      });
-      this.setModified({
-        uuid: this.card.uuid,
-        modified: true
-      });
-      this.$emit("simulate-card");
     },
     ...mapMutations({
-      updateCard: "interactiveMap/updateCard",
-      setModified: "interactiveMap/setModified"
+      updateCard: "interactiveMap/updateCard"
     })
   }
 });
