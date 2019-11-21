@@ -2038,7 +2038,7 @@ export default Vue.extend({
       Vue.set(item, property, value);
     },
     clear() {
-      Object.assign(this.$data, getInitialState());
+      Object.assign(this.$data, getInitialState.apply(this));
     },
     createExperiment() {
       const hasACondition = !this.isTableUnchanged(this.tables.conditions);
