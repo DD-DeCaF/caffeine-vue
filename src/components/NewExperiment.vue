@@ -159,13 +159,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('conditions')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -273,13 +266,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('samples')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -396,13 +382,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('fluxomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -537,13 +516,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('metabolomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -658,13 +630,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('proteomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -799,13 +764,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('uptakeSecretion')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -972,13 +930,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('molarYields')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -1068,15 +1019,15 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('growth')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
+            <v-btn
+              color="primary"
+              small
+              @click="addRow(selectedTableKey)"
+              class="mt-3"
+              >Add row</v-btn
+            >
           </v-card>
         </v-flex>
 
