@@ -1072,11 +1072,11 @@
                           :disabled="!!whyIsTableDisabled(key)"
                         ></v-radio>
                         <v-icon
-                          v-if="table.isValid() && !isTableUnchanged(table)"
+                          v-if="isTableValid(table) && !isTableUnchanged(table)"
                           color="success"
                           >done</v-icon
                         >
-                        <v-icon v-if="!table.isValid()" color="error"
+                        <v-icon v-if="!isTableValid(table)" color="error"
                           >error_outline</v-icon
                         >
                       </v-layout>
@@ -1225,15 +1225,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         // Needed to pass created strain or medium to the appropriate condition
         rowIndex: null,
         // We should control pagination for every table separately
@@ -1281,15 +1272,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1330,15 +1312,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1379,15 +1352,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1428,15 +1392,6 @@ function getInitialState() {
           uncertainty: proteomicsItem => []
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1477,15 +1432,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1543,15 +1489,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1583,15 +1520,6 @@ function getInitialState() {
           ]
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1663,8 +1591,9 @@ export default Vue.extend({
     },
     isValid() {
       return (
-        Object.values(this.tables).every((table: any) => table.isValid()) &&
-        this.isExperimentDataValid
+        Object.values(this.tables).every((table: any) =>
+          this.isTableValid(table)
+        ) && this.isExperimentDataValid
       );
     }
   },
@@ -1908,7 +1837,7 @@ export default Vue.extend({
     },
     requiredIfHasCondition(value) {
       if (
-        this.tables.conditions.isValid() &&
+        this.isTableValid(this.tables.conditions) &&
         !this.isTableUnchanged(this.tables.conditions) &&
         !value &&
         value !== 0
@@ -2274,7 +2203,7 @@ export default Vue.extend({
       } else if (key === "samples") {
         if (
           !this.isTableUnchanged(this.tables.conditions) &&
-          this.tables.conditions.isValid()
+          this.isTableValid(this.tables.conditions)
         ) {
           return false;
         } else {
@@ -2283,7 +2212,7 @@ export default Vue.extend({
       } else {
         if (
           !this.isTableUnchanged(this.tables.samples) &&
-          this.tables.samples.isValid()
+          this.isTableValid(this.tables.samples)
         ) {
           return false;
         } else {
@@ -2299,6 +2228,15 @@ export default Vue.extend({
     },
     onMeasurementClear(index, table, property) {
       table.items[index][property] = null;
+    },
+    isTableValid(table) {
+      const rules = table.rules;
+      const keys = Object.keys(rules);
+      return table.items.every(item =>
+        keys.every(key =>
+          rules[key](item).every(valid => typeof valid === "boolean")
+        )
+      );
     }
   }
 });
