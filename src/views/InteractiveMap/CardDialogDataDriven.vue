@@ -10,40 +10,13 @@
             <v-flex xs6>
               <p class="text-xs-right subheading mb-0 mt-2 font-italic">
                 Simulation status:
-                <span v-if="card.solverStatus">
-                  <span v-if="card.solverStatus == 'optimal'">Successful</span>
-                  <span v-else-if="card.solverStatus == 'infeasible'"
-                    >Infeasible</span
-                  >
-                </span>
-                <span v-else-if="card.sampleErrors.length > 0"
-                  >Can not integrate data</span
-                >
-                <span v-else-if="card.hasSimulationError"
-                  >Error during simulation</span
-                >
-                <span v-else-if="!model && !card.sample"
-                  >Waiting for model and sample</span
-                >
-                <span v-else-if="!model">Waiting for a model</span>
-                <span v-else-if="!card.sample">Waiting for a sample</span>
-                <span v-else-if="isModifyingModel">
-                  Integrating data...
-                  <v-progress-circular
-                    indeterminate
-                    size="12"
-                    :width="1"
-                  ></v-progress-circular>
-                </span>
-                <span v-else-if="card.isSimulating">
-                  Simulating...
-                  <v-progress-circular
-                    indeterminate
-                    size="12"
-                    :width="1"
-                  ></v-progress-circular>
-                </span>
-                <span v-else>Unknown</span>
+                <span>{{ simulationStatus.text }}</span>
+                <v-progress-circular
+                  v-if="simulationStatus.loader"
+                  indeterminate
+                  size="12"
+                  :width="1"
+                ></v-progress-circular>
               </p>
             </v-flex>
           </v-layout>
@@ -644,6 +617,36 @@ export default Vue.extend({
       set(value) {
         this.$emit("input", value);
       }
+    },
+    simulationStatus() {
+      const status = {
+        text: "Unknown",
+        loader: false
+      };
+      if (this.card.solverStatus) {
+        if (this.card.solverStatus === "optimal") {
+          status.text = "Successful";
+        } else if (this.card.solverStatus === "infeasible") {
+          status.text = "Infeasible";
+        }
+      } else if (this.card.sampleErrors.length > 0) {
+        status.text = "Can not integrate data";
+      } else if (this.card.hasSimulationError) {
+        status.text = "Error during simulation";
+      } else if (!this.model && !this.card.sample) {
+        status.text = "Please select model and sample";
+      } else if (!this.model) {
+        status.text = "Please select model";
+      } else if (!this.card.sample) {
+        status.text = "Please select sample";
+      } else if (this.isModifyingModel) {
+        status.text = "Integrating data...";
+        status.loader = true;
+      } else if (this.card.isSimulating) {
+        status.text = "Simulating...";
+        status.loader = true;
+      }
+      return status;
     }
   },
   watch: {
