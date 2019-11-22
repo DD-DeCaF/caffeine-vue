@@ -1028,6 +1028,9 @@
               class="mt-3"
               >Add row</v-btn
             >
+            <v-btn color="primary" small @click="showInvalidRows()" class="mt-3"
+              >Show invalid rows first</v-btn
+            >
           </v-card>
         </v-flex>
 
@@ -2123,6 +2126,24 @@ export default Vue.extend({
     },
     onMeasurementClear(index, table, property) {
       table.items[index][property] = null;
+    },
+    showInvalidRows() {
+      const table = this.tables[this.selectedTableKey];
+      const keys = Object.keys(table.rules);
+      const validItems: any[] = [];
+      const invalidItems: any[] = [];
+      table.items.forEach(item => {
+        if (
+          keys.every(key =>
+            table.rules[key](item).every(valid => typeof valid === "boolean")
+          )
+        ) {
+          validItems.push(item);
+        } else {
+          invalidItems.push(item);
+        }
+      });
+      table.items = [...invalidItems, ...validItems];
     }
   }
 });
