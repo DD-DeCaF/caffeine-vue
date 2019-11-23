@@ -1168,7 +1168,8 @@ import {
   unzip,
   keyBy,
   findKey,
-  isEmpty
+  isEmpty,
+  sortBy
 } from "lodash";
 import * as settings from "@/utils/settings";
 import { mapMnxReactionToReaction } from "@/utils/reaction";
@@ -2132,18 +2133,12 @@ export default Vue.extend({
       const keys = Object.keys(table.rules);
       const validItems: any[] = [];
       const invalidItems: any[] = [];
-      table.items.forEach(item => {
-        if (
-          keys.every(key =>
-            table.rules[key](item).every(valid => typeof valid === "boolean")
-          )
-        ) {
-          validItems.push(item);
-        } else {
-          invalidItems.push(item);
-        }
+      table.items = sortBy(table.items, item => {
+        const isValid = keys.every(key =>
+          table.rules[key](item).every(valid => typeof valid === "boolean")
+        );
+        return isValid ? 1 : -1;
       });
-      table.items = [...invalidItems, ...validItems];
     }
   }
 });
