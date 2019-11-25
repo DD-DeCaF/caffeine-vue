@@ -201,12 +201,12 @@
               </td>
               <td>
                 {{ protein.measurement }}
-                <em>mmol/l</em>
+                <em>mmol gDW<sup>-1</sup></em>
               </td>
               <td>
                 <span v-if="protein.uncertainty">
                   {{ protein.uncertainty }}
-                  <em>mmol/l</em>
+                  <em>mmol gDW<sup>-1</sup></em>
                 </span>
                 <span v-else>
                   No uncertainty
