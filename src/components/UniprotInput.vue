@@ -15,8 +15,9 @@
       ></v-text-field>
     </template>
     <span v-if="protein">
-      <em>Full name: </em>{{ protein.fullName }}<br />
       <em>Identifier: </em>{{ protein.identifier }}<br />
+      <em>Name: </em>{{ protein.name }}<br />
+      <em>Full name: </em>{{ protein.fullName }}<br />
       <em>Gene: </em>{{ protein.gene }}<br />
     </span>
   </v-tooltip>
@@ -105,14 +106,16 @@ export default Vue.extend({
             response.data,
             "text/xml"
           );
+          const identifier = doc.querySelector("entry > accession");
+          const name = doc.querySelector("entry > name");
           const fullName = doc.querySelector(
             "entry > protein > recommendedName > fullName"
           );
-          const identifier = doc.querySelector("entry > accession");
           const gene = doc.querySelector("entry > gene > name[type='primary']");
           this.protein = {
-            fullName: fullName ? fullName.innerHTML : "Unknown",
             identifier: identifier ? identifier.innerHTML : "Unknown",
+            name: name ? name.innerHTML : "Unknown",
+            fullName: fullName ? fullName.innerHTML : "Unknown",
             gene: gene ? gene.innerHTML : "Unknown",
             uniprotId: uniprotId
           };
