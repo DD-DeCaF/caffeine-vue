@@ -1644,9 +1644,16 @@ export default Vue.extend({
         );
         return strs.map(str => {
           if (str in parsedResponse) {
+            // The protein name field includes both recommended name, and
+            // alternative names in parentheses. Use only the recommended name.
+            let proteinName = parsedResponse[str]["Protein names"] || "Unknown";
+            const index = proteinName.indexOf("(");
+            if (index !== -1) {
+              proteinName = proteinName.substring(0, index).trim();
+            }
             return {
               identifier: parsedResponse[str]["Entry name"] || "Unknown",
-              name: parsedResponse[str]["Protein names"] || "Unknown",
+              name: proteinName,
               gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
               uniprotId: str
             };
