@@ -186,7 +186,7 @@
             class="elevation-1"
           >
             <template v-slot:items="{ item: protein }">
-              <td>{{ protein.name }}</td>
+              <td>{{ protein.full_name }}</td>
               <td>
                 <a
                   :href="

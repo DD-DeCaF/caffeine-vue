@@ -15,7 +15,7 @@
       ></v-text-field>
     </template>
     <span v-if="protein">
-      <em>Name: </em>{{ protein.name }}<br />
+      <em>Full name: </em>{{ protein.fullName }}<br />
       <em>Identifier: </em>{{ protein.identifier }}<br />
       <em>Gene: </em>{{ protein.gene }}<br />
     </span>
@@ -71,7 +71,7 @@ export default Vue.extend({
   methods: {
     hint() {
       if (this.protein) {
-        return `<a href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a> (${this.protein.name})`;
+        return `<a href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a> (${this.protein.fullName})`;
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }
@@ -100,18 +100,18 @@ export default Vue.extend({
       axios
         .get(`https://www.uniprot.org/uniprot/${uniprotId}.xml`)
         .then(response => {
-          // Parse the XML response, looking for name, identifier and gene.
+          // Parse the XML response, looking for full name, identifier and gene.
           const doc = new DOMParser().parseFromString(
             response.data,
             "text/xml"
           );
-          const name = doc.querySelector(
+          const fullName = doc.querySelector(
             "entry > protein > recommendedName > fullName"
           );
           const identifier = doc.querySelector("entry > accession");
           const gene = doc.querySelector("entry > gene > name[type='primary']");
           this.protein = {
-            name: name ? name.innerHTML : "Unknown",
+            fullName: fullName ? fullName.innerHTML : "Unknown",
             identifier: identifier ? identifier.innerHTML : "Unknown",
             gene: gene ? gene.innerHTML : "Unknown",
             uniprotId: uniprotId

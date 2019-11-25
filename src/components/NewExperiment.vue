@@ -2062,7 +2062,7 @@ export default Vue.extend({
         .map(proteomicsItem => {
           const payload = {
             sample_id: this.sampleTempIdsMap[proteomicsItem.sample.temporaryId],
-            name: proteomicsItem.protein.name,
+            full_name: proteomicsItem.protein.fullName,
             identifier: proteomicsItem.protein.identifier,
             gene: proteomicsItem.protein.gene,
             measurement: proteomicsItem.measurement,
