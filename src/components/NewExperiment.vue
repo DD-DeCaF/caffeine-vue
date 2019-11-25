@@ -1645,7 +1645,7 @@ export default Vue.extend({
         return strs.map(str => {
           if (str in parsedResponse) {
             return {
-              identifier: parsedResponse[str]["Entry name"] || "Unknown",
+              identifier: parsedResponse[str]["Entry"] || "Unknown",
               name: parsedResponse[str]["Protein names"] || "Unknown",
               gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
               uniprotId: str

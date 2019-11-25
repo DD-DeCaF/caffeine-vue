@@ -108,7 +108,7 @@ export default Vue.extend({
           const name = doc.querySelector(
             "entry > protein > recommendedName > fullName"
           );
-          const identifier = doc.querySelector("entry > name");
+          const identifier = doc.querySelector("entry > accession");
           const gene = doc.querySelector("entry > gene > name[type='primary']");
           this.protein = {
             name: name ? name.innerHTML : "Unknown",
