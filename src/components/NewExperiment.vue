@@ -612,7 +612,7 @@
                         <td>
                           <v-number-field
                             v-model.number="proteomicsItem.measurement"
-                            hint="mmol l <sup>-1</sup>"
+                            hint="mmol gDW <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             @paste="
@@ -628,7 +628,7 @@
                         <td>
                           <v-number-field
                             v-model.number="proteomicsItem.uncertainty"
-                            hint="mmol l <sup>-1</sup>"
+                            hint="mmol gDW <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             @paste="
@@ -1652,8 +1652,9 @@ export default Vue.extend({
               proteinName = proteinName.substring(0, index).trim();
             }
             return {
-              identifier: parsedResponse[str]["Entry name"] || "Unknown",
-              name: proteinName,
+              identifier: parsedResponse[str]["Entry"] || "Unknown",
+              name: parsedResponse[str]["Entry name"] || "Unknown",
+              fullName: proteinName,
               gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
               uniprotId: str
             };
@@ -2069,8 +2070,9 @@ export default Vue.extend({
         .map(proteomicsItem => {
           const payload = {
             sample_id: this.sampleTempIdsMap[proteomicsItem.sample.temporaryId],
-            name: proteomicsItem.protein.name,
             identifier: proteomicsItem.protein.identifier,
+            name: proteomicsItem.protein.name,
+            full_name: proteomicsItem.protein.fullName,
             gene: proteomicsItem.protein.gene,
             measurement: proteomicsItem.measurement,
             uncertainty: proteomicsItem.uncertainty || 0
