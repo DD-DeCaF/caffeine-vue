@@ -612,7 +612,7 @@
                         <td>
                           <v-number-field
                             v-model.number="proteomicsItem.measurement"
-                            hint="mmol l <sup>-1</sup>"
+                            hint="mmol gDW <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             @paste="
@@ -628,7 +628,7 @@
                         <td>
                           <v-number-field
                             v-model.number="proteomicsItem.uncertainty"
-                            hint="mmol l <sup>-1</sup>"
+                            hint="mmol gDW <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             @paste="
