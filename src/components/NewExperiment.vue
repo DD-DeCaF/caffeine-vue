@@ -30,6 +30,7 @@
                   :items="tables.conditions.items"
                   :pagination.sync="tables.conditions.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -144,13 +145,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('conditions')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -162,6 +156,7 @@
                   :items="tables.samples.items"
                   :pagination.sync="tables.samples.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -239,13 +234,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('samples')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -257,6 +245,7 @@
                   :items="tables.fluxomics.items"
                   :pagination.sync="tables.fluxomics.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -353,13 +342,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('fluxomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -371,6 +353,7 @@
                   :items="tables.metabolomics.items"
                   :pagination.sync="tables.metabolomics.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -489,13 +472,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('metabolomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -507,6 +483,7 @@
                   :items="tables.proteomics.items"
                   :pagination.sync="tables.proteomics.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -610,13 +587,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('proteomics')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -628,6 +598,7 @@
                   :items="tables.uptakeSecretion.items"
                   :pagination.sync="tables.uptakeSecretion.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -748,13 +719,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('uptakeSecretion')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -766,6 +730,7 @@
                   :items="tables.molarYields.items"
                   :pagination.sync="tables.molarYields.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -913,13 +878,6 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('molarYields')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
 
@@ -931,6 +889,7 @@
                   :items="tables.growth.items"
                   :pagination.sync="tables.growth.pagination"
                   :rows-per-page-items="[10, 25]"
+                  hide-actions
                   disable-initial-sort
                 >
                   <template
@@ -999,15 +958,25 @@
                     </Var>
                   </template>
                 </v-data-table>
-                <v-btn
-                  color="primary"
-                  small
-                  @click="addRow('growth')"
-                  class="mt-3"
-                  >Add row</v-btn
-                >
               </div>
             </v-form-extended>
+            <v-btn
+              color="primary"
+              small
+              @click="addRow(selectedTableKey)"
+              class="mt-4"
+              >Add row</v-btn
+            >
+            <v-btn color="primary" small @click="showInvalidRows()" class="mt-4"
+              >Show invalid rows first</v-btn
+            >
+            <div class="text-xs-center mt-4">
+              <v-pagination
+                v-model="tables[selectedTableKey].pagination.page"
+                :length="calculatePaginatorLength()"
+                :totalVisible="7"
+              ></v-pagination>
+            </div>
           </v-card>
         </v-flex>
 
@@ -1145,7 +1114,8 @@ import {
   unzip,
   keyBy,
   findKey,
-  isEmpty
+  isEmpty,
+  sortBy
 } from "lodash";
 import * as settings from "@/utils/settings";
 import { mapMnxReactionToReaction } from "@/utils/reaction";
@@ -2237,6 +2207,28 @@ export default Vue.extend({
     },
     onMeasurementClear(index, table, property) {
       table.items[index][property] = null;
+    },
+    showInvalidRows() {
+      const table = this.tables[this.selectedTableKey];
+      const keys = Object.keys(table.rules);
+      table.items = sortBy(table.items, item => {
+        const isValid = keys.every(key =>
+          table.rules[key](item).every(valid => typeof valid === "boolean")
+        );
+        return isValid ? 1 : -1;
+      });
+    },
+    calculatePaginatorLength() {
+      if (
+        this.tables[this.selectedTableKey].pagination.rowsPerPage == null ||
+        this.tables[this.selectedTableKey].items.length === 0
+      ) {
+        return 0;
+      }
+      return Math.ceil(
+        this.tables[this.selectedTableKey].items.length /
+          this.tables[this.selectedTableKey].pagination.rowsPerPage
+      );
     },
     isTableValid(table) {
       const rules = table.rules;
