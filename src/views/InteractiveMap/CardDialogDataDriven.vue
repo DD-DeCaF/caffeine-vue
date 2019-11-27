@@ -186,7 +186,6 @@
             class="elevation-1"
           >
             <template v-slot:items="{ item: protein }">
-              <td>{{ protein.name }}</td>
               <td>
                 <a
                   :href="
@@ -196,17 +195,19 @@
                   >{{ protein.identifier }}</a
                 >
               </td>
+              <td>{{ protein.name }}</td>
+              <td>{{ protein.full_name }}</td>
               <td>
                 {{ protein.gene }}
               </td>
               <td>
                 {{ protein.measurement }}
-                <em>mmol/l</em>
+                <em>mmol gDW<sup>-1</sup></em>
               </td>
               <td>
                 <span v-if="protein.uncertainty">
                   {{ protein.uncertainty }}
-                  <em>mmol/l</em>
+                  <em>mmol gDW<sup>-1</sup></em>
                 </span>
                 <span v-else>
                   No uncertainty
@@ -421,8 +422,9 @@ export default Vue.extend({
       { text: "Uncertainty", sortable: false }
     ],
     proteomicsHeaders: [
-      { text: "Protein", sortable: false },
       { text: "Identifier", sortable: false },
+      { text: "Name", sortable: false },
+      { text: "Full name", sortable: false },
       { text: "Gene", sortable: false },
       { text: "Measurement", sortable: false },
       { text: "Uncertainty", sortable: false }
