@@ -2146,8 +2146,6 @@ export default Vue.extend({
     showInvalidRows() {
       const table = this.tables[this.selectedTableKey];
       const keys = Object.keys(table.rules);
-      const validItems: any[] = [];
-      const invalidItems: any[] = [];
       table.items = sortBy(table.items, item => {
         const isValid = keys.every(key =>
           table.rules[key](item).every(valid => typeof valid === "boolean")
