@@ -139,6 +139,66 @@ export default Vue.extend({
     },
     showDiffFVAScore() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    enzymeUsage() {
+      // If this is an enzyme-constrained model, calculate the enzyme usage for
+      // each pseudo-reaction.
+      if (
+        !this.card ||
+        !this.card.fluxes ||
+        !this.model ||
+        !this.model.model_serialized ||
+        !this.model.ec_model
+      ) {
+        return null;
+      }
+
+      // Each pseudoreaction always has a single gene, so store the enzyme usage
+      // value per gene.
+      const enzymeUsagePerGene = {};
+      // If the upper bound is smaller than this value, we can assume it was
+      // constrained by real-world observations. Anything larger is ignored,
+      // mostly to save computational cycles below.
+      const highestConveivableEnzymeUsage = 4;
+      this.model.model_serialized.reactions
+        .filter(
+          rxn => rxn.id.startsWith("prot_") && rxn.id.endsWith("_exchange")
+        )
+        .filter(rxn => rxn.upper_bound < highestConveivableEnzymeUsage)
+        // Ignore reactions with no positive flux - they would cause division by
+        // zero.
+        .filter(rxn => rxn.upper_bound !== 0)
+        .forEach(pseudoReaction => {
+          enzymeUsagePerGene[pseudoReaction.gene_reaction_rule] =
+            this.card.fluxes[pseudoReaction.id] / pseudoReaction.upper_bound;
+        });
+
+      // Now map those usages on to all reactions that are catalyzed by any of
+      // those genes.
+      const enzymeUsages = {};
+      this.model.model_serialized.reactions
+        .filter(
+          rxn => !(rxn.id.startsWith("prot_") && rxn.id.endsWith("_exchange"))
+        )
+        .forEach(rxn => {
+          rxn.gene_reaction_rule.split(/\W+/).forEach(gene => {
+            if (gene in enzymeUsagePerGene) {
+              // It's a match! Set the enzyme usage.
+              if (rxn.id in enzymeUsages) {
+                // Another gene is already recorded for this reaction; use the
+                // highest value.
+                enzymeUsages[rxn.id] = Math.max(
+                  enzymeUsages[rxn.id],
+                  enzymeUsagePerGene[gene]
+                );
+              } else {
+                enzymeUsages[rxn.id] = enzymeUsagePerGene[gene];
+              }
+            }
+          });
+        });
+
+      return enzymeUsages;
     }
   },
   watch: {
