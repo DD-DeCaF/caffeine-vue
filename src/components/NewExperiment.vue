@@ -962,7 +962,7 @@
                         <td>
                           <v-number-field
                             v-model.number="growthItem.measurement"
-                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            hint="h <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             :rules="tables.growth.rules.measurement(growthItem)"
@@ -974,7 +974,7 @@
                         <td>
                           <v-number-field
                             v-model.number="growthItem.uncertainty"
-                            hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
+                            hint="h <sup>-1</sup>"
                             persistent-hint
                             step="any"
                             @paste="
