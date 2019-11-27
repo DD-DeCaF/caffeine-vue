@@ -15,6 +15,18 @@
 
       <v-btn flat icon @click.stop="isCardDialogVisible = true">
         <CardDialog
+          v-if="card.type !== 'DataDriven'"
+          v-model="isCardDialogVisible"
+          :card="card"
+          :model="model"
+          :modifications="modifications"
+          @simulate-card="simulateCard"
+          @simulation-error="$emit('simulation-error')"
+          @open-method-help-dialog="showMethodHelpDialog = true"
+          @load-data-error="$emit('load-data-error')"
+        />
+        <CardDialogDataDriven
+          v-else
           v-model="isCardDialogVisible"
           :card="card"
           :model="model"
@@ -261,12 +273,14 @@ import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialog from "@/views/InteractiveMap/CardDialog.vue";
+import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
 import MethodHelpDialog from "@/views/InteractiveMap/MethodHelpDialog.vue";
 
 export default Vue.extend({
   name: "Card",
   components: {
     CardDialog,
+    CardDialogDataDriven,
     MethodHelpDialog
   },
   filters: {

@@ -19,7 +19,6 @@
                 :items="organisms"
                 v-model="cardOrganism"
                 autoselectOnlyOption
-                :loading="isLoadingOrganism"
                 item-text="name"
                 item-value="id"
                 :hint="modificationsHint"
@@ -122,7 +121,6 @@ export default Vue.extend({
   },
   props: ["card", "model", "modifications", "value"],
   data: () => ({
-    isLoadingOrganism: false,
     methods: [
       { id: "fba", name: "Flux Balance Analysis (FBA)" },
       { id: "pfba", name: "Parsimonious FBA" },
@@ -246,9 +244,6 @@ export default Vue.extend({
         modified: true
       });
       this.$emit("simulate-card");
-    },
-    setLoadingOrganism(isLoading) {
-      this.isLoadingOrganism = isLoading;
     },
     ...mapMutations({
       updateCard: "interactiveMap/updateCard",
