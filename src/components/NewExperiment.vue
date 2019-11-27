@@ -52,12 +52,7 @@
                             @paste="
                               paste(0, absoluteIndex, tables.conditions, $event)
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.conditions,
-                                condition.name
-                              )
-                            ]"
+                            :rules="tables.conditions.rules.name(condition)"
                           ></v-text-field>
                         </td>
                         <td>
@@ -73,12 +68,7 @@
                               condition.strain && condition.strain._pastedText
                             "
                             ref="strainAutocomplete"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.conditions,
-                                condition.strain
-                              )
-                            ]"
+                            :rules="tables.conditions.rules.strain(condition)"
                             @paste="
                               paste(1, absoluteIndex, tables.conditions, $event)
                             "
@@ -116,12 +106,7 @@
                               condition.medium && condition.medium._pastedText
                             "
                             ref="mediumAutocomplete"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.conditions,
-                                condition.medium
-                              )
-                            ]"
+                            :rules="tables.conditions.rules.medium(condition)"
                             @paste="
                               paste(2, absoluteIndex, tables.conditions, $event)
                             "
@@ -201,12 +186,7 @@
                             item-text="name"
                             v-model="sample.condition"
                             no-data-text="No data available. You can add it in Conditions table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.samples,
-                                sample.condition
-                              )
-                            ]"
+                            :rules="tables.samples.rules.condition(sample)"
                           >
                           </v-select>
                         </td>
@@ -218,12 +198,7 @@
                             @paste="
                               paste(1, absoluteIndex, tables.samples, $event)
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.samples,
-                                sample.name
-                              )
-                            ]"
+                            :rules="tables.samples.rules.name(sample)"
                           ></v-text-field>
                         </td>
                         <td>
@@ -233,13 +208,7 @@
                             return-masked-value
                             placeholder="yyyy-mm-dd hh:mm"
                             hint="yyyy-mm-dd hh:mm"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.samples,
-                                sample.startTime
-                              ),
-                              singleDateTimeRule
-                            ]"
+                            :rules="tables.samples.rules.startTime(sample)"
                             @paste="
                               paste(2, absoluteIndex, tables.samples, $event)
                             "
@@ -252,10 +221,7 @@
                             return-masked-value
                             placeholder="yyyy-mm-dd hh:mm"
                             hint="yyyy-mm-dd hh:mm"
-                            :rules="[
-                              singleDateTimeRule,
-                              dateTimeRules(sample.startTime, sample.endTime)
-                            ]"
+                            :rules="tables.samples.rules.endTime(sample)"
                             @paste="
                               paste(3, absoluteIndex, tables.samples, $event)
                             "
@@ -315,12 +281,9 @@
                             item-value="temporaryId"
                             v-model="fluxomicsItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.fluxomics,
-                                fluxomicsItem.sample
-                              )
-                            ]"
+                            :rules="
+                              tables.fluxomics.rules.sample(fluxomicsItem)
+                            "
                           >
                           </v-select>
                         </td>
@@ -341,12 +304,9 @@
                               )
                             "
                             :modelIds="getRelevantModelIds(fluxomicsItem)"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.fluxomics,
-                                fluxomicsItem.reaction
-                              )
-                            ]"
+                            :rules="
+                              tables.fluxomics.rules.reaction(fluxomicsItem)
+                            "
                             :passedReaction="fluxomicsItem.reaction"
                             validate-on-blur
                           ></AutocompleteMnxReaction>
@@ -357,12 +317,9 @@
                             hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                             persistent-hint
                             step="any"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.fluxomics,
-                                fluxomicsItem.measurement
-                              )
-                            ]"
+                            :rules="
+                              tables.fluxomics.rules.measurement(fluxomicsItem)
+                            "
                             @paste="
                               paste(2, absoluteIndex, tables.fluxomics, $event)
                             "
@@ -441,12 +398,9 @@
                             item-value="temporaryId"
                             v-model="metabolomicsItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.metabolomics,
-                                metabolomicsItem.sample
-                              )
-                            ]"
+                            :rules="
+                              tables.metabolomics.rules.sample(metabolomicsItem)
+                            "
                           >
                           </v-select>
                         </td>
@@ -473,12 +427,11 @@
                             "
                             :passedMetabolite="metabolomicsItem.compound"
                             :modelIds="getRelevantModelIds(metabolomicsItem)"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.metabolomics,
-                                metabolomicsItem.compound
+                            :rules="
+                              tables.metabolomics.rules.compound(
+                                metabolomicsItem
                               )
-                            ]"
+                            "
                             validate-on-blur
                           ></AutocompleteMnxMetabolite>
                         </td>
@@ -496,12 +449,11 @@
                                 $event
                               )
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.metabolomics,
-                                metabolomicsItem.measurement
+                            :rules="
+                              tables.metabolomics.rules.measurement(
+                                metabolomicsItem
                               )
-                            ]"
+                            "
                           ></v-number-field>
                         </td>
                         <td>
@@ -703,12 +655,11 @@
                             item-value="temporaryId"
                             v-model="uptakeSecretionItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.uptakeSecretion,
-                                uptakeSecretionItem.sample
+                            :rules="
+                              tables.uptakeSecretion.rules.sample(
+                                uptakeSecretionItem
                               )
-                            ]"
+                            "
                           >
                           </v-select>
                         </td>
@@ -735,12 +686,11 @@
                             "
                             :passedMetabolite="uptakeSecretionItem.compound"
                             :modelIds="getRelevantModelIds(uptakeSecretionItem)"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.uptakeSecretion,
-                                uptakeSecretionItem.compound
+                            :rules="
+                              tables.uptakeSecretion.rules.compound(
+                                uptakeSecretionItem
                               )
-                            ]"
+                            "
                             validate-on-blur
                           ></AutocompleteMnxMetabolite>
                         </td>
@@ -758,12 +708,11 @@
                                 $event
                               )
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.uptakeSecretion,
-                                uptakeSecretionItem.measurement
+                            :rules="
+                              tables.uptakeSecretion.rules.measurement(
+                                uptakeSecretionItem
                               )
-                            ]"
+                            "
                           ></v-number-field>
                         </td>
                         <td>
@@ -844,12 +793,9 @@
                             item-value="temporaryId"
                             v-model="molarYieldsItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.molarYields,
-                                molarYieldsItem.sample
-                              )
-                            ]"
+                            :rules="
+                              tables.molarYields.rules.sample(molarYieldsItem)
+                            "
                           >
                           </v-select>
                         </td>
@@ -876,12 +822,9 @@
                             "
                             :passedMetabolite="molarYieldsItem.product"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.molarYields,
-                                molarYieldsItem.product
-                              )
-                            ]"
+                            :rules="
+                              tables.molarYields.rules.product(molarYieldsItem)
+                            "
                             validate-on-blur
                           ></AutocompleteMnxMetabolite>
                         </td>
@@ -908,12 +851,11 @@
                             "
                             :passedMetabolite="molarYieldsItem.substrate"
                             :modelIds="getRelevantModelIds(molarYieldsItem)"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.molarYields,
-                                molarYieldsItem.substrate
+                            :rules="
+                              tables.molarYields.rules.substrate(
+                                molarYieldsItem
                               )
-                            ]"
+                            "
                             validate-on-blur
                           ></AutocompleteMnxMetabolite>
                         </td>
@@ -931,12 +873,11 @@
                                 $event
                               )
                             "
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.molarYields,
-                                molarYieldsItem.measurement
+                            :rules="
+                              tables.molarYields.rules.measurement(
+                                molarYieldsItem
                               )
-                            ]"
+                            "
                           ></v-number-field>
                         </td>
                         <td>
@@ -1014,12 +955,7 @@
                             item-value="temporaryId"
                             v-model="growthItem.sample"
                             no-data-text="No data available. You can add it in Samples table."
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.growth,
-                                growthItem.sample
-                              )
-                            ]"
+                            :rules="tables.growth.rules.sample(growthItem)"
                           >
                           </v-select>
                         </td>
@@ -1029,12 +965,7 @@
                             hint="mmol gDW <sup>-1</sup> h <sup>-1</sup>"
                             persistent-hint
                             step="any"
-                            :rules="[
-                              requiredIfTableHasChanged(
-                                tables.growth,
-                                growthItem.measurement
-                              )
-                            ]"
+                            :rules="tables.growth.rules.measurement(growthItem)"
                             @paste="
                               paste(1, absoluteIndex, tables.growth, $event)
                             "
@@ -1141,11 +1072,11 @@
                           :disabled="!!whyIsTableDisabled(key)"
                         ></v-radio>
                         <v-icon
-                          v-if="table.isValid() && !isTableUnchanged(table)"
+                          v-if="isTableValid(table) && !isTableUnchanged(table)"
                           color="success"
                           >done</v-icon
                         >
-                        <v-icon v-if="!table.isValid()" color="error"
+                        <v-icon v-if="!isTableValid(table)" color="error"
                           >error_outline</v-icon
                         >
                       </v-layout>
@@ -1273,10 +1204,27 @@ function getInitialState() {
             });
           }
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          name: condition => [
+            this.requiredIfTableHasChanged(
+              this.tables.conditions,
+              condition.name
+            )
+          ],
+          strain: condition => [
+            this.requiredIfTableHasChanged(
+              this.tables.conditions,
+              condition.strain
+            )
+          ],
+          medium: condition => [
+            this.requiredIfTableHasChanged(
+              this.tables.conditions,
+              condition.medium
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         // Needed to pass created strain or medium to the appropriate condition
         rowIndex: null,
         // We should control pagination for every table separately
@@ -1301,10 +1249,29 @@ function getInitialState() {
           startTime: strs => strs,
           endTime: strs => strs
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          condition: sample => [
+            this.requiredIfTableHasChanged(
+              this.tables.samples,
+              sample.condition
+            )
+          ],
+          name: sample => [
+            this.requiredIfTableHasChanged(this.tables.samples, sample.name)
+          ],
+          startTime: sample => [
+            this.requiredIfTableHasChanged(
+              this.tables.samples,
+              sample.startTime
+            ),
+            this.singleDateTimeRule(sample.startTime)
+          ],
+          endTime: sample => [
+            this.singleDateTimeRule(sample.endTime),
+            this.dateTimeRules(sample.startTime, sample.endTime)
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1324,10 +1291,27 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          sample: fluxomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.fluxomics,
+              fluxomicsItem.sample
+            )
+          ],
+          reaction: fluxomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.fluxomics,
+              fluxomicsItem.reaction
+            )
+          ],
+          measurement: fluxomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.fluxomics,
+              fluxomicsItem.measurement
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1347,10 +1331,27 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          sample: metabolomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.metabolomics,
+              metabolomicsItem.sample
+            )
+          ],
+          compound: metabolomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.metabolomics,
+              metabolomicsItem.compound
+            )
+          ],
+          measurement: metabolomicsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.metabolomics,
+              metabolomicsItem.measurement
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1391,15 +1392,6 @@ function getInitialState() {
           uncertainty: proteomicsItem => []
         },
         items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          const rules = this.rules;
-          const keys = Object.keys(rules);
-          return this.items.every(item =>
-            keys.every(key =>
-              rules[key](item).every(valid => typeof valid === "boolean")
-            )
-          );
-        },
         pagination: {
           rowsPerPage: 10
         }
@@ -1419,10 +1411,27 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          sample: uptakeSecretionItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.uptakeSecretion,
+              uptakeSecretionItem.sample
+            )
+          ],
+          compound: uptakeSecretionItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.uptakeSecretion,
+              uptakeSecretionItem.compound
+            )
+          ],
+          measurement: uptakeSecretionItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.uptakeSecretion,
+              uptakeSecretionItem.measurement
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1453,10 +1462,33 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          sample: molarYieldsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.molarYields,
+              molarYieldsItem.sample
+            )
+          ],
+          product: molarYieldsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.molarYields,
+              molarYieldsItem.product
+            )
+          ],
+          substrate: molarYieldsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.molarYields,
+              molarYieldsItem.substrate
+            )
+          ],
+          measurement: molarYieldsItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.molarYields,
+              molarYieldsItem.measurement
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1473,10 +1505,21 @@ function getInitialState() {
           measurement: strs => strs.map(str => parseFloat(str)),
           uncertainty: strs => strs.map(str => parseFloat(str))
         },
-        items: [{ temporaryId: uuidv4() }],
-        isValid() {
-          return true;
+        rules: {
+          sample: growthItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.growth,
+              growthItem.sample
+            )
+          ],
+          measurement: growthItem => [
+            this.requiredIfTableHasChanged(
+              this.tables.growth,
+              growthItem.measurement
+            )
+          ]
         },
+        items: [{ temporaryId: uuidv4() }],
         pagination: {
           rowsPerPage: 10
         }
@@ -1548,8 +1591,9 @@ export default Vue.extend({
     },
     isValid() {
       return (
-        Object.values(this.tables).every((table: any) => table.isValid()) &&
-        this.isExperimentDataValid
+        Object.values(this.tables).every((table: any) =>
+          this.isTableValid(table)
+        ) && this.isExperimentDataValid
       );
     }
   },
@@ -1567,6 +1611,10 @@ export default Vue.extend({
         .then(response => {
           const mnxReactions: MetaNetXReaction[] = response.data;
           return mnxReactions.map((mnxReaction, index) => {
+            // Handle pasting empty cells
+            if (strs[index] === "") {
+              return null;
+            }
             if (isEmpty(mnxReaction)) {
               return { _pastedText: strs[index] };
             }
@@ -1595,6 +1643,10 @@ export default Vue.extend({
         .then(response => {
           const mnxMetabolites: MetaNetXMetabolite[] = response.data;
           return mnxMetabolites.map((mnxMetabolite, index) => {
+            // Handle pasting empty cells
+            if (strs[index] === "") {
+              return null;
+            }
             if (isEmpty(mnxMetabolite)) {
               return { _pastedText: strs[index] };
             }
@@ -1643,6 +1695,10 @@ export default Vue.extend({
           item => item.Entry
         );
         return strs.map(str => {
+          // Handle pasting empty cells
+          if (str === "") {
+            return null;
+          }
           if (str in parsedResponse) {
             // The protein name field includes both recommended name, and
             // alternative names in parentheses. Use only the recommended name.
@@ -1789,7 +1845,7 @@ export default Vue.extend({
     },
     requiredIfHasCondition(value) {
       if (
-        this.tables.conditions.isValid() &&
+        this.isTableValid(this.tables.conditions) &&
         !this.isTableUnchanged(this.tables.conditions) &&
         !value &&
         value !== 0
@@ -1919,7 +1975,7 @@ export default Vue.extend({
       Vue.set(item, property, value);
     },
     clear() {
-      Object.assign(this.$data, getInitialState());
+      Object.assign(this.$data, getInitialState.apply(this));
     },
     createExperiment() {
       const hasACondition = !this.isTableUnchanged(this.tables.conditions);
@@ -2156,7 +2212,7 @@ export default Vue.extend({
       } else if (key === "samples") {
         if (
           !this.isTableUnchanged(this.tables.conditions) &&
-          this.tables.conditions.isValid()
+          this.isTableValid(this.tables.conditions)
         ) {
           return false;
         } else {
@@ -2165,7 +2221,7 @@ export default Vue.extend({
       } else {
         if (
           !this.isTableUnchanged(this.tables.samples) &&
-          this.tables.samples.isValid()
+          this.isTableValid(this.tables.samples)
         ) {
           return false;
         } else {
@@ -2181,6 +2237,15 @@ export default Vue.extend({
     },
     onMeasurementClear(index, table, property) {
       table.items[index][property] = null;
+    },
+    isTableValid(table) {
+      const rules = table.rules;
+      const keys = Object.keys(rules);
+      return table.items.every(item =>
+        keys.every(key =>
+          rules[key](item).every(valid => typeof valid === "boolean")
+        )
+      );
     }
   }
 });
