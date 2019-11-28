@@ -224,6 +224,21 @@ export default Vue.extend({
         });
 
       return enzymeUsages;
+    },
+    enzymeUsageMapped() {
+      // Map the ecModel-specific reaction identifiers back to the original
+      // identifiers, so that they are correctly recognized in the Escher map.
+      const mappedReactions = {};
+      Object.keys(this.enzymeUsage).forEach(id => {
+        let newId = id;
+        if (id.startsWith("arm_")) {
+          newId = id.slice(4);
+        } else if (id.endsWith("No1")) {
+          newId = id.slice(0, -3);
+        }
+        mappedReactions[newId] = this.enzymeUsage[id];
+      });
+      return mappedReactions;
     }
   },
   watch: {
@@ -403,24 +418,11 @@ export default Vue.extend({
         return;
       }
 
-      // Map the ecModel-specific reaction identifiers back to the original
-      // identifiers, so that they are correctly recognized in the Escher map.
-      const mappedReactions = {};
-      Object.keys(this.enzymeUsage).forEach(id => {
-        let newId = id;
-        if (id.startsWith("arm_")) {
-          newId = id.slice(4);
-        } else if (id.endsWith("No1")) {
-          newId = id.slice(0, -3);
-        }
-        mappedReactions[newId] = this.enzymeUsage[id];
-      });
-
       // Only highlight reactions with enzyme usage above the given threshold.
       // TODO: The threshold should be user-modifiable.
       const threshold = 0.0001;
-      const reactions = Object.keys(mappedReactions).filter(
-        id => mappedReactions[id] >= threshold
+      const reactions = Object.keys(this.enzymeUsageMapped).filter(
+        id => this.enzymeUsageMapped[id] >= threshold
       );
       this.escherBuilder.set_highlight_reactions(reactions);
     },
