@@ -228,6 +228,21 @@
         </v-layout>
       </v-container>
 
+      <!-- ecModels visualizing enzyme usage -->
+      <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
+        <v-layout row>
+          <v-flex>
+            Highlight reactions where enzyme usage exceeds the following
+            threshold:
+          </v-flex>
+        </v-layout>
+        <v-layout row>
+          <v-flex>
+            <v-slider v-model="enzymeUsageThreshold" thumb-label></v-slider>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="!isSaveTooltipVisible">
@@ -455,6 +470,24 @@ export default Vue.extend({
     },
     isInfeasible() {
       return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
+    },
+    showEnzymeUsageSlider() {
+      return (
+        this.card.type == "DataDriven" &&
+        this.card.sample &&
+        this.card.sample.proteomics.length > 0
+      );
+    },
+    enzymeUsageThreshold: {
+      get() {
+        return this.card.enzymeUsageThreshold;
+      },
+      set(newValue) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { enzymeUsageThreshold: newValue }
+        });
+      }
     }
   },
   watch: {

@@ -291,7 +291,8 @@ export default Vue.extend({
         // Specific fields for design prediction methods
         manipulations: null,
         productionGrowthRate: null,
-        showDiffFVAScore: false
+        showDiffFVAScore: false,
+        enzymeUsageThreshold: 90
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;

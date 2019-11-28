@@ -307,6 +307,9 @@ export default Vue.extend({
     },
     enzymeUsage() {
       this.onEscherReady.then(this.setEnzymeUsage);
+    },
+    "card.enzymeUsageThreshold"() {
+      this.onEscherReady.then(this.setEnzymeUsage);
     }
   },
   mounted() {
@@ -419,10 +422,8 @@ export default Vue.extend({
       }
 
       // Only highlight reactions with enzyme usage above the given threshold.
-      // TODO: The threshold should be user-modifiable.
-      const threshold = 0.0001;
       const reactions = Object.keys(this.enzymeUsageMapped).filter(
-        id => this.enzymeUsageMapped[id] >= threshold
+        id => this.enzymeUsageMapped[id] >= this.card.enzymeUsageThreshold / 100
       );
       this.escherBuilder.set_highlight_reactions(reactions);
     },

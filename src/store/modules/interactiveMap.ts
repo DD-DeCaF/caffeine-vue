@@ -71,6 +71,8 @@ export interface Card {
   manipulations: any[] | null;
   productionGrowthRate: number | null;
   showDiffFVAScore: boolean;
+  // For ecModels
+  enzymeUsageThreshold: number;
 }
 
 export default {
