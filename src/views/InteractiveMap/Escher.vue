@@ -245,6 +245,7 @@ export default Vue.extend({
           this.setReactionKnockouts();
           this.setGeneKnockouts();
           this.setDataSample();
+          this.setEnzymeUsage();
           this.setFluxes();
         }, 10);
       };
@@ -288,6 +289,9 @@ export default Vue.extend({
     showDiffFVAScore() {
       this.onEscherReady.then(this.toggleColorScheme);
       this.onEscherReady.then(this.setFluxes);
+    },
+    enzymeUsage() {
+      this.onEscherReady.then(this.setEnzymeUsage);
     }
   },
   mounted() {
@@ -386,6 +390,39 @@ export default Vue.extend({
       this.escherBuilder.set_highlight_reactions(
         this.card.sample.fluxomics.map(m => m.reaction_identifier)
       );
+    },
+    setEnzymeUsage() {
+      // Based on proteomics and simulated fluxes, visualizes enzyme usage by
+      // highlighting reactions over the given threshold.
+      // NOTE: This currently intereferes with fluxomics since we use
+      // highlighted reactions for both use cases, so currently the assumption
+      // is that users won't upload both fluxomics and proteomics in the same
+      // experiment.
+      if (!this.enzymeUsage) {
+        this.escherBuilder.set_highlight_reactions([]);
+        return;
+      }
+
+      // Map the ecModel-specific reaction identifiers back to the original
+      // identifiers, so that they are correctly recognized in the Escher map.
+      const mappedReactions = {};
+      Object.keys(this.enzymeUsage).forEach(id => {
+        let newId = id;
+        if (id.startsWith("arm_")) {
+          newId = id.slice(4);
+        } else if (id.endsWith("No1")) {
+          newId = id.slice(0, -3);
+        }
+        mappedReactions[newId] = this.enzymeUsage[id];
+      });
+
+      // Only highlight reactions with enzyme usage above the given threshold.
+      // TODO: The threshold should be user-modifiable.
+      const threshold = 0.0001;
+      const reactions = Object.keys(mappedReactions).filter(
+        id => mappedReactions[id] >= threshold
+      );
+      this.escherBuilder.set_highlight_reactions(reactions);
     },
     setFluxes() {
       // Update the flux distribution
