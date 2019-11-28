@@ -62,7 +62,8 @@ export default Vue.extend({
       // Returns the modified model (original model + added reactions) for the
       // currently selected card.
       // TODO: This is duplicated logic, a very similar computed property exists
-      // in the Card component.
+      // in the Card component. Note however that this property also adjusts
+      // bounds; the Card component property does not.
       if (!this.card) {
         return null;
       }
@@ -83,9 +84,10 @@ export default Vue.extend({
           ...selectedModel.model_serialized
         }
       };
+
+      // Add all added reactions to the model.
       this.card.reactionAdditions.forEach(reaction => {
-        // Add the reaction to the model. (Take care to replace, not modify, the
-        // original array.)
+        // Take care to replace, not modify, the original array.
         model.model_serialized.reactions = [
           ...model.model_serialized.reactions,
           {
@@ -124,6 +126,29 @@ export default Vue.extend({
           ...metabolites
         ];
       });
+
+      // Update any bounds that were modified.
+      const boundedReactions = {};
+      this.card.editedBounds.forEach(rxn => {
+        boundedReactions[rxn.id] = {
+          lowerBound: rxn.lowerBound,
+          upperBound: rxn.upperBound
+        };
+      });
+      // Take care to replace, not modify, the original array.
+      const reactions = model.model_serialized.reactions.map(reaction => {
+        if (reaction.id in boundedReactions) {
+          return {
+            ...reaction,
+            lower_bound: boundedReactions[reaction.id].lowerBound,
+            upper_bound: boundedReactions[reaction.id].upperBound
+          };
+        } else {
+          return reaction;
+        }
+      });
+      model.model_serialized.reactions = reactions;
+
       return model;
     },
     diffFVAScores() {

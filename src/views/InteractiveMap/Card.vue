@@ -362,7 +362,9 @@ export default Vue.extend({
       // Returns the modified model (original model + added reactions) for this
       // card.
       // TODO: This is duplicated logic, a very similar computed property exists
-      // in the Escher component.
+      // in the Escher component. (Note that the Escher property also adjusts
+      // bounds, this does not - it's simply not implemented because there's no
+      // need yet.)
       const selectedModel = this.$store.getters["models/getModelById"](
         this.card.modelId
       );
