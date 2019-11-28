@@ -51,10 +51,16 @@
             Not in the model
           </p>
         </v-layout>
-        <v-layout align-center v-show="!showScoreLegend">
+        <v-layout align-center v-show="!showScoreLegend && !showEnzymeUsage">
           <div class="measured-flux"></div>
           <p class="mb-0 ml-3">
             Measured flux
+          </p>
+        </v-layout>
+        <v-layout align-center v-show="showEnzymeUsage">
+          <div class="measured-flux"></div>
+          <p class="mb-0 ml-3">
+            Enzyme usage exceeds threshold
           </p>
         </v-layout>
       </v-card-text>
@@ -74,6 +80,14 @@ export default Vue.extend({
   computed: {
     showScoreLegend() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    showEnzymeUsage() {
+      return (
+        this.card &&
+        this.ecModel &&
+        this.card.type === "DataDriven" &&
+        this.card.sample.proteomics.length > 0
+      );
     }
   }
 });
