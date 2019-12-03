@@ -225,10 +225,16 @@ export default Vue.extend({
       // identifiers, so that they are correctly recognized in the Escher map.
       return mapKeys(this.enzymeUsage, (usage, id) => {
         if (id.startsWith("arm_")) {
+          // For isozymes, use the value in the reaction "arm_XXX".
           return id.slice(4);
         } else if (id.endsWith("No1")) {
+          // For single enzymes, use the value in the reaction "XXXNo1" (for
+          // this, check first that no arm reaction is already present).
           return id.slice(0, -3);
         }
+        // Note: We can disregard the reversible reactions ("XXX_REV"), as those
+        // will just contain redundant information in terms of enzyme usage (the
+        // GPR rule of the backward and forward reaction are equivalent).
         return id;
       });
     }
