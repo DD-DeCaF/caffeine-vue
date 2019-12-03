@@ -35,6 +35,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
+import { keyBy } from "lodash";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
@@ -128,13 +129,7 @@ export default Vue.extend({
       });
 
       // Update any bounds that were modified.
-      const boundedReactions = {};
-      this.card.editedBounds.forEach(rxn => {
-        boundedReactions[rxn.id] = {
-          lowerBound: rxn.lowerBound,
-          upperBound: rxn.upperBound
-        };
-      });
+      const boundedReactions = keyBy(this.card.editedBounds, rxn => rxn.id);
       // Take care to replace, not modify, the original array.
       const reactions = model.model_serialized.reactions.map(reaction => {
         if (reaction.id in boundedReactions) {
