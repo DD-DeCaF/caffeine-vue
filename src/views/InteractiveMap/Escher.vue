@@ -35,7 +35,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import { keyBy, mapKeys } from "lodash";
+import { keyBy, mapKeys, pickBy } from "lodash";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
@@ -223,8 +223,17 @@ export default Vue.extend({
     enzymeUsageMapped() {
       // Map the ecModel-specific reaction identifiers back to the original
       // identifiers, so that they are correctly recognized in the Escher map.
-      const reactionIds = Object.keys(this.enzymeUsage);
-      return mapKeys(this.enzymeUsage, (usage, id) => {
+
+      // Disregard the reversible reactions ("XXX_REV"), as those will just
+      // contain redundant information in terms of enzyme usage (the GPR rule of
+      // the backward and forward reaction are equivalent).
+      const enzymeUsage = pickBy(
+        this.enzymeUsage,
+        (usage, id) => !id.endsWith("_REV")
+      );
+
+      const reactionIds = Object.keys(enzymeUsage);
+      return mapKeys(enzymeUsage, (usage, id) => {
         if (id.startsWith("arm_")) {
           // For isozymes, use the value in the reaction "arm_XXX".
           return id.slice(4);
@@ -236,9 +245,6 @@ export default Vue.extend({
           // this, check first that no arm reaction is already present).
           return id.slice(0, -3);
         }
-        // Note: We can disregard the reversible reactions ("XXX_REV"), as those
-        // will just contain redundant information in terms of enzyme usage (the
-        // GPR rule of the backward and forward reaction are equivalent).
         return id;
       });
     }
