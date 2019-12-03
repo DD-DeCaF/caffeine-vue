@@ -35,7 +35,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import { keyBy } from "lodash";
+import { keyBy, mapKeys } from "lodash";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
@@ -223,17 +223,14 @@ export default Vue.extend({
     enzymeUsageMapped() {
       // Map the ecModel-specific reaction identifiers back to the original
       // identifiers, so that they are correctly recognized in the Escher map.
-      const mappedReactions = {};
-      Object.keys(this.enzymeUsage).forEach(id => {
-        let newId = id;
+      return mapKeys(this.enzymeUsage, (usage, id) => {
         if (id.startsWith("arm_")) {
-          newId = id.slice(4);
+          return id.slice(4);
         } else if (id.endsWith("No1")) {
-          newId = id.slice(0, -3);
+          return id.slice(0, -3);
         }
-        mappedReactions[newId] = this.enzymeUsage[id];
+        return id;
       });
-      return mappedReactions;
     }
   },
   watch: {
