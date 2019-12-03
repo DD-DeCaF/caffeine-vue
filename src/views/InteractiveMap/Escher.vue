@@ -223,11 +223,15 @@ export default Vue.extend({
     enzymeUsageMapped() {
       // Map the ecModel-specific reaction identifiers back to the original
       // identifiers, so that they are correctly recognized in the Escher map.
+      const reactionIds = Object.keys(this.enzymeUsage);
       return mapKeys(this.enzymeUsage, (usage, id) => {
         if (id.startsWith("arm_")) {
           // For isozymes, use the value in the reaction "arm_XXX".
           return id.slice(4);
-        } else if (id.endsWith("No1")) {
+        } else if (
+          id.endsWith("No1") &&
+          !(`arm_${id.slice(0, -3)}` in reactionIds)
+        ) {
           // For single enzymes, use the value in the reaction "XXXNo1" (for
           // this, check first that no arm reaction is already present).
           return id.slice(0, -3);
