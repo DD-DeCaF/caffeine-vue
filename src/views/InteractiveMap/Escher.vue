@@ -229,7 +229,7 @@ export default Vue.extend({
       // the backward and forward reaction are equivalent).
       const enzymeUsage = pickBy(
         this.enzymeUsage,
-        (usage, id) => !id.endsWith("_REV")
+        (usage, id) => !(id.endsWith("_REV") || id.includes("_REVNo"))
       );
 
       const reactionIds = Object.keys(enzymeUsage);
