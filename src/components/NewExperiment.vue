@@ -1095,7 +1095,7 @@
       Please enter condition, sample and at least one measurement.
     </v-snackbar>
     <v-snackbar color="error" v-model="hasRequestError" :timeout="7000">
-      |Could not search for pasted data. The service or your internet connection
+      Could not search for pasted data. The service or your internet connection
       might be down.
     </v-snackbar>
   </div>
@@ -2055,27 +2055,29 @@ export default Vue.extend({
         });
     },
     postFluxomics() {
-      return this.tables.fluxomics.items
-        .filter(fluxomicsItem => fluxomicsItem.sample)
-        .map(fluxomicsItem => {
-          const payload = {
+      const payload = {
+        body: this.tables.fluxomics.items
+          .filter(fluxomicsItem => fluxomicsItem.sample)
+          .map(fluxomicsItem => ({
             sample_id: this.sampleTempIdsMap[fluxomicsItem.sample.temporaryId],
             reaction_name: fluxomicsItem.reaction.name,
             reaction_identifier: fluxomicsItem.reaction.id,
             reaction_namespace: fluxomicsItem.reaction.namespace,
             measurement: fluxomicsItem.measurement,
             uncertainty: fluxomicsItem.uncertainty || 0
-          };
-          return axios
-            .post(`${settings.apis.warehouse}/fluxomics`, payload)
-            .then(() => this.updateProgressValue());
-        });
+          }))
+      };
+      return [
+        axios
+          .post(`${settings.apis.warehouse}/fluxomics/batch`, payload)
+          .then(() => this.updateProgressValue())
+      ];
     },
     postMetabolomics() {
-      return this.tables.metabolomics.items
-        .filter(metabolomicsItem => metabolomicsItem.sample)
-        .map(metabolomicsItem => {
-          const payload = {
+      const payload = {
+        body: this.tables.metabolomics.items
+          .filter(metabolomicsItem => metabolomicsItem.sample)
+          .map(metabolomicsItem => ({
             sample_id: this.sampleTempIdsMap[
               metabolomicsItem.sample.temporaryId
             ],
@@ -2084,17 +2086,19 @@ export default Vue.extend({
             compound_namespace: metabolomicsItem.compound.namespace,
             measurement: metabolomicsItem.measurement,
             uncertainty: metabolomicsItem.uncertainty || 0
-          };
-          return axios
-            .post(`${settings.apis.warehouse}/metabolomics`, payload)
-            .then(() => this.updateProgressValue());
-        });
+          }))
+      };
+      return [
+        axios
+          .post(`${settings.apis.warehouse}/metabolomics/batch`, payload)
+          .then(() => this.updateProgressValue())
+      ];
     },
     postProteomics() {
-      return this.tables.proteomics.items
-        .filter(proteomicsItem => proteomicsItem.sample)
-        .map(proteomicsItem => {
-          const payload = {
+      const payload = {
+        body: this.tables.proteomics.items
+          .filter(proteomicsItem => proteomicsItem.sample)
+          .map(proteomicsItem => ({
             sample_id: this.sampleTempIdsMap[proteomicsItem.sample.temporaryId],
             identifier: proteomicsItem.protein.identifier,
             name: proteomicsItem.protein.name,
@@ -2102,11 +2106,13 @@ export default Vue.extend({
             gene: proteomicsItem.protein.gene,
             measurement: proteomicsItem.measurement,
             uncertainty: proteomicsItem.uncertainty || 0
-          };
-          return axios
-            .post(`${settings.apis.warehouse}/proteomics`, payload)
-            .then(() => this.updateProgressValue());
-        });
+          }))
+      };
+      return [
+        axios
+          .post(`${settings.apis.warehouse}/proteomics/batch`, payload)
+          .then(() => this.updateProgressValue())
+      ];
     },
     postUptakeSecretionRates() {
       return this.tables.uptakeSecretion.items
