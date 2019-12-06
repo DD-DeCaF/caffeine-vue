@@ -1067,12 +1067,8 @@
                   >Submit
                 </v-btn>
               </v-card-actions>
-              <div class="my-5" v-if="isSubmitting">
-                <em>Submitting...</em>
-                <v-progress-linear
-                  v-model="submitProgressValue"
-                  class="my-2"
-                ></v-progress-linear>
+              <div class="my-3" v-if="isSubmitting">
+                <em>Submitting data...</em>
               </div>
             </v-form-extended>
           </v-card>
@@ -1141,7 +1137,6 @@ function getInitialState() {
     isSubmitting: false,
     isExperimentDataValid: true,
     isMoreDataRequired: false,
-    submitProgressValue: 0,
     conditionTempIdsMap: {},
     sampleTempIdsMap: {},
     selectedMediumRelevantModelIds: [],
@@ -1555,9 +1550,6 @@ export default Vue.extend({
         result += this.tables[tableKey].items.length;
       });
       return result;
-    },
-    itemWeight() {
-      return Math.round(100 / this.itemsToPostAmount);
     },
     isValid() {
       return (
@@ -1973,7 +1965,6 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/experiments`, this.experiment)
         .then((response: AxiosResponse) => {
           this.experiment.id = response.data.id;
-          this.updateProgressValue();
           return Promise.all(this.postConditions());
         })
         .then(() => {
@@ -2023,7 +2014,6 @@ export default Vue.extend({
           return axios
             .post(`${settings.apis.warehouse}/conditions`, payload)
             .then((response: AxiosResponse) => {
-              this.updateProgressValue();
               this.conditionTempIdsMap[condition.temporaryId] =
                 response.data.id;
             });
@@ -2049,7 +2039,6 @@ export default Vue.extend({
           return axios
             .post(`${settings.apis.warehouse}/samples`, payload)
             .then((response: AxiosResponse) => {
-              this.updateProgressValue();
               this.sampleTempIdsMap[sample.temporaryId] = response.data.id;
             });
         });
@@ -2068,9 +2057,7 @@ export default Vue.extend({
           }))
       };
       return [
-        axios
-          .post(`${settings.apis.warehouse}/fluxomics/batch`, payload)
-          .then(() => this.updateProgressValue())
+        axios.post(`${settings.apis.warehouse}/fluxomics/batch`, payload)
       ];
     },
     postMetabolomics() {
@@ -2089,9 +2076,7 @@ export default Vue.extend({
           }))
       };
       return [
-        axios
-          .post(`${settings.apis.warehouse}/metabolomics/batch`, payload)
-          .then(() => this.updateProgressValue())
+        axios.post(`${settings.apis.warehouse}/metabolomics/batch`, payload)
       ];
     },
     postProteomics() {
@@ -2109,9 +2094,7 @@ export default Vue.extend({
           }))
       };
       return [
-        axios
-          .post(`${settings.apis.warehouse}/proteomics/batch`, payload)
-          .then(() => this.updateProgressValue())
+        axios.post(`${settings.apis.warehouse}/proteomics/batch`, payload)
       ];
     },
     postUptakeSecretionRates() {
@@ -2128,9 +2111,10 @@ export default Vue.extend({
             measurement: uptakeSecretionItem.measurement,
             uncertainty: uptakeSecretionItem.uncertainty || 0
           };
-          return axios
-            .post(`${settings.apis.warehouse}/uptake-secretion-rates`, payload)
-            .then(() => this.updateProgressValue());
+          return axios.post(
+            `${settings.apis.warehouse}/uptake-secretion-rates`,
+            payload
+          );
         });
     },
     postMolarYields() {
@@ -2150,9 +2134,7 @@ export default Vue.extend({
             measurement: molarYieldsItem.measurement,
             uncertainty: molarYieldsItem.uncertainty || 0
           };
-          return axios
-            .post(`${settings.apis.warehouse}/molar-yields`, payload)
-            .then(() => this.updateProgressValue());
+          return axios.post(`${settings.apis.warehouse}/molar-yields`, payload);
         });
     },
     postGrowthRates() {
@@ -2164,13 +2146,8 @@ export default Vue.extend({
             measurement: growthItem.measurement,
             uncertainty: growthItem.uncertainty || 0
           };
-          return axios
-            .post(`${settings.apis.warehouse}/growth-rates`, payload)
-            .then(() => this.updateProgressValue());
+          return axios.post(`${settings.apis.warehouse}/growth-rates`, payload);
         });
-    },
-    updateProgressValue() {
-      this.submitProgressValue += this.itemWeight;
     },
     // Does row have anything other than temporaryId and e.g. name=""?
     isRowEmpty(item): boolean {
