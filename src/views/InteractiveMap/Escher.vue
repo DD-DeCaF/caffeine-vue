@@ -179,12 +179,12 @@ export default Vue.extend({
       // If the upper bound is smaller than this value, we can assume it was
       // constrained by real-world observations. Anything larger is ignored,
       // mostly to save computational cycles below.
-      const highestConveivableEnzymeUsage = 4;
+      const highestConceivableEnzymeUsage = 4;
       this.model.model_serialized.reactions
         .filter(
           rxn => rxn.id.startsWith("prot_") && rxn.id.endsWith("_exchange")
         )
-        .filter(rxn => rxn.upper_bound < highestConveivableEnzymeUsage)
+        .filter(rxn => rxn.upper_bound < highestConceivableEnzymeUsage)
         // Ignore reactions with no positive flux - they would cause division by
         // zero.
         .filter(rxn => rxn.upper_bound !== 0)
