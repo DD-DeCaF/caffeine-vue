@@ -27,6 +27,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { debounce } from "lodash";
+import { tsvParse } from "d3-dsv";
 
 export default Vue.extend({
   name: "UniprotInput",
@@ -99,24 +100,41 @@ export default Vue.extend({
     },
     query(uniprotId: string) {
       axios
-        .get(`https://www.uniprot.org/uniprot/${uniprotId}.xml`)
+        .get(`https://www.uniprot.org/uniprot/`, {
+          params: {
+            query: uniprotId,
+            format: "tab",
+            columns:
+              "id,protein_names,entry_name,genes(PREFERRED),genes(ALTERNATIVE),genes(OLN),genes(ORF)"
+          }
+        })
         .then(response => {
-          // Parse the XML response, looking for full name, identifier and gene.
-          const doc = new DOMParser().parseFromString(
-            response.data,
-            "text/xml"
-          );
-          const identifier = doc.querySelector("entry > accession");
-          const name = doc.querySelector("entry > name");
-          const fullName = doc.querySelector(
-            "entry > protein > recommendedName > fullName"
-          );
-          const gene = doc.querySelector("entry > gene > name[type='primary']");
+          const parsedResponse = tsvParse(response.data)[0];
+          // The protein name field includes both recommended name, and
+          // alternative names in parentheses. Use only the recommended name.
+          let proteinName = parsedResponse["Protein names"] || "Unknown";
+          const index = proteinName.indexOf("(");
+          if (index !== -1) {
+            proteinName = proteinName.substring(0, index).trim();
+          }
           this.protein = {
-            identifier: identifier ? identifier.innerHTML : "Unknown",
-            name: name ? name.innerHTML : "Unknown",
-            fullName: fullName ? fullName.innerHTML : "Unknown",
-            gene: gene ? gene.innerHTML : "Unknown",
+            identifier: parsedResponse["Entry"] || "Unknown",
+            name: parsedResponse["Entry name"] || "Unknown",
+            fullName: proteinName,
+            gene: {
+              primary: parsedResponse["Gene names  (primary )"]
+                ? parsedResponse["Gene names  (primary )"].split(" ")
+                : [],
+              synonym: parsedResponse["Gene names  (synonym )"]
+                ? parsedResponse["Gene names  (synonym )"].split(" ")
+                : [],
+              orderedLocus: parsedResponse["Gene names  (ordered locus )"]
+                ? parsedResponse["Gene names  (ordered locus )"].split(" ")
+                : [],
+              orf: parsedResponse["Gene names  (ORF )"]
+                ? parsedResponse["Gene names  (ORF )"].split(" ")
+                : []
+            },
             uniprotId: uniprotId
           };
           this.$emit("change", this.protein);
