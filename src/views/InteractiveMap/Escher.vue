@@ -233,13 +233,16 @@ export default Vue.extend({
       );
 
       const reactionIds = Object.keys(enzymeUsage);
+      // Make a copy of the original IDs, as we need to compare the unmodified
+      // identifiers during iteration.
+      const originalReactionIds = reactionIds.slice();
       return mapKeys(enzymeUsage, (usage, id) => {
         if (id.startsWith("arm_")) {
           // For isozymes, use the value in the reaction "arm_XXX".
           return id.slice(4);
         } else if (
           id.endsWith("No1") &&
-          !(`arm_${id.slice(0, -3)}` in reactionIds)
+          !(`arm_${id.slice(0, -3)}` in originalReactionIds)
         ) {
           // For single enzymes, use the value in the reaction "XXXNo1" (for
           // this, check first that no arm reaction is already present).
