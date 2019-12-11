@@ -64,7 +64,7 @@
           </p>
         </v-layout>
         <v-layout align-center v-show="showEnzymeUsage" class="mt-3">
-          <img src="../../assets/gene-highlighted.png" alt="Highlighted gene">
+          <img src="../../assets/gene-highlighted.png" alt="Highlighted gene" />
           <p class="mb-0 ml-3">
             Gene with enzyme usage greater than or equal to threshold
           </p>
