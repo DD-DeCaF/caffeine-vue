@@ -439,6 +439,13 @@ export default Vue.extend({
         return;
       }
 
+      // Only highlight genes with enzyme usage above the given threshold.
+      const genes = Object.keys(this.enzymeUsagePerGene).filter(
+        id =>
+          this.enzymeUsagePerGene[id] >= this.card.enzymeUsageThreshold / 100
+      );
+      this.escherBuilder.set_highlight_genes(genes);
+
       // Only highlight reactions with enzyme usage above the given threshold.
       const reactions = Object.keys(this.enzymeUsageMapped).filter(
         id => this.enzymeUsageMapped[id] >= this.card.enzymeUsageThreshold / 100
