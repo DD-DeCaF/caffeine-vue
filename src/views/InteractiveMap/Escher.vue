@@ -429,7 +429,8 @@ export default Vue.extend({
     },
     setEnzymeUsage() {
       // Based on proteomics and simulated fluxes, visualizes enzyme usage by
-      // highlighting reactions over the given threshold.
+      // highlighting reactions with enzyme usage greater than or equal to the
+      // given threshold.
       // NOTE: This currently intereferes with fluxomics since we use
       // highlighted reactions for both use cases, so currently the assumption
       // is that users won't upload both fluxomics and proteomics in the same
@@ -439,7 +440,8 @@ export default Vue.extend({
         return;
       }
 
-      // Only highlight genes with enzyme usage above the given threshold.
+      // Only highlight reactions with enzyme usage greater than or equal to the
+      // given threshold.
       const genes = Object.keys(this.enzymeUsagePerGene).filter(
         id =>
           this.enzymeUsagePerGene[id] >= this.card.enzymeUsageThreshold / 100

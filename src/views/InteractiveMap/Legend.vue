@@ -60,7 +60,7 @@
         <v-layout align-center v-show="showEnzymeUsage">
           <div class="measured-flux"></div>
           <p class="mb-0 ml-3">
-            Enzyme usage exceeds threshold
+            Reaction with enzyme usage greater than or equal to threshold
           </p>
         </v-layout>
       </v-card-text>

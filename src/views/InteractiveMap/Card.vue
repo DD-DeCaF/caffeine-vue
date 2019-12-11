@@ -232,8 +232,8 @@
       <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
         <v-layout row>
           <v-flex>
-            Highlight reactions where enzyme usage exceeds the following
-            threshold:
+            Highlight reactions where enzyme usage is greater than or equal to
+            the following threshold:
           </v-flex>
         </v-layout>
         <v-layout row>
