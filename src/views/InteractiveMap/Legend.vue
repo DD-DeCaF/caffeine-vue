@@ -86,6 +86,7 @@ export default Vue.extend({
         this.card &&
         this.ecModel &&
         this.card.type === "DataDriven" &&
+        this.card.sample &&
         this.card.sample.proteomics.length > 0
       );
     }
