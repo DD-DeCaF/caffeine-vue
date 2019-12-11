@@ -160,7 +160,7 @@ export default Vue.extend({
     showDiffFVAScore() {
       return this.card ? this.card.showDiffFVAScore : false;
     },
-    enzymeUsage() {
+    enzymeUsagePerGene() {
       // If this is an enzyme-constrained model, calculate the enzyme usage for
       // each pseudo-reaction.
       if (
@@ -193,8 +193,15 @@ export default Vue.extend({
             this.card.fluxes[pseudoReaction.id] / pseudoReaction.upper_bound;
         });
 
-      // Now map those usages on to all reactions that are catalyzed by any of
-      // those genes.
+      return enzymeUsagePerGene;
+    },
+    enzymeUsage() {
+      const enzymeUsagePerGene = this.enzymeUsagePerGene;
+      if (!enzymeUsagePerGene) {
+        return null;
+      }
+      // Map the enzyme usages on to all reactions that are catalyzed by any of
+      // the genes.
       const enzymeUsages = {};
       this.model.model_serialized.reactions
         .filter(
