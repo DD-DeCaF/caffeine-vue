@@ -59,6 +59,7 @@ export interface Card {
   sample: any;
   sampleWarnings: any[];
   sampleErrors: any[];
+  showProteomicsData: boolean;
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;

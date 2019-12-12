@@ -478,6 +478,7 @@ export default Vue.extend({
           sample: null,
           sampleWarnings: [],
           sampleErrors: [],
+          showProteomicsData: false,
           // General simulation fields
           isSimulating: false,
           hasSimulationError: false,
