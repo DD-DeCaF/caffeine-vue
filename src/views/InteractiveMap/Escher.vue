@@ -36,6 +36,7 @@ import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
 import Legend from "@/views/InteractiveMap/Legend.vue";
+import { keyBy, flatten } from "lodash";
 
 export default Vue.extend({
   name: "Escher",
@@ -139,6 +140,9 @@ export default Vue.extend({
     },
     showDiffFVAScore() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    showProteomicsData() {
+      return this.card ? this.card.showProteomicsData : false;
     }
   },
   watch: {
@@ -202,6 +206,9 @@ export default Vue.extend({
     },
     showDiffFVAScore() {
       this.onEscherReady.then(this.toggleColorScheme);
+      this.onEscherReady.then(this.setFluxes);
+    },
+    showProteomicsData() {
       this.onEscherReady.then(this.setFluxes);
     }
   },
@@ -305,9 +312,40 @@ export default Vue.extend({
     setFluxes() {
       // Update the flux distribution
       if (this.card === null || this.card.fluxes === null) {
+        this.escherBuilder.set_gene_data(null);
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (!this.showDiffFVAScore) {
+        if (this.showDiffFVAScore) {
+          // Set the DiffFVA scores instead of the cards fluxes.
+          // (calculated from a diffFVA card's manipulations)
+          this.escherBuilder.set_reaction_data(this.diffFVAScores);
+          // Set the FVA data for transparency visualization as above.
+          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
+        } else if (this.showProteomicsData) {
+          // Set gene data instead of the card fluxes
+          const modelGeneIdsWithNames = keyBy(
+            this.model.model_serialized.genes,
+            gene => gene.id
+          );
+          const modelGeneIds = new Set(
+            this.model.model_serialized.genes.map(gene => gene.id)
+          );
+          const geneData = {};
+          this.card.conditionData.samples.forEach(sample => {
+            sample.proteomics.forEach(proteomicsItem => {
+              const proteomicsGeneIds: string[] = flatten(
+                Object.values(JSON.parse(proteomicsItem.gene))
+              );
+              proteomicsGeneIds.forEach(proteomicsGeneId => {
+                if (modelGeneIds.has(proteomicsGeneId)) {
+                  const geneName = modelGeneIdsWithNames[proteomicsGeneId].name;
+                  geneData[geneName] = proteomicsItem.measurement;
+                }
+              });
+            });
+          });
+          this.escherBuilder.set_gene_data(geneData);
+        } else {
           // For ecModels, map the simulated flux distribution back to the
           // original reaction identifiers for the non-ec model, so that they
           // match with the escher maps.
@@ -337,12 +375,6 @@ export default Vue.extend({
             // Set the FVA data for transparency visualization.
             this.escherBuilder.set_reaction_fva_data(fluxes);
           }
-        } else {
-          // Set the DiffFVA scores instead of the cards fluxes.
-          // (calculated from a diffFVA card's manipulations)
-          this.escherBuilder.set_reaction_data(this.diffFVAScores);
-          // Set the FVA data for transparency visualization as above.
-          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
         }
       }
       this.escherBuilder._updateData(true, true);
