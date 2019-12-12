@@ -228,6 +228,38 @@
         </v-layout>
       </v-container>
 
+      <!-- Proteomics -->
+      <v-container
+        v-if="
+          card.type == 'DataDriven' &&
+            card.conditionData &&
+            card.conditionData.samples.some(sample => sample.proteomics.length)
+        "
+        fluid
+        class="pa-0"
+      >
+        <v-layout row>
+          <v-flex>
+            <v-tooltip bottom>
+              <span>
+                Show either the flux distribution or proteomics data.
+              </span>
+              <v-switch
+                color="primary"
+                v-model="showProteomicsData"
+                slot="activator"
+              >
+                <template v-slot:label>
+                  <div :style="{ color: showProteomicsData ? 'black' : null }">
+                    Show proteomics data
+                  </div>
+                </template>
+              </v-switch>
+            </v-tooltip>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="!isSaveTooltipVisible">
@@ -294,6 +326,7 @@ export default Vue.extend({
     showMethodHelpDialog: false,
     isCardDialogVisible: false,
     showDiffFVAScore: false,
+    showProteomicsData: false,
     styleObject: {
       "pointer-events": "auto"
     }
@@ -473,6 +506,12 @@ export default Vue.extend({
       this.updateCard({
         uuid: this.card.uuid,
         props: { showDiffFVAScore: this.showDiffFVAScore }
+      });
+    },
+    showProteomicsData() {
+      this.updateCard({
+        uuid: this.card.uuid,
+        props: { showProteomicsData: this.showProteomicsData }
       });
     }
   },
