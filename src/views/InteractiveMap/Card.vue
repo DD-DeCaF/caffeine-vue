@@ -228,6 +228,21 @@
         </v-layout>
       </v-container>
 
+      <!-- ecModels visualizing enzyme usage -->
+      <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
+        <v-layout row>
+          <v-flex>
+            Highlight reactions where enzyme usage is greater than or equal to
+            the following threshold:
+          </v-flex>
+        </v-layout>
+        <v-layout row>
+          <v-flex>
+            <v-slider v-model="enzymeUsageThreshold" thumb-label></v-slider>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="!isSaveTooltipVisible">
@@ -362,7 +377,9 @@ export default Vue.extend({
       // Returns the modified model (original model + added reactions) for this
       // card.
       // TODO: This is duplicated logic, a very similar computed property exists
-      // in the Escher component.
+      // in the Escher component. (Note that the Escher property also adjusts
+      // bounds, this does not - it's simply not implemented because there's no
+      // need yet.)
       const selectedModel = this.$store.getters["models/getModelById"](
         this.card.modelId
       );
@@ -453,6 +470,24 @@ export default Vue.extend({
     },
     isInfeasible() {
       return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
+    },
+    showEnzymeUsageSlider() {
+      return (
+        this.card.type == "DataDriven" &&
+        this.card.sample &&
+        this.card.sample.proteomics.length > 0
+      );
+    },
+    enzymeUsageThreshold: {
+      get() {
+        return this.card.enzymeUsageThreshold;
+      },
+      set(newValue) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { enzymeUsageThreshold: newValue }
+        });
+      }
     }
   },
   watch: {
