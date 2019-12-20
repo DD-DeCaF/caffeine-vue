@@ -10,8 +10,16 @@
         </v-btn>
       </v-toolbar>
       <v-card-text v-if="isExpanded">
-        <div v-if="!showScoreLegend">
-          <p class="mb-0">Flux</p>
+        <div v-if="showScoreLegend">
+          <p class="mb-0">Change expression</p>
+          <div class="score-gradient"></div>
+          <p>
+            down
+            <span style="float: right;">up</span>
+          </p>
+        </div>
+        <div v-else-if="showProteomicsLegend">
+          <p class="mb-0">Protein abundance</p>
           <div class="flux-gradient"></div>
           <p>
             min
@@ -19,11 +27,11 @@
           </p>
         </div>
         <div v-else>
-          <p class="mb-0">Change expression</p>
-          <div class="score-gradient"></div>
+          <p class="mb-0">Flux</p>
+          <div class="flux-gradient"></div>
           <p>
-            down
-            <span style="float: right;">up</span>
+            min
+            <span style="float: right;">max</span>
           </p>
         </div>
         <v-layout align-center class="mb-4">
@@ -42,16 +50,28 @@
             ></path>
           </svg>
           <p class="mb-0 ml-3">
-            No flux
+            <span v-if="showProteomicsLegend">
+              No protein abundance
+            </span>
+            <span v-else>
+              No flux
+            </span>
           </p>
         </v-layout>
-        <v-layout v-if="!ecModel" align-center class="mb-4">
+        <v-layout
+          v-if="!ecModel && !showProteomicsLegend"
+          align-center
+          class="mb-4"
+        >
           <div class="not-in-model"></div>
           <p class="mb-0 ml-3">
             Not in the model
           </p>
         </v-layout>
-        <v-layout align-center v-show="!showScoreLegend">
+        <v-layout
+          align-center
+          v-show="!showScoreLegend && !showProteomicsLegend"
+        >
           <div class="measured-flux"></div>
           <p class="mb-0 ml-3">
             Measured flux
@@ -74,6 +94,9 @@ export default Vue.extend({
   computed: {
     showScoreLegend() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    showProteomicsLegend() {
+      return this.card ? this.card.showProteomicsData : false;
     }
   }
 });
