@@ -2105,7 +2105,7 @@ export default Vue.extend({
             identifier: proteomicsItem.protein.identifier,
             name: proteomicsItem.protein.name,
             full_name: proteomicsItem.protein.fullName,
-            gene: JSON.stringify(proteomicsItem.protein.gene),
+            gene: proteomicsItem.protein.gene,
             measurement: proteomicsItem.measurement,
             uncertainty: proteomicsItem.uncertainty || 0
           }))

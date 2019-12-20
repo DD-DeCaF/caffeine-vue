@@ -338,7 +338,7 @@ export default Vue.extend({
           this.card.conditionData.samples.forEach(sample => {
             sample.proteomics.forEach(proteomicsItem => {
               const proteomicsGeneIds: string[] = flatten(
-                Object.values(JSON.parse(proteomicsItem.gene))
+                Object.values(proteomicsItem.gene)
               );
               proteomicsGeneIds.forEach(proteomicsGeneId => {
                 if (modelGeneIds.has(proteomicsGeneId)) {
