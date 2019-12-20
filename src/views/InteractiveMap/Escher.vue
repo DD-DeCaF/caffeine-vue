@@ -315,6 +315,10 @@ export default Vue.extend({
         this.escherBuilder.set_gene_data(null);
         this.escherBuilder.set_reaction_data(null);
       } else {
+        this.escherBuilder.settings.set(
+          "highlight_missing",
+          !this.model.ec_model && !this.card.showProteomicsData
+        );
         if (this.showDiffFVAScore) {
           // Set the DiffFVA scores instead of the cards fluxes.
           // (calculated from a diffFVA card's manipulations)
