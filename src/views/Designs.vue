@@ -489,7 +489,8 @@ export default Vue.extend({
           // Specific fields for design prediction methods
           manipulations: null,
           productionGrowthRate: null,
-          showDiffFVAScore: false
+          showDiffFVAScore: false,
+          enzymeUsageThreshold: 90
         };
         // Make sure the full model is available before adding the card.
         this.$store

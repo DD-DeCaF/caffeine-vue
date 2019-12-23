@@ -961,7 +961,8 @@ export default Vue.extend({
                 jobPrediction.method === "PathwayPredictor+DifferentialFVA"
                   ? jobPrediction.biomass
                   : null,
-              showDiffFVAScore: false
+              showDiffFVAScore: false,
+              enzymeUsageThreshold: 90
             };
             this.$store.commit("interactiveMap/addCard", card);
             // Apply anaerobic conditions if needed

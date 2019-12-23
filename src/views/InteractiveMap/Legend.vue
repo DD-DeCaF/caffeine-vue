@@ -70,11 +70,23 @@
         </v-layout>
         <v-layout
           align-center
-          v-show="!showScoreLegend && !showProteomicsLegend"
+          v-show="!showScoreLegend && !showProteomicsLegend && !showEnzymeUsage"
         >
           <div class="measured-flux"></div>
           <p class="mb-0 ml-3">
             Measured flux
+          </p>
+        </v-layout>
+        <v-layout align-center v-show="showEnzymeUsage">
+          <div class="measured-flux"></div>
+          <p class="mb-0 ml-3">
+            Reaction with enzyme usage greater than or equal to threshold
+          </p>
+        </v-layout>
+        <v-layout align-center v-show="showEnzymeUsage" class="mt-3">
+          <img src="../../assets/gene-highlighted.png" alt="Highlighted gene" />
+          <p class="mb-0 ml-3">
+            Gene with enzyme usage greater than or equal to threshold
           </p>
         </v-layout>
       </v-card-text>
@@ -97,6 +109,15 @@ export default Vue.extend({
     },
     showProteomicsLegend() {
       return this.card ? this.card.showProteomicsData : false;
+    },
+    showEnzymeUsage() {
+      return (
+        this.card &&
+        this.ecModel &&
+        this.card.type === "DataDriven" &&
+        this.card.sample &&
+        this.card.sample.proteomics.length > 0
+      );
     }
   }
 });
