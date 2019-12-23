@@ -251,7 +251,7 @@
                     <td>{{ protein.name }}</td>
                     <td>{{ protein.full_name }}</td>
                     <td>
-                      {{ protein.gene }}
+                      {{ displayGeneIds(protein.gene) }}
                     </td>
                     <td>
                       {{ protein.measurement }}
@@ -464,6 +464,7 @@ import CompoundLink from "@/components/CompoundLink.vue";
 import { Metabolite } from "@/store/modules/interactiveMap";
 import { buildReactionString } from "@/utils/reaction";
 import { ModelItem } from "@/store/modules/models";
+import { flatten } from "lodash";
 
 export default Vue.extend({
   name: "CardDialogDataDriven",
@@ -509,7 +510,7 @@ export default Vue.extend({
       { text: "Identifier", sortable: false },
       { text: "Name", sortable: false },
       { text: "Full name", sortable: false },
-      { text: "Gene", sortable: false },
+      { text: "Gene ids", sortable: false },
       { text: "Measurement", sortable: false },
       { text: "Uncertainty", sortable: false }
     ],
@@ -971,7 +972,10 @@ export default Vue.extend({
     },
     ...mapMutations({
       updateCard: "interactiveMap/updateCard"
-    })
+    }),
+    displayGeneIds(gene) {
+      return flatten(Object.values(gene)).join(", ");
+    }
   }
 });
 </script>

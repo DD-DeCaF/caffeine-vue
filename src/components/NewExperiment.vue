@@ -1639,7 +1639,7 @@ export default Vue.extend({
       bodyFormData.append("uploadQuery", strs.join(" "));
       bodyFormData.append(
         "columns",
-        "id,protein_names,entry_name,genes(PREFERRED)"
+        "id,protein_names,entry_name,genes(PREFERRED),genes(ALTERNATIVE),genes(OLN),genes(ORF)"
       );
       bodyFormData.append("format", "tab");
       bodyFormData.append("from", "ACC,ID");
@@ -1673,7 +1673,24 @@ export default Vue.extend({
               identifier: parsedResponse[str]["Entry"] || "Unknown",
               name: parsedResponse[str]["Entry name"] || "Unknown",
               fullName: proteinName,
-              gene: parsedResponse[str]["Gene names  (primary )"] || "Unknown",
+              gene: {
+                primary: parsedResponse[str]["Gene names  (primary )"]
+                  ? parsedResponse[str]["Gene names  (primary )"].split(" ")
+                  : [],
+                synonym: parsedResponse[str]["Gene names  (synonym )"]
+                  ? parsedResponse[str]["Gene names  (synonym )"].split(" ")
+                  : [],
+                orderedLocus: parsedResponse[str][
+                  "Gene names  (ordered locus )"
+                ]
+                  ? parsedResponse[str]["Gene names  (ordered locus )"].split(
+                      " "
+                    )
+                  : [],
+                orf: parsedResponse[str]["Gene names  (ORF )"]
+                  ? parsedResponse[str]["Gene names  (ORF )"].split(" ")
+                  : []
+              },
               uniprotId: str
             };
           }

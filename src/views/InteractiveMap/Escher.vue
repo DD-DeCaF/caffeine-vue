@@ -35,7 +35,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
-import { keyBy, mapKeys, pickBy } from "lodash";
+import { keyBy, mapKeys, pickBy, flatten } from "lodash";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
@@ -159,6 +159,14 @@ export default Vue.extend({
     },
     showDiffFVAScore() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    showProteomicsData() {
+      return this.card ? this.card.showProteomicsData : false;
+    },
+    highlightMissing() {
+      // We cannot highlight missing reactions for ecModels, since most of the
+      // identifiers on the map would not match those in the model.
+      return !(this.showProteomicsData || (this.model && this.model.ec_model));
     },
     enzymeUsagePerGene() {
       // If this is an enzyme-constrained model, calculate the enzyme usage for
@@ -323,6 +331,15 @@ export default Vue.extend({
       this.onEscherReady.then(this.toggleColorScheme);
       this.onEscherReady.then(this.setFluxes);
     },
+    showProteomicsData() {
+      this.onEscherReady.then(this.setFluxes);
+    },
+    highlightMissing() {
+      this.escherBuilder.settings.set(
+        "highlight_missing",
+        this.highlightMissing
+      );
+    },
     enzymeUsage() {
       this.onEscherReady.then(this.setEnzymeUsage);
     },
@@ -372,16 +389,8 @@ export default Vue.extend({
     setModel() {
       if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.load_model(null);
-        this.escherBuilder.settings.set("highlight_missing", true);
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
-
-        // We cannot highlight missing reactions for ecModels, since most of the
-        // identifiers on the map would not match those in the model.
-        this.escherBuilder.settings.set(
-          "highlight_missing",
-          !this.model.ec_model
-        );
       }
     },
     setReactionAdditions() {
@@ -457,9 +466,37 @@ export default Vue.extend({
     setFluxes() {
       // Update the flux distribution
       if (this.card === null || this.card.fluxes === null) {
+        this.escherBuilder.set_gene_data(null);
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (!this.showDiffFVAScore) {
+        if (this.showDiffFVAScore) {
+          // Set the DiffFVA scores instead of the cards fluxes.
+          // (calculated from a diffFVA card's manipulations)
+          this.escherBuilder.set_reaction_data(this.diffFVAScores);
+          // Set the FVA data for transparency visualization as above.
+          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
+        } else if (this.showProteomicsData) {
+          // Set gene data instead of the card fluxes
+          const modelGeneIdsWithNames = keyBy(
+            this.model.model_serialized.genes,
+            gene => gene.id
+          );
+          const geneData = {};
+          this.card.conditionData.samples.forEach(sample => {
+            sample.proteomics.forEach(proteomicsItem => {
+              const proteomicsGeneIds: string[] = flatten(
+                Object.values(proteomicsItem.gene)
+              );
+              proteomicsGeneIds.forEach(proteomicsGeneId => {
+                if (proteomicsGeneId in modelGeneIdsWithNames) {
+                  const geneName = modelGeneIdsWithNames[proteomicsGeneId].name;
+                  geneData[geneName] = proteomicsItem.measurement;
+                }
+              });
+            });
+          });
+          this.escherBuilder.set_gene_data(geneData);
+        } else {
           // For ecModels, map the simulated flux distribution back to the
           // original reaction identifiers for the non-ec model, so that they
           // match with the escher maps.
@@ -489,12 +526,6 @@ export default Vue.extend({
             // Set the FVA data for transparency visualization.
             this.escherBuilder.set_reaction_fva_data(fluxes);
           }
-        } else {
-          // Set the DiffFVA scores instead of the cards fluxes.
-          // (calculated from a diffFVA card's manipulations)
-          this.escherBuilder.set_reaction_data(this.diffFVAScores);
-          // Set the FVA data for transparency visualization as above.
-          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
         }
       }
       this.escherBuilder._updateData(true, true);

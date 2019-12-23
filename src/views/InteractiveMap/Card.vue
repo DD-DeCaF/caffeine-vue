@@ -228,6 +228,38 @@
         </v-layout>
       </v-container>
 
+      <!-- Proteomics -->
+      <v-container
+        v-if="
+          card.type == 'DataDriven' &&
+            card.conditionData &&
+            card.conditionData.samples.some(sample => sample.proteomics.length)
+        "
+        fluid
+        class="pa-0"
+      >
+        <v-layout row>
+          <v-flex>
+            <v-tooltip bottom>
+              <span>
+                Show either the flux distribution or proteomics data.
+              </span>
+              <v-switch
+                color="primary"
+                v-model="showProteomicsData"
+                slot="activator"
+              >
+                <template v-slot:label>
+                  <div :style="{ color: showProteomicsData ? 'black' : null }">
+                    Show proteomics data
+                  </div>
+                </template>
+              </v-switch>
+            </v-tooltip>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <!-- ecModels visualizing enzyme usage -->
       <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
         <v-layout row>
@@ -470,6 +502,17 @@ export default Vue.extend({
     },
     isInfeasible() {
       return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
+    },
+    showProteomicsData: {
+      get() {
+        return this.card.showProteomicsData;
+      },
+      set(value) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { showProteomicsData: value }
+        });
+      }
     },
     showEnzymeUsageSlider() {
       return (
