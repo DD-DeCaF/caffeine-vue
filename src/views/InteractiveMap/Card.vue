@@ -326,7 +326,6 @@ export default Vue.extend({
     showMethodHelpDialog: false,
     isCardDialogVisible: false,
     showDiffFVAScore: false,
-    showProteomicsData: false,
     styleObject: {
       "pointer-events": "auto"
     }
@@ -486,6 +485,17 @@ export default Vue.extend({
     },
     isInfeasible() {
       return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
+    },
+    showProteomicsData: {
+      get() {
+        return this.card.showProteomicsData;
+      },
+      set(value) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { showProteomicsData: value }
+        });
+      }
     }
   },
   watch: {
@@ -506,12 +516,6 @@ export default Vue.extend({
       this.updateCard({
         uuid: this.card.uuid,
         props: { showDiffFVAScore: this.showDiffFVAScore }
-      });
-    },
-    showProteomicsData() {
-      this.updateCard({
-        uuid: this.card.uuid,
-        props: { showProteomicsData: this.showProteomicsData }
       });
     }
   },

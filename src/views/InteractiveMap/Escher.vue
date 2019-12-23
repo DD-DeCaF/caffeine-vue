@@ -143,6 +143,11 @@ export default Vue.extend({
     },
     showProteomicsData() {
       return this.card ? this.card.showProteomicsData : false;
+    },
+    highlightMissing() {
+      // We cannot highlight missing reactions for ecModels, since most of the
+      // identifiers on the map would not match those in the model.
+      return !(this.showProteomicsData || (this.model && this.model.ec_model));
     }
   },
   watch: {
@@ -210,6 +215,12 @@ export default Vue.extend({
     },
     showProteomicsData() {
       this.onEscherReady.then(this.setFluxes);
+    },
+    highlightMissing() {
+      this.escherBuilder.settings.set(
+        "highlight_missing",
+        this.highlightMissing
+      );
     }
   },
   mounted() {
@@ -254,16 +265,8 @@ export default Vue.extend({
     setModel() {
       if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.load_model(null);
-        this.escherBuilder.settings.set("highlight_missing", true);
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
-
-        // We cannot highlight missing reactions for ecModels, since most of the
-        // identifiers on the map would not match those in the model.
-        this.escherBuilder.settings.set(
-          "highlight_missing",
-          !this.model.ec_model
-        );
       }
     },
     setReactionAdditions() {
@@ -315,10 +318,6 @@ export default Vue.extend({
         this.escherBuilder.set_gene_data(null);
         this.escherBuilder.set_reaction_data(null);
       } else {
-        this.escherBuilder.settings.set(
-          "highlight_missing",
-          !this.model.ec_model && !this.card.showProteomicsData
-        );
         if (this.showDiffFVAScore) {
           // Set the DiffFVA scores instead of the cards fluxes.
           // (calculated from a diffFVA card's manipulations)
@@ -331,9 +330,6 @@ export default Vue.extend({
             this.model.model_serialized.genes,
             gene => gene.id
           );
-          const modelGeneIds = new Set(
-            this.model.model_serialized.genes.map(gene => gene.id)
-          );
           const geneData = {};
           this.card.conditionData.samples.forEach(sample => {
             sample.proteomics.forEach(proteomicsItem => {
@@ -341,7 +337,7 @@ export default Vue.extend({
                 Object.values(proteomicsItem.gene)
               );
               proteomicsGeneIds.forEach(proteomicsGeneId => {
-                if (modelGeneIds.has(proteomicsGeneId)) {
+                if (proteomicsGeneId in modelGeneIdsWithNames) {
                   const geneName = modelGeneIdsWithNames[proteomicsGeneId].name;
                   geneData[geneName] = proteomicsItem.measurement;
                 }
