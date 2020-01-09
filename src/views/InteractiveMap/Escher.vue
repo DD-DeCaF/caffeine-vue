@@ -446,6 +446,7 @@ export default Vue.extend({
       // experiment.
       if (!this.enzymeUsage) {
         this.escherBuilder.set_highlight_reactions([]);
+        this.escherBuilder.set_highlight_genes([]);
         return;
       }
 
