@@ -489,8 +489,7 @@ export default Vue.extend({
               );
               proteomicsGeneIds.forEach(proteomicsGeneId => {
                 if (proteomicsGeneId in modelGeneIdsWithNames) {
-                  const geneName = modelGeneIdsWithNames[proteomicsGeneId].name;
-                  geneData[geneName] = proteomicsItem.measurement;
+                  geneData[proteomicsGeneId] = proteomicsItem.measurement;
                 }
               });
             });
