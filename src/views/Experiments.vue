@@ -9,6 +9,7 @@
       />
       <NewExperiment
         v-model="isNewExperimentDialogVisible"
+        :experiment-to-edit="experimentToEdit"
         @new-experiment-success="onNewExperimentSuccess"
       />
       <v-layout justify-center>
@@ -26,6 +27,34 @@
               <td>{{ experiment.description }}</td>
               <td>{{ experiment.created | moment("D MMM YYYY, HH:mm") }}</td>
               <td>
+                <v-tooltip
+                  bottom
+                  :disabled="isAuthenticated && experiment.project_id !== null"
+                >
+                  <div v-if="!isAuthenticated">
+                    <span>
+                      {{ $store.state.commonTooltipMessages.unauthenticated }}
+                    </span>
+                  </div>
+                  <div v-else-if="experiment.project_id === null">
+                    <span>
+                      {{ $store.state.commonTooltipMessages.publicData }}
+                    </span>
+                  </div>
+                  <v-icon
+                    slot="activator"
+                    @click="editItem(experiment)"
+                    :disabled="
+                      !isAuthenticated || experiment.project_id === null
+                    "
+                    :class="{
+                      pointerDisabled:
+                        !isAuthenticated || experiment.project_id === null
+                    }"
+                  >
+                    edit
+                  </v-icon>
+                </v-tooltip>
                 <v-tooltip
                   bottom
                   :disabled="isAuthenticated && experiment.project_id !== null"
@@ -64,7 +93,7 @@
               bottom
               right
               :disabled="!isAuthenticated"
-              @click.stop="isNewExperimentDialogVisible = true"
+              @click.stop="createExperiment"
               color="primary"
               v-bind:style="styleObject"
             >
@@ -103,6 +132,7 @@ export default Vue.extend({
       { text: "Created", value: "created", width: "20%" },
       { text: "Actions", sortable: false, width: "10%" }
     ],
+    experimentToEdit: null,
     experimentToDelete: { name: null },
     isDeleting: false,
     isDeletionDialogVisible: false,
@@ -130,6 +160,14 @@ export default Vue.extend({
     });
   },
   methods: {
+    createExperiment() {
+      this.experimentToEdit = null;
+      this.isNewExperimentDialogVisible = true;
+    },
+    editItem(item) {
+      this.experimentToEdit = item;
+      this.isNewExperimentDialogVisible = true;
+    },
     deleteItem(item) {
       this.experimentToDelete = item;
       this.isDeletionDialogVisible = true;

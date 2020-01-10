@@ -1074,7 +1074,12 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-container fluid fill-height class="overlay" v-if="isPasting">
+      <v-container
+        fluid
+        fill-height
+        class="overlay"
+        v-if="isPasting || isLoading"
+      >
         <v-layout align-center justify-center>
           <v-progress-circular
             indeterminate
@@ -1144,6 +1149,7 @@ function getInitialState() {
     metabolitesInModelsMap: {},
     hasRequestError: false,
     isPasting: false,
+    isLoading: false,
     selectedTableKey: "conditions",
     tables: {
       conditions: {
@@ -1502,6 +1508,9 @@ export default Vue.extend({
     value: {
       type: Boolean,
       required: true
+    },
+    experimentToEdit: {
+      type: Object
     }
   },
   data: getInitialState,
@@ -1557,6 +1566,155 @@ export default Vue.extend({
           this.isTableValid(table)
         ) && this.isExperimentDataValid
       );
+    }
+  },
+  watch: {
+    experimentToEdit() {
+      if (!this.experimentToEdit) {
+        // Might be creating new experiment after editing one; clear the dialog.
+        this.clear();
+        return;
+      }
+      this.isLoading = true;
+      axios
+        .get(
+          `${settings.apis.warehouse}/experiments/${this.experimentToEdit.id}/data`
+        )
+        .then(response => {
+          this.experiment = response.data;
+
+          // Clear all tables
+          this.tables.conditions.items = [];
+          this.tables.samples.items = [];
+          this.tables.fluxomics.items = [];
+          this.tables.metabolomics.items = [];
+          this.tables.proteomics.items = [];
+          this.tables.molarYields.items = [];
+          this.tables.uptakeSecretion.items = [];
+          this.tables.growth.items = [];
+
+          // Conditions
+          response.data.conditions.forEach(condition => {
+            const localCondition = {
+              temporaryId: uuidv4(),
+              name: condition.name,
+              strain: condition.strain,
+              medium: condition.medium
+            };
+            this.tables.conditions.items.push(localCondition);
+
+            // Samples
+            condition.samples.forEach(sample => {
+              const localSample = {
+                temporaryId: uuidv4(),
+                condition: localCondition,
+                name: sample.name,
+                startTime: this.$moment(sample.start_time).format(
+                  "YYYY-MM-DD HH:mm"
+                ),
+                endTime: sample.end_time
+                  ? this.$moment(sample.end_time).format("YYYY-MM-DD HH:mm")
+                  : undefined
+              };
+              this.tables.samples.items.push(localSample);
+
+              // Fluxomics
+              sample.fluxomics.forEach(fluxomics => {
+                this.tables.fluxomics.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  reaction: {
+                    id: fluxomics.reaction_identifier,
+                    name: fluxomics.reaction_name,
+                    namespace: fluxomics.reaction_namespace
+                  },
+                  measurement: fluxomics.measurement,
+                  uncertainty: fluxomics.uncertainty
+                });
+              });
+
+              // Metabolomics
+              sample.metabolomics.forEach(metabolomics => {
+                this.tables.metabolomics.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  compound: {
+                    id: metabolomics.compound_identifier,
+                    name: metabolomics.compound_name,
+                    namespace: metabolomics.compound_namespace
+                  },
+                  measurement: metabolomics.measurement,
+                  uncertainty: metabolomics.uncertainty
+                });
+              });
+
+              // Proteomics
+              sample.proteomics.forEach(proteomics => {
+                this.tables.proteomics.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  protein: {
+                    identifier: proteomics.identifier,
+                    name: proteomics.name,
+                    fullName: proteomics.full_name,
+                    gene: proteomics.gene,
+                    // `uniprotId` isn't stored anywhere, but used as the search
+                    // query by the UniprotInput component.
+                    uniprotId: proteomics.identifier
+                  },
+                  measurement: proteomics.measurement,
+                  uncertainty: proteomics.uncertainty
+                });
+              });
+
+              // Molar Yields
+              sample.molar_yields.forEach(molarYields => {
+                this.tables.molarYields.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  product: {
+                    id: molarYields.product_identifier,
+                    name: molarYields.product_name,
+                    namespace: molarYields.product_namespace
+                  },
+                  substrate: {
+                    id: molarYields.substrate_identifier,
+                    name: molarYields.substrate_name,
+                    namespace: molarYields.substrate_namespace
+                  },
+                  measurement: molarYields.measurement,
+                  uncertainty: molarYields.uncertainty
+                });
+              });
+
+              // Uptake/Secretion rates
+              sample.uptake_secretion_rates.forEach(uptakeSecretion => {
+                this.tables.uptakeSecretion.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  compound: {
+                    id: uptakeSecretion.compound_identifier,
+                    name: uptakeSecretion.compound_name,
+                    namespace: uptakeSecretion.compound_namespace
+                  },
+                  measurement: uptakeSecretion.measurement,
+                  uncertainty: uptakeSecretion.uncertainty
+                });
+              });
+
+              // Growth rate
+              if (sample.growth_rate) {
+                this.tables.growth.items.push({
+                  temporaryId: uuidv4(),
+                  sample: localSample,
+                  measurement: sample.growth_rate.measurement,
+                  uncertainty: sample.growth_rate.uncertainty
+                });
+              }
+            });
+          });
+          this.isLoading = false;
+        });
     }
   },
   methods: {
@@ -2012,10 +2170,29 @@ export default Vue.extend({
           this.$store.commit("setPostError", error);
         })
         .then(() => {
-          this.isSubmitting = false;
-          this.$emit("new-experiment-success", this.experiment.name);
-          this.isDialogVisible = false;
-          this.clear();
+          const completeSubmission = () => {
+            this.isSubmitting = false;
+            this.$emit("new-experiment-success", this.experiment.name);
+            this.isDialogVisible = false;
+            this.clear();
+          };
+
+          // The experiment was submitted successfully. If we were editing an
+          // existing experiment, delete the previous instance.
+          if (this.experimentToEdit) {
+            axios
+              .delete(
+                `${settings.apis.warehouse}/experiments/${this.experimentToEdit.id}`
+              )
+              .then(() => {
+                this.$store.commit("experiments/delete", [
+                  this.experimentToEdit.id
+                ]);
+                completeSubmission();
+              });
+          } else {
+            completeSubmission();
+          }
         });
     },
     postConditions() {
