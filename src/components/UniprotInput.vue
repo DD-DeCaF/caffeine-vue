@@ -109,7 +109,17 @@ export default Vue.extend({
           }
         })
         .then(response => {
-          const parsedResponse = tsvParse(response.data)[0];
+          // The API query appears to match loosely on free text and yields
+          // multiple results. We care about exact identifier matches, so try to
+          // find one among the results.
+          const parsedResponse = tsvParse(response.data).find(
+            item => item["Entry"] === uniprotId
+          );
+          if (!parsedResponse) {
+            // Not found. No need to do any explicit error handling, since
+            // `this.protein` is already null and will not pass validation.
+            return;
+          }
           // The protein name field includes both recommended name, and
           // alternative names in parentheses. Use only the recommended name.
           let proteinName = parsedResponse["Protein names"] || "Unknown";
@@ -140,12 +150,7 @@ export default Vue.extend({
           this.$emit("change", this.protein);
         })
         .catch(error => {
-          if (error.response && error.response.status === 404) {
-            // Not found - no need to take action; since `this.protein` is
-            // already null and will not pass validation.
-          } else {
-            this.requestError = true;
-          }
+          this.requestError = true;
         })
         .then(() => {
           this.isLoading = false;
