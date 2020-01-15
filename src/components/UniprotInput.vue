@@ -113,7 +113,7 @@ export default Vue.extend({
           // multiple results. We care about exact identifier matches, so try to
           // find one among the results.
           const parsedResponse = tsvParse(response.data).find(
-            item => item["Entry"] === uniprotId
+            item => item["Entry"].toLowerCase() === uniprotId.toLowerCase()
           );
           if (!parsedResponse) {
             // Not found. No need to do any explicit error handling, since
