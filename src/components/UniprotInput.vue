@@ -2,21 +2,22 @@
   <v-tooltip bottom :disabled="!protein">
     <template v-slot:activator="{ on }">
       <v-text-field
-        label="Protein"
         v-model="searchQuery"
+        :placeholder="passedProtein ? passedProtein._pastedText : ''"
         :loading="isLoading"
         :hint="hint()"
         persistent-hint
         :rules="[requestErrorRule(requestError), ...(rules || [])]"
         clearable
         @paste="$emit('paste', $event)"
-        @click:clear="onClear"
+        @click:clear="$emit('clear')"
         v-on="on"
       ></v-text-field>
     </template>
     <span v-if="protein">
-      <em>Name: </em>{{ protein.name }}<br />
       <em>Identifier: </em>{{ protein.identifier }}<br />
+      <em>Name: </em>{{ protein.name }}<br />
+      <em>Full name: </em>{{ protein.fullName }}<br />
       <em>Gene: </em>{{ protein.gene }}<br />
     </span>
   </v-tooltip>
@@ -26,12 +27,13 @@
 import Vue from "vue";
 import axios from "axios";
 import { debounce } from "lodash";
+import { tsvParse } from "d3-dsv";
 
 export default Vue.extend({
   name: "UniprotInput",
   props: {
     rules: [Array, Object],
-    forceSearchQuery: String
+    passedProtein: Object
   },
   data: () => ({
     debouncedQuery: null,
@@ -45,30 +47,23 @@ export default Vue.extend({
   }),
   computed: {},
   watch: {
-    forceSearchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
-      immediate: true,
-      handler() {
-        if (!this.forceSearchQuery) {
-          return;
-        }
-        if (this.forceSearchQuery === this.searchQuery) {
-          // User re-pasted the same query string. Trigger a search directly,
-          // because the `searchQuery` watcher won't trigger when it hasn't
-          // changed.
-          this.triggerQuery();
-        } else {
-          this.searchQuery = this.forceSearchQuery;
-        }
+    searchQuery() {
+      if (
+        this.passedProtein &&
+        this.searchQuery === this.passedProtein.uniprotId
+      ) {
+        return;
       }
+      this.triggerQuery();
     },
-    searchQuery: {
-      // Watcher needs to be immediate to trigger when copy-paste creates
-      // new rows with forceSearchQuery already set
+    passedProtein: {
       immediate: true,
       handler() {
-        this.triggerQuery();
+        if (this.passedProtein) {
+          // To display pasted uniprot id, we need to assign it to searchQuery
+          this.searchQuery = this.passedProtein.uniprotId;
+          this.protein = this.passedProtein;
+        }
       }
     }
   },
@@ -78,11 +73,7 @@ export default Vue.extend({
   methods: {
     hint() {
       if (this.protein) {
-        return `<a href="https://www.uniprot.org/uniprot/${
-          this.protein.identifier
-        }" target="_blank">${this.protein.identifier}</a> (${
-          this.protein.name
-        })`;
+        return `<a href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a> (${this.protein.fullName})`;
       } else {
         return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
       }
@@ -107,52 +98,64 @@ export default Vue.extend({
         this.debouncedQuery(this.searchQuery);
       });
     },
-    query(identifier: string) {
+    query(uniprotId: string) {
       axios
-        .get(`https://www.uniprot.org/uniprot/${identifier}.xml`)
+        .get(`https://www.uniprot.org/uniprot/`, {
+          params: {
+            query: uniprotId,
+            format: "tab",
+            columns:
+              "id,protein_names,entry_name,genes(PREFERRED),genes(ALTERNATIVE),genes(OLN),genes(ORF)"
+          }
+        })
         .then(response => {
-          // Parse the XML response, looking for name, identifier and gene.
-          const doc = new DOMParser().parseFromString(
-            response.data,
-            "text/xml"
+          // The API query appears to match loosely on free text and yields
+          // multiple results. We care about exact identifier matches, so try to
+          // find one among the results.
+          const parsedResponse = tsvParse(response.data).find(
+            item => item["Entry"].toLowerCase() === uniprotId.toLowerCase()
           );
-          const name = doc.querySelector(
-            "entry > protein > recommendedName > fullName"
-          );
-          const identifier = doc.querySelector("entry > name");
-          const gene = doc.querySelector("entry > gene > name[type='primary']");
+          if (!parsedResponse) {
+            // Not found. No need to do any explicit error handling, since
+            // `this.protein` is already null and will not pass validation.
+            return;
+          }
+          // The protein name field includes both recommended name, and
+          // alternative names in parentheses. Use only the recommended name.
+          let proteinName = parsedResponse["Protein names"] || "Unknown";
+          const index = proteinName.indexOf("(");
+          if (index !== -1) {
+            proteinName = proteinName.substring(0, index).trim();
+          }
           this.protein = {
-            name: name ? name.innerHTML : "Unknown",
-            identifier: identifier ? identifier.innerHTML : "Unknown",
-            gene: gene ? gene.innerHTML : "Unknown"
+            identifier: parsedResponse["Entry"] || "Unknown",
+            name: parsedResponse["Entry name"] || "Unknown",
+            fullName: proteinName,
+            gene: {
+              primary: parsedResponse["Gene names  (primary )"]
+                ? parsedResponse["Gene names  (primary )"].split(" ")
+                : [],
+              synonym: parsedResponse["Gene names  (synonym )"]
+                ? parsedResponse["Gene names  (synonym )"].split(" ")
+                : [],
+              orderedLocus: parsedResponse["Gene names  (ordered locus )"]
+                ? parsedResponse["Gene names  (ordered locus )"].split(" ")
+                : [],
+              orf: parsedResponse["Gene names  (ORF )"]
+                ? parsedResponse["Gene names  (ORF )"].split(" ")
+                : []
+            },
+            uniprotId: uniprotId
           };
           this.$emit("change", this.protein);
         })
         .catch(error => {
-          if (error.response && error.response.status === 404) {
-            // Not found - no need to take action; since `this.protein` is
-            // already null and will not pass validation.
-          } else {
-            this.requestError = true;
-          }
+          this.requestError = true;
         })
         .then(() => {
           this.isLoading = false;
         });
-    },
-    onClear() {
-      this.$emit("clear");
     }
   }
 });
 </script>
-
-<style lang="scss" scoped>
-.protein-table {
-  width: 100%;
-
-  th {
-    text-align: left;
-  }
-}
-</style>

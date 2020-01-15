@@ -341,7 +341,7 @@
                 hide-actions
                 hide-headers
               >
-                <template v-slot:items="props">
+                <template v-slot:items="">
                   <td width="5%"></td>
                   <td width="12%" class="expanded-cell">
                     <div class="link-list mt-2 mb-3">
@@ -363,9 +363,7 @@
                               <template v-slot:activator="{ on }">
                                 <a
                                   :href="
-                                    `http://bigg.ucsd.edu/search?query=${
-                                      manipulation.id
-                                    }`
+                                    `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
                                   class="link"
                                   target="_blank"
@@ -392,9 +390,7 @@
                               <template v-slot:activator="{ on }">
                                 <a
                                   :href="
-                                    `http://bigg.ucsd.edu/search?query=${
-                                      manipulation.id
-                                    }`
+                                    `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
                                   class="link"
                                   target="_blank"
@@ -430,9 +426,7 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  manipulation.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
                               class="link"
                               target="_blank"
@@ -456,9 +450,7 @@
                           >
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  manipulation.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
                               class="link"
                               target="_blank"
@@ -550,10 +542,7 @@
                                   "
                                   class="link caption"
                                   :href="
-                                    `https://www.uniprot.org/uniprot/?query=${
-                                      prediction.result.reactions[reactionId]
-                                        .annotation.EC
-                                    }`
+                                    `https://www.uniprot.org/uniprot/?query=${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
                                   >UniProt</a
@@ -567,10 +556,7 @@
                                   "
                                   class="link caption"
                                   :href="
-                                    `http://gmgc.embl.de/search/${
-                                      prediction.result.reactions[reactionId]
-                                        .annotation.EC
-                                    }`
+                                    `http://gmgc.embl.de/search/${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
                                   >GMGC</a
@@ -665,7 +651,7 @@ import { PathwayPredictionResponse } from "@/views/Jobs/JobDetails.vue";
 import { Prop } from "vue/types/options";
 import axios from "axios";
 import { AxiosResponse } from "axios";
-import orderBy from "lodash/fp/orderBy";
+import { orderBy } from "lodash";
 import uuidv4 from "uuid/v4";
 import * as settings from "@/utils/settings";
 import { getMetaboliteId } from "@/utils/metabolite";
@@ -888,6 +874,7 @@ export default Vue.extend({
     },
     customSort(items, index, isDesc) {
       return orderBy(
+        items,
         item => {
           if (
             index === "manipulations" ||
@@ -898,8 +885,7 @@ export default Vue.extend({
           }
           return item[index];
         },
-        isDesc ? "desc" : "asc",
-        items
+        isDesc ? "desc" : "asc"
       );
     },
     toggleAll() {
@@ -960,6 +946,7 @@ export default Vue.extend({
               sample: null,
               sampleWarnings: [],
               sampleErrors: [],
+              showProteomicsData: false,
               // General simulation fields
               isSimulating: false,
               hasSimulationError: false,
@@ -974,7 +961,8 @@ export default Vue.extend({
                 jobPrediction.method === "PathwayPredictor+DifferentialFVA"
                   ? jobPrediction.biomass
                   : null,
-              showDiffFVAScore: false
+              showDiffFVAScore: false,
+              enzymeUsageThreshold: 90
             };
             this.$store.commit("interactiveMap/addCard", card);
             // Apply anaerobic conditions if needed
@@ -1047,9 +1035,7 @@ export default Vue.extend({
                       oldUpperBound = reactionFromModel.upper_bound;
                     } else {
                       throw new Error(
-                        `Reaction ${
-                          manipulation.id
-                        } is neither added or in the original model`
+                        `Reaction ${manipulation.id} is neither added or in the original model`
                       );
                     }
                   }
@@ -1285,9 +1271,7 @@ export default Vue.extend({
       // Sending HTTP request headers is not possible through links like <a href="...">
       // This approach is used in order to send Authorization header
       axios({
-        url: `${settings.apis.metabolicNinja}/predictions/export/${
-          this.prediction.id
-        }`,
+        url: `${settings.apis.metabolicNinja}/predictions/export/${this.prediction.id}`,
         method: "GET",
         params: {
           prediction_ids: predictionIds

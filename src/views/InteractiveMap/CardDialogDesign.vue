@@ -147,6 +147,7 @@
 import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
+import { getMetaboliteId } from "@/utils/metabolite";
 import ReactionDialog from "@/views/InteractiveMap/ReactionDialog.vue";
 import ModificationsTable from "@/components/ModificationsTable.vue";
 import { MetaNetXReaction } from "@/components/AutocompleteMnxReaction.vue";
@@ -253,32 +254,23 @@ export default Vue.extend({
     geneDisplay(gene) {
       return `${gene.name} (${gene.id})`;
     },
-    addReaction(addReaction: {
-      reaction: Reaction;
-      mnxReaction: MetaNetXReaction;
-    }) {
+    addReaction(reaction: Reaction) {
       // Try to use metabolites from model.
       const reactionWithModelMetabolites = {
-        ...addReaction.reaction,
-        metabolites: addReaction.reaction.metabolites.map(m => {
-          const fullMetabolite = addReaction.mnxReaction.metabolites.find(
-            ({ mnx_id }) => mnx_id === m.id
-          );
-          if (!fullMetabolite) {
+        ...reaction,
+        metabolites: reaction.metabolites.map(m => {
+          if (!m.annotation) {
             return m;
           }
-          if (!fullMetabolite.annotation) {
-            return m;
-          }
-          if (!fullMetabolite.annotation["bigg.metabolite"]) {
+          if (!m.annotation["bigg.metabolite"]) {
             return m;
           }
 
           // TODO: optimize for performance
           let matchingMetaboliteInModel = null as Metabolite | null | undefined;
-          fullMetabolite.annotation["bigg.metabolite"].find(biggId => {
+          m.annotation["bigg.metabolite"].find(biggId => {
             matchingMetaboliteInModel = this.model.model_serialized.metabolites.find(
-              m => m.id === biggId + "_" + m.compartment
+              m => getMetaboliteId(m.id, m.compartment) === biggId
             );
             return !!matchingMetaboliteInModel;
           });
@@ -288,10 +280,9 @@ export default Vue.extend({
 
           // TODO: instead of removing the compartment here and adding it later,
           // we should just pass the metabolite identifiers as they are.
-          const idWithoutCompartment = matchingMetaboliteInModel.id.substring(
-            0,
-            matchingMetaboliteInModel.id.length -
-              (matchingMetaboliteInModel.compartment.length + 1)
+          const idWithoutCompartment = getMetaboliteId(
+            matchingMetaboliteInModel.id,
+            matchingMetaboliteInModel.compartment
           );
           return {
             ...m,

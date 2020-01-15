@@ -198,7 +198,7 @@
                   hide-headers
                   :headers-length="7"
                 >
-                  <template v-slot:items="props">
+                  <template v-slot:items="">
                     <td width="55%"></td>
                     <td width="15%">
                       <div class="link-list">
@@ -296,9 +296,7 @@
                           <div v-if="index < 10">
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  geneKnockout.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
                               class="link"
                               target="_blank"
@@ -312,9 +310,7 @@
                           >
                             <a
                               :href="
-                                `http://bigg.ucsd.edu/search?query=${
-                                  geneKnockout.id
-                                }`
+                                `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
                               class="link"
                               target="_blank"
@@ -360,7 +356,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import uuidv4 from "uuid/v4";
-import orderBy from "lodash/fp/orderBy";
+import { orderBy } from "lodash";
 import { Card } from "@/store/modules/interactiveMap";
 import { DesignItem } from "@/store/modules/designs";
 
@@ -406,6 +402,7 @@ export default Vue.extend({
   methods: {
     customSort(items: DesignItem[], index: string, isDesc: boolean) {
       return orderBy(
+        items,
         (item: DesignItem) => {
           if (
             index === "reactionKnockins" ||
@@ -419,8 +416,7 @@ export default Vue.extend({
           }
           return item[index];
         },
-        isDesc ? "desc" : "asc",
-        items
+        isDesc ? "desc" : "asc"
       );
     },
     reactionLink(reactionId, method) {
@@ -482,6 +478,7 @@ export default Vue.extend({
           sample: null,
           sampleWarnings: [],
           sampleErrors: [],
+          showProteomicsData: false,
           // General simulation fields
           isSimulating: false,
           hasSimulationError: false,
@@ -492,7 +489,8 @@ export default Vue.extend({
           // Specific fields for design prediction methods
           manipulations: null,
           productionGrowthRate: null,
-          showDiffFVAScore: false
+          showDiffFVAScore: false,
+          enzymeUsageThreshold: 90
         };
         // Make sure the full model is available before adding the card.
         this.$store

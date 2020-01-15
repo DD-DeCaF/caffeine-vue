@@ -16,6 +16,8 @@ export interface Metabolite {
   formula: string;
   compartment: string;
   stoichiometry: number;
+  annotation?: Object;
+  mnxId?: string;
 }
 
 export interface Reaction {
@@ -26,6 +28,9 @@ export interface Reaction {
   lowerBound?: number; // Used when editing bounds
   upperBound?: number; // Used when editing bounds
   namespace?: string;
+  annotation?: Object;
+  ec?: string;
+  mnxId?: string;
 }
 
 export interface Card {
@@ -54,6 +59,7 @@ export interface Card {
   sample: any;
   sampleWarnings: any[];
   sampleErrors: any[];
+  showProteomicsData: boolean;
   // General simulation fields
   isSimulating: boolean;
   hasSimulationError: boolean;
@@ -66,6 +72,8 @@ export interface Card {
   manipulations: any[] | null;
   productionGrowthRate: number | null;
   showDiffFVAScore: boolean;
+  // For ecModels
+  enzymeUsageThreshold: number;
 }
 
 export default {

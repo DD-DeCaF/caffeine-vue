@@ -35,6 +35,7 @@
 import Vue from "vue";
 /// <reference path="@/types/escher.d.ts" />
 import * as escher from "@dd-decaf/escher";
+import { keyBy, mapKeys, pickBy, flatten } from "lodash";
 import Legend from "@/views/InteractiveMap/Legend.vue";
 
 export default Vue.extend({
@@ -62,7 +63,8 @@ export default Vue.extend({
       // Returns the modified model (original model + added reactions) for the
       // currently selected card.
       // TODO: This is duplicated logic, a very similar computed property exists
-      // in the Card component.
+      // in the Card component. Note however that this property also adjusts
+      // bounds; the Card component property does not.
       if (!this.card) {
         return null;
       }
@@ -83,9 +85,10 @@ export default Vue.extend({
           ...selectedModel.model_serialized
         }
       };
+
+      // Add all added reactions to the model.
       this.card.reactionAdditions.forEach(reaction => {
-        // Add the reaction to the model. (Take care to replace, not modify, the
-        // original array.)
+        // Take care to replace, not modify, the original array.
         model.model_serialized.reactions = [
           ...model.model_serialized.reactions,
           {
@@ -124,6 +127,23 @@ export default Vue.extend({
           ...metabolites
         ];
       });
+
+      // Update any bounds that were modified.
+      const boundedReactions = keyBy(this.card.editedBounds, rxn => rxn.id);
+      // Take care to replace, not modify, the original array.
+      const reactions = model.model_serialized.reactions.map(reaction => {
+        if (reaction.id in boundedReactions) {
+          return {
+            ...reaction,
+            lower_bound: boundedReactions[reaction.id].lowerBound,
+            upper_bound: boundedReactions[reaction.id].upperBound
+          };
+        } else {
+          return reaction;
+        }
+      });
+      model.model_serialized.reactions = reactions;
+
       return model;
     },
     diffFVAScores() {
@@ -139,6 +159,112 @@ export default Vue.extend({
     },
     showDiffFVAScore() {
       return this.card ? this.card.showDiffFVAScore : false;
+    },
+    showProteomicsData() {
+      return this.card ? this.card.showProteomicsData : false;
+    },
+    highlightMissing() {
+      // We cannot highlight missing reactions for ecModels, since most of the
+      // identifiers on the map would not match those in the model.
+      return !(this.showProteomicsData || (this.model && this.model.ec_model));
+    },
+    enzymeUsagePerGene() {
+      // If this is an enzyme-constrained model, calculate the enzyme usage for
+      // each pseudo-reaction.
+      if (
+        !this.card ||
+        !this.card.fluxes ||
+        !this.model ||
+        !this.model.model_serialized ||
+        !this.model.ec_model
+      ) {
+        return null;
+      }
+
+      // Each pseudoreaction always has a single gene, so store the enzyme usage
+      // value per gene.
+      const enzymeUsagePerGene = {};
+      // If the upper bound is smaller than this value, we can assume it was
+      // constrained by real-world observations. Anything larger is ignored,
+      // mostly to save computational cycles below.
+      const highestConceivableEnzymeUsage = 4;
+      this.model.model_serialized.reactions
+        .filter(
+          rxn => rxn.id.startsWith("prot_") && rxn.id.endsWith("_exchange")
+        )
+        .filter(rxn => rxn.upper_bound < highestConceivableEnzymeUsage)
+        // Ignore reactions with no positive flux - they would cause division by
+        // zero.
+        .filter(rxn => rxn.upper_bound !== 0)
+        .forEach(pseudoReaction => {
+          enzymeUsagePerGene[pseudoReaction.gene_reaction_rule] =
+            this.card.fluxes[pseudoReaction.id] / pseudoReaction.upper_bound;
+        });
+
+      return enzymeUsagePerGene;
+    },
+    enzymeUsage() {
+      const enzymeUsagePerGene = this.enzymeUsagePerGene;
+      if (!enzymeUsagePerGene) {
+        return null;
+      }
+      // Map the enzyme usages on to all reactions that are catalyzed by any of
+      // the genes.
+      const enzymeUsages = {};
+      this.model.model_serialized.reactions
+        .filter(
+          rxn => !(rxn.id.startsWith("prot_") && rxn.id.endsWith("_exchange"))
+        )
+        .forEach(rxn => {
+          rxn.gene_reaction_rule.split(/\W+/).forEach(gene => {
+            if (gene in enzymeUsagePerGene) {
+              // It's a match! Set the enzyme usage.
+              if (rxn.id in enzymeUsages) {
+                // Another gene is already recorded for this reaction; use the
+                // highest value.
+                enzymeUsages[rxn.id] = Math.max(
+                  enzymeUsages[rxn.id],
+                  enzymeUsagePerGene[gene]
+                );
+              } else {
+                enzymeUsages[rxn.id] = enzymeUsagePerGene[gene];
+              }
+            }
+          });
+        });
+
+      return enzymeUsages;
+    },
+    enzymeUsageMapped() {
+      // Map the ecModel-specific reaction identifiers back to the original
+      // identifiers, so that they are correctly recognized in the Escher map.
+
+      // Disregard the reversible reactions ("XXX_REV"), as those will just
+      // contain redundant information in terms of enzyme usage (the GPR rule of
+      // the backward and forward reaction are equivalent).
+      const enzymeUsage = pickBy(
+        this.enzymeUsage,
+        (usage, id) => !(id.endsWith("_REV") || id.includes("_REVNo"))
+      );
+
+      const reactionIds = Object.keys(enzymeUsage);
+      // Make a copy of the original IDs, as we need to compare the unmodified
+      // identifiers during iteration.
+      const originalReactionIds = reactionIds.slice();
+      return mapKeys(enzymeUsage, (usage, id) => {
+        if (id.startsWith("arm_")) {
+          // For isozymes, use the value in the reaction "arm_XXX".
+          return id.slice(4);
+        } else if (
+          id.endsWith("No1") &&
+          !(`arm_${id.slice(0, -3)}` in originalReactionIds)
+        ) {
+          // For single enzymes, use the value in the reaction "XXXNo1" (for
+          // this, check first that no arm reaction is already present).
+          return id.slice(0, -3);
+        }
+        return id;
+      });
     }
   },
   watch: {
@@ -160,6 +286,7 @@ export default Vue.extend({
           this.setReactionKnockouts();
           this.setGeneKnockouts();
           this.setDataSample();
+          this.setEnzymeUsage();
           this.setFluxes();
         }, 10);
       };
@@ -203,6 +330,21 @@ export default Vue.extend({
     showDiffFVAScore() {
       this.onEscherReady.then(this.toggleColorScheme);
       this.onEscherReady.then(this.setFluxes);
+    },
+    showProteomicsData() {
+      this.onEscherReady.then(this.setFluxes);
+    },
+    highlightMissing() {
+      this.escherBuilder.settings.set(
+        "highlight_missing",
+        this.highlightMissing
+      );
+    },
+    enzymeUsage() {
+      this.onEscherReady.then(this.setEnzymeUsage);
+    },
+    "card.enzymeUsageThreshold"() {
+      this.onEscherReady.then(this.setEnzymeUsage);
     }
   },
   mounted() {
@@ -247,16 +389,8 @@ export default Vue.extend({
     setModel() {
       if (!this.card || !this.model || !this.model.model_serialized) {
         this.escherBuilder.load_model(null);
-        this.escherBuilder.settings.set("highlight_missing", true);
       } else {
         this.escherBuilder.load_model(this.model.model_serialized);
-
-        // We cannot highlight missing reactions for ecModels, since most of the
-        // identifiers on the map would not match those in the model.
-        this.escherBuilder.settings.set(
-          "highlight_missing",
-          !this.model.ec_model
-        );
       }
     },
     setReactionAdditions() {
@@ -302,12 +436,67 @@ export default Vue.extend({
         this.card.sample.fluxomics.map(m => m.reaction_identifier)
       );
     },
+    setEnzymeUsage() {
+      // Based on proteomics and simulated fluxes, visualizes enzyme usage by
+      // highlighting reactions with enzyme usage greater than or equal to the
+      // given threshold.
+      // NOTE: This currently intereferes with fluxomics since we use
+      // highlighted reactions for both use cases, so currently the assumption
+      // is that users won't upload both fluxomics and proteomics in the same
+      // experiment.
+      if (!this.enzymeUsage) {
+        this.escherBuilder.set_highlight_reactions([]);
+        this.escherBuilder.set_highlight_genes([]);
+        return;
+      }
+
+      // Only highlight reactions with enzyme usage greater than or equal to the
+      // given threshold.
+      const genes = Object.keys(this.enzymeUsagePerGene).filter(
+        id =>
+          this.enzymeUsagePerGene[id] >= this.card.enzymeUsageThreshold / 100
+      );
+      this.escherBuilder.set_highlight_genes(genes);
+
+      // Only highlight reactions with enzyme usage above the given threshold.
+      const reactions = Object.keys(this.enzymeUsageMapped).filter(
+        id => this.enzymeUsageMapped[id] >= this.card.enzymeUsageThreshold / 100
+      );
+      this.escherBuilder.set_highlight_reactions(reactions);
+    },
     setFluxes() {
       // Update the flux distribution
       if (this.card === null || this.card.fluxes === null) {
+        this.escherBuilder.set_gene_data(null);
         this.escherBuilder.set_reaction_data(null);
       } else {
-        if (!this.showDiffFVAScore) {
+        if (this.showDiffFVAScore) {
+          // Set the DiffFVA scores instead of the cards fluxes.
+          // (calculated from a diffFVA card's manipulations)
+          this.escherBuilder.set_reaction_data(this.diffFVAScores);
+          // Set the FVA data for transparency visualization as above.
+          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
+        } else if (this.showProteomicsData) {
+          // Set gene data instead of the card fluxes
+          const modelGeneIdsWithNames = keyBy(
+            this.model.model_serialized.genes,
+            gene => gene.id
+          );
+          const geneData = {};
+          this.card.conditionData.samples.forEach(sample => {
+            sample.proteomics.forEach(proteomicsItem => {
+              const proteomicsGeneIds: string[] = flatten(
+                Object.values(proteomicsItem.gene)
+              );
+              proteomicsGeneIds.forEach(proteomicsGeneId => {
+                if (proteomicsGeneId in modelGeneIdsWithNames) {
+                  geneData[proteomicsGeneId] = proteomicsItem.measurement;
+                }
+              });
+            });
+          });
+          this.escherBuilder.set_gene_data(geneData);
+        } else {
           // For ecModels, map the simulated flux distribution back to the
           // original reaction identifiers for the non-ec model, so that they
           // match with the escher maps.
@@ -337,12 +526,6 @@ export default Vue.extend({
             // Set the FVA data for transparency visualization.
             this.escherBuilder.set_reaction_fva_data(fluxes);
           }
-        } else {
-          // Set the DiffFVA scores instead of the cards fluxes.
-          // (calculated from a diffFVA card's manipulations)
-          this.escherBuilder.set_reaction_data(this.diffFVAScores);
-          // Set the FVA data for transparency visualization as above.
-          this.escherBuilder.set_reaction_fva_data(this.diffFVAScores);
         }
       }
       this.escherBuilder._updateData(true, true);

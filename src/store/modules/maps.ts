@@ -2,6 +2,7 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 export interface MapItem {
   id: number;
@@ -10,11 +11,11 @@ export interface MapItem {
   project_id: number;
 }
 
-export default {
+export default vuexStoreModule({
   namespaced: true,
   state: {
-    maps: [],
-    mapsPromise: null
+    maps: [] as MapItem[],
+    mapsPromise: null as Promise<void> | null
   },
   mutations: {
     setMaps(state, maps: MapItem[]) {
@@ -54,4 +55,4 @@ export default {
       return state.maps;
     }
   }
-};
+});

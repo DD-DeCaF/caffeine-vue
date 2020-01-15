@@ -15,6 +15,18 @@
 
       <v-btn flat icon @click.stop="isCardDialogVisible = true">
         <CardDialog
+          v-if="card.type !== 'DataDriven'"
+          v-model="isCardDialogVisible"
+          :card="card"
+          :model="model"
+          :modifications="modifications"
+          @simulate-card="simulateCard"
+          @simulation-error="$emit('simulation-error')"
+          @open-method-help-dialog="showMethodHelpDialog = true"
+          @load-data-error="$emit('load-data-error')"
+        />
+        <CardDialogDataDriven
+          v-else
           v-model="isCardDialogVisible"
           :card="card"
           :model="model"
@@ -216,6 +228,53 @@
         </v-layout>
       </v-container>
 
+      <!-- Proteomics -->
+      <v-container
+        v-if="
+          card.type == 'DataDriven' &&
+            card.conditionData &&
+            card.conditionData.samples.some(sample => sample.proteomics.length)
+        "
+        fluid
+        class="pa-0"
+      >
+        <v-layout row>
+          <v-flex>
+            <v-tooltip bottom>
+              <span>
+                Show either the flux distribution or proteomics data.
+              </span>
+              <v-switch
+                color="primary"
+                v-model="showProteomicsData"
+                slot="activator"
+              >
+                <template v-slot:label>
+                  <div :style="{ color: showProteomicsData ? 'black' : null }">
+                    Show proteomics data
+                  </div>
+                </template>
+              </v-switch>
+            </v-tooltip>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <!-- ecModels visualizing enzyme usage -->
+      <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
+        <v-layout row>
+          <v-flex>
+            Highlight reactions where enzyme usage is greater than or equal to
+            the following threshold:
+          </v-flex>
+        </v-layout>
+        <v-layout row>
+          <v-flex>
+            <v-slider v-model="enzymeUsageThreshold" thumb-label></v-slider>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-container fluid class="pa-0" v-if="isSaveable">
         <v-layout wrap justify-end>
           <v-tooltip bottom :disabled="!isSaveTooltipVisible">
@@ -261,12 +320,14 @@ import { mapMutations } from "vuex";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialog from "@/views/InteractiveMap/CardDialog.vue";
+import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
 import MethodHelpDialog from "@/views/InteractiveMap/MethodHelpDialog.vue";
 
 export default Vue.extend({
   name: "Card",
   components: {
     CardDialog,
+    CardDialogDataDriven,
     MethodHelpDialog
   },
   filters: {
@@ -348,7 +409,9 @@ export default Vue.extend({
       // Returns the modified model (original model + added reactions) for this
       // card.
       // TODO: This is duplicated logic, a very similar computed property exists
-      // in the Escher component.
+      // in the Escher component. (Note that the Escher property also adjusts
+      // bounds, this does not - it's simply not implemented because there's no
+      // need yet.)
       const selectedModel = this.$store.getters["models/getModelById"](
         this.card.modelId
       );
@@ -439,6 +502,35 @@ export default Vue.extend({
     },
     isInfeasible() {
       return !!this.card.solverStatus && this.card.solverStatus !== "optimal";
+    },
+    showProteomicsData: {
+      get() {
+        return this.card.showProteomicsData;
+      },
+      set(value) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { showProteomicsData: value }
+        });
+      }
+    },
+    showEnzymeUsageSlider() {
+      return (
+        this.card.type == "DataDriven" &&
+        this.card.sample &&
+        this.card.sample.proteomics.length > 0
+      );
+    },
+    enzymeUsageThreshold: {
+      get() {
+        return this.card.enzymeUsageThreshold;
+      },
+      set(newValue) {
+        this.updateCard({
+          uuid: this.card.uuid,
+          props: { enzymeUsageThreshold: newValue }
+        });
+      }
     }
   },
   watch: {
