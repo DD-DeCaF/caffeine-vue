@@ -2045,6 +2045,7 @@ export default Vue.extend({
           ];
           const payload = {
             condition_id: conditionId,
+            name: sample.name,
             start_time: this.$moment(
               sample.startTime,
               "YYYY-MM-DD HH:mm"
