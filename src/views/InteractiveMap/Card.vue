@@ -181,6 +181,20 @@
       <v-container fluid class="pa-0">
         <v-layout wrap>
           <v-flex>Growth rate:</v-flex>
+          <v-flex>
+            <div v-if="card.growthRate !== null">
+              <v-tooltip v-if="card.growthRate <= 0.00001" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon color="warning" dark v-on="on">error</v-icon>
+                </template>
+                <span>
+                  You are simulating with proteomics data but without setting
+                  any growth rate. <br />Consider adding a growth rate to your
+                  experiment to avoid unreasonably low growth rate predictions.
+                </span>
+              </v-tooltip>
+            </div>
+          </v-flex>
           <v-flex class="text-xs-right">
             <div v-if="!card.isSimulating">
               <span
