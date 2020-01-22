@@ -191,25 +191,6 @@
                 <em>h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
-              <span v-if="card.growthRate === null">
-                <v-tooltip
-                  v-if="
-                    card.type == 'DataDriven' &&
-                      card.sample.proteomics.length > 0
-                  "
-                  bottom
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-icon color="warning" dark v-on="on">error</v-icon>
-                  </template>
-                  <span>
-                    You are simulating with proteomics data without setting a
-                    growth rate. <br />Consider adding a growth rate to your
-                    experiment to avoid unreasonably low growth rate
-                    predictions.
-                  </span>
-                </v-tooltip>
-              </span>
             </div>
             <div v-else>
               <v-progress-circular
