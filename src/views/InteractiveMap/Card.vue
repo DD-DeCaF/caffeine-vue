@@ -537,7 +537,8 @@ export default Vue.extend({
       return (
         this.card.type == "DataDriven" &&
         this.card.sample &&
-        this.card.sample.proteomics.length > 0
+        this.card.sample.proteomics.length > 0 &&
+        this.model.ec_model
       );
     },
     enzymeUsageThreshold: {
