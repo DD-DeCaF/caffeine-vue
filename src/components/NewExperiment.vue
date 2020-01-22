@@ -1481,7 +1481,16 @@ function getInitialState() {
             this.requiredIfTableHasChanged(
               this.tables.growth,
               growthItem.sample
+            ),
+            this.tables.growth.items.some(
+              growth =>
+                growth.sample &&
+                growthItem.sample &&
+                growth.temporaryId !== growthItem.temporaryId &&
+                growth.sample.temporaryId === growthItem.sample.temporaryId
             )
+              ? "This sample already has another measured growth rate. You can only record a single growth rate measurement per sample."
+              : true
           ],
           measurement: growthItem => [
             this.requiredIfTableHasChanged(
