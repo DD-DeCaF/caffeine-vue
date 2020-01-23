@@ -261,7 +261,11 @@
       </v-container>
 
       <!-- ecModels visualizing enzyme usage -->
-      <v-container v-if="showEnzymeUsageSlider" fluid class="pa-0">
+      <v-container
+        v-if="showEnzymeUsageSlider && model && model.ec_model"
+        fluid
+        class="pa-0"
+      >
         <v-layout row>
           <v-flex>
             Highlight reactions where enzyme usage is greater than or equal to
@@ -518,8 +522,7 @@ export default Vue.extend({
       return (
         this.card.type == "DataDriven" &&
         this.card.sample &&
-        this.card.sample.proteomics.length > 0 &&
-        this.model.ec_model
+        this.card.sample.proteomics.length > 0
       );
     },
     enzymeUsageThreshold: {
