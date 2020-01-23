@@ -206,10 +206,10 @@
                     <v-icon color="warning" dark v-on="on">error</v-icon>
                   </template>
                   <span>
-                    You are simulating with proteomics data without setting a
-                    growth rate. <br />Consider adding a growth rate to your
-                    experiment to avoid unreasonably low growth rate
-                    predictions.
+                    You are simulating an ecModel with proteomics data but
+                    without setting a growth rate. <br />Consider adding a
+                    growth rate to your experiment to avoid unreasonably low
+                    growth rate predictions.
                   </span>
                 </v-tooltip>
               </span>
