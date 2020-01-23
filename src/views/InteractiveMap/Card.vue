@@ -191,14 +191,17 @@
                 <em>h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
-              <span v-if="card.sample.growth_rate === null && model.ec_model">
-                <v-tooltip
-                  v-if="
+              <span
+                v-if="
+                  model &&
+                    model.ec_model &&
                     card.type == 'DataDriven' &&
-                      card.sample.proteomics.length > 0
-                  "
-                  bottom
-                >
+                    card.sample !== null &&
+                    card.sample.proteomics.length > 0 &&
+                    card.sample.growth_rate === null
+                "
+              >
+                <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-icon color="warning" dark v-on="on">error</v-icon>
                   </template>
