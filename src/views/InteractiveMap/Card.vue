@@ -191,7 +191,7 @@
                 <em>h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
-              <span v-if="card.growthRate === null">
+              <span v-if="card.sample.growth_rate === null && model.ec_model">
                 <v-tooltip
                   v-if="
                     card.type == 'DataDriven' &&
