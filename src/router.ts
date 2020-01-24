@@ -3,6 +3,7 @@ import Router, { NavigationGuard, RawLocation } from "vue-router";
 import store from "@/store";
 import sessionStore from "@/store/modules/session";
 import Home from "./views/Home.vue";
+import CommunityModeling from "./views/CommunityModeling.vue";
 import Design from "./views/Design.vue";
 import Designs from "./views/Designs.vue";
 import InteractiveMap from "./views/InteractiveMap/InteractiveMap.vue";
@@ -41,6 +42,12 @@ export default new Router({
       path: "/",
       name: "home",
       component: Home
+    },
+    {
+      path: "/community-modeling",
+      name: "community-modeling",
+      component: CommunityModeling,
+      beforeEnter: authGuard
     },
     {
       path: "/design",
