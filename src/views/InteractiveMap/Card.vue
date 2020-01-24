@@ -538,6 +538,8 @@ export default Vue.extend({
     },
     showEnzymeUsageSlider() {
       return (
+        this.model &&
+        this.model.ec_model &&
         this.card.type == "DataDriven" &&
         this.card.sample &&
         this.card.sample.proteomics.length > 0
