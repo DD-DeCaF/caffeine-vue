@@ -191,6 +191,28 @@
                 <em>h<sup>-1</sup></em>
               </span>
               <span v-else>N/A</span>
+              <span
+                v-if="
+                  model &&
+                    model.ec_model &&
+                    card.type == 'DataDriven' &&
+                    card.sample !== null &&
+                    card.sample.proteomics.length > 0 &&
+                    card.sample.growth_rate === null
+                "
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-icon color="warning" dark v-on="on">error</v-icon>
+                  </template>
+                  <span>
+                    You are simulating an ecModel with proteomics data but
+                    without setting a growth rate. <br />Consider adding a
+                    growth rate to your experiment to avoid unreasonably low
+                    growth rate predictions.
+                  </span>
+                </v-tooltip>
+              </span>
             </div>
             <div v-else>
               <v-progress-circular
