@@ -24,11 +24,14 @@
         <v-container class="py-1">
             <v-select
             :items='media'
+            :disabled="isUpdating"
             label="Selected Medium"
             autofocus
             item-text="name"
             item-value="id"
-            v-model="defaultMedium"
+            v-model="selectedMedium"
+            return-object
+            :rules="[v => !!v || 'Please choose a medium.']"
             ></v-select>       
              <v-autocomplete
                 v-model="selectedModels"
@@ -40,7 +43,7 @@
                 item-text="name"
                 item-value="id"
                 multiple
-                :rules="[v => !!v || 'Please choose at least one metabolic model.']"
+                :rules="[v => v.length >= 2 || 'Please choose at least two metabolic models that you wish to simulate as a community.']"
               >
                 <template v-slot:selection="data">
                   <v-chip
@@ -56,15 +59,20 @@
 
             <v-btn
             :loading="isUpdating"
+            :disabled="isUpdating || !isValid"
             color="primary"
             depressed
-            @click="isUpdating = true"
+            @click="simulateCommunity"
             >
           <v-icon left>update</v-icon>
           Simulate Now
         </v-btn>
         </v-container>
     </v-navigation-drawer>
+    <v-snackbar color="error" v-model="hasSimulationError" :timeout="8000">
+      Sorry, we were not able to complete the simulation successfully. Please
+      try again in a few seconds, or contact us if the problem persists.
+    </v-snackbar>
     </div>
 </template>
 
@@ -82,11 +90,18 @@ export default Vue.extend({
   data: () => ({
     isUpdating: false,
     selectedModels:[],
-    defaultMedium:{'id':1},
+    selectedMedium: null,
     isSidepanelOpen: true,
-    media: [{'id':1, 'name':"M9 Glucose", 'componentIDs':[1,2,3,4,5]}]
+    hasSimulationError: false,
+    communityData: null,
+    media: [{'id':1, 'name':"M9 Glucose", 'componentIDs':["ca2", "cl", "co2", "cobalt2", "cu2", "fe2", "glc__D", "h2o", "h", "hco3", "k", "mg2", "mn2", "mobd", "na1", "nh4", "ni2", "o2", "pi", "sel", "so4", "tungs", "zn2"]}]
   }),
   computed: {
+    isValid() {
+        if (this.selectedModels.length >= 2 && this.selectedMedium !== null) {
+        return true;
+        } else { return false;}
+    },
     models() {
     return partitionedList("models", "organisms");
     },
@@ -100,6 +115,24 @@ export default Vue.extend({
   mounted() {
   },
   methods: {
+    simulateCommunity() {
+        this.isUpdating = true;
+        const payload = {
+            medium: this.selectedMedium.componentIDs,
+            model_ids: this.selectedModels
+        };
+        axios
+        .post(`${settings.apis.simulations}/community/simulate`, payload)
+        .then(response => {
+          this.communityData = response.data;
+          this.isUpdating = false;
+        })
+        .catch(error => {
+          this.isUpdating = false;
+          this.communityData = null;
+          this.hasSimulationError = true;
+        });
+    },
     remove (item) {
     const index = this.selectedModels.indexOf(item.id)
     if (index >= 0) { this.selectedModels.splice(index, 1) }
