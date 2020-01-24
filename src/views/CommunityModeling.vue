@@ -33,7 +33,7 @@
              <v-autocomplete
                 v-model="selectedModels"
                 :disabled="isUpdating"
-                :items="availableModels"
+                :items="models"
                 box
                 chips
                 label="Selected Models"
@@ -51,11 +51,6 @@
                   >
                     {{ data.item.name }}
                   </v-chip>
-                </template>
-                <template v-slot:item="data">
-                    <v-list-tile-content>
-                      <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
-                    </v-list-tile-content>
                 </template>
               </v-autocomplete>
 
@@ -78,6 +73,7 @@ import Vue from "vue";
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import { mapGetters } from "vuex";
+import { partitionedList } from "@/utils/utility";
 
 export default Vue.extend({
   name: "CommunityModeling",
@@ -91,6 +87,9 @@ export default Vue.extend({
     media: [{'id':1, 'name':"M9 Glucose", 'componentIDs':[1,2,3,4,5]}]
   }),
   computed: {
+    models() {
+    return partitionedList("models", "organisms");
+    },
     availableModels() {
       return this.$store.state.models.models;
     },
