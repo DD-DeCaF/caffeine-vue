@@ -61,6 +61,19 @@
           </template>
         </v-autocomplete>
 
+        <v-select
+          :items="methods"
+          :disabled="isUpdating"
+          label="Simulation Method"
+          item-text="name"
+          item-value="id"
+          :hint="selectedMethod.description"
+          persistent-hint
+          v-model="selectedMethod"
+          return-object
+          :rules="[v => !!v || 'Please choose the simulation method.']"
+        ></v-select>
+
         <v-btn
           :loading="isUpdating"
           :disabled="isUpdating || !isValid"
@@ -94,6 +107,7 @@ export default Vue.extend({
     isUpdating: false,
     selectedModels: [],
     selectedMedium: null,
+    selectedMethod: null,
     isSidepanelOpen: true,
     hasSimulationError: false,
     communityData: null,
@@ -127,6 +141,18 @@ export default Vue.extend({
           "zn2"
         ]
       }
+    ],
+    methods: [
+      {
+        id: "steadycom",
+        name: "SteadyCom",
+        description: "Implementation of SteadyCom (Chan et al 2017)"
+      },
+      {
+        id: "steadiercom",
+        name: "SteadierCom",
+        description: "Improvements on SteadyCom by Daniel Machado"
+      }
     ]
   }),
   computed: {
@@ -147,13 +173,16 @@ export default Vue.extend({
       organism: "organisms/getOrganismById"
     })
   },
-  mounted() {},
+  mounted() {
+    this.selectedMethod = this.methods[0];
+  },
   methods: {
     simulateCommunity() {
       this.isUpdating = true;
       const payload = {
         medium: this.selectedMedium.componentIDs,
-        model_ids: this.selectedModels
+        model_ids: this.selectedModels,
+        method: this.selectedMethod.id
       };
       axios
         .post(`${settings.apis.simulations}/community/simulate`, payload)
