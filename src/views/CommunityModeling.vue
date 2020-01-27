@@ -14,11 +14,14 @@
         >
           <v-icon>apps</v-icon>
         </v-btn>
-        <v-container @click="isSidepanelOpen = false">
+        <v-container 
+        @click="isSidepanelOpen = false"
+        v-if="communityData"
+        >
           <!-- Community Growth Rate -->
           <h1>Community Modeling</h1>
           <h2>Community Growth Rate</h2>
-          <p>{{ this.communityData.growth_rate }}</p>
+          <p>{{ communityData.growth_rate }}</p>
           <!-- Abundance -->
           <h2>Abundance</h2>
           <v-data-table
@@ -27,8 +30,9 @@
             class="elevation-1 pa-2 my-3"
           >
             <template v-slot:items="props">
-              <td>{{ props.item.id }}</td>
-              <td>{{ props.item.value }}</td>
+              <td>{{ getOrganismByID(getModelByID(props.item.id).organism_id).name }}</td>
+              <td>{{ getModelByID(props.item.id).name }}</td>
+              <td>{{ props.item.value}}</td>
             </template>
             <template v-slot:no-data>
               <v-alert :value="true" color="error" icon="warning">
@@ -52,11 +56,15 @@
             </template>
             <template v-slot:no-data>
               <v-alert :value="true" color="error" icon="warning">
-                No data to display yet. Select a medium and at least two models,
-                then click SIMULATE NOW.
+                Cross-feeding could not be calculated. This could be due to mismatching metabolite identifiers between the selected models.
               </v-alert>
             </template>
           </v-data-table>
+        </v-container>
+        <v-container
+        @click="isSidepanelOpen = false"
+        v-else>
+        No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
         </v-container>
       </v-card-text>
     </v-card>
@@ -158,6 +166,7 @@ export default Vue.extend({
     hasSimulationError: false,
     communityData: null,
     headersAbundance: [
+      { text: "Organism", value: "id" },
       { text: "Model", value: "id" },
       { text: "Abundance", value: "value" }
     ],
@@ -226,10 +235,11 @@ export default Vue.extend({
       return this.$store.state.models.models;
     },
     ...mapGetters({
-      organism: "organisms/getOrganismById"
+      getModelByID: "models/getModelById",
+      getOrganismByID: "organisms/getOrganismById"
     })
   },
-  mounted() {
+  created() {
     this.selectedMethod = this.methods[0];
   },
   methods: {
