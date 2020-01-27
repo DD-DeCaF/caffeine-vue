@@ -1,19 +1,73 @@
 <template>
-  <div class="interactive-map fill-height">
-    <v-container>
-      <h1>Some test results go here</h1>
-      <v-btn
-        color="primary"
-        small
-        fab
-        top
-        right
-        class="sidepanel-toggle"
-        @click="isSidepanelOpen = true"
-      >
-        <v-icon>apps</v-icon>
-      </v-btn>
-    </v-container>
+  <v-container>
+    <v-card>
+      <v-card-title></v-card-title>
+      <v-card-text>
+        <v-btn
+          color="primary"
+          small
+          fab
+          top
+          right
+          class="sidepanel-toggle"
+          @click="isSidepanelOpen = true"
+        >
+          <v-icon>apps</v-icon>
+        </v-btn>
+        <v-container 
+        @click="isSidepanelOpen = false"
+        v-if="communityData"
+        >
+          <!-- Community Growth Rate -->
+          <h1>Community Modeling</h1>
+          <h2>Community Growth Rate</h2>
+          <p>{{ communityData.growth_rate }}</p>
+          <!-- Abundance -->
+          <h2>Abundance</h2>
+          <v-data-table
+            :headers="headersAbundance"
+            :items="communityData.abundance"
+            class="elevation-1 pa-2 my-3"
+          >
+            <template v-slot:items="props">
+              <td>{{ getOrganismByID(getModelByID(props.item.id).organism_id).name }}</td>
+              <td>{{ getModelByID(props.item.id).name }}</td>
+              <td>{{ props.item.value}}</td>
+            </template>
+            <template v-slot:no-data>
+              <v-alert :value="true" color="error" icon="warning">
+                No data to display yet. Select a medium and at least two models,
+                then click SIMULATE NOW.
+              </v-alert>
+            </template>
+          </v-data-table>
+          <!-- Cross-Feeding -->
+          <h2>Cross-Feeding</h2>
+          <v-data-table
+            :headers="headersCrossFeeding"
+            :items="communityData.cross_feeding"
+            class="elevation-1 pa-2 my-3"
+          >
+            <template v-slot:items="props">
+              <td>{{ props.item.from }}</td>
+              <td>{{ props.item.to }}</td>
+              <td>{{ props.item.metabolite }}</td>
+              <td>{{ props.item.value }}</td>
+            </template>
+            <template v-slot:no-data>
+              <v-alert :value="true" color="error" icon="warning">
+                Cross-feeding could not be calculated. This could be due to mismatching metabolite identifiers between the selected models.
+              </v-alert>
+            </template>
+          </v-data-table>
+        </v-container>
+        <v-container
+        @click="isSidepanelOpen = false"
+        v-else>
+        No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
+        </v-container>
+      </v-card-text>
+    </v-card>
     <v-navigation-drawer
       v-model="isSidepanelOpen"
       right
@@ -90,7 +144,7 @@
       Sorry, we were not able to complete the simulation successfully. Please
       try again in a few seconds, or contact us if the problem persists.
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -111,6 +165,17 @@ export default Vue.extend({
     isSidepanelOpen: true,
     hasSimulationError: false,
     communityData: null,
+    headersAbundance: [
+      { text: "Organism", value: "id" },
+      { text: "Model", value: "id" },
+      { text: "Abundance", value: "value" }
+    ],
+    headersCrossFeeding: [
+      { text: "From", value: "from" },
+      { text: "To", value: "to" },
+      { text: "Metabolite", value: "metabolite" },
+      { text: "Value", value: "value" }
+    ],
     media: [
       {
         id: 1,
@@ -170,10 +235,11 @@ export default Vue.extend({
       return this.$store.state.models.models;
     },
     ...mapGetters({
-      organism: "organisms/getOrganismById"
+      getModelByID: "models/getModelById",
+      getOrganismByID: "organisms/getOrganismById"
     })
   },
-  mounted() {
+  created() {
     this.selectedMethod = this.methods[0];
   },
   methods: {
