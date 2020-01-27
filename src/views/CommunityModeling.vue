@@ -1,8 +1,9 @@
 <template>
-  <div class="interactive-map fill-height">
-    <v-container>
-      <h1>Some test results go here</h1>
-      <v-btn
+  <v-container>
+    <v-card>
+      <v-card-title></v-card-title>
+      <v-card-text>
+     <v-btn
         color="primary"
         small
         fab
@@ -13,8 +14,51 @@
       >
         <v-icon>apps</v-icon>
       </v-btn>
+    <v-container @click="isSidepanelOpen = false">
+<!-- Community Growth Rate -->
+      <h1>Community Modeling</h1>
+      <h2>Community Growth Rate</h2>
+      <p> {{ this.communityData.growth_rate }} </p>
+<!-- Abundance -->
+      <h2>Abundance</h2>
+      <v-data-table
+      :headers="headersAbundance"
+      :items="communityData.abundance"
+      class="elevation-1 pa-2 my-3"
+      >
+      <template v-slot:items="props">
+        <td>{{ props.item.id }}</td>
+        <td>{{ props.item.value }}</td>
+      </template>
+      <template v-slot:no-data>
+        <v-alert :value="true" color="error" icon="warning">
+          No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
+        </v-alert>
+      </template>
+      </v-data-table>
+<!-- Cross-Feeding -->
+      <h2>Cross-Feeding</h2>
+      <v-data-table
+      :headers="headersCrossFeeding"
+      :items="communityData.cross_feeding"
+      class="elevation-1 pa-2 my-3"
+      >
+      <template v-slot:items="props">
+        <td>{{ props.item.from }}</td>
+        <td>{{ props.item.to }}</td>
+        <td>{{ props.item.metabolite }}</td>
+        <td>{{ props.item.value }}</td>
+      </template>
+      <template v-slot:no-data>
+        <v-alert :value="true" color="error" icon="warning">
+          No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
+        </v-alert>
+      </template>
+      </v-data-table>
     </v-container>
-    <v-navigation-drawer
+    </v-card-text>
+  </v-card>
+      <v-navigation-drawer
       v-model="isSidepanelOpen"
       right
       absolute
@@ -90,7 +134,7 @@
       Sorry, we were not able to complete the simulation successfully. Please
       try again in a few seconds, or contact us if the problem persists.
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -110,7 +154,25 @@ export default Vue.extend({
     selectedMethod: null,
     isSidepanelOpen: true,
     hasSimulationError: false,
-    communityData: null,
+    communityData: {},
+    // communityData: {
+    //   abundance: [
+    //     {id: '1', value: '0.3'},
+    //     {id: '5', value: '0.7'}
+    //   ],
+    //   cross_feeding: [{from: '1', to: '5', metabolite: 'M_EX_asp_c', value: '5'}],
+    //   growth_rate: 0.55342358
+    // },
+    headersAbundance: [
+        { text: 'Model', value: 'id'},
+        { text: 'Abundance', value: 'value' }
+      ],
+    headersCrossFeeding: [
+        { text: 'From', value: 'from' },
+        { text: 'To', value: 'to' },
+        { text: 'Metabolite', value: 'metabolite' },
+        { text: 'Value', value: 'value' }
+      ],
     media: [
       {
         id: 1,
