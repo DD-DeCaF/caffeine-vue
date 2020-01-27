@@ -255,6 +255,11 @@
         again.
       </v-snackbar>
 
+      <v-snackbar color="warning" v-model="hasConsentError" :timeout="6000">
+        Sorry, we were unable to retrieve your consents. You may be asked about
+        your preferences again.
+      </v-snackbar>
+
       <v-snackbar color="error" v-model="unauthorizedError" :timeout="6000">
         Sorry, you need to be logged in to access {{ unauthorizedError }}.
       </v-snackbar>
@@ -333,6 +338,14 @@ export default Vue.extend({
       },
       set(newValue) {
         this.$store.commit("setDeleteError", null);
+      }
+    },
+    hasConsentError: {
+      get() {
+        return this.$store.state.session.consentError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("session/setConsentError", null);
       }
     },
     unauthorizedError: {
