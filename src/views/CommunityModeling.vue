@@ -3,62 +3,64 @@
     <v-card>
       <v-card-title></v-card-title>
       <v-card-text>
-     <v-btn
-        color="primary"
-        small
-        fab
-        top
-        right
-        class="sidepanel-toggle"
-        @click="isSidepanelOpen = true"
-      >
-        <v-icon>apps</v-icon>
-      </v-btn>
-    <v-container @click="isSidepanelOpen = false">
-<!-- Community Growth Rate -->
-      <h1>Community Modeling</h1>
-      <h2>Community Growth Rate</h2>
-      <p> {{ this.communityData.growth_rate }} </p>
-<!-- Abundance -->
-      <h2>Abundance</h2>
-      <v-data-table
-      :headers="headersAbundance"
-      :items="communityData.abundance"
-      class="elevation-1 pa-2 my-3"
-      >
-      <template v-slot:items="props">
-        <td>{{ props.item.id }}</td>
-        <td>{{ props.item.value }}</td>
-      </template>
-      <template v-slot:no-data>
-        <v-alert :value="true" color="error" icon="warning">
-          No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
-        </v-alert>
-      </template>
-      </v-data-table>
-<!-- Cross-Feeding -->
-      <h2>Cross-Feeding</h2>
-      <v-data-table
-      :headers="headersCrossFeeding"
-      :items="communityData.cross_feeding"
-      class="elevation-1 pa-2 my-3"
-      >
-      <template v-slot:items="props">
-        <td>{{ props.item.from }}</td>
-        <td>{{ props.item.to }}</td>
-        <td>{{ props.item.metabolite }}</td>
-        <td>{{ props.item.value }}</td>
-      </template>
-      <template v-slot:no-data>
-        <v-alert :value="true" color="error" icon="warning">
-          No data to display yet. Select a medium and at least two models, then click SIMULATE NOW.
-        </v-alert>
-      </template>
-      </v-data-table>
-    </v-container>
-    </v-card-text>
-  </v-card>
-      <v-navigation-drawer
+        <v-btn
+          color="primary"
+          small
+          fab
+          top
+          right
+          class="sidepanel-toggle"
+          @click="isSidepanelOpen = true"
+        >
+          <v-icon>apps</v-icon>
+        </v-btn>
+        <v-container @click="isSidepanelOpen = false">
+          <!-- Community Growth Rate -->
+          <h1>Community Modeling</h1>
+          <h2>Community Growth Rate</h2>
+          <p>{{ this.communityData.growth_rate }}</p>
+          <!-- Abundance -->
+          <h2>Abundance</h2>
+          <v-data-table
+            :headers="headersAbundance"
+            :items="communityData.abundance"
+            class="elevation-1 pa-2 my-3"
+          >
+            <template v-slot:items="props">
+              <td>{{ props.item.id }}</td>
+              <td>{{ props.item.value }}</td>
+            </template>
+            <template v-slot:no-data>
+              <v-alert :value="true" color="error" icon="warning">
+                No data to display yet. Select a medium and at least two models,
+                then click SIMULATE NOW.
+              </v-alert>
+            </template>
+          </v-data-table>
+          <!-- Cross-Feeding -->
+          <h2>Cross-Feeding</h2>
+          <v-data-table
+            :headers="headersCrossFeeding"
+            :items="communityData.cross_feeding"
+            class="elevation-1 pa-2 my-3"
+          >
+            <template v-slot:items="props">
+              <td>{{ props.item.from }}</td>
+              <td>{{ props.item.to }}</td>
+              <td>{{ props.item.metabolite }}</td>
+              <td>{{ props.item.value }}</td>
+            </template>
+            <template v-slot:no-data>
+              <v-alert :value="true" color="error" icon="warning">
+                No data to display yet. Select a medium and at least two models,
+                then click SIMULATE NOW.
+              </v-alert>
+            </template>
+          </v-data-table>
+        </v-container>
+      </v-card-text>
+    </v-card>
+    <v-navigation-drawer
       v-model="isSidepanelOpen"
       right
       absolute
@@ -156,15 +158,15 @@ export default Vue.extend({
     hasSimulationError: false,
     communityData: null,
     headersAbundance: [
-        { text: 'Model', value: 'id'},
-        { text: 'Abundance', value: 'value' }
-      ],
+      { text: "Model", value: "id" },
+      { text: "Abundance", value: "value" }
+    ],
     headersCrossFeeding: [
-        { text: 'From', value: 'from' },
-        { text: 'To', value: 'to' },
-        { text: 'Metabolite', value: 'metabolite' },
-        { text: 'Value', value: 'value' }
-      ],
+      { text: "From", value: "from" },
+      { text: "To", value: "to" },
+      { text: "Metabolite", value: "metabolite" },
+      { text: "Value", value: "value" }
+    ],
     media: [
       {
         id: 1,
