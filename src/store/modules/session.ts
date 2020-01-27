@@ -20,7 +20,128 @@ type LinkedJWTAuthenticated =
       jwt: JWT;
     };
 
+/**
+ * Description of user-given/-rejected consents
+ */
+export interface Consent {
+  /**
+   * Whether the consent was accepted or rejected/revoked.
+   *
+   * Values:
+   * `"accepted"`
+   * `"rejected"`
+   *
+   * @example
+   * "accepted"
+   */
+  status: string;
+  /**
+   * Type of the consent
+   *
+   * Values:
+   * `"gdpr"` - consenting to data processing
+   * `"cookie"` - consenting to cookies on website
+   *
+   * @example
+   * "gdpr"
+   */
+  type: string;
+  /**
+   * Category/type the data-processing the consent relates to.
+   *
+   * @example
+   * // GDPR:
+   * // User signed up for a newsletter with their email.
+   * // Email is a personal identifiable information (PII) and stored
+   * // on our servers, so we need their consent. In this case, we assign the
+   * // consent the category "newsletter"
+   * "newsletter"
+   *
+   * // Cookies:
+   * // User consented to analytics cookies. To distinguish this consent from,
+   * // consent for essential or marketing cookies, we assign the consent
+   * // the category "analytics"
+   * "analytics"
+   */
+  category: string;
+  /**
+   * Unix timestamp of the time when user accepted/rejected the consent.
+   *
+   * @default current timestamp
+   *
+   * @example
+   * // User consented to a newsletter at Wed Jan 15 2020 12:36:17
+   * // so the timestamp becomes
+   * 1579088177
+   */
+  timestamp?: number;
+  /**
+   * Timestamp of the time when the consent should be revoked.
+   *
+   * @default "unlimited"
+   *
+   * @example
+   * // User consented to a newsletter at Wed Jan 15 2020 12:36:17.
+   * // The website's policy mentions that the users' consents are valid
+   * // for 2 years, so the validUntil is unix timestamp of Wed Jan 15 2022 12:36:17
+   * 1642246577
+   *
+   * // Alternatively, the privacy policy may state that the users' consents
+   * // are valid for unlimited time. Rather than entering an arbitrary high
+   * // number, it is better to set the field as "unlimited"
+   * "unlimited"
+   */
+  validUntil?: number | string;
+  /**
+   * Source of the consent.
+   *
+   * @example
+   * // If user's consent can be given via website or api, and user consented
+   * // to the newsletter via website, the value would be:
+   * "website"
+   *
+   * // Alternatively, if we're only on the website, and the cookies consent
+   * // was given in the cookies consent banner, we might assign the value:
+   * "cookie_consent_banner"
+   */
+  source?: string;
+  /**
+   * Exact wording of what the user consented to.
+   *
+   * @example
+   * // User signed up for a newsletter. The sign-up form contained following
+   * // info:
+   * "By clicking on the submit button, you consent to us processing your data. For more information, see Privacy Policy"
+   */
+  message?: string;
+}
+
+/**
+ * GDPR consent - consent to store and/or process user's data
+ *
+ * For example when user registers, they should be acknowledged that by
+ * registering, they consent to submitting their data and consent to us
+ * processing the data. For such consent, use the GDPRConsent object
+ */
+export interface GDPRConsent extends Consent {
+  type: "gdpr";
+}
+
+/**
+ * Cookie consent - consent to store cookies on user's machine (browser)
+ *
+ * For example when user visits the page, they should be informed that the
+ * website uses cookies, and them accepting/rejecting that for individual types
+ * of cookies should be recorded as CookieConsent objects.
+ */
+
+export interface CookieConsent extends Consent {
+  type: "cookie";
+}
+
 type SessionState = LinkedJWTAuthenticated & {
+  consentError: null;
+  consents: Consent[];
   refreshError: null;
   refreshRequest: Promise<void> | null;
 };
@@ -29,6 +150,8 @@ export default vuexStoreModule({
   namespaced: true,
   state: {
     isAuthenticated: false,
+    consentError: null,
+    consents: [],
     jwt: null,
     refreshError: null,
     // While a token refresh request is in progress, the following variable will
@@ -55,6 +178,21 @@ export default vuexStoreModule({
       state.isAuthenticated = false;
       state.jwt = null;
       localStorage.removeItem("jwt");
+    },
+    setConsent(state, consent: Consent) {
+      state.consents = [
+        // keep all consents where either c.type or c.category are different
+        ...state.consents.filter(c =>
+          ["type", "category"].reduce(
+            (predicate: boolean, key) => predicate || c[key] !== consent[key],
+            false
+          )
+        ),
+        consent
+      ];
+    },
+    setConsentError(state, error) {
+      state.consentError = error;
     }
   },
   actions: {
@@ -169,6 +307,30 @@ export default vuexStoreModule({
           });
         commit("setRefreshRequest", refreshRequest);
       }
+    },
+    fetchConsents({ state, commit }) {
+      if (state.isAuthenticated) {
+        axios
+          .get(`${settings.apis.iam}/consent`)
+          .then(response => {
+            response.data.map(consent => {
+              commit("setConsent", consent);
+            });
+          })
+          .catch(error => {
+            commit("setConsentError", error);
+          });
+      }
+    },
+    addConsent({ commit }, consent) {
+      axios
+        .post(`${settings.apis.iam}/consent`, consent)
+        .then(response => {
+          commit("setConsent", consent);
+        })
+        .catch(error => {
+          commit("setConsentError", error);
+        });
     }
   }
 });
