@@ -154,15 +154,7 @@ export default Vue.extend({
     selectedMethod: null,
     isSidepanelOpen: true,
     hasSimulationError: false,
-    communityData: {},
-    // communityData: {
-    //   abundance: [
-    //     {id: '1', value: '0.3'},
-    //     {id: '5', value: '0.7'}
-    //   ],
-    //   cross_feeding: [{from: '1', to: '5', metabolite: 'M_EX_asp_c', value: '5'}],
-    //   growth_rate: 0.55342358
-    // },
+    communityData: null,
     headersAbundance: [
         { text: 'Model', value: 'id'},
         { text: 'Abundance', value: 'value' }
