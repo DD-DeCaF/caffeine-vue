@@ -241,7 +241,7 @@ export default Vue.extend({
     },
     login(params: object, type: string) {
       this.isLoading = true;
-      axios
+      return axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
         .then((response: AxiosResponse<JWT>) => {
           this.$store.commit("session/login", response.data);
@@ -283,7 +283,18 @@ export default Vue.extend({
             .currentUser!.getIdToken(true)
             .then(idToken => {
               const credentials = { uid: result.user.uid, token: idToken };
-              this.login(credentials, "firebase");
+              this.login(credentials, "firebase").then(() => {
+                if (!this.isLoginSuccess) {
+                  return;
+                }
+                if (result.additionalUserInfo.isNewUser) {
+                  this.$store.dispatch("session/acceptGdprConsent", {
+                    category: "registration",
+                    message: this.$refs.disclaimer.textContent,
+                    source: "web"
+                  });
+                }
+              });
             });
         })
         .catch(error => {
@@ -293,6 +304,12 @@ export default Vue.extend({
     onRegister() {
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
+
+      this.$store.dispatch("session/acceptGdprConsent", {
+        category: "registration",
+        message: this.$refs.disclaimer.textContent,
+        source: "web"
+      });
     },
     forgotPassword() {
       this.isLoginDialogVisible = false;
