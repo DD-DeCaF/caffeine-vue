@@ -68,6 +68,7 @@ export default new Vuex.Store({
   },
   actions: {
     fetchAllData({ dispatch }) {
+      dispatch("session/fetchConsents");
       dispatch("designs/fetchDesigns");
       dispatch("experiments/fetchExperiments");
       dispatch("jobs/fetchJobs");
