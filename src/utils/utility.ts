@@ -12,13 +12,13 @@ export function partitionedList(contentType, separatorType) {
   if (validator(contentType) && validator(separatorType)) {
     switch (contentType) {
       case "organisms":
-        items = [...store.getters.designs.designs];
+        items = [...store.getters["organisms/getOrganisms"]];
         break;
       case "models":
-        items = [...store.getters.models.models];
+        items = [...store.getters["models/getModels"]];
         break;
       case "projects":
-        items = [...store.getters.projects.projects];
+        items = [...store.getters["projects/getProjects"]];
         break;
       case "maps":
         items = [...store.getters["maps/getMaps"]];

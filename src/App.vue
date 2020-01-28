@@ -116,6 +116,25 @@
 
             <v-tooltip bottom :disabled="isAuthenticated">
               <v-list-tile
+                slot="activator"
+                to="/community-modeling"
+                :disabled="!isAuthenticated"
+              >
+                <v-list-tile-action>
+                  <v-icon>grain</v-icon>
+                </v-list-tile-action>
+
+                <v-list-tile-content>
+                  <v-list-tile-title>Community Modeling</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <span>
+                {{ $store.state.commonTooltipMessages.unauthenticated }}
+              </span>
+            </v-tooltip>
+
+            <v-tooltip bottom :disabled="isAuthenticated">
+              <v-list-tile
                 to="/jobs"
                 slot="activator"
                 :disabled="!isAuthenticated"
