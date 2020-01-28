@@ -329,7 +329,7 @@ export default vuexStoreModule({
       }
     },
     addConsent({ commit }, consent) {
-      const remoteConsent = snakeCasePropertyNames({
+      const formattedConsent = {
         ...consent,
         validUntil: consent.validUntil
           ? toISOFormat(consent.validUntil)
@@ -337,11 +337,12 @@ export default vuexStoreModule({
         timestamp: consent.timestamp
           ? toISOFormat(consent.timestamp)
           : undefined
-      });
+      };
+      const remoteConsent = snakeCasePropertyNames(formattedConsent);
       axios
         .post(`${settings.apis.iam}/consent`, remoteConsent)
         .then(response => {
-          commit("setConsent", consent);
+          commit("setConsent", formattedConsent);
         })
         .catch(error => {
           commit("setConsentError", error);
