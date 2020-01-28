@@ -347,6 +347,42 @@ export default vuexStoreModule({
         .catch(error => {
           commit("setConsentError", error);
         });
+    },
+    addGdprConsent({ dispatch }, consent) {
+      dispatch("addConsent", {
+        ...consent,
+        type: "gdpr"
+      });
+    },
+    addCookieConsent({ dispatch }, consent) {
+      dispatch("addConsent", {
+        ...consent,
+        type: "cookie"
+      });
+    },
+    acceptGdprConsent({ dispatch }, consent) {
+      dispatch("addGdprConsent", {
+        ...consent,
+        status: "accepted"
+      });
+    },
+    rejectGdprConsent({ dispatch }, consent) {
+      dispatch("addGdprConsent", {
+        ...consent,
+        status: "rejected"
+      });
+    },
+    acceptCookieConsent({ dispatch }, consent) {
+      dispatch("addCookieConsent", {
+        ...consent,
+        status: "accepted"
+      });
+    },
+    rejectCookieConsent({ dispatch }, consent) {
+      dispatch("addCookieConsent", {
+        ...consent,
+        status: "rejected"
+      });
     }
   }
 });
