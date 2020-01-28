@@ -49,8 +49,8 @@
             class="elevation-1 pa-2 my-3"
           >
             <template v-slot:items="props">
-              <td>{{ props.item.from }}</td>
-              <td>{{ props.item.to }}</td>
+              <td>{{ getModelByID(props.item.from).name }}</td>
+              <td>{{ getModelByID(props.item.to).name }}</td>
               <td>{{ props.item.metabolite }}</td>
               <td>{{ props.item.value }}</td>
             </template>
@@ -205,6 +205,20 @@ export default Vue.extend({
           "tungs",
           "zn2"
         ]
+      },
+      {
+        id: 2,
+        name: "M9 Glucose, Fructose, Sucrose",
+        componentIDs: ['ca2', 'cl','cobalt2','cu2','fe2','fe3','h',
+              'h2o','k','mg2','mn2','mobd','na1','tungs','zn2','co2',
+              'ni2','sel','slnt','so4','nh4','pi','cbl1','nh4','h2','glc__D', 'fru', 'sucr',
+                                   'ergst',
+                            'zymst',
+                            'hdcea',
+                                   'ocdca',
+                                   'ocdcea',
+                                   'ocdcya'
+        ]
       }
     ],
     methods: [
@@ -240,6 +254,7 @@ export default Vue.extend({
     })
   },
   created() {
+    this.selectedMedium = this.media[0];
     this.selectedMethod = this.methods[0];
   },
   methods: {
