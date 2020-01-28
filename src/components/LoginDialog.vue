@@ -112,6 +112,23 @@
             >Login</v-btn
           >
         </v-card-actions>
+
+        <div ref="disclaimer">
+          <small class="mb-0 pl-2">
+            By creating an account you agree to the
+            <router-link to="terms-of-service">
+              <span @click="isLoginDialogVisible = false">
+                Terms of Service
+              </span>
+            </router-link>
+            and
+            <router-link to="privacy-policy">
+              <span @click="isLoginDialogVisible = false">
+                Privacy policy</span
+              ></router-link
+            >.
+          </small>
+        </div>
       </v-card>
 
       <v-snackbar
