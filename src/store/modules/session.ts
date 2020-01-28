@@ -1,6 +1,10 @@
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
+import {
+  snakeCasePropertyNames,
+  camelCasePropertyNames
+} from "@/utils/utility";
 
 export interface JWT {
   jwt: string;
@@ -314,7 +318,8 @@ export default vuexStoreModule({
           .get(`${settings.apis.iam}/consent`)
           .then(response => {
             response.data.map(consent => {
-              commit("setConsent", consent);
+              const localConsent = camelCasePropertyNames(consent);
+              commit("setConsent", localConsent);
             });
           })
           .catch(error => {
@@ -323,8 +328,9 @@ export default vuexStoreModule({
       }
     },
     addConsent({ commit }, consent) {
+      const remoteConsent = snakeCasePropertyNames(consent);
       axios
-        .post(`${settings.apis.iam}/consent`, consent)
+        .post(`${settings.apis.iam}/consent`, remoteConsent)
         .then(response => {
           commit("setConsent", consent);
         })
