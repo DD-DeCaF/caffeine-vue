@@ -113,7 +113,7 @@
           >
         </v-card-actions>
 
-        <div ref="disclaimer">
+        <div v-if="!isLoading" ref="disclaimer">
           <small class="mb-0 pl-2">
             By creating an account you agree to the
             <router-link to="terms-of-service">
