@@ -196,6 +196,9 @@ export default vuexStoreModule({
         consent
       ];
     },
+    clearConsents(state) {
+      state.consents = [];
+    },
     setConsentError(state, error) {
       state.consentError = error;
     }
@@ -314,18 +317,22 @@ export default vuexStoreModule({
       }
     },
     fetchConsents({ state, commit }) {
-      if (state.isAuthenticated) {
-        axios
-          .get(`${settings.apis.iam}/consent`)
-          .then(response => {
-            response.data.map(consent => {
-              const localConsent = camelCasePropertyNames(consent);
-              commit("setConsent", localConsent);
-            });
-          })
-          .catch(error => {
-            commit("setConsentError", error);
+      if (!state.isAuthenticated) {
+        // TODO: Once cookies are implemented, first check if consents info is
+        //       in localStorage, and only if not then clear consents
+        commit("clearConsents");
+      }
+      axios
+        .get(`${settings.apis.iam}/consent`)
+        .then(response => {
+          response.data.map(consent => {
+            const localConsent = camelCasePropertyNames(consent);
+            commit("setConsent", localConsent);
           });
+        })
+        .catch(error => {
+          commit("setConsentError", error);
+        });
       }
     },
     addConsent({ commit }, consent) {
