@@ -3,7 +3,8 @@ import * as settings from "@/utils/settings";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
 import {
   snakeCasePropertyNames,
-  camelCasePropertyNames
+  camelCasePropertyNames,
+  toISOFormat
 } from "@/utils/utility";
 
 export interface JWT {
@@ -328,7 +329,15 @@ export default vuexStoreModule({
       }
     },
     addConsent({ commit }, consent) {
-      const remoteConsent = snakeCasePropertyNames(consent);
+      const remoteConsent = snakeCasePropertyNames({
+        ...consent,
+        validUntil: consent.validUntil
+          ? toISOFormat(consent.validUntil)
+          : undefined,
+        timestamp: consent.timestamp
+          ? toISOFormat(consent.timestamp)
+          : undefined
+      });
       axios
         .post(`${settings.apis.iam}/consent`, remoteConsent)
         .then(response => {

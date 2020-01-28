@@ -1,4 +1,5 @@
 import Vue from "vue";
+import moment from "moment";
 import { snakeCase, camelCase } from "lodash";
 import store from "../store";
 
@@ -98,4 +99,8 @@ export function snakeCasePropertyNames(obj) {
 
 export function camelCasePropertyNames(obj) {
   return mapPropertyNames(obj, camelCase);
+}
+
+export function toISOFormat(datetime) {
+  return moment(datetime).format("YYYY-MM-DDTHH:mm:ss.SSSSSZ");
 }
