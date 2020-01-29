@@ -321,6 +321,7 @@ export default vuexStoreModule({
         // TODO: Once cookies are implemented, first check if consents info is
         //       in localStorage, and only if not then clear consents
         commit("clearConsents");
+        return;
       }
       axios
         .get(`${settings.apis.iam}/consent`)
