@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-layout justify-center>
+    <v-layout column align-center>
       <v-flex md6>
         <h1>Privacy Policy</h1>
         <p>
@@ -54,6 +54,63 @@
           >
         </p> -->
       </v-flex>
+      <v-flex v-if="isAuthenticated">
+        <v-btn color="primary" class="mb-3" @click="switchVisibility()"
+          >Change Privacy Settings</v-btn
+        >
+      </v-flex>
+      <v-flex md6 v-if="showForm">
+        <v-layout column align-center>
+          <v-form>
+            <v-flex v-for="consent in consents" v-bind:key="consent.category">
+              <v-checkbox
+                :label="consent.label"
+                color="primary"
+                v-model="consent.status"
+                false-value="rejected"
+                value="accepted"
+                :disabled="consent.readOnly"
+              ></v-checkbox>
+              <p>{{ consent.message }}</p>
+            </v-flex>
+          </v-form>
+          <v-btn color="primary" class="mb-3" @click="acceptPrivacyChanges()"
+            >Save Changes</v-btn
+          >
+        </v-layout>
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
+
+<script lang="ts">
+import Vue from "vue";
+import _ from "lodash";
+
+export default Vue.extend({
+  name: "PrivacyPolicy",
+  data: () => ({
+    showForm: false,
+    isAuthenticated: false,
+    consents: []
+  }),
+  created() {
+    this.fetchConsents();
+  },
+  methods: {
+    fetchConsents() {
+      this.isAuthenticated = this.$store.state.session.isAuthenticated;
+      this.consents = _.cloneDeep(this.$store.state.session.consents);
+    },
+    switchVisibility() {
+      this.showForm = this.showForm ? false : true;
+    },
+    acceptPrivacyChanges() {
+      this.consents.map(el => {
+        el.timestamp = Date.now();
+        this.$store.dispatch("session/addConsent", el);
+      });
+    }
+  }
+});
+</script>
