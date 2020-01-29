@@ -144,7 +144,16 @@ export interface CookieConsent extends Consent {
   type: "cookie";
 }
 
+export interface CookieOption {
+  category: string;
+  label: string;
+  message: string;
+  default: boolean;
+  readOnly: boolean;
+}
+
 type SessionState = LinkedJWTAuthenticated & {
+  cookieOptions: CookieOption[];
   consentError: null;
   consents: Consent[];
   refreshError: null;
@@ -157,6 +166,53 @@ export default vuexStoreModule({
     isAuthenticated: false,
     consentError: null,
     consents: [],
+    cookieOptions: [
+      {
+        category: "strictly_necessary",
+        label: "Strictly Necessary",
+        message:
+          "These cookies are essential for you to use the website and its " +
+          "features, and security reasons.",
+        default: true,
+        readOnly: true
+      },
+      {
+        category: "preferences",
+        label: "Preferences",
+        message:
+          "These cookies allow to remember choices you have made such as " +
+          "what your user name and password are so you can automatically " +
+          "log in.",
+        default: false,
+        readOnly: false
+      },
+      {
+        category: "statistics",
+        label: "Statistics",
+        message:
+          "These cookies collect information about how you use a website, " +
+          "like which pages you visited and which links you clicked on. " +
+          "None of this information can be used to identify you. It is all " +
+          "aggregated and, therefore, anonymized. Their sole purpose is " +
+          "to improve website functions. This includes cookies from " +
+          "third-party analytics services as long as the cookies are for " +
+          "the exclusive use of the owner of the website visited.",
+        default: false,
+        readOnly: false
+      }
+      // {
+      //   category: "marketing",
+      //   label: "Marketing",
+      //   messages:
+      //     "These cookies track your online activity to help advertisers " +
+      //     "deliver more relevant advertising or to limit how many times " +
+      //     "you see an ad. These cookies can share that information with " +
+      //     "other organizations or advertisers. These are persistent " +
+      //     "cookies and almost always of third-party provenance.",
+      //   default: false,
+      //   readOnly: false
+      // }
+    ],
     jwt: null,
     refreshError: null,
     // While a token refresh request is in progress, the following variable will
