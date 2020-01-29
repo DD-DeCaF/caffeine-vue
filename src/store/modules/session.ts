@@ -333,7 +333,6 @@ export default vuexStoreModule({
         .catch(error => {
           commit("setConsentError", error);
         });
-      }
     },
     addConsent({ commit }, consent) {
       const formattedConsent = {
