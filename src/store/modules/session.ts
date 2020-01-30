@@ -379,10 +379,12 @@ export default vuexStoreModule({
       }
     },
     fetchConsents({ state, commit }) {
+      // Fetch consents from localStorage if anonymous user
       if (!state.isAuthenticated) {
-        // TODO: Once cookies are implemented, first check if consents info is
-        //       in localStorage, and only if not then clear consents
-        commit("clearConsents");
+        const consentsJson = localStorage.getItem("consents");
+        const consents = consentsJson ? JSON.parse(consentsJson) : [];
+        consents.forEach((consent: Consent) => commit("setConsent", consent));
+        commit("setConsentsPromise", Promise.resolve(consents));
         return;
       }
       const consentsPromise = axios
@@ -398,7 +400,7 @@ export default vuexStoreModule({
         });
       commit("setConsentsPromise", consentsPromise);
     },
-    addConsent({ commit }, consent) {
+    addConsent({ commit, state }, consent) {
       const formattedConsent = {
         ...consent,
         validUntil: consent.validUntil
@@ -408,6 +410,21 @@ export default vuexStoreModule({
           ? toISOFormat(consent.timestamp)
           : undefined
       };
+      // Store consent in localStorage if anonymous user
+      if (!state.isAuthenticated) {
+        const updatedConsents = [
+          ...state.consents.filter(c =>
+            ["type", "category"].reduce(
+              (predicate: boolean, key) => predicate || c[key] !== consent[key],
+              false
+            )
+          ),
+          formattedConsent
+        ];
+        localStorage.setItem("consents", JSON.stringify(updatedConsents));
+        commit("setConsent", formattedConsent);
+        return;
+      }
       const remoteConsent = snakeCasePropertyNames(formattedConsent);
       axios
         .post(`${settings.apis.iam}/consent`, remoteConsent)
@@ -417,6 +434,15 @@ export default vuexStoreModule({
         .catch(error => {
           commit("setConsentError", error);
         });
+    },
+    addConsentsFromLocalStorage({ dispatch }) {
+      const consents = localStorage.getItem("consents");
+      if (consents) {
+        JSON.parse(consents).forEach((consent: Consent) => {
+          dispatch("addConsent", consent);
+        });
+      }
+      localStorage.removeItem("consents");
     },
     addGdprConsent({ dispatch }, consent) {
       dispatch("addConsent", {
