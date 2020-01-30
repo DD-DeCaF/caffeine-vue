@@ -156,6 +156,7 @@ type SessionState = LinkedJWTAuthenticated & {
   cookieOptions: CookieOption[];
   consentError: null;
   consents: Consent[];
+  consentsPromise: Promise<void> | null;
   refreshError: null;
   refreshRequest: Promise<void> | null;
 };
@@ -166,6 +167,8 @@ export default vuexStoreModule({
     isAuthenticated: false,
     consentError: null,
     consents: [],
+    consentsPromise: null,
+    // For cookie consent categories, see https://gdpr.eu/cookies/
     cookieOptions: [
       {
         category: "strictly_necessary",
@@ -251,6 +254,9 @@ export default vuexStoreModule({
         ),
         consent
       ];
+    },
+    setConsentsPromise(state, consentsPromise) {
+      state.consentsPromise = consentsPromise;
     },
     clearConsents(state) {
       state.consents = [];
@@ -379,7 +385,7 @@ export default vuexStoreModule({
         commit("clearConsents");
         return;
       }
-      axios
+      const consentsPromise = axios
         .get(`${settings.apis.iam}/consent`)
         .then(response => {
           response.data.map(consent => {
@@ -390,6 +396,7 @@ export default vuexStoreModule({
         .catch(error => {
           commit("setConsentError", error);
         });
+      commit("setConsentsPromise", consentsPromise);
     },
     addConsent({ commit }, consent) {
       const formattedConsent = {
