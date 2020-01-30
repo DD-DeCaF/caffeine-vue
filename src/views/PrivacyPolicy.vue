@@ -54,7 +54,7 @@
           >
         </p> -->
       </v-flex>
-      <v-flex v-if="isAuthenticated">
+      <v-flex>
         <v-btn color="primary" class="mb-3" @click="switchVisibility()"
           >Change Privacy Settings</v-btn
         >
@@ -62,15 +62,17 @@
       <v-flex md6 v-if="showForm">
         <v-layout column align-center>
           <v-form>
-            <v-flex v-for="consent in availableConsents" v-bind:key="consent.category">
+            <v-flex
+              v-for="option in this.$store.state.session.cookieOptions"
+              :key="option.category"
+            >
               <v-checkbox
-                :label="consent.category"
+                :label="option.label"
                 color="primary"
-                v-model="consent.status"
-                false-value="rejected"
-                value="accepted"
+                v-model="cookies[option.category]"
+                :messages="option.message"
+                :disabled="!option.canOptOut"
               ></v-checkbox>
-              <p>{{ consent.message }}</p>
             </v-flex>
           </v-form>
           <v-btn color="primary" class="mb-3" @click="acceptPrivacyChanges()"
@@ -84,31 +86,50 @@
 
 <script lang="ts">
 import Vue from "vue";
-import _ from "lodash";
+import { Consent, CookieOption } from "@/store/modules/session";
 
 export default Vue.extend({
   name: "PrivacyPolicy",
   data: () => ({
     showForm: false,
-    consents: []
-  }),
-  computed: {
-    availableConsents() {
-      return this.$store.state.session.consents;
-    },
-    isAuthenticated(){
-      return this.$store.state.session.isAuthenticated;
+    cookies: {
+      strictlyNecessary: false,
+      preferences: false,
+      statistics: false,
+      marketing: false
     }
+  }),
+  created() {
+    this.$store.state.session.cookieOptions.forEach((option: CookieOption) => {
+      this.cookies[option.category] = option.default;
+    });
+    this.$store.state.session.consentsPromise.then(() => {
+      this.$store.state.session.consents
+        .filter(({ category }: Consent) => category !== "strictly_necessary")
+        .forEach((consent: Consent) => {
+          if (this.cookies.hasOwnProperty(consent.category)) {
+            this.cookies[consent.category] = this.$store.getters[
+              "session/isConsentAccepted"
+            ](consent);
+          }
+        });
+    });
   },
   methods: {
     switchVisibility() {
       this.showForm = this.showForm ? false : true;
     },
     acceptPrivacyChanges() {
-      this.consents.map(el => {
-        el.timestamp = Date.now();
-        this.$store.dispatch("session/addConsent", el);
-      });
+      this.$store.state.session.cookieOptions.forEach(
+        ({ category, message }: CookieOption) => {
+          this.$store.dispatch("session/addCookieConsent", {
+            category: category,
+            message: message,
+            status: this.cookies[category] ? "accepted" : "rejected",
+            source: "cookie_consent_banner"
+          });
+        }
+      );
     }
   }
 });
