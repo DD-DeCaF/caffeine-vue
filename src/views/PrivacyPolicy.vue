@@ -62,14 +62,13 @@
       <v-flex md6 v-if="showForm">
         <v-layout column align-center>
           <v-form>
-            <v-flex v-for="consent in consents" v-bind:key="consent.category">
+            <v-flex v-for="consent in availableConsents" v-bind:key="consent.category">
               <v-checkbox
-                :label="consent.label"
+                :label="consent.category"
                 color="primary"
                 v-model="consent.status"
                 false-value="rejected"
                 value="accepted"
-                :disabled="consent.readOnly"
               ></v-checkbox>
               <p>{{ consent.message }}</p>
             </v-flex>
@@ -91,17 +90,17 @@ export default Vue.extend({
   name: "PrivacyPolicy",
   data: () => ({
     showForm: false,
-    isAuthenticated: false,
     consents: []
   }),
-  created() {
-    this.fetchConsents();
+  computed: {
+    availableConsents() {
+      return this.$store.state.session.consents;
+    },
+    isAuthenticated(){
+      return this.$store.state.session.isAuthenticated;
+    }
   },
   methods: {
-    fetchConsents() {
-      this.isAuthenticated = this.$store.state.session.isAuthenticated;
-      this.consents = _.cloneDeep(this.$store.state.session.consents);
-    },
     switchVisibility() {
       this.showForm = this.showForm ? false : true;
     },
