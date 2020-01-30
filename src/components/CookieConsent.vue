@@ -41,7 +41,10 @@
           @click="isCookieOptionsVisible = true"
           >Choose Cookies</v-btn
         >
-        <v-btn color="primary" class="mb-4 mt-auto" @click="submitCookies"
+        <v-btn
+          color="primary"
+          class="mb-4 mt-auto"
+          @click="submitCookies({ accept, close })"
           >Accept Cookies</v-btn
         >
       </template>
