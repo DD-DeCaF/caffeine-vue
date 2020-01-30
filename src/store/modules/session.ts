@@ -149,7 +149,7 @@ export interface CookieOption {
   label: string;
   message: string;
   default: boolean;
-  readOnly: boolean;
+  canOptOut: boolean;
 }
 
 type SessionState = LinkedJWTAuthenticated & {
@@ -177,7 +177,7 @@ export default vuexStoreModule({
           "These cookies are essential for you to use the website and its " +
           "features, and security reasons.",
         default: true,
-        readOnly: true
+        canOptOut: false
       },
       {
         category: "preferences",
@@ -187,7 +187,7 @@ export default vuexStoreModule({
           "what your user name and password are so you can automatically " +
           "log in.",
         default: false,
-        readOnly: false
+        canOptOut: true
       },
       {
         category: "statistics",
@@ -201,7 +201,7 @@ export default vuexStoreModule({
           "third-party analytics services as long as the cookies are for " +
           "the exclusive use of the owner of the website visited.",
         default: false,
-        readOnly: false
+        canOptOut: true
       }
       // {
       //   category: "marketing",
@@ -213,7 +213,7 @@ export default vuexStoreModule({
       //     "other organizations or advertisers. These are persistent " +
       //     "cookies and almost always of third-party provenance.",
       //   default: false,
-      //   readOnly: false
+      //   canOptOut: true
       // }
     ],
     jwt: null,
