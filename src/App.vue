@@ -236,6 +236,8 @@
         <router-view />
       </v-content>
 
+      <CookieConsent />
+
       <v-snackbar color="error" v-model="hasFetchDataError" :timeout="6000">
         Sorry, we were unable to retrieve some data from the server. Please try
         again in a few minutes.
