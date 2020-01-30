@@ -7,7 +7,7 @@
             v-for="(item, index) in $store.state.session.cookieOptions"
             :key="index"
             v-model="cookies[item.category]"
-            :disabled="item.readOnly"
+            :disabled="!item.canOptOut"
             :label="item.label"
             :messages="item.message"
             color="primary"
@@ -85,8 +85,6 @@ export default Vue.extend({
     });
   },
   methods: {
-    // TODO:
-    // CHANGE READONLY TO DISABLED
     submitCookies({ accept, close }) {
       this.$store.state.session.cookieOptions.forEach(
         ({ category, message }: CookieOption) => {
