@@ -454,5 +454,13 @@ export default vuexStoreModule({
         status: "rejected"
       });
     }
+  },
+  getters: {
+    isConsentAccepted: state => ({ type, category }) => {
+      const consent =
+        state.consents.find(c => c.type == type && c.category == category) ||
+        ({} as Consent);
+      return consent.status === "accepted";
+    }
   }
 });
