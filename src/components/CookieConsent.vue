@@ -88,13 +88,12 @@ export default Vue.extend({
     submitCookies({ accept, close }) {
       this.$store.state.session.cookieOptions.forEach(
         ({ category, message }: CookieOption) => {
-          console.log([category, message])
-          // this.$store.dispatch("session/addCookieConsent", {
-          //   category: category,
-          //   message: message,
-          //   status: this.cookies[category] ? "accepted" : "rejected",
-          //   source: "cookie_consent_banner"
-          // });
+          this.$store.dispatch("session/addCookieConsent", {
+            category: category,
+            message: message,
+            status: this.cookies[category] ? "accepted" : "rejected",
+            source: "cookie_consent_banner"
+          });
         }
       );
       // Do not set cookie on whether user accepted cookies if 'preferences'
