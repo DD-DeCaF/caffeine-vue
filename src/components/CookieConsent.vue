@@ -33,11 +33,18 @@
       </template>
 
       <template v-else>
-        <v-container class="mt-auto px-4 pb-3 pt-0">
-          Our website uses cookies to ensure you get the best experience. By
-          clicking on the Accept button, you agree with the use of these
-          cookies. If you change your mind or want more information please see
-          <router-link to="privacy-policy">Privacy policy</router-link>.
+        <v-container class="mt-auto px-4 pb-0 pt-0">
+          <p>
+            Our website uses cookies to ensure you get the best experience. By
+            clicking on the Accept button, you agree with the use of these
+            cookies. If you change your mind or want more information please see
+            <router-link to="privacy-policy">Privacy policy</router-link>.
+          </p>
+          <p class="mb-0">
+            <small>
+              Preferences cookies are necessary to hide this notification.
+            </small>
+          </p>
         </v-container>
         <v-btn
           color="primary-2"
