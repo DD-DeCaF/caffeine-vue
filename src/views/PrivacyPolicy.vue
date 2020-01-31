@@ -101,7 +101,7 @@
                 duration of a page visit).
               </li>
             </ul>
-
+            <br />
             <h1>Collecting and Using Your Personal Data</h1>
             <h2>Types of Data Collected</h2>
 
@@ -117,7 +117,7 @@
               <li>First name and last name</li>
               <li>Usage Data</li>
             </ul>
-
+            <br />
             <h3>Usage Data</h3>
             <p>Usage Data is collected automatically when using the Service.</p>
             <p>
@@ -257,7 +257,7 @@
                 Your requests to Us.
               </li>
             </ul>
-
+            <br />
             <p>
               We may share your personal information in the following
               situations:
@@ -267,10 +267,8 @@
               <li>
                 <strong>With Service Providers:</strong> We may share Your
                 personal information with Service Providers to monitor and
-                analyze the use of our Service, to show advertisements to You to
-                help support and maintain Our Service, to contact You, to
-                advertise on third party websites to You after You visited our
-                Service or for p ayment processing.
+                analyze the use of our Service, to help support and maintain Our
+                Service, to contact You.
               </li>
               <li>
                 <strong>With Affiliates:</strong> We may share Your information
@@ -281,7 +279,7 @@
                 common control with Us.
               </li>
             </ul>
-
+            <br />
             <h2>Retention of Your Personal Data</h2>
             <p>
               The Consortium will retain Your Personal Data only for as long as
@@ -350,7 +348,7 @@
               </li>
               <li>Protect against legal liability</li>
             </ul>
-
+            <br />
             <h2>Security of Your Personal Data</h2>
             <p>
               The security of Your Personal Data is important to Us, but
@@ -486,6 +484,7 @@
                 revoke your consent for the processing of your information
               </li>
             </ul>
+            <br />
             <p>
               We will consider all requests and provide our response within the
               time period stated by applicable law. Please note, however, that
