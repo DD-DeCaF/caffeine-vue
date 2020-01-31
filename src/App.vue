@@ -344,10 +344,10 @@ export default Vue.extend({
     },
     hasConsentError: {
       get() {
-        return this.$store.state.session.consentError !== null;
+        return this.$store.state.consents.consentError !== null;
       },
       set(newValue) {
-        this.$store.commit("session/setConsentError", null);
+        this.$store.commit("consents/setConsentError", null);
       }
     },
     unauthorizedError: {

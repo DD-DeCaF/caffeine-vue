@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import * as Sentry from "@sentry/browser";
 import session from "./modules/session";
+import consents from "./modules/consents";
 import designs from "./modules/designs";
 import experiments from "./modules/experiments";
 import jobs from "./modules/jobs";
@@ -19,6 +20,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   modules: {
     session,
+    consents,
     designs,
     experiments,
     jobs,
@@ -70,7 +72,7 @@ export default new Vuex.Store({
   },
   actions: {
     fetchAllData({ dispatch }) {
-      dispatch("session/fetchConsents");
+      dispatch("consents/fetchConsents");
       dispatch("designs/fetchDesigns");
       dispatch("experiments/fetchExperiments");
       dispatch("jobs/fetchJobs");

@@ -247,7 +247,7 @@ export default Vue.extend({
           this.$store.commit("session/login", response.data);
           this.isLoginDialogVisible = false;
           this.isLoginSuccess = true;
-          this.$store.dispatch("session/addConsentsFromLocalStorage");
+          this.$store.dispatch("consents/addConsentsFromLocalStorage");
           this.$store.dispatch("fetchAllData");
         })
         .catch(error => {
@@ -263,7 +263,7 @@ export default Vue.extend({
     },
     logout() {
       this.$store.commit("session/logout");
-      this.$store.commit("session/clearConsents");
+      this.$store.commit("consents/clearConsents");
       this.isLogoutSuccess = true;
       this.$store.dispatch("fetchAllData");
       this.$router.replace({ name: "home" });
@@ -290,7 +290,7 @@ export default Vue.extend({
                   return;
                 }
                 if (result.additionalUserInfo.isNewUser) {
-                  this.$store.dispatch("session/acceptGdprConsent", {
+                  this.$store.dispatch("consents/acceptGdprConsent", {
                     category: "registration",
                     message: this.$refs.disclaimer.textContent,
                     source: "web"
@@ -307,7 +307,7 @@ export default Vue.extend({
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
 
-      this.$store.dispatch("session/acceptGdprConsent", {
+      this.$store.dispatch("consents/acceptGdprConsent", {
         category: "registration",
         message: this.$refs.disclaimer.textContent,
         source: "web"

@@ -4,7 +4,7 @@
       <template v-if="isCookieOptionsVisible">
         <v-container class="mt-auto px-4 pb-3 pt-0">
           <v-checkbox
-            v-for="(item, index) in $store.state.session.cookieOptions"
+            v-for="(item, index) in $store.state.consents.cookieOptions"
             :key="index"
             v-model="cookies[item.category]"
             :disabled="!item.canOptOut"
@@ -55,7 +55,7 @@
 <script lang="ts">
 import Vue from "vue";
 import CookieLaw from "vue-cookie-law";
-import { Consent, CookieOption } from "@/store/modules/session";
+import { Consent, CookieOption } from "@/store/modules/consents";
 
 export default Vue.extend({
   name: "CookieConsent",
@@ -72,16 +72,16 @@ export default Vue.extend({
     }
   }),
   created() {
-    this.$store.state.session.cookieOptions.forEach((option: CookieOption) => {
+    this.$store.state.consents.cookieOptions.forEach((option: CookieOption) => {
       this.cookies[option.category] = option.default;
     });
-    this.$store.state.session.consentsPromise.then(() => {
-      this.$store.state.session.consents
+    this.$store.state.consents.consentsPromise.then(() => {
+      this.$store.state.consents.consents
         .filter(({ category }: Consent) => category !== "strictly_necessary")
         .forEach((consent: Consent) => {
           if (this.cookies.hasOwnProperty(consent.category)) {
             this.cookies[consent.category] = this.$store.getters[
-              "session/isConsentAccepted"
+              "consents/isConsentAccepted"
             ](consent);
           }
         });
@@ -89,9 +89,9 @@ export default Vue.extend({
   },
   methods: {
     submitCookies({ accept, close }) {
-      this.$store.state.session.cookieOptions.forEach(
+      this.$store.state.consents.cookieOptions.forEach(
         ({ category, message }: CookieOption) => {
-          this.$store.dispatch("session/addCookieConsent", {
+          this.$store.dispatch("consents/addCookieConsent", {
             category: category,
             message: message,
             status: this.cookies[category] ? "accepted" : "rejected",
