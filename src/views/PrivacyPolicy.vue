@@ -452,11 +452,6 @@
             provide access to and/or a copy of certain information we hold about
             you
           </li>
-          <li>
-            prevent the processing of your information for direct-marketing
-            purposes (including any direct marketing processing based on
-            profiling)
-          </li>
           <li>update information which is out of date or incorrect</li>
           <li>delete certain information which we are holding about you</li>
           <li>
