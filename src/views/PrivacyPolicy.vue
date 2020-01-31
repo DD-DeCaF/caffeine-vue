@@ -506,32 +506,37 @@
             </ul>
           </v-flex>
         </v-layout>
-        <v-flex>
-          <v-btn color="primary" class="mb-3" @click="switchVisibility()"
-            >Change Privacy Settings</v-btn
-          >
-        </v-flex>
-        <v-flex md6 v-if="showForm">
-          <v-layout column align-center>
-            <v-form>
-              <v-flex
-                v-for="option in this.$store.state.consents.cookieOptions"
-                :key="option.category"
-              >
-                <v-checkbox
-                  :label="option.label"
-                  color="primary"
-                  v-model="cookies[option.category]"
-                  :messages="option.message"
-                  :disabled="!option.canOptOut"
-                ></v-checkbox>
-              </v-flex>
-            </v-form>
-            <v-btn color="primary" class="mb-3" @click="acceptPrivacyChanges()"
-              >Save Changes</v-btn
+        <div v-if="showForm">
+          <v-flex>
+            <v-btn color="primary" class="mb-3" @click="switchVisibility()"
+              >Change Privacy Settings</v-btn
             >
-          </v-layout>
-        </v-flex>
+          </v-flex>
+          <v-flex md6>
+            <v-layout column align-center>
+              <v-form>
+                <v-flex
+                  v-for="option in this.$store.state.consents.cookieOptions"
+                  :key="option.category"
+                >
+                  <v-checkbox
+                    :label="option.label"
+                    color="primary"
+                    v-model="cookies[option.category]"
+                    :messages="option.message"
+                    :disabled="!option.canOptOut"
+                  ></v-checkbox>
+                </v-flex>
+              </v-form>
+              <v-btn
+                color="primary"
+                class="mb-3"
+                @click="acceptPrivacyChanges()"
+                >Save Changes</v-btn
+              >
+            </v-layout>
+          </v-flex>
+        </div>
       </v-layout>
     </v-container>
     <v-snackbar
@@ -551,7 +556,7 @@ import { Consent, CookieOption } from "@/store/modules/consents";
 export default Vue.extend({
   name: "PrivacyPolicy",
   data: () => ({
-    showForm: false,
+    formIsVisible: false,
     cookies: {
       strictlyNecessary: false,
       preferences: false,
@@ -560,6 +565,11 @@ export default Vue.extend({
     },
     isSettingsChangeSuccess: false
   }),
+  computed: {
+    showForm() {
+      return this.formIsVisible && this.$store.state.consents.enableConsents;
+    }
+  },
   created() {
     // Load up checkbox values from default and user's consent values
     this.$store.state.consents.cookieOptions.forEach((option: CookieOption) => {
@@ -579,7 +589,7 @@ export default Vue.extend({
   },
   methods: {
     switchVisibility() {
-      this.showForm = this.showForm ? false : true;
+      this.formIsVisible = this.formIsVisible ? false : true;
     },
     acceptPrivacyChanges() {
       this.$store.state.consents.cookieOptions.forEach(

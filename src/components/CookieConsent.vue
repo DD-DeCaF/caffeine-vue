@@ -1,5 +1,9 @@
 <template>
-  <CookieLaw v-bind="$attrs" class="elevation-6">
+  <CookieLaw
+    v-if="$store.state.consents.enableConsents"
+    v-bind="$attrs"
+    class="elevation-6"
+  >
     <template v-slot="{ accept, close }">
       <template v-if="isCookieOptionsVisible">
         <v-container class="mt-auto px-4 pb-3 pt-0">
@@ -64,6 +68,7 @@ export default Vue.extend({
   },
   data: () => ({
     isCookieOptionsVisible: false,
+    shouldShowBanner: true,
     cookies: {
       strictlyNecessary: false,
       preferences: false,
@@ -71,11 +76,26 @@ export default Vue.extend({
       marketing: false
     }
   }),
+  computed: {
+    showBanner() {
+      return this.$store.state.consents.enableConsents && this.shouldShowBanner;
+    }
+  },
   created() {
-    this.$store.state.consents.cookieOptions.forEach((option: CookieOption) => {
-      this.cookies[option.category] = option.default;
-    });
     this.$store.state.consents.consentsPromise.then(() => {
+      // Check if user has any cookies consents. If so, we assume they've seen
+      // the banner before even if that info is not stored in localStorage
+      if (this.$store.state.consents.consents.find(c => c.type === "cookie")) {
+        this.showShowBanner = false;
+        return;
+      }
+      // Otherwise, load up checkbox values from default and user's
+      // consent values
+      this.$store.state.consents.cookieOptions.forEach(
+        (option: CookieOption) => {
+          this.cookies[option.category] = option.default;
+        }
+      );
       this.$store.state.consents.consents
         .filter(({ category }: Consent) => category !== "strictly_necessary")
         .forEach((consent: Consent) => {

@@ -10,10 +10,15 @@ import { Store } from "vuex";
  */
 export const cookiePlugin = (store: Store<any>) => {
   store.subscribe(({ type, payload }, state) => {
-    const clearPreferencesCookies = () =>
+    const clearPreferencesCookies = () => {
+      // Do nothing if consents are not enabled
+      if (!store.state.consents.enableConsents) {
+        return;
+      }
       ["jwt", "cookie:accepted", "consents"].forEach(k =>
         localStorage.removeItem(k)
       );
+    };
     if (type === "consents/setConsent") {
       if (payload.type === "cookie" && payload.category === "preferences") {
         if (store.getters["consents/isConsentAccepted"](payload)) {
