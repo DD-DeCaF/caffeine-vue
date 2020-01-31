@@ -112,6 +112,23 @@
             >Login</v-btn
           >
         </v-card-actions>
+
+        <div v-if="!isLoading" ref="disclaimer">
+          <small class="mb-0 pl-2">
+            By creating an account you agree to the
+            <router-link to="terms-of-service">
+              <span @click="isLoginDialogVisible = false">
+                Terms of Service
+              </span>
+            </router-link>
+            and
+            <router-link to="privacy-policy">
+              <span @click="isLoginDialogVisible = false">
+                Privacy policy</span
+              ></router-link
+            >.
+          </small>
+        </div>
       </v-card>
 
       <v-snackbar
@@ -224,12 +241,13 @@ export default Vue.extend({
     },
     login(params: object, type: string) {
       this.isLoading = true;
-      axios
+      return axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
         .then((response: AxiosResponse<JWT>) => {
           this.$store.commit("session/login", response.data);
           this.isLoginDialogVisible = false;
           this.isLoginSuccess = true;
+          this.$store.dispatch("session/addConsentsFromLocalStorage");
           this.$store.dispatch("fetchAllData");
         })
         .catch(error => {
@@ -245,6 +263,7 @@ export default Vue.extend({
     },
     logout() {
       this.$store.commit("session/logout");
+      this.$store.commit("session/clearConsents");
       this.isLogoutSuccess = true;
       this.$store.dispatch("fetchAllData");
       this.$router.replace({ name: "home" });
@@ -266,7 +285,18 @@ export default Vue.extend({
             .currentUser!.getIdToken(true)
             .then(idToken => {
               const credentials = { uid: result.user.uid, token: idToken };
-              this.login(credentials, "firebase");
+              this.login(credentials, "firebase").then(() => {
+                if (!this.isLoginSuccess) {
+                  return;
+                }
+                if (result.additionalUserInfo.isNewUser) {
+                  this.$store.dispatch("session/acceptGdprConsent", {
+                    category: "registration",
+                    message: this.$refs.disclaimer.textContent,
+                    source: "web"
+                  });
+                }
+              });
             });
         })
         .catch(error => {
@@ -276,6 +306,12 @@ export default Vue.extend({
     onRegister() {
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
+
+      this.$store.dispatch("session/acceptGdprConsent", {
+        category: "registration",
+        message: this.$refs.disclaimer.textContent,
+        source: "web"
+      });
     },
     forgotPassword() {
       this.isLoginDialogVisible = false;

@@ -1,4 +1,6 @@
 import Vue from "vue";
+import moment from "moment";
+import { snakeCase, camelCase } from "lodash";
 import store from "../store";
 
 function validator(value: string) {
@@ -82,4 +84,23 @@ export function partitionedList(contentType, separatorType) {
     previousSeparatorId = item[idKey];
   });
   return itemsWithHeaders;
+}
+
+export function mapPropertyNames(obj, fn: Function) {
+  return Object.keys(obj).reduce((agg, key) => {
+    agg[fn(key)] = obj[key];
+    return agg;
+  }, {});
+}
+
+export function snakeCasePropertyNames(obj) {
+  return mapPropertyNames(obj, snakeCase);
+}
+
+export function camelCasePropertyNames(obj) {
+  return mapPropertyNames(obj, camelCase);
+}
+
+export function toISOFormat(datetime) {
+  return moment(datetime).format("YYYY-MM-DDTHH:mm:ss.SSSSSZ");
 }

@@ -236,6 +236,8 @@
         <router-view />
       </v-content>
 
+      <CookieConsent />
+
       <v-snackbar color="error" v-model="hasFetchDataError" :timeout="6000">
         Sorry, we were unable to retrieve some data from the server. Please try
         again in a few minutes.
@@ -253,6 +255,11 @@
       <v-snackbar color="warning" v-model="hasRefreshError" :timeout="6000">
         Your session has expired and you have been logged out. Please log in
         again.
+      </v-snackbar>
+
+      <v-snackbar color="warning" v-model="hasConsentError" :timeout="6000">
+        Sorry, we were unable to retrieve your consents. You may be asked about
+        your preferences again.
       </v-snackbar>
 
       <v-snackbar color="error" v-model="unauthorizedError" :timeout="6000">
@@ -333,6 +340,14 @@ export default Vue.extend({
       },
       set(newValue) {
         this.$store.commit("setDeleteError", null);
+      }
+    },
+    hasConsentError: {
+      get() {
+        return this.$store.state.session.consentError !== null;
+      },
+      set(newValue) {
+        this.$store.commit("session/setConsentError", null);
       }
     },
     unauthorizedError: {
