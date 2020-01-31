@@ -506,13 +506,13 @@
             </ul>
           </v-flex>
         </v-layout>
-        <div v-if="showForm">
+        <template v-if="showPrivacySettings">
           <v-flex>
             <v-btn color="primary" class="mb-3" @click="switchVisibility()"
               >Change Privacy Settings</v-btn
             >
           </v-flex>
-          <v-flex md6>
+          <v-flex md6 v-if="showForm">
             <v-layout column align-center>
               <v-form>
                 <v-flex
@@ -536,7 +536,7 @@
               >
             </v-layout>
           </v-flex>
-        </div>
+        </template>
       </v-layout>
     </v-container>
     <v-snackbar
@@ -556,7 +556,7 @@ import { Consent, CookieOption } from "@/store/modules/consents";
 export default Vue.extend({
   name: "PrivacyPolicy",
   data: () => ({
-    formIsVisible: false,
+    showForm: false,
     cookies: {
       strictlyNecessary: false,
       preferences: false,
@@ -566,8 +566,8 @@ export default Vue.extend({
     isSettingsChangeSuccess: false
   }),
   computed: {
-    showForm() {
-      return this.formIsVisible && this.$store.state.consents.enableConsents;
+    showPrivacySettings() {
+      return this.$store.state.consents.enableConsents;
     }
   },
   created() {
@@ -589,7 +589,7 @@ export default Vue.extend({
   },
   methods: {
     switchVisibility() {
-      this.formIsVisible = this.formIsVisible ? false : true;
+      this.showForm = this.showForm ? false : true;
     },
     acceptPrivacyChanges() {
       this.$store.state.consents.cookieOptions.forEach(
