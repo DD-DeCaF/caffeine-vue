@@ -78,8 +78,9 @@
     >
       <v-container class="py-1">
         <v-select
-          :items="media"
+          :items="availableMedia"
           :disabled="isUpdating"
+          :loading="isLoading"
           label="Selected Medium"
           autofocus
           item-text="name"
@@ -160,6 +161,7 @@ export default Vue.extend({
   components: {},
   data: () => ({
     isUpdating: false,
+    isLoading: true,
     selectedModels: [],
     selectedMedium: null,
     selectedMethod: null,
@@ -176,77 +178,6 @@ export default Vue.extend({
       { text: "To", value: "to" },
       { text: "Metabolite", value: "metabolite" },
       { text: "Value", value: "value" }
-    ],
-    media: [
-      {
-        id: 1,
-        name: "M9 Glucose",
-        componentIDs: [
-          "ca2",
-          "cl",
-          "co2",
-          "cobalt2",
-          "cu2",
-          "fe2",
-          "glc__D",
-          "h2o",
-          "h",
-          "hco3",
-          "k",
-          "mg2",
-          "mn2",
-          "mobd",
-          "na1",
-          "nh4",
-          "ni2",
-          "o2",
-          "pi",
-          "sel",
-          "so4",
-          "tungs",
-          "zn2"
-        ]
-      },
-      {
-        id: 2,
-        name: "M9 Glucose, Fructose, Sucrose",
-        componentIDs: [
-          "ca2",
-          "cl",
-          "cobalt2",
-          "cu2",
-          "fe2",
-          "fe3",
-          "h",
-          "h2o",
-          "k",
-          "mg2",
-          "mn2",
-          "mobd",
-          "na1",
-          "tungs",
-          "zn2",
-          "co2",
-          "ni2",
-          "sel",
-          "slnt",
-          "so4",
-          "nh4",
-          "pi",
-          "cbl1",
-          "nh4",
-          "h2",
-          "glc__D",
-          "fru",
-          "sucr",
-          "ergst",
-          "zymst",
-          "hdcea",
-          "ocdca",
-          "ocdcea",
-          "ocdcya"
-        ]
-      }
     ],
     methods: [
       {
@@ -275,14 +206,19 @@ export default Vue.extend({
     availableModels() {
       return this.$store.state.models.models;
     },
+    availableMedia() {
+      return this.$store.state.media.media;
+    },
     ...mapGetters({
       getModelByID: "models/getModelById",
       getOrganismByID: "organisms/getOrganismById"
     })
   },
   created() {
-    this.selectedMedium = this.media[0];
     this.selectedMethod = this.methods[0];
+    this.$store.state.media.mediaPromise.then(() => {
+      this.isLoading = false;
+    });
   },
   methods: {
     simulateCommunity() {
