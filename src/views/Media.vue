@@ -17,10 +17,10 @@
     <NewMap v-model="isMapCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
-        <h1 class="mb-2">Maps</h1>
+        <h1 class="mb-2">Media</h1>
         <v-data-table
           :headers="headers"
-          :items="availableMaps"
+          :items="availableMedia"
           class="elevation-8"
           :loading="isLoading || isDeleting"
           :pagination.sync="pagination"
@@ -231,12 +231,12 @@ import * as settings from "@/utils/settings";
 import { mapGetters } from "vuex";
 
 export default Vue.extend({
-  name: "Maps",
+  name: "Media",
   data: () => ({
     isValid: false,
     isDeleting: false,
     isLoading: true,
-    isMapCreationDialogVisible: false,
+    isMediumCreationDialogVisible: false,
     isModelCreationDialogVisible: false,
     isProjectCreationDialogVisible: false,
     isMapEditSuccess: false,
@@ -309,8 +309,8 @@ export default Vue.extend({
       this.selectedModel = this.availableModels.find(
         obj => obj.id == item.model_id
       );
-      this.mediumItemIndex = this.availableMaps.indexOf(item);
-      this.isMapEditDialogVisible = true;
+      this.mediumItemIndex = this.availableMedia.indexOf(item);
+      this.isMediaEditDialogVisible = true;
     },
     deleteItem(item) {
       this.mediumItem = item;
