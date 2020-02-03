@@ -237,7 +237,15 @@ export default Vue.extend({
       this.login(
         { email: this.email.value, password: this.password.value },
         "local"
-      );
+      ).then(() => {
+        if (!this.isLoginSuccess) {
+          return;
+        }
+        this.$store.dispatch("analytics/login", {
+          signInMethod: "email",
+          isNewUser: false
+        });
+      });
     },
     login(params: {[x: string]: any}, type: string) {
       this.isLoading = true;
@@ -322,6 +330,10 @@ export default Vue.extend({
                   lastName: result.additionalUserInfo.profile.family_name,
                   dateJoined: result.user.metadata.a // creation time timestamp
                 });
+                this.$store.dispatch("analytics/login", {
+                  signInMethod: providerKey,
+                  isNewUser: result.additionalUserInfo.isNewUser
+                });
               });
             });
         })
@@ -345,6 +357,10 @@ export default Vue.extend({
         ...params,
         password: undefined, // Hide user's password
         dateJoined: new Date().getTime()
+      });
+      this.$store.dispatch("analytics/login", {
+        signInMethod: "email",
+        isNewUser: true
       });
     },
     forgotPassword() {

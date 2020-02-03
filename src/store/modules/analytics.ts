@@ -37,6 +37,9 @@ export default vuexStoreModule({
     }
   },
   actions: {
+    login({ state }, payload) {
+      state.analytics!.track("login", payload);
+    },
     identifyUser({ state }, payload) {
       state.analytics!.identify(payload.registeredEmail, {
         ...payload,
