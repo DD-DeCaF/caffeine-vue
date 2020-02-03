@@ -302,13 +302,26 @@ export default Vue.extend({
                   });
                 }
                 // Email is not passed to the login function, so we have to 
-                // identify user by email here
+                // identify user by email here.
                 const email = result.user.email || result.additionalUserInfo.profile.email;
+                // Note: identifyUser and updateUser are not guarded by the
+                // isNewUser check as we want to capture the information even
+                // if it is not the first time the user logged in.
                 if (email) {
                   this.$store.dispatch("analytics/identifyUser", {
                     registeredEmail: email
                   });
                 }
+                this.$store.dispatch("analytics/updateUser", {
+                  email,
+                  displayName: result.user.displayName,
+                  photoUrl: result.user.photoURL,
+                  phone: result.user.phoneNumber,
+                  username: result.additionalUserInfo.username,
+                  firstName: result.additionalUserInfo.profile.given_name,
+                  lastName: result.additionalUserInfo.profile.family_name,
+                  dateJoined: result.user.metadata.a // creation time timestamp
+                });
               });
             });
         })
@@ -327,6 +340,11 @@ export default Vue.extend({
       });
       this.$store.dispatch("analytics/identifyUser", {
         registeredEmail: params.email
+      });
+      this.$store.dispatch("analytics/updateUser", {
+        ...params,
+        password: undefined, // Hide user's password
+        dateJoined: new Date().getTime()
       });
     },
     forgotPassword() {

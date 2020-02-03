@@ -42,6 +42,9 @@ export default vuexStoreModule({
         ...payload,
         registeredEmail: undefined
       });
+    },
+    updateUser({ state }, payload) {
+      state.analytics!.identify(null, payload);
     }
   }
 });
