@@ -145,7 +145,7 @@ type ConsentsState = {
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    enableConsents: true,
+    enableConsents: settings.enableConsents,
     consentError: null,
     consents: [],
     consentsPromise: Promise.resolve(),
