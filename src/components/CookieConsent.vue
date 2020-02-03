@@ -38,7 +38,7 @@
           </p>
           <p class="mb-0">
             <small>
-              Preferences cookies are necessary to hide this notification.
+              Note: Preferences cookies are necessary to hide this notification.
             </small>
           </p>
         </v-container>

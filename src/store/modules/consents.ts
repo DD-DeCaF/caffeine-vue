@@ -166,7 +166,8 @@ export default vuexStoreModule({
         message:
           "These cookies allow to remember choices you have made such as " +
           "what your user name and password are so you can automatically " +
-          "log in.",
+          "log in.<br/><br/>Note: Preferences cookies are necessary to " +
+          "remember which cookies you agreed to.",
         default: false,
         canOptOut: true
       },
