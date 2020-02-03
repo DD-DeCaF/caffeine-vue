@@ -239,7 +239,7 @@ export default Vue.extend({
         "local"
       );
     },
-    login(params: object, type: string) {
+    login(params: {[x: string]: any}, type: string) {
       this.isLoading = true;
       return axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
@@ -249,6 +249,11 @@ export default Vue.extend({
           this.isLoginSuccess = true;
           this.$store.dispatch("consents/addConsentsFromLocalStorage");
           this.$store.dispatch("fetchAllData");
+          this.$store.dispatch("analytics/identifyUser", {
+            registeredEmail: params.email,
+            internalId: params.id,
+            firebaseId: params.uid
+          });
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -296,6 +301,14 @@ export default Vue.extend({
                     source: "web"
                   });
                 }
+                // Email is not passed to the login function, so we have to 
+                // identify user by email here
+                const email = result.user.email || result.additionalUserInfo.profile.email;
+                if (email) {
+                  this.$store.dispatch("analytics/identifyUser", {
+                    registeredEmail: email
+                  });
+                }
               });
             });
         })
@@ -303,7 +316,7 @@ export default Vue.extend({
           this.hasLoginError = true;
         });
     },
-    onRegister() {
+    onRegister(params) {
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
 
@@ -311,6 +324,9 @@ export default Vue.extend({
         category: "registration",
         message: this.$refs.disclaimer.textContent,
         source: "web"
+      });
+      this.$store.dispatch("analytics/identifyUser", {
+        registeredEmail: params.email
       });
     },
     forgotPassword() {

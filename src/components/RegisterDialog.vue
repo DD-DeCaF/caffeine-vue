@@ -183,7 +183,7 @@ export default Vue.extend({
           this.$store.commit("session/login", response.data);
           this.isUserRegisterSuccess = true;
           this.showDialog = false;
-          this.$emit("register-success");
+          this.$emit("register-success", params);
         })
         .catch(error => {
           this.userRegisterErrorMessage = error.response.data;

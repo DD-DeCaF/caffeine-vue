@@ -1,6 +1,5 @@
 import { vuexStoreModule } from "@/store/vuexStoreModule";
 
-
 /**
  * Analytics class from https://github.com/DavidWells/analytics
  */
@@ -37,5 +36,12 @@ export default vuexStoreModule({
       state.analytics = analytics;
     }
   },
-  actions: {}
+  actions: {
+    identifyUser({ state }, payload) {
+      state.analytics!.identify(payload.registeredEmail, {
+        ...payload,
+        registeredEmail: undefined
+      });
+    }
+  }
 });
