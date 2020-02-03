@@ -55,7 +55,7 @@ export default Vue.extend({
       type: String,
       required: true,
       validator: (value: string) =>
-        ["designs", "maps", "models", "projects", "experiments"].includes(value)
+        ["designs", "maps", "media", "models", "projects", "experiments"].includes(value)
     }
   },
   data: () => ({

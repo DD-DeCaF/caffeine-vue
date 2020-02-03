@@ -10,11 +10,7 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
-    <NewModel
-      v-model="isModelCreationDialogVisible"
-      @return-object="passModel"
-    />
-    <NewMap v-model="isMapCreationDialogVisible" />
+    <NewMedium v-model="isMediumCreationDialogVisible" />
     <v-layout justify-center>
       <v-flex md6>
         <h1 class="mb-2">Media</h1>
@@ -138,7 +134,6 @@
                   ref="projectAutocomplete"
                 >
                   <template v-slot:prepend-item>
-                    <!-- Work out why clicking on the project creation dialog will close it. How do I mimik the behaviour of the old platform here? -->
                     <v-list-tile
                       ripple
                       @click="
@@ -149,36 +144,6 @@
                       <v-icon class="mr-3" color="primary">add_circle</v-icon>
                       <v-list-tile-title>
                         New Project
-                      </v-list-tile-title>
-                    </v-list-tile>
-                    <v-divider class="my-2"></v-divider>
-                  </template>
-                </v-autocomplete-extended>
-                <v-autocomplete-extended
-                  required
-                  return-object
-                  item-text="name"
-                  item-value="id"
-                  v-model="selectedModel"
-                  :items="availableModels"
-                  :rules="[rules.required]"
-                  persistent-hint
-                  name="model"
-                  label="Model"
-                  type="text"
-                  ref="modelAutocomplete"
-                >
-                  <template v-slot:prepend-item>
-                    <v-list-tile
-                      ripple
-                      @click="
-                        isModelCreationDialogVisible = true;
-                        $refs.modelAutocomplete.isMenuActive = false;
-                      "
-                    >
-                      <v-icon class="mr-3">add_circle</v-icon>
-                      <v-list-tile-title>
-                        New Model
                       </v-list-tile-title>
                     </v-list-tile>
                     <v-divider class="my-2"></v-divider>
@@ -196,14 +161,14 @@
           <v-btn
             color="secondary"
             flat
-            @click.stop="isMapEditDialogVisible = false"
+            @click.stop="isMediumEditDialogVisible = false"
             :disabled="$store.state.isDialogVisible.loader"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
-            @click="editMap"
+            @click="editMedium"
             :disabled="$store.state.isDialogVisible.loader || !isValid"
           >
             Edit
@@ -214,7 +179,7 @@
     <!-- Definition of notifications and banners -->
     <v-snackbar
       color="success"
-      v-model="isMapEditSuccess"
+      v-model="isMediumEditSuccess"
       bottom
       :timeout="3000"
     >
@@ -237,9 +202,8 @@ export default Vue.extend({
     isDeleting: false,
     isLoading: true,
     isMediumCreationDialogVisible: false,
-    isModelCreationDialogVisible: false,
     isProjectCreationDialogVisible: false,
-    isMapEditSuccess: false,
+    isMediumEditSuccess: false,
     isInvalidCredentials: false,
     isUnauthorized: false,
     isNotFound: false,
@@ -252,11 +216,10 @@ export default Vue.extend({
     },
     mediumItem: { name: null },
     mediumItemIndex: null,
-    isMapEditDialogVisible: false,
+    isMediumEditDialogVisible: false,
     isDeletionDialogVisible: false,
     headers: [
       { text: "Name", align: "left", value: "name", width: "45%" },
-      { text: "Model", value: "model_id", width: "40%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
     ],
     pagination: {
@@ -284,9 +247,6 @@ export default Vue.extend({
     }),
     availableProjects() {
       return this.$store.state.projects.projects;
-    },
-    availableModels() {
-      return this.$store.state.models.models;
     }
   },
   created() {
@@ -306,11 +266,8 @@ export default Vue.extend({
       this.project = this.availableProjects.find(
         obj => obj.id == item.project_id
       );
-      this.selectedModel = this.availableModels.find(
-        obj => obj.id == item.model_id
-      );
       this.mediumItemIndex = this.availableMedia.indexOf(item);
-      this.isMediaEditDialogVisible = true;
+      this.isMediumEditDialogVisible = true;
     },
     deleteItem(item) {
       this.mediumItem = item;
@@ -332,7 +289,7 @@ export default Vue.extend({
             index: this.mediumItemIndex
           };
           this.$store.commit("media/editMedium", commitPayload);
-          this.isMapEditSuccess = true;
+          this.isMediumEditSuccess = true;
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
