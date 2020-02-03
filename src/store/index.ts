@@ -13,6 +13,7 @@ import projects from "./modules/projects";
 import strains from "./modules/strains";
 import media from "./modules/media";
 import interactiveMap from "./modules/interactiveMap";
+import analytics from "./modules/analytics";
 
 Vue.use(Vuex);
 
@@ -29,7 +30,8 @@ export default new Vuex.Store({
     projects,
     strains,
     media,
-    interactiveMap
+    interactiveMap,
+    analytics
   },
   state: {
     fetchDataError: false,
