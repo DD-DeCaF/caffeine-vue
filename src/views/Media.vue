@@ -155,7 +155,7 @@
                   </div>
                   <v-layout column mx-3>
                     <div 
-                    v-for="(compound, index) in compounds" 
+                    v-for="(compound, index) in filteredCompounds" 
                     :key="index"
                     >
                       <v-layout>
@@ -182,9 +182,9 @@
                             label="Compound"
                             hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
                             @change="
-                              compound.name = $event.name;
-                              compound.id = $event.id;
-                              compound.namespace = $event.namespace;
+                              compound.compound_name = $event.name;
+                              compound.compound_identifier = $event.id;
+                              compound.compound_namespace = $event.namespace;
                             "
                             :modelIds="modelIds"
                           ></AutocompleteMnxMetabolite>
@@ -192,13 +192,13 @@
 
                         <v-flex xs2>
                           <v-layout>
-                            <v-btn icon @click="compounds.push({})">
+                            <v-btn icon @click="filteredCompounds.push({})">
                               <v-icon color="primary">add_circle</v-icon>
                             </v-btn>
                             <v-btn
                               icon
-                              v-if="compounds.length > 1"
-                              @click="compounds.splice(index, 1)"
+                              v-if="filteredCompounds.length > 1"
+                              @click="filteredCompounds.splice(index, 1)"
                             >
                               <v-icon color="primary">delete</v-icon>
                             </v-btn>
@@ -283,6 +283,7 @@ export default Vue.extend({
     mediumItemIndex: null,
     isMediumEditDialogVisible: false,
     isDeletionDialogVisible: false,
+    filteredCompounds: [{}],
     compounds: [{}],
     headers: [
       { text: "Name", align: "left", value: "name", width: "45%" },
@@ -313,6 +314,9 @@ export default Vue.extend({
     }
   },
   created() {
+    this.$store.dispatch('media/fetchCachedCompounds').then((response)=>{
+      this.compounds = response
+    });
     this.$store.state.media.mediaPromise.then(() => {
       this.isLoading = false;
     });
@@ -331,7 +335,7 @@ export default Vue.extend({
       );
       this.mediumItemIndex = this.availableMedia.indexOf(item);
       this.isMediumEditDialogVisible = true;
-      this.$store.dispatch('media/fetchCachedCompounds')
+      this.filteredCompounds = this.compounds.filter((element) => element.medium_id == this.id);
     },
     deleteItem(item) {
       this.mediumItem = item;

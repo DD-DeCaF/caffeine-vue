@@ -79,6 +79,7 @@ export default Vue.extend({
       const storage = {
         designs: "designStorage",
         maps: "maps",
+        media:"warehouse",
         models: "modelStorage",
         projects: "iam",
         experiments: "warehouse"

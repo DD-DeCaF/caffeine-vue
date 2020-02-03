@@ -32,6 +32,9 @@ export default vuexStoreModule({
     addMedium(state, medium: MediumItem) {
       state.media.push(medium);
     },
+    delete(state, ids) {
+      state.media = state.media.filter(medium => !ids.includes(medium.id));
+    },
     setMediaPromise(state, mediaPromise) {
       state.mediaPromise = mediaPromise;
     },
