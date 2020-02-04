@@ -18,13 +18,19 @@ export interface MediumCompound {
   medium_id: number;
 }
 
+export interface MediaState {
+  media: MediumItem[];
+  mediaPromise: Promise<void> | null;
+  _compoundsPromise: Promise<MediumCompound[]> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    media: [] as MediumItem[],
-    mediaPromise: null as Promise<void> | null,
-    _compoundsPromise: null as Promise<MediumCompound[]> | null
-  },
+    media: [],
+    mediaPromise: null,
+    _compoundsPromise: null
+  } as MediaState,
   mutations: {
     setMedia(state, media: MediumItem[]) {
       state.media = media;

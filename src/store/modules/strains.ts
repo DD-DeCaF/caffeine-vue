@@ -14,12 +14,17 @@ export interface StrainItem {
   updated: string;
 }
 
+export interface StrainsState {
+  strains: StrainItem[];
+  strainsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    strains: [] as StrainItem[],
-    strainsPromise: null as Promise<void> | null
-  },
+    strains: [],
+    strainsPromise: null
+  } as StrainsState,
   mutations: {
     setStrains(state, strains: StrainItem[]) {
       state.strains = strains;

@@ -23,12 +23,17 @@ export interface DesignItem {
   method: string;
 }
 
+export interface DesignsState {
+  designs: DesignItem[];
+  designsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    designs: [] as DesignItem[],
-    designsPromise: null as Promise<void> | null
-  },
+    designs: [],
+    designsPromise: null
+  } as DesignsState,
   mutations: {
     setDesigns(state, designs: DesignItem[]) {
       state.designs = designs;
