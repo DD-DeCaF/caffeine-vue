@@ -134,7 +134,7 @@ export interface CookieOption {
   canOptOut: boolean;
 }
 
-type ConsentsState = {
+export type ConsentsState = {
   enableConsents: boolean;
   cookieOptions: CookieOption[];
   consentError: null;
