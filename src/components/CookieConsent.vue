@@ -1,10 +1,10 @@
 <template>
-  <CookieLaw v-bind="$attrs" class="elevation-6">
+  <CookieLaw v-if="showBanner" v-bind="$attrs" class="elevation-6">
     <template v-slot="{ accept, close }">
       <template v-if="isCookieOptionsVisible">
         <v-container class="mt-auto px-4 pb-3 pt-0">
           <v-checkbox
-            v-for="(item, index) in $store.state.session.cookieOptions"
+            v-for="(item, index) in $store.state.consents.cookieOptions"
             :key="index"
             v-model="cookies[item.category]"
             :disabled="!item.canOptOut"
@@ -29,11 +29,18 @@
       </template>
 
       <template v-else>
-        <v-container class="mt-auto px-4 pb-3 pt-0">
-          Our website uses cookies to ensure you get the best experience. By
-          clicking on the Accept button, you agree with the use of these
-          cookies. If you change your mind or want more information please see
-          <router-link to="privacy-policy">Privacy policy</router-link>.
+        <v-container class="mt-auto px-4 pb-0 pt-0">
+          <p>
+            Our website uses cookies to ensure you get the best experience. By
+            clicking on the Accept button, you agree with the use of these
+            cookies. If you change your mind or want more information please see
+            <router-link to="privacy-policy">Privacy policy</router-link>.
+          </p>
+          <p class="mb-0">
+            <small>
+              Note: Preferences cookies are necessary to hide this notification.
+            </small>
+          </p>
         </v-container>
         <v-btn
           color="primary-2"
@@ -55,7 +62,7 @@
 <script lang="ts">
 import Vue from "vue";
 import CookieLaw from "vue-cookie-law";
-import { Consent, CookieOption } from "@/store/modules/session";
+import { Consent, CookieOption } from "@/store/modules/consents";
 
 export default Vue.extend({
   name: "CookieConsent",
@@ -64,6 +71,7 @@ export default Vue.extend({
   },
   data: () => ({
     isCookieOptionsVisible: false,
+    shouldShowBanner: false,
     cookies: {
       strictlyNecessary: false,
       preferences: false,
@@ -71,17 +79,31 @@ export default Vue.extend({
       marketing: false
     }
   }),
+  computed: {
+    showBanner() {
+      return this.$store.state.consents.enableConsents && this.shouldShowBanner;
+    }
+  },
   created() {
-    this.$store.state.session.cookieOptions.forEach((option: CookieOption) => {
+    // Prepare default checkbox values
+    this.$store.state.consents.cookieOptions.forEach((option: CookieOption) => {
       this.cookies[option.category] = option.default;
     });
-    this.$store.state.session.consentsPromise.then(() => {
-      this.$store.state.session.consents
+    this.$store.state.consents.consentsPromise.then(() => {
+      // Check if user has any cookies consents. If so, we assume they've seen
+      // the banner before even if that info is not stored in localStorage
+      if (this.$store.state.consents.consents.find(c => c.type === "cookie")) {
+        this.shouldShowBanner = false;
+        return;
+      }
+      this.shouldShowBanner = true;
+      // Otherwise, load up checkbox values from user's consent values
+      this.$store.state.consents.consents
         .filter(({ category }: Consent) => category !== "strictly_necessary")
         .forEach((consent: Consent) => {
           if (this.cookies.hasOwnProperty(consent.category)) {
             this.cookies[consent.category] = this.$store.getters[
-              "session/isConsentAccepted"
+              "consents/isConsentAccepted"
             ](consent);
           }
         });
@@ -89,9 +111,9 @@ export default Vue.extend({
   },
   methods: {
     submitCookies({ accept, close }) {
-      this.$store.state.session.cookieOptions.forEach(
+      this.$store.state.consents.cookieOptions.forEach(
         ({ category, message }: CookieOption) => {
-          this.$store.dispatch("session/addCookieConsent", {
+          this.$store.dispatch("consents/addCookieConsent", {
             category: category,
             message: message,
             status: this.cookies[category] ? "accepted" : "rejected",

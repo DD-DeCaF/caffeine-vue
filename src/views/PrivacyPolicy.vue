@@ -506,32 +506,37 @@
             </ul>
           </v-flex>
         </v-layout>
-        <v-flex>
-          <v-btn color="primary" class="mb-3" @click="switchVisibility()"
-            >Change Privacy Settings</v-btn
-          >
-        </v-flex>
-        <v-flex md6 v-if="showForm">
-          <v-layout column align-center>
-            <v-form>
-              <v-flex
-                v-for="option in this.$store.state.session.cookieOptions"
-                :key="option.category"
-              >
-                <v-checkbox
-                  :label="option.label"
-                  color="primary"
-                  v-model="cookies[option.category]"
-                  :messages="option.message"
-                  :disabled="!option.canOptOut"
-                ></v-checkbox>
-              </v-flex>
-            </v-form>
-            <v-btn color="primary" class="mb-3" @click="acceptPrivacyChanges()"
-              >Save Changes</v-btn
+        <template v-if="showPrivacySettings">
+          <v-flex>
+            <v-btn color="primary" class="mb-3" @click="switchVisibility()"
+              >Change Privacy Settings</v-btn
             >
-          </v-layout>
-        </v-flex>
+          </v-flex>
+          <v-flex md6 v-if="showForm">
+            <v-layout column align-center>
+              <v-form>
+                <v-flex
+                  v-for="option in this.$store.state.consents.cookieOptions"
+                  :key="option.category"
+                >
+                  <v-checkbox
+                    :label="option.label"
+                    color="primary"
+                    v-model="cookies[option.category]"
+                    :messages="option.message"
+                    :disabled="!option.canOptOut"
+                  ></v-checkbox>
+                </v-flex>
+              </v-form>
+              <v-btn
+                color="primary"
+                class="mb-3"
+                @click="acceptPrivacyChanges()"
+                >Save Changes</v-btn
+              >
+            </v-layout>
+          </v-flex>
+        </template>
       </v-layout>
     </v-container>
     <v-snackbar
@@ -546,7 +551,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Consent, CookieOption } from "@/store/modules/session";
+import { Consent, CookieOption } from "@/store/modules/consents";
 
 export default Vue.extend({
   name: "PrivacyPolicy",
@@ -560,17 +565,23 @@ export default Vue.extend({
     },
     isSettingsChangeSuccess: false
   }),
+  computed: {
+    showPrivacySettings() {
+      return this.$store.state.consents.enableConsents;
+    }
+  },
   created() {
-    this.$store.state.session.cookieOptions.forEach((option: CookieOption) => {
+    // Load up checkbox values from default and user's consent values
+    this.$store.state.consents.cookieOptions.forEach((option: CookieOption) => {
       this.cookies[option.category] = option.default;
     });
-    this.$store.state.session.consentsPromise.then(() => {
-      this.$store.state.session.consents
+    this.$store.state.consents.consentsPromise.then(() => {
+      this.$store.state.consents.consents
         .filter(({ category }: Consent) => category !== "strictly_necessary")
         .forEach((consent: Consent) => {
           if (this.cookies.hasOwnProperty(consent.category)) {
             this.cookies[consent.category] = this.$store.getters[
-              "session/isConsentAccepted"
+              "consents/isConsentAccepted"
             ](consent);
           }
         });
@@ -581,9 +592,9 @@ export default Vue.extend({
       this.showForm = this.showForm ? false : true;
     },
     acceptPrivacyChanges() {
-      this.$store.state.session.cookieOptions.forEach(
+      this.$store.state.consents.cookieOptions.forEach(
         ({ category, message }: CookieOption) => {
-          this.$store.dispatch("session/addCookieConsent", {
+          this.$store.dispatch("consents/addCookieConsent", {
             category: category,
             message: message,
             status: this.cookies[category] ? "accepted" : "rejected",
