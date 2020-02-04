@@ -43,7 +43,8 @@
                   @click="editItem(medium)"
                   :disabled="!isAuthenticated || medium.project_id === null"
                   :class="{
-                    pointerDisabled: !isAuthenticated || medium.project_id === null
+                    pointerDisabled:
+                      !isAuthenticated || medium.project_id === null
                   }"
                 >
                   edit
@@ -68,7 +69,8 @@
                   @click="deleteItem(medium)"
                   :disabled="!isAuthenticated || medium.project_id === null"
                   :class="{
-                    pointerDisabled: !isAuthenticated || medium.project_id === null
+                    pointerDisabled:
+                      !isAuthenticated || medium.project_id === null
                   }"
                 >
                   delete
@@ -150,63 +152,64 @@
                   </template>
                 </v-autocomplete-extended>
               </v-form>
-                  <div class="body-2 mb-2">
-                    Compounds:
-                  </div>
-                  <v-layout column mx-3>
-                    <div 
-                    v-for="(compound, index) in filteredCompounds" 
-                    :key="index"
-                    >
+              <div class="body-2 mb-2">
+                Compounds:
+              </div>
+              <v-layout column mx-3>
+                <div
+                  v-for="(compound, index) in filteredCompounds"
+                  :key="index"
+                >
+                  <v-layout>
+                    <v-flex xs3>
+                      <v-number-field
+                        v-model.number="compound.mass_concentration"
+                        :rules="[
+                          rules.conditionallyRequired(
+                            compound.mass_concentration,
+                            !!compound.id
+                          )
+                        ]"
+                        name="mass"
+                        label="Mass Concentration"
+                        hint="mmol l <sup>-1</sup>"
+                        persistent-hint
+                        step="any"
+                        class="mx-2"
+                      ></v-number-field>
+                    </v-flex>
+
+                    <v-flex xs8>
+                      <AutocompleteMnxMetabolite
+                        label="Compound"
+                        hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
+                        @change="
+                          compound.compound_name = $event.name;
+                          compound.compound_identifier = $event.id;
+                          compound.compound_namespace = $event.namespace;
+                        "
+                        :modelIds="modelIds"
+                        :passedMetabolite="compound"
+                      ></AutocompleteMnxMetabolite>
+                    </v-flex>
+
+                    <v-flex xs2>
                       <v-layout>
-                        <v-flex xs3>
-                          <v-number-field
-                            v-model.number="compound.mass_concentration"
-                            :rules="[
-                              rules.conditionallyRequired(
-                                compound.mass_concentration,
-                                !!compound.id
-                              )
-                            ]"
-                            name="mass"
-                            label="Mass Concentration"
-                            hint="mmol l <sup>-1</sup>"
-                            persistent-hint
-                            step="any"
-                            class="mx-2"
-                          ></v-number-field>
-                        </v-flex>
-
-                        <v-flex xs8>
-                          <AutocompleteMnxMetabolite
-                            label="Compound"
-                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
-                            @change="
-                              compound.compound_name = $event.name;
-                              compound.compound_identifier = $event.id;
-                              compound.compound_namespace = $event.namespace;
-                            "
-                            :modelIds="modelIds"
-                          ></AutocompleteMnxMetabolite>
-                        </v-flex>
-
-                        <v-flex xs2>
-                          <v-layout>
-                            <v-btn icon @click="filteredCompounds.push({})">
-                              <v-icon color="primary">add_circle</v-icon>
-                            </v-btn>
-                            <v-btn
-                              icon
-                              v-if="filteredCompounds.length > 1"
-                              @click="filteredCompounds.splice(index, 1)"
-                            >
-                              <v-icon color="primary">delete</v-icon>
-                            </v-btn>
-                          </v-layout>
-                        </v-flex>
+                        <v-btn icon @click="filteredCompounds.push({})">
+                          <v-icon color="primary">add_circle</v-icon>
+                        </v-btn>
+                        <v-btn
+                          icon
+                          v-if="filteredCompounds.length > 1"
+                          @click="filteredCompounds.splice(index, 1)"
+                        >
+                          <v-icon color="primary">delete</v-icon>
+                        </v-btn>
                       </v-layout>
-                    </div>
+                    </v-flex>
                   </v-layout>
+                </div>
+              </v-layout>
             </v-flex>
           </v-layout>
         </v-container>
@@ -253,7 +256,7 @@ import * as settings from "@/utils/settings";
 
 export default Vue.extend({
   name: "Media",
-  props:{
+  props: {
     modelIds: Array as Prop<Array<string>>
   },
   data: () => ({
@@ -277,7 +280,7 @@ export default Vue.extend({
         } else {
           return true;
         }
-    }
+      }
     },
     mediumItem: { name: null },
     mediumItemIndex: null,
@@ -313,15 +316,27 @@ export default Vue.extend({
       return this.$store.state.projects.projects;
     }
   },
+  // watch: {
+  //   availableMedia() {
+  //   this.getCompounds;
+  //   }
+  // },
   created() {
-    this.$store.dispatch('media/fetchCachedCompounds').then((response)=>{
-      this.compounds = response
+    this.$store.dispatch("media/fetchCachedCompounds").then(response => {
+      this.compounds = response;
     });
     this.$store.state.media.mediaPromise.then(() => {
       this.isLoading = false;
     });
   },
   methods: {
+    getCompounds() {
+      this.isLoading = true;
+      this.$store.dispatch("media/fetchCachedCompounds").then(response => {
+        this.compounds = response;
+      });
+      this.isLoading = false;
+    },
     onEnter() {
       if (this.$refs.form.validate()) {
         this.editMedium();
@@ -335,7 +350,9 @@ export default Vue.extend({
       );
       this.mediumItemIndex = this.availableMedia.indexOf(item);
       this.isMediumEditDialogVisible = true;
-      this.filteredCompounds = this.compounds.filter((element) => element.medium_id == this.id);
+      this.filteredCompounds = this.compounds.filter(
+        element => element.medium_id === this.id
+      );
     },
     deleteItem(item) {
       this.mediumItem = item;
@@ -345,7 +362,7 @@ export default Vue.extend({
       const payload = {
         id: this.id,
         name: this.name,
-        project_id: this.project.id,
+        project_id: this.project.id
       };
       axios
         .put(`${settings.apis.warehouse}/media/${this.id}`, payload)
