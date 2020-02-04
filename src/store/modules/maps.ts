@@ -11,12 +11,17 @@ export interface MapItem {
   project_id: number;
 }
 
+export interface MapState {
+  maps: MapItem[];
+  mapsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    maps: [] as MapItem[],
-    mapsPromise: null as Promise<void> | null
-  },
+    maps: [],
+    mapsPromise: null
+  } as MapState,
   mutations: {
     setMaps(state, maps: MapItem[]) {
       state.maps = maps;

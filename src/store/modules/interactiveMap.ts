@@ -3,6 +3,7 @@ import axios from "axios";
 import he from "he";
 import * as settings from "@/utils/settings";
 import { OrganismItem } from "./organisms";
+import { MapItem } from "./maps";
 
 export interface Gene {
   id: string;
@@ -76,12 +77,17 @@ export interface Card {
   enzymeUsageThreshold: number;
 }
 
+export interface InteractiveMapState {
+  currentMapId: MapItem["id"] | null;
+  cards: Card[];
+}
+
 export default {
   namespaced: true,
   state: {
     currentMapId: null,
-    cards: [] as Card[]
-  },
+    cards: []
+  } as InteractiveMapState,
   mutations: {
     setCurrentMapId(state, currentMapId) {
       state.currentMapId = currentMapId;

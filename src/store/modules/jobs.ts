@@ -16,13 +16,19 @@ export interface JobItem {
   aerobic: boolean;
 }
 
+export interface JobsState {
+  jobs: JobItem[];
+  isPolling: boolean;
+  jobsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    jobs: [] as JobItem[],
+    jobs: [],
     isPolling: false,
-    jobsPromise: null as Promise<void> | null
-  },
+    jobsPromise: null
+  } as JobsState,
   mutations: {
     setJobs(state, jobs: JobItem[]) {
       state.jobs = jobs;

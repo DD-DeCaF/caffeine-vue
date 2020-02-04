@@ -17,6 +17,12 @@ export interface ModelItem {
   model_serialized?: object;
 }
 
+export interface ModelsState {
+  models: ModelItem[];
+  modelsPromise: Promise<void> | null;
+  fullModelPromises: Record<number, Promise<void>>;
+}
+
 // TODO (Moritz Beber): This mapping needs to be expanded to all organisms.
 // See https://github.com/DD-DeCaF/caffeine-vue/issues/41
 export const organism2ModelMapping = {
@@ -26,12 +32,12 @@ export const organism2ModelMapping = {
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    models: [] as ModelItem[],
-    modelsPromise: null as Promise<void> | null,
+    models: [],
+    modelsPromise: null,
     // `fullModelPromises` contains the promises to request the full model,
     // keyed by model id. See the `withFullModel` action.
-    fullModelPromises: {} as Record<number, Promise<void>>
-  },
+    fullModelPromises: {}
+  } as ModelsState,
   mutations: {
     setModels(state, models: ModelItem[]) {
       state.models = models;

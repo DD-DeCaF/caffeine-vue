@@ -14,7 +14,7 @@ export interface ColoredProjectItem extends ProjectItem {
   color: string;
 }
 
-interface ProjectStore {
+export interface ProjectsState {
   projects: ColoredProjectItem[];
   activeProject: ColoredProjectItem | null | undefined;
   projectsPromise: Promise<void> | null;
@@ -41,7 +41,7 @@ export default vuexStoreModule({
     projects: [],
     activeProject: null,
     projectsPromise: null
-  } as ProjectStore,
+  } as ProjectsState,
   mutations: {
     setProjects(state, projects: ColoredProjectItem[]) {
       state.projects = projects;

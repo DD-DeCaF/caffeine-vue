@@ -11,12 +11,17 @@ export interface OrganismItem {
   updated: string;
 }
 
+export interface OrganismsState {
+  organisms: OrganismItem[];
+  organismsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    organisms: [] as OrganismItem[],
-    organismsPromise: null as Promise<void> | null
-  },
+    organisms: [],
+    organismsPromise: null
+  } as OrganismsState,
   mutations: {
     setOrganisms(state, organisms: OrganismItem[]) {
       state.organisms = organisms;

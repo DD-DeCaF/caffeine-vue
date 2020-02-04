@@ -152,7 +152,7 @@ export interface CookieOption {
   canOptOut: boolean;
 }
 
-type SessionState = LinkedJWTAuthenticated & {
+export type SessionState = LinkedJWTAuthenticated & {
   cookieOptions: CookieOption[];
   consentError: null;
   consents: Consent[];

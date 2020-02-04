@@ -12,12 +12,17 @@ export interface ExperimentItem {
   updated: string;
 }
 
+export interface ExperimentsState {
+  experiments: ExperimentItem[];
+  experimentsPromise: Promise<void> | null;
+}
+
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    experiments: [] as ExperimentItem[],
-    experimentsPromise: null as Promise<void> | null
-  },
+    experiments: [],
+    experimentsPromise: null
+  } as ExperimentsState,
   mutations: {
     setExperiments(state, experiments: ExperimentItem[]) {
       state.experiments = experiments;
