@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as settings from "@/utils/settings";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
+import { RootState } from "@/types/vuex";
 import {
   snakeCasePropertyNames,
   camelCasePropertyNames,
@@ -231,7 +232,7 @@ export default vuexStoreModule({
         return;
       }
       // Fetch consents from localStorage if anonymous user
-      if (!rootState.session.isAuthenticated) {
+      if (!(rootState as RootState).session.isAuthenticated) {
         const consentsJson = localStorage.getItem("consents");
         const consents = consentsJson ? JSON.parse(consentsJson) : [];
         consents.forEach((consent: Consent) => commit("setConsent", consent));
@@ -265,7 +266,7 @@ export default vuexStoreModule({
           : undefined
       };
       // Store consent in localStorage if anonymous user
-      if (!rootState.session.isAuthenticated) {
+      if (!(rootState as RootState).session.isAuthenticated) {
         const updatedConsents = [
           ...state.consents.filter(c =>
             ["type", "category"].reduce(
