@@ -1,6 +1,16 @@
 import { vuexStoreModule } from "@/store/vuexStoreModule";
 
 /**
+ * Response to GET request on iam/user endpoint
+ */
+interface IAMUser {
+  email: string;
+  first_name: string;
+  id: number;
+  last_name: string;
+}
+
+/**
  * Analytics class from https://github.com/DavidWells/analytics
  */
 export interface Analytics {
@@ -49,7 +59,7 @@ export default vuexStoreModule({
         }
         axios
           .get(`${settings.apis.iam}/user`)
-          .then((response: AxiosResponse<AIMUser>) => {
+          .then((response: AxiosResponse<IAMUser>) => {
             dispatch("login", response.data);
           })
           .catch(error => null);
