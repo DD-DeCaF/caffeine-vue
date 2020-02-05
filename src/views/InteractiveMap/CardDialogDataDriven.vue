@@ -1,439 +1,485 @@
+/* eslint-disable prettier/prettier */
 <template>
   <v-dialog v-model="showDialog" width="1200">
     <v-card class="pa-2">
-      <v-form>
-        <v-container>
-          <v-layout row wrap>
-            <v-flex xs6>
-              <p class="headline">Modify data-driven simulation</p>
-            </v-flex>
-            <v-flex xs6>
-              <p class="text-xs-right subheading mb-0 mt-2 font-italic">
-                Simulation status:
-                <span>{{ simulationStatus.text }}</span>
-                <v-progress-circular
-                  v-if="simulationStatus.loader"
-                  indeterminate
-                  size="12"
-                  :width="1"
-                ></v-progress-circular>
-              </p>
-            </v-flex>
-          </v-layout>
-
-          <v-progress-linear
-            v-if="card.isSimulating"
-            :indeterminate="true"
-            class="my-0"
-          ></v-progress-linear>
-          <div v-else style="height: 7px"></div>
-
-          <v-layout wrap>
-            <v-flex xs12 md3>
-              <v-text-field
-                label="Card name"
-                v-model="cardName"
-                required
-              ></v-text-field>
-            </v-flex>
-
-            <v-flex xs12 md3>
-              <v-autocomplete-extended
-                label="Experiment"
-                :items="experiments"
-                v-model="cardExperiment"
-                autoselectOnlyOption
-                item-text="name"
-                item-value="id"
-                placeholder="Choose the experiment you wish to simulate..."
-                return-object
-              ></v-autocomplete-extended>
-            </v-flex>
-
-            <v-flex xs12 md3>
-              <v-autocomplete-extended
-                label="Conditions"
-                :items="conditions"
-                v-model="selectedCondition"
-                autoselectOnlyOption
-                :loading="isLoadingConditions"
-                :disabled="conditions === []"
-                item-text="name"
-                item-value="id"
-                placeholder="Choose the experimental conditions you wish to simulate..."
-                return-object
-              ></v-autocomplete-extended>
-            </v-flex>
-
-            <v-flex xs12 md3>
-              <v-autocomplete-extended
-                label="Sample"
-                :items="samples"
-                v-model="cardSample"
-                autoselectOnlyOption
-                :loading="isLoadingConditionData"
-                :disabled="samples === []"
-                item-text="start_time"
-                item-value="id"
-                placeholder="Choose the sample you wish to simulate..."
-                return-object
-              ></v-autocomplete-extended>
-            </v-flex>
-          </v-layout>
-
-          <v-layout>
-            <v-flex xs12 md6>
-              <v-select-extended
-                label="Model"
-                :items="modelsByOrganism"
-                v-model="cardModel"
-                autoselectOnlyOption
-                item-text="name"
-                item-value="id"
-                :hint="modelHint"
-                persistent-hint
-                return-object
-                @change="onModelChange"
-              ></v-select-extended>
-            </v-flex>
-            <v-flex xs12 md6>
-              <v-select-extended
-                label="Method"
-                :items="methods"
-                v-model="cardMethod"
-                autoselectOnlyOption
-                item-text="name"
-                item-value="id"
-                prepend-icon="help"
-                @click:prepend="$emit('open-method-help-dialog')"
-                @change="$emit('simulate-card')"
-              ></v-select-extended>
-            </v-flex>
-          </v-layout>
-
-          <v-layout v-if="card.conditionData && card.sample" column>
-            <v-flex mb-1>
-              <v-card>
-                <v-subheader
-                  >Strain {{ card.conditionData.strain.name }}</v-subheader
-                >
-                <v-card-text v-if="card.conditionData.strain.genotype">
-                  <code class="px-2">{{
-                    card.conditionData.strain.genotype
-                  }}</code>
-                  <p class="mt-2">
-                    The genotype above is described in
-                    <a href="https://gnomic.readthedocs.io">gnomic</a> syntax, a
-                    grammar to represent genotypes and phenotypes developed at
-                    DTU Biosustain.
+      <v-tabs grow color="primary" dark>
+        <v-tabs-slider color="white"></v-tabs-slider>
+        <v-tab>
+          Simulation Configuration
+        </v-tab>
+        <v-tab-item>
+          <v-form>
+            <v-container>
+              <v-layout row wrap>
+                <v-flex xs6>
+                  <p class="headline">Modify data-driven simulation</p>
+                </v-flex>
+                <v-flex xs6>
+                  <p class="text-xs-right subheading mb-0 mt-2 font-italic">
+                    Simulation status:
+                    <span>{{ simulationStatus.text }}</span>
+                    <v-progress-circular
+                      v-if="simulationStatus.loader"
+                      indeterminate
+                      size="12"
+                      :width="1"
+                    ></v-progress-circular>
                   </p>
-                </v-card-text>
-                <v-card-text v-else>
-                  There are no genotype modifications in this strain.
-                </v-card-text>
-              </v-card>
-            </v-flex>
-            <v-flex mb-1>
-              <v-card>
-                <v-subheader
-                  >Medium {{ card.conditionData.medium.name }}</v-subheader
-                >
-                <v-data-table
-                  :headers="mediumHeaders"
-                  :items="card.conditionData.medium.compounds"
-                  class="elevation-1"
-                >
-                  <template v-slot:items="{ item: compound }">
-                    <td>{{ compound.compound_name }}</td>
-                    <td>
-                      <CompoundLink
-                        :identifier="compound.compound_identifier"
-                        :namespace="compound.compound_namespace"
-                      />
-                    </td>
-                    <td>
-                      <span v-if="compound.mass_concentration">
-                        {{ compound.mass_concentration }} <em>mmol/l</em>
-                      </span>
-                      <span v-else>Unspecified</span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
+                </v-flex>
+              </v-layout>
 
-            <v-flex mb-1 v-if="card.sample.fluxomics.length > 0">
-              <v-card>
-                <v-subheader>Fluxomics</v-subheader>
-                <v-data-table
-                  :headers="fluxomicsHeaders"
-                  :items="card.sample.fluxomics"
-                  class="elevation-1"
+              <v-progress-linear
+                v-if="card.isSimulating"
+                :indeterminate="true"
+                class="my-0"
+              ></v-progress-linear>
+              <div v-else style="height: 7px"></div>
+
+              <v-layout wrap>
+                <v-flex xs12 md3>
+                  <v-text-field
+                    label="Card name"
+                    v-model="cardName"
+                    required
+                  ></v-text-field>
+                </v-flex>
+
+                <v-flex xs12 md3>
+                  <v-autocomplete-extended
+                    label="Experiment"
+                    :items="experiments"
+                    v-model="cardExperiment"
+                    autoselectOnlyOption
+                    item-text="name"
+                    item-value="id"
+                    placeholder="Choose the experiment you wish to simulate..."
+                    return-object
+                  ></v-autocomplete-extended>
+                </v-flex>
+
+                <v-flex xs12 md3>
+                  <v-autocomplete-extended
+                    label="Conditions"
+                    :items="conditions"
+                    v-model="selectedCondition"
+                    autoselectOnlyOption
+                    :loading="isLoadingConditions"
+                    :disabled="conditions === []"
+                    item-text="name"
+                    item-value="id"
+                    placeholder="Choose the experimental conditions you wish to simulate..."
+                    return-object
+                  ></v-autocomplete-extended>
+                </v-flex>
+
+                <v-flex xs12 md3>
+                  <v-autocomplete-extended
+                    label="Sample"
+                    :items="samples"
+                    v-model="cardSample"
+                    autoselectOnlyOption
+                    :loading="isLoadingConditionData"
+                    :disabled="samples === []"
+                    item-text="start_time"
+                    item-value="id"
+                    placeholder="Choose the sample you wish to simulate..."
+                    return-object
+                  ></v-autocomplete-extended>
+                </v-flex>
+              </v-layout>
+
+              <v-layout>
+                <v-flex xs12 md6>
+                  <v-select-extended
+                    label="Model"
+                    :items="modelsByOrganism"
+                    v-model="cardModel"
+                    autoselectOnlyOption
+                    item-text="name"
+                    item-value="id"
+                    :hint="modelHint"
+                    persistent-hint
+                    return-object
+                    @change="onModelChange"
+                  ></v-select-extended>
+                </v-flex>
+                <v-flex xs12 md6>
+                  <v-select-extended
+                    label="Method"
+                    :items="methods"
+                    v-model="cardMethod"
+                    autoselectOnlyOption
+                    item-text="name"
+                    item-value="id"
+                    prepend-icon="help"
+                    @click:prepend="$emit('open-method-help-dialog')"
+                    @change="$emit('simulate-card')"
+                  ></v-select-extended>
+                </v-flex>
+              </v-layout>
+
+              <v-layout v-if="card.conditionData && card.sample" column>
+                <v-flex mb-1>
+                  <v-card>
+                    <v-subheader
+                      >Strain {{ card.conditionData.strain.name }}</v-subheader
+                    >
+                    <v-card-text v-if="card.conditionData.strain.genotype">
+                      <code class="px-2">{{
+                        card.conditionData.strain.genotype
+                      }}</code>
+                      <p class="mt-2">
+                        The genotype above is described in
+                        <a href="https://gnomic.readthedocs.io">gnomic</a>
+                        syntax, a grammar to represent genotypes and phenotypes
+                        developed at DTU Biosustain.
+                      </p>
+                    </v-card-text>
+                    <v-card-text v-else>
+                      There are no genotype modifications in this strain.
+                    </v-card-text>
+                  </v-card>
+                </v-flex>
+                <v-flex mb-1>
+                  <v-card>
+                    <v-subheader
+                      >Medium {{ card.conditionData.medium.name }}</v-subheader
+                    >
+                    <v-data-table
+                      :headers="mediumHeaders"
+                      :items="card.conditionData.medium.compounds"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: compound }">
+                        <td>{{ compound.compound_name }}</td>
+                        <td>
+                          <CompoundLink
+                            :identifier="compound.compound_identifier"
+                            :namespace="compound.compound_namespace"
+                          />
+                        </td>
+                        <td>
+                          <span v-if="compound.mass_concentration">
+                            {{ compound.mass_concentration }} <em>mmol/l</em>
+                          </span>
+                          <span v-else>Unspecified</span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+
+                <v-flex mb-1 v-if="card.sample.fluxomics.length > 0">
+                  <v-card>
+                    <v-subheader>Fluxomics</v-subheader>
+                    <v-data-table
+                      :headers="fluxomicsHeaders"
+                      :items="card.sample.fluxomics"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: reaction }">
+                        <td>{{ reaction.reaction_name }}</td>
+                        <td>
+                          <ReactionLink
+                            :identifier="reaction.reaction_identifier"
+                            :namespace="reaction.reaction_namespace"
+                          />
+                        </td>
+                        <td>
+                          {{ reaction.measurement }}
+                          <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
+                        </td>
+                        <td>
+                          <span v-if="reaction.uncertainty">
+                            {{ reaction.uncertainty }}
+                            <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+
+                <v-flex mb-1 v-if="card.sample.metabolomics.length > 0">
+                  <v-card>
+                    <v-subheader>Metabolomics</v-subheader>
+                    <v-data-table
+                      :headers="metabolomicsHeaders"
+                      :items="card.sample.metabolomics"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: metabolite }">
+                        <td>{{ metabolite.compound_name }}</td>
+                        <td>
+                          <CompoundLink
+                            :identifier="metabolite.compound_identifier"
+                            :namespace="metabolite.compound_namespace"
+                          />
+                        </td>
+                        <td>
+                          {{ metabolite.measurement }}
+                          <em>mmol/l</em>
+                        </td>
+                        <td>
+                          <span v-if="metabolite.uncertainty">
+                            {{ metabolite.uncertainty }}
+                            <em>mmol/l</em>
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+
+                <v-flex mb-1 v-if="card.sample.proteomics.length > 0">
+                  <v-card>
+                    <v-subheader>Proteomics</v-subheader>
+                    <v-data-table
+                      :headers="proteomicsHeaders"
+                      :items="card.sample.proteomics"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: protein }">
+                        <td>
+                          <a
+                            :href="
+                              `https://www.uniprot.org/uniprot/${protein.identifier}`
+                            "
+                            target="_blank"
+                            >{{ protein.identifier }}</a
+                          >
+                        </td>
+                        <td>{{ protein.name }}</td>
+                        <td>{{ protein.full_name }}</td>
+                        <td>
+                          {{ displayGeneIds(protein.gene) }}
+                        </td>
+                        <td>
+                          {{ protein.measurement }}
+                          <em>mmol gDW<sup>-1</sup></em>
+                        </td>
+                        <td>
+                          <span v-if="protein.uncertainty">
+                            {{ protein.uncertainty }}
+                            <em>mmol gDW<sup>-1</sup></em>
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+
+                <v-flex
+                  mb-1
+                  v-if="card.sample.uptake_secretion_rates.length > 0"
                 >
-                  <template v-slot:items="{ item: reaction }">
-                    <td>{{ reaction.reaction_name }}</td>
-                    <td>
-                      <ReactionLink
-                        :identifier="reaction.reaction_identifier"
-                        :namespace="reaction.reaction_namespace"
-                      />
-                    </td>
-                    <td>
-                      {{ reaction.measurement }}
-                      <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
-                    </td>
-                    <td>
-                      <span v-if="reaction.uncertainty">
-                        {{ reaction.uncertainty }}
-                        <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
+                  <v-card>
+                    <v-subheader>Uptake secretion rates</v-subheader>
+                    <v-data-table
+                      :headers="uptakeSecretionRatesHeaders"
+                      :items="card.sample.uptake_secretion_rates"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: rate }">
+                        <td>{{ rate.compound_name }}</td>
+                        <td>
+                          <CompoundLink
+                            :identifier="rate.compound_identifier"
+                            :namespace="rate.compound_namespace"
+                          />
+                        </td>
+                        <td>
+                          {{ rate.measurement }}
+                          <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
+                        </td>
+                        <td>
+                          <span v-if="rate.uncertainty">
+                            {{ rate.uncertainty }}
+                            <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
 
-            <v-flex mb-1 v-if="card.sample.metabolomics.length > 0">
-              <v-card>
-                <v-subheader>Metabolomics</v-subheader>
-                <v-data-table
-                  :headers="metabolomicsHeaders"
-                  :items="card.sample.metabolomics"
-                  class="elevation-1"
+                <v-flex mb-1 v-if="card.sample.molar_yields.length > 0">
+                  <v-card>
+                    <v-subheader>Molar yields</v-subheader>
+                    <v-data-table
+                      :headers="molarYieldsHeaders"
+                      :items="card.sample.molar_yields"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: molarYield }">
+                        <td>{{ molarYield.product_name }}</td>
+                        <td>
+                          <CompoundLink
+                            :identifier="molarYield.product_identifier"
+                            :namespace="molarYield.product_namespace"
+                          />
+                        </td>
+                        <td>{{ molarYield.substrate_name }}</td>
+                        <td>
+                          <CompoundLink
+                            :identifier="molarYield.substrate_identifier"
+                            :namespace="molarYield.substrate_namespace"
+                          />
+                        </td>
+                        <td>
+                          {{ molarYield.measurement }}
+                          <em
+                            >mmol-{{ molarYield.product_name }} / mmol-{{
+                              molarYield.substrate_name
+                            }}</em
+                          >
+                        </td>
+                        <td>
+                          <span v-if="molarYield.uncertainty">
+                            {{ molarYield.uncertainty }}
+                            <em
+                              >mmol-{{ molarYield.product_name }} / mmol-{{
+                                molarYield.substrate_name
+                              }}</em
+                            >
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+
+                <v-flex mb-1 v-if="card.sample.growth_rate">
+                  <v-card>
+                    <v-subheader>Growth rate</v-subheader>
+                    <v-data-table
+                      :headers="growthRateHeaders"
+                      :items="[card.sample.growth_rate]"
+                      class="elevation-1"
+                    >
+                      <template v-slot:items="{ item: growthRate }">
+                        <td>
+                          {{ growthRate.measurement }}
+                          <em>h<sup>-1</sup></em>
+                        </td>
+                        <td>
+                          <span v-if="growthRate.uncertainty">
+                            {{ growthRate.uncertainty }}
+                            <em>h<sup>-1</sup></em>
+                          </span>
+                          <span v-else>
+                            No uncertainty
+                          </span>
+                        </td>
+                      </template>
+                    </v-data-table>
+                  </v-card>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </v-form>
+        </v-tab-item>
+        <v-tab :disabled="modifications.length === 0">
+          Model Modifications
+        </v-tab>
+        <v-tab-item>
+          <v-container>
+            <ModificationsTable
+              v-if="modifications.length > 0"
+              :modifications="modifications"
+              :readonly="true"
+            />
+          </v-container>
+        </v-tab-item>
+        <v-tab
+          :disabled="!(card.sampleErrors.length || card.sampleWarnings.length)"
+        >
+          <v-badge
+            color="error"
+            :value="card.sampleErrors.length + card.sampleWarnings.length"
+            v-if="card.sampleErrors.length"
+          >
+            <template v-slot:badge
+              >{{ card.sampleWarnings.length + card.sampleErrors.length }}
+            </template>
+            <span>Warnings and Errors</span>
+          </v-badge>
+          <v-badge
+            color="warning"
+            :value="card.sampleErrors.length + card.sampleWarnings.length"
+            v-else
+          >
+            <template v-slot:badge
+              >{{ card.sampleWarnings.length + card.sampleErrors.length }}
+            </template>
+            <span>Warnings and Errors</span>
+          </v-badge>
+        </v-tab>
+        <v-tab-item>
+          <v-container>
+            <v-expansion-panel
+              v-if="card.sampleWarnings.length || card.sampleErrors.length"
+              class="mt-2"
+            >
+              <v-expansion-panel-content>
+                <template v-slot:header>
+                  <div>
+                    <v-badge color="error" v-if="card.sampleErrors.length">
+                      <template v-slot:badge
+                        >{{
+                          card.sampleWarnings.length + card.sampleErrors.length
+                        }}
+                      </template>
+                      <span>Warnings and Errors</span>
+                    </v-badge>
+                    <v-badge color="warning" v-else>
+                      <template v-slot:badge
+                        >{{
+                          card.sampleWarnings.length + card.sampleErrors.length
+                        }}
+                      </template>
+                      <span>Warnings and Errors</span>
+                    </v-badge>
+                  </div>
+                </template>
+                <div
+                  v-for="error in card.sampleErrors"
+                  :key="error"
+                  class="mt-2"
                 >
-                  <template v-slot:items="{ item: metabolite }">
-                    <td>{{ metabolite.compound_name }}</td>
-                    <td>
-                      <CompoundLink
-                        :identifier="metabolite.compound_identifier"
-                        :namespace="metabolite.compound_namespace"
-                      />
-                    </td>
-                    <td>
-                      {{ metabolite.measurement }}
-                      <em>mmol/l</em>
-                    </td>
-                    <td>
-                      <span v-if="metabolite.uncertainty">
-                        {{ metabolite.uncertainty }}
-                        <em>mmol/l</em>
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-
-            <v-flex mb-1 v-if="card.sample.proteomics.length > 0">
-              <v-card>
-                <v-subheader>Proteomics</v-subheader>
-                <v-data-table
-                  :headers="proteomicsHeaders"
-                  :items="card.sample.proteomics"
-                  class="elevation-1"
-                >
-                  <template v-slot:items="{ item: protein }">
-                    <td>
-                      <a
-                        :href="
-                          `https://www.uniprot.org/uniprot/${protein.identifier}`
-                        "
-                        target="_blank"
-                        >{{ protein.identifier }}</a
-                      >
-                    </td>
-                    <td>{{ protein.name }}</td>
-                    <td>{{ protein.full_name }}</td>
-                    <td>
-                      {{ displayGeneIds(protein.gene) }}
-                    </td>
-                    <td>
-                      {{ protein.measurement }}
-                      <em>mmol gDW<sup>-1</sup></em>
-                    </td>
-                    <td>
-                      <span v-if="protein.uncertainty">
-                        {{ protein.uncertainty }}
-                        <em>mmol gDW<sup>-1</sup></em>
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-
-            <v-flex mb-1 v-if="card.sample.uptake_secretion_rates.length > 0">
-              <v-card>
-                <v-subheader>Uptake secretion rates</v-subheader>
-                <v-data-table
-                  :headers="uptakeSecretionRatesHeaders"
-                  :items="card.sample.uptake_secretion_rates"
-                  class="elevation-1"
-                >
-                  <template v-slot:items="{ item: rate }">
-                    <td>{{ rate.compound_name }}</td>
-                    <td>
-                      <CompoundLink
-                        :identifier="rate.compound_identifier"
-                        :namespace="rate.compound_namespace"
-                      />
-                    </td>
-                    <td>
-                      {{ rate.measurement }}
-                      <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
-                    </td>
-                    <td>
-                      <span v-if="rate.uncertainty">
-                        {{ rate.uncertainty }}
-                        <em>mmol gDW<sup>-1</sup> h<sup>-1</sup></em>
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-
-            <v-flex mb-1 v-if="card.sample.molar_yields.length > 0">
-              <v-card>
-                <v-subheader>Molar yields</v-subheader>
-                <v-data-table
-                  :headers="molarYieldsHeaders"
-                  :items="card.sample.molar_yields"
-                  class="elevation-1"
-                >
-                  <template v-slot:items="{ item: molarYield }">
-                    <td>{{ molarYield.product_name }}</td>
-                    <td>
-                      <CompoundLink
-                        :identifier="molarYield.product_identifier"
-                        :namespace="molarYield.product_namespace"
-                      />
-                    </td>
-                    <td>{{ molarYield.substrate_name }}</td>
-                    <td>
-                      <CompoundLink
-                        :identifier="molarYield.substrate_identifier"
-                        :namespace="molarYield.substrate_namespace"
-                      />
-                    </td>
-                    <td>
-                      {{ molarYield.measurement }}
-                      <em
-                        >mmol-{{ molarYield.product_name }} / mmol-{{
-                          molarYield.substrate_name
-                        }}</em
-                      >
-                    </td>
-                    <td>
-                      <span v-if="molarYield.uncertainty">
-                        {{ molarYield.uncertainty }}
-                        <em
-                          >mmol-{{ molarYield.product_name }} / mmol-{{
-                            molarYield.substrate_name
-                          }}</em
-                        >
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-
-            <v-flex mb-1 v-if="card.sample.growth_rate">
-              <v-card>
-                <v-subheader>Growth rate</v-subheader>
-                <v-data-table
-                  :headers="growthRateHeaders"
-                  :items="[card.sample.growth_rate]"
-                  class="elevation-1"
-                >
-                  <template v-slot:items="{ item: growthRate }">
-                    <td>
-                      {{ growthRate.measurement }}
-                      <em>h<sup>-1</sup></em>
-                    </td>
-                    <td>
-                      <span v-if="growthRate.uncertainty">
-                        {{ growthRate.uncertainty }}
-                        <em>h<sup>-1</sup></em>
-                      </span>
-                      <span v-else>
-                        No uncertainty
-                      </span>
-                    </td>
-                  </template>
-                </v-data-table>
-              </v-card>
-            </v-flex>
-          </v-layout>
-
-          <ModificationsTable
-            v-if="modifications.length > 0"
-            :modifications="modifications"
-            :readonly="true"
-          />
-
-          <v-expansion-panel v-if="card.sampleWarnings.length" class="mt-2">
-            <v-expansion-panel-content>
-              <template v-slot:header>
-                <div>
-                  <v-badge color="warning">
-                    <template v-slot:badge
-                      >{{ card.sampleWarnings.length }}
-                    </template>
-                    <span>Warnings</span>
-                  </v-badge>
+                  <v-alert :value="true" type="error">
+                    {{ error }}
+                  </v-alert>
                 </div>
-              </template>
-              <div
-                v-for="warning in card.sampleWarnings"
-                :key="warning"
-                class="mt-2"
-              >
-                <v-alert :value="true" type="warning">
-                  {{ warning }}
-                </v-alert>
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-
-          <v-expansion-panel v-if="card.sampleErrors.length" class="mt-2">
-            <v-expansion-panel-content>
-              <template v-slot:header>
-                <div>
-                  <v-badge color="error">
-                    <template v-slot:badge
-                      >{{ card.sampleErrors.length }}
-                    </template>
-                    <span>Errors</span>
-                  </v-badge>
+                <div
+                  v-for="warning in card.sampleWarnings"
+                  :key="warning"
+                  class="mt-2"
+                >
+                  <v-alert :value="true" type="warning">
+                    {{ warning }}
+                  </v-alert>
                 </div>
-              </template>
-              <div v-for="error in card.sampleErrors" :key="error" class="mt-2">
-                <v-alert :value="true" type="error">
-                  {{ error }}
-                </v-alert>
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-container>
-      </v-form>
-
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-container>
+        </v-tab-item>
+      </v-tabs>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-progress-circular
@@ -948,7 +994,9 @@ export default Vue.extend({
           // waiting for the actual simulation to finish.
           this.updateCard({
             uuid: this.card.uuid,
-            props: { sampleWarnings: response.data.warnings }
+            props: {
+              sampleWarnings: response.data.warnings
+            }
           });
           this.$emit("simulate-card");
         })
@@ -961,7 +1009,9 @@ export default Vue.extend({
           if (error.response && error.response.data.errors) {
             this.updateCard({
               uuid: this.card.uuid,
-              props: { sampleErrors: error.response.data.errors }
+              props: {
+                sampleErrors: error.response.data.errors
+              }
             });
           }
           this.$emit("simulation-error");
