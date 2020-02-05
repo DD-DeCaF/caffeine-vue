@@ -37,8 +37,9 @@
             <router-link to="privacy-policy">Privacy policy</router-link>.
           </p>
           <p class="mb-0">
-            <small>
-              Note: Preferences cookies are necessary to hide this notification.
+            <small class="warning py-1 px-1 font-weight-bold">
+              Note: Preferences cookies are necessary to hide this notification
+              and remember login.
             </small>
           </p>
         </v-container>

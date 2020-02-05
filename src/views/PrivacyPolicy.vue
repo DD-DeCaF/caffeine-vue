@@ -598,7 +598,7 @@ export default Vue.extend({
             category: category,
             message: message,
             status: this.cookies[category] ? "accepted" : "rejected",
-            source: "cookie_consent_banner"
+            source: "privacy_policy"
           });
         }
       );
