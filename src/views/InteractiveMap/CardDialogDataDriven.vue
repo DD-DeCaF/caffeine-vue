@@ -416,7 +416,7 @@
         <v-tab-item>
           <v-container>
             <v-expansion-panel
-              v-if="card.sampleWarnings.length || card.sampleErrors"
+              v-if="card.sampleWarnings.length || card.sampleErrors.length"
               class="mt-2"
             >
               <v-expansion-panel-content>
@@ -973,8 +973,6 @@ export default Vue.extend({
               sampleWarnings: response.data.warnings
             }
           });
-          console.log(this.card.sampleWarnings.length);
-
           this.$emit("simulate-card");
         })
         .catch(error => {
@@ -990,10 +988,6 @@ export default Vue.extend({
                 sampleErrors: error.response.data.errors
               }
             });
-            console.log(this.card.sampleErrors);
-            console.log(this.card.sampleErrors[0]);
-            console.log(typeof this.card.sampleErrors[0]);
-            console.log(this.card.sampleErrors.length)
           }
           this.$emit("simulation-error");
         })
