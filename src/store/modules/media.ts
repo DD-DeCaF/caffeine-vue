@@ -1,3 +1,4 @@
+import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
@@ -31,6 +32,9 @@ export default vuexStoreModule({
     },
     addMedium(state, medium: MediumItem) {
       state.media.push(medium);
+    },
+    editMedium(state, payload: any) {
+      Vue.set(state.media, payload.index, payload.item);
     },
     delete(state, ids) {
       state.media = state.media.filter(medium => !ids.includes(medium.id));

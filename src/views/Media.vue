@@ -273,6 +273,7 @@ export default Vue.extend({
     hasOtherError: false,
     name: null,
     project: null,
+    id: null,
     rules: {
       required: value => !!value || "Required.",
       conditionallyRequired: (value, condition) => {
@@ -318,11 +319,6 @@ export default Vue.extend({
       return this.$store.state.projects.projects;
     }
   },
-  // watch: {
-  //   availableMedia() {
-  //   this.getCompounds;
-  //   }
-  // },
   created() {
     this.$store.dispatch("media/fetchCachedCompounds").then(response => {
       this.compounds = response;
@@ -364,21 +360,34 @@ export default Vue.extend({
       this.isDeletionDialogVisible = true;
     },
     editMedium() {
-      const payload = {
+      const payload_medium = {
         id: this.id,
         name: this.name,
         project_id: this.project.id
       };
       axios
-        .put(`${settings.apis.warehouse}/media/${this.id}`, payload)
+        .put(`${settings.apis.warehouse}/media/${this.id}`, payload_medium)
         .then((response: AxiosResponse) => {
           this.$store.commit("toggleDialog", "loader");
           const commitPayload = {
-            item: payload,
+            item: payload_medium,
             index: this.mediumItemIndex
           };
           this.$store.commit("media/editMedium", commitPayload);
           this.isMediumEditSuccess = true;
+        })
+        .then(() => {
+          return Promise.all(
+            this.idsBeforeEditing.forEach(compound_id => {
+              this.deleteCompoundByID(compound_id);
+            })
+          )
+        })
+        .then(() => {
+          return Promise.all(
+            this.idsBeforeEditing.forEach(compound => {
+              this.postCompounds(compound);
+            }));
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -392,9 +401,18 @@ export default Vue.extend({
           }
         })
         .then(() => {
+          this.getCompounds;
           this.$store.commit("toggleDialog", "loader");
           this.isMediumEditDialogVisible = false;
         });
+    },
+    deleteCompoundByID(id) {
+      return axios
+        .delete(`${settings.apis.warehouse}/media/compounds/${id}`)
+    },
+    postCompounds(payload) {
+      return axios
+        .post(`${settings.apis.warehouse}/media/compounds/`, payload)
     },
     passProject(project) {
       this.project = project;
