@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@amcharts/amcharts4": "^4.8.9",
-    "@dd-decaf/escher": "^1.9.5-decaf",
+    "@dd-decaf/escher": "^1.9.7-decaf",
     "@sentry/browser": "^5.8.0",
     "@sentry/integrations": "^5.8.0",
     "axios": "^0.19.0",
