@@ -71,6 +71,9 @@ export default vuexStoreModule({
     link({ state }, payload) {
       state.analytics!.track("outbound_link", payload);
     },
+    export({ state }, payload) {
+      state.analytics!.track("export", payload);
+    },
     visualize({ state }, payload) {
       // destructure nullable properties
       const { project = {}, model = {}, map = {}, card = {} } = payload;

@@ -1310,6 +1310,11 @@ export default Vue.extend({
           reader.readAsText(error.response.data);
         })
         .then(() => (this.isExporting = false));
+
+      this.$store.dispatch("analytics/export", {
+        ids: predictionIds,
+        type: "prediction"
+      });
     }
   }
 });
