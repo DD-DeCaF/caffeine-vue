@@ -70,6 +70,66 @@ export default vuexStoreModule({
     },
     link({ state }, payload) {
       state.analytics!.track("outbound_link", payload);
+    },
+    visualize({ state }, payload) {
+      // destructure nullable properties
+      const { project = {}, model = {}, map = {}, card = {} } = payload;
+      const {
+        method,
+        showProteomicsData,
+        type,
+        uuid: cardId,
+        name: cardName,
+        organism = {},
+        sample = {},
+        experiment = {},
+        conditionData = {},
+        objective: {
+          reaction: objectiveReaction = {},
+          maximize: isObjectiveMaximize = null
+        } = {}
+      } = card || {};
+      const { id: projectId, name: projectName } = project || {};
+      const { id: modelId, name: modelName } = model || {};
+      const { id: organismId, name: organismName } = organism || {};
+      const { id: sampleId } = sample || {};
+      const { id: experimentId, name: experimentName } = experiment || {};
+      const { id: conditionId, name: conditionName, medium = {}, strain = {} } =
+        conditionData || {};
+      const { id: objectiveId, name: objectiveName } = objectiveReaction || {};
+
+      const data = {
+        projectId,
+        projectName,
+        cardName,
+        cardId,
+        method,
+        type,
+        modelId,
+        modelName,
+        organismId,
+        organismName,
+        experimentId,
+        experimentName,
+        conditionId,
+        conditionName,
+        sampleId,
+        objectiveName,
+        objectiveId,
+        objectiveDirection: isObjectiveMaximize ? "max" : "min",
+        visualizationType: showProteomicsData ? "proteomics" : "flux",
+        // modifications: card.manipulations, // Do not track modifications
+        mapId: map.id,
+        mapName: map.name,
+        mediumId: medium.id,
+        mediumName: medium.name,
+        strainId: strain.id,
+        strainName: strain.name,
+        source: payload.source,
+        sourceType: payload.sourceType,
+        sourceId: payload.sourceId
+      };
+      state.analytics!.track("visualize", data);
     }
   }
 });
