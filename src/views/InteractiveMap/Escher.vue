@@ -402,6 +402,11 @@ export default Vue.extend({
           objectiveDirection: this.setObjectiveDirection,
           changeBounds: this.editBounds,
           resetBounds: this.resetBounds
+        },
+        search_callbacks: {
+          search: search => {
+            this.$store.dispatch("analytics/searchEscher", search);
+          }
         }
       });
     });

@@ -133,6 +133,9 @@ export default vuexStoreModule({
         sourceId: payload.sourceId
       };
       state.analytics!.track("visualize", data);
+    },
+    searchEscher({ state }, payload) {
+      state.analytics!.track("search_escher", payload);
     }
   }
 });
