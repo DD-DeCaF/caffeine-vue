@@ -13,7 +13,6 @@ import projects from "./modules/projects";
 import strains from "./modules/strains";
 import media from "./modules/media";
 import interactiveMap from "./modules/interactiveMap";
-import { cookiePlugin } from "./plugins/cookies";
 
 Vue.use(Vuex);
 
@@ -32,7 +31,6 @@ export default new Vuex.Store({
     media,
     interactiveMap
   },
-  plugins: [cookiePlugin],
   state: {
     fetchDataError: false,
     postDataError: null,

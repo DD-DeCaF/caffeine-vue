@@ -385,6 +385,9 @@ export default Vue.extend({
     // Now fetch the user data, as session/token logic is ready and will ensure
     // the requests are authorized as expected.
     this.$store.dispatch("fetchAllData");
+
+    // Remove user info from localStorage if they haven't consented to it
+    this.$store.dispatch("consents/clearLocalStorageOnExit");
   },
   mounted() {
     if (module.hot) {
