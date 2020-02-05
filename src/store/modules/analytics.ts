@@ -1,4 +1,9 @@
+import axios from "axios";
+import { AxiosResponse } from "axios";
+import * as settings from "@/utils/settings";
+import { RootState } from "@/types/vuex";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
+import store from "..";
 
 /**
  * Response to GET request on iam/user endpoint
