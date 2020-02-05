@@ -1,7 +1,8 @@
 <template>
   <v-dialog v-model="showDialog" width="1200">
     <v-card class="pa-2">
-      <v-tabs grow>
+      <v-tabs grow color="primary" dark>
+              <v-tabs-slider color="white"></v-tabs-slider>
         <v-tab>
           Simulation Configuration
         </v-tab>
@@ -461,6 +462,30 @@
                 </div>
               </v-expansion-panel-content>
             </v-expansion-panel>
+
+            <v-expansion-panel v-if="card.sampleErrors.length" class="mt-2">
+              <v-expansion-panel-content>
+                <template v-slot:header>
+                  <div>
+                    <v-badge color="error">
+                      <template v-slot:badge
+                        >{{ card.sampleErrors.length }}
+                      </template>
+                      <span>Errors</span>
+                    </v-badge>
+                  </div>
+                </template>
+                <div
+                  v-for="error in card.sampleErrors"
+                  :key="error"
+                  class="mt-2"
+                >
+                  <v-alert :value="true" type="error">
+                    {{ error }}
+                  </v-alert>
+                </div>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
           </v-container>
         </v-tab-item>
       </v-tabs>
@@ -799,7 +824,6 @@ export default Vue.extend({
           // Reset warnings and errors
           sampleWarnings: [],
           sampleErrors: [],
-          hasSampleWarningsOrErrors: false,
           hasSimulationError: false,
           solverStatus: null,
           // Reset simulation results
@@ -980,8 +1004,7 @@ export default Vue.extend({
           this.updateCard({
             uuid: this.card.uuid,
             props: {
-              sampleWarnings: response.data.warnings,
-              hasSampleWarningsOrErrors: response.data.warnings.length > 0
+              sampleWarnings: response.data.warnings
             }
           });
           this.$emit("simulate-card");
@@ -996,8 +1019,7 @@ export default Vue.extend({
             this.updateCard({
               uuid: this.card.uuid,
               props: {
-                sampleErrors: error.response.data.errors,
-                hasSampleWarningsOrErrors: true
+                sampleErrors: error.response.data.errors
               }
             });
           }
