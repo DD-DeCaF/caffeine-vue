@@ -189,7 +189,7 @@
                           compound.compound_namespace = $event.namespace;
                         "
                         :modelIds="modelIds"
-                        :passedMetabolite="compound"
+                        :passedMetabolite="convertToMetaNetXMetabolite(compound)"
                       ></AutocompleteMnxMetabolite>
                     </v-flex>
 
@@ -253,6 +253,7 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { MetaNetXMetabolite, Annotation } from '../components/AutocompleteMnxMetabolite.vue';
 
 export default Vue.extend({
   name: "Media",
@@ -396,6 +397,9 @@ export default Vue.extend({
     },
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
+    },
+    convertToMetaNetXMetabolite({compound_name, compound_identifier, compound_namespace}) {
+      return {name: compound_name, id: compound_identifier, namespace: compound_namespace, formula: 'Unavailable'}; 
     }
   }
 });
