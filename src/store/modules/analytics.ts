@@ -56,6 +56,9 @@ export default vuexStoreModule({
         unsubscribe();
       });
     },
+    logout({ state }) {
+      state.analytics!.reset();
+    },
     identifyUser({ state }, payload) {
       state.analytics!.identify(payload.registeredEmail, {
         ...payload,

@@ -280,6 +280,7 @@ export default Vue.extend({
       this.isLogoutSuccess = true;
       this.$store.dispatch("fetchAllData");
       this.$router.replace({ name: "home" });
+      this.$store.dispatch("analytics/logout");
     },
     socialLogin(providerKey) {
       firebase.auth().signOut();
