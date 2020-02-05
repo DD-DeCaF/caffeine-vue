@@ -118,56 +118,57 @@
                 </v-flex>
               </v-layout>
 
-              <v-layout v-if="card.conditionData && card.sample" column>
-                <v-flex mb-1>
-                  <v-card>
-                    <v-subheader
-                      >Strain {{ card.conditionData.strain.name }}</v-subheader
-                    >
-                    <v-card-text v-if="card.conditionData.strain.genotype">
-                      <code class="px-2">{{
-                        card.conditionData.strain.genotype
-                      }}</code>
-                      <p class="mt-2">
-                        The genotype above is described in
-                        <a href="https://gnomic.readthedocs.io">gnomic</a>
-                        syntax, a grammar to represent genotypes and phenotypes
-                        developed at DTU Biosustain.
-                      </p>
-                    </v-card-text>
-                    <v-card-text v-else>
-                      There are no genotype modifications in this strain.
-                    </v-card-text>
-                  </v-card>
-                </v-flex>
-                <v-flex mb-1>
-                  <v-card>
-                    <v-subheader
-                      >Medium {{ card.conditionData.medium.name }}</v-subheader
-                    >
-                    <v-data-table
-                      :headers="mediumHeaders"
-                      :items="card.conditionData.medium.compounds"
-                      class="elevation-1"
-                    >
-                      <template v-slot:items="{ item: compound }">
-                        <td>{{ compound.compound_name }}</td>
-                        <td>
-                          <CompoundLink
-                            :identifier="compound.compound_identifier"
-                            :namespace="compound.compound_namespace"
-                          />
-                        </td>
-                        <td>
-                          <span v-if="compound.mass_concentration">
-                            {{ compound.mass_concentration }} <em>mmol/l</em>
-                          </span>
-                          <span v-else>Unspecified</span>
-                        </td>
-                      </template>
-                    </v-data-table>
-                  </v-card>
-                </v-flex>
+          <v-layout v-if="card.conditionData && card.sample" column>
+            <v-flex mb-1>
+              <v-card>
+                <v-subheader
+                  >Strain {{ card.conditionData.strain.name }}</v-subheader
+                >
+                <v-card-text v-if="card.conditionData.strain.genotype">
+                  <code class="px-2">{{
+                    card.conditionData.strain.genotype
+                  }}</code>
+                  <p class="mt-2">
+                    The genotype above is described in
+                    <a-extended href="https://gnomic.readthedocs.io"
+                      >gnomic</a-extended
+                    >syntax, a grammar to represent genotypes and phenotypes
+                    developed at DTU Biosustain.
+                  </p>
+                </v-card-text>
+                <v-card-text v-else>
+                  There are no genotype modifications in this strain.
+                </v-card-text>
+              </v-card>
+            </v-flex>
+            <v-flex mb-1>
+              <v-card>
+                <v-subheader
+                  >Medium {{ card.conditionData.medium.name }}</v-subheader
+                >
+                <v-data-table
+                  :headers="mediumHeaders"
+                  :items="card.conditionData.medium.compounds"
+                  class="elevation-1"
+                >
+                  <template v-slot:items="{ item: compound }">
+                    <td>{{ compound.compound_name }}</td>
+                    <td>
+                      <CompoundLink
+                        :identifier="compound.compound_identifier"
+                        :namespace="compound.compound_namespace"
+                      />
+                    </td>
+                    <td>
+                      <span v-if="compound.mass_concentration">
+                        {{ compound.mass_concentration }} <em>mmol/l</em>
+                      </span>
+                      <span v-else>Unspecified</span>
+                    </td>
+                  </template>
+                </v-data-table>
+              </v-card>
+            </v-flex>
 
                 <v-flex mb-1 v-if="card.sample.fluxomics.length > 0">
                   <v-card>
@@ -237,46 +238,46 @@
                   </v-card>
                 </v-flex>
 
-                <v-flex mb-1 v-if="card.sample.proteomics.length > 0">
-                  <v-card>
-                    <v-subheader>Proteomics</v-subheader>
-                    <v-data-table
-                      :headers="proteomicsHeaders"
-                      :items="card.sample.proteomics"
-                      class="elevation-1"
-                    >
-                      <template v-slot:items="{ item: protein }">
-                        <td>
-                          <a
-                            :href="
-                              `https://www.uniprot.org/uniprot/${protein.identifier}`
-                            "
-                            target="_blank"
-                            >{{ protein.identifier }}</a
-                          >
-                        </td>
-                        <td>{{ protein.name }}</td>
-                        <td>{{ protein.full_name }}</td>
-                        <td>
-                          {{ displayGeneIds(protein.gene) }}
-                        </td>
-                        <td>
-                          {{ protein.measurement }}
-                          <em>mmol gDW<sup>-1</sup></em>
-                        </td>
-                        <td>
-                          <span v-if="protein.uncertainty">
-                            {{ protein.uncertainty }}
-                            <em>mmol gDW<sup>-1</sup></em>
-                          </span>
-                          <span v-else>
-                            No uncertainty
-                          </span>
-                        </td>
-                      </template>
-                    </v-data-table>
-                  </v-card>
-                </v-flex>
+            <v-flex mb-1 v-if="card.sample.proteomics.length > 0">
+              <v-card>
+                <v-subheader>Proteomics</v-subheader>
+                <v-data-table
+                  :headers="proteomicsHeaders"
+                  :items="card.sample.proteomics"
+                  class="elevation-1"
+                >
+                  <template v-slot:items="{ item: protein }">
+                    <td>
+                      <a-extended
+                        :href="
+                          `https://www.uniprot.org/uniprot/${protein.identifier}`
+                        "
+                        target="_blank"
+                        >{{ protein.identifier }}</a-extended
+                      >
+                    </td>
+                    <td>{{ protein.name }}</td>
+                    <td>{{ protein.full_name }}</td>
+                    <td>
+                      {{ displayGeneIds(protein.gene) }}
+                    </td>
+                    <td>
+                      {{ protein.measurement }}
+                      <em>mmol gDW<sup>-1</sup></em>
+                    </td>
+                    <td>
+                      <span v-if="protein.uncertainty">
+                        {{ protein.uncertainty }}
+                        <em>mmol gDW<sup>-1</sup></em>
+                      </span>
+                      <span v-else>
+                        No uncertainty
+                      </span>
+                    </td>
+                  </template>
+                </v-data-table>
+              </v-card>
+            </v-flex>
 
                 <v-flex
                   mb-1

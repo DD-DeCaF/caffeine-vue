@@ -7,6 +7,11 @@
 <script lang="ts">
 import Vue from "vue";
 
+/**
+ * a-extended behaves like regular <a>, but upon click it checks if href
+ * points to remote host, and dispatches "analytics/link" with destination info
+ * if so.
+ */
 export default Vue.extend({
   name: "a-extended",
   inheritAttrs: false,

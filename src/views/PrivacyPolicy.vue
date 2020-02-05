@@ -396,7 +396,7 @@
                   acknowledge that Google may process data in the manner and for
                   the purposes set out above. Please see further Google policies
                   at:
-                  <a
+                  <a-extended
                     href="http://www.google.com/intl/en/policies/technologies/ads/"
                     >http://www.google.com/intl/en/policies/technologies/ads/</a
                   >

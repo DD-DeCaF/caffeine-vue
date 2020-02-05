@@ -84,7 +84,7 @@
                         <v-flex xs8>
                           <AutocompleteMnxMetabolite
                             label="Compound"
-                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
+                            hint="Searches the entire <a-extended href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a-extended> database for known compounds."
                             @change="
                               compound.name = $event.name;
                               compound.id = $event.id;
