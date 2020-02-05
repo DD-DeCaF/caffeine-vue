@@ -287,8 +287,9 @@ export default Vue.extend({
     mediumItemIndex: null,
     isMediumEditDialogVisible: false,
     isDeletionDialogVisible: false,
-    filteredCompounds: [{}],
-    compounds: [{}],
+    filteredCompounds: [],
+    compounds: [],
+    idsBeforeEditing: [],
     headers: [
       { text: "Name", align: "left", value: "name", width: "45%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
@@ -354,6 +355,9 @@ export default Vue.extend({
       this.filteredCompounds = this.compounds.filter(
         element => element.medium_id === this.id
       );
+      for (const {id: i} of this.filteredCompounds) {
+        this.idsBeforeEditing.push(i);
+      }
     },
     deleteItem(item) {
       this.mediumItem = item;
