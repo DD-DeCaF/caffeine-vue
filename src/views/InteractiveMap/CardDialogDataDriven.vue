@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 <template>
   <v-dialog v-model="showDialog" width="1200">
     <v-card class="pa-2">
@@ -393,7 +394,7 @@
             </v-container>
           </v-form>
         </v-tab-item>
-        <v-tab v-if="modifications.length > 0">
+        <v-tab :disabled="modifications.length === 0">
           Model Modifications
         </v-tab>
         <v-tab-item>
@@ -405,8 +406,24 @@
             />
           </v-container>
         </v-tab-item>
-        <v-tab v-if="card.sampleErrors.length || card.sampleWarnings.length">
-          <v-badge color="warning">
+        <v-tab
+          :disabled="!(card.sampleErrors.length || card.sampleWarnings.length)"
+        >
+          <v-badge
+            color="error"
+            :value="card.sampleErrors.length + card.sampleWarnings.length"
+            v-if="card.sampleErrors.length"
+          >
+            <template v-slot:badge
+              >{{ card.sampleWarnings.length + card.sampleErrors.length }}
+            </template>
+            <span>Warnings and Errors</span>
+          </v-badge>
+          <v-badge
+            color="warning"
+            :value="card.sampleErrors.length + card.sampleWarnings.length"
+            v-else
+          >
             <template v-slot:badge
               >{{ card.sampleWarnings.length + card.sampleErrors.length }}
             </template>
@@ -422,7 +439,15 @@
               <v-expansion-panel-content>
                 <template v-slot:header>
                   <div>
-                    <v-badge color="warning">
+                    <v-badge color="error" v-if="card.sampleErrors.length">
+                      <template v-slot:badge
+                        >{{
+                          card.sampleWarnings.length + card.sampleErrors.length
+                        }}
+                      </template>
+                      <span>Warnings and Errors</span>
+                    </v-badge>
+                    <v-badge color="warning" v-else>
                       <template v-slot:badge
                         >{{
                           card.sampleWarnings.length + card.sampleErrors.length
@@ -433,21 +458,21 @@
                   </div>
                 </template>
                 <div
-                  v-for="warning in card.sampleWarnings"
-                  :key="warning"
-                  class="mt-2"
-                >
-                  <v-alert :value="true" type="warning">
-                    {{ warning }}
-                  </v-alert>
-                </div>
-                <div
                   v-for="error in card.sampleErrors"
                   :key="error"
                   class="mt-2"
                 >
                   <v-alert :value="true" type="error">
                     {{ error }}
+                  </v-alert>
+                </div>
+                <div
+                  v-for="warning in card.sampleWarnings"
+                  :key="warning"
+                  class="mt-2"
+                >
+                  <v-alert :value="true" type="warning">
+                    {{ warning }}
                   </v-alert>
                 </div>
               </v-expansion-panel-content>
