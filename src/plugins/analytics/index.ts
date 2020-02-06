@@ -44,11 +44,6 @@ export default function install(Vue, options: AnalyticsConfig) {
 
   Vue.directive("analytics-model", analyticsModelDirective);
 
-  if (!Vue.prototype.$analytics) {
-    Vue.prototype.$analytics = {};
-  }
-  Vue.prototype.$analytics.commands = config.commands;
-
   // Start auto tracking
   autoTracking();
 }

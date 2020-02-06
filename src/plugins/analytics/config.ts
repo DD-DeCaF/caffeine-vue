@@ -32,9 +32,6 @@ export interface TrackPageConfig {
   $vue: Vue | null;
   router: VueRouter | null;
   ignoreRoutes?: string[];
-  commands?: {
-    [key: string]: Function;
-  };
   autoTracking?: {
     shouldRouterUpdate?: Function | null;
     skipSamePath?: Boolean;
@@ -49,8 +46,6 @@ const defaultConfig: TrackPageConfig = {
   $vue: null,
   router: null,
   ignoreRoutes: [],
-  commands: {},
-
   autoTracking: {
     shouldRouterUpdate: null,
     skipSamePath: false,

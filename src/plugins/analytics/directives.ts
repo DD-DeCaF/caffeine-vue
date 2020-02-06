@@ -24,12 +24,11 @@
  * SOFTWARE.
  */
 
-import config from "./config";
 import { DirectiveOptions } from "vue";
 
 /**
- * Directive that calls a function from ./config.commands if element's value
- * changes to truthy
+ * Directive that dispatches an action in store's analytics module if
+ * components's value changes to truthy
  */
 export const analyticsModelDirective: DirectiveOptions = {
   update: function(el, binding, vnode, oldVnode) {
@@ -41,13 +40,6 @@ export const analyticsModelDirective: DirectiveOptions = {
       return;
     }
     const { command, payload } = binding.value;
-    let fn = config.commands && config.commands[command];
-    if (!fn) {
-      throw new Error(
-        "[analytics] The value passed to v-analytics-model is not defined " +
-          "in the commands list."
-      );
-    }
-    fn.call(vnode.context, payload);
+    vnode.context!.$store.dispatch(`analytics/${command}`, payload);
   }
 };
