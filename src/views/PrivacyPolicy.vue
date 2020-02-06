@@ -398,7 +398,7 @@
                   at:
                   <a-extended
                     href="http://www.google.com/intl/en/policies/technologies/ads/"
-                    >http://www.google.com/intl/en/policies/technologies/ads/</a
+                    >http://www.google.com/intl/en/policies/technologies/ads/</a-extended
                   >
                 </p>
               </li>
