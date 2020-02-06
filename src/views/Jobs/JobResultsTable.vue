@@ -1199,6 +1199,10 @@ export default Vue.extend({
         Promise.all(addingPromises).then(() => {
           this.$router.push({ name: "interactiveMap" });
           this.isVisualizing = false;
+          this.$store.dispatch("analytics/sendToVisualize", {
+            ids: this.selected.map(prediction => prediction.id),
+            type: "prediction"
+          });
         });
       });
     },

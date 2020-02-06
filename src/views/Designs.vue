@@ -500,6 +500,10 @@ export default Vue.extend({
             this.$router.push({ name: "interactiveMap" });
           });
       });
+      this.$store.dispatch("analytics/sendToVisualize", {
+        ids: this.selected.map(design => design.id),
+        type: "design"
+      });
     },
     onDeletion(ids) {
       // Remove any cards from the store that belongs to any of the deleted

@@ -152,6 +152,9 @@ export default vuexStoreModule({
       };
       state.analytics!.track("visualize", data);
     },
+    sendToVisualize({ state }, payload) {
+      state.analytics!.track("send_to_visualize", payload);
+    },
     searchEscher({ state }, payload) {
       state.analytics!.track("search_escher", payload);
     }
