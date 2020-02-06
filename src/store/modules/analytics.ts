@@ -91,6 +91,9 @@ export default vuexStoreModule({
     page({ state }, payload) {
       state.analytics!.page(payload);
     },
+    trackDialog({ state }, payload) {
+      state.analytics!.track("dialog", payload);
+    },
     link({ state }, payload) {
       state.analytics!.track("outbound_link", payload);
     },
