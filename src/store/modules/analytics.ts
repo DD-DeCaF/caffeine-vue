@@ -38,6 +38,7 @@ export interface Analytics {
 }
 
 export interface AnalyticsState {
+  enableAnalytics: boolean;
   analytics: Analytics | null;
   lastEscherSearch: string | null;
 }
@@ -45,10 +46,14 @@ export interface AnalyticsState {
 export default vuexStoreModule({
   namespaced: true,
   state: {
+    enableAnalytics: settings.enableAnalytics,
     analytics: null,
     lastEscherSearch: null
   } as AnalyticsState,
   mutations: {
+    setEnableAnalytics(state, enabled) {
+      state.enableAnalytics = enabled;
+    },
     setAnalytics(state, analytics: Analytics) {
       state.analytics = analytics;
     },

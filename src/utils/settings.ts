@@ -17,6 +17,9 @@ export const apis = {
 export const trustedURLs = process.env.VUE_APP_TRUSTED_URLS.split(",");
 export const sentryDSN = process.env.sentryDSN;
 export const gaTrackingID = process.env.VUE_APP_GA_TRACKING_ID;
+export const enableAnalytics = ["true", "1"].includes(
+  process.env.VUE_APP_ENABLE_ANALYTICS.toLowerCase()
+);
 export const enableConsents = ["true", "1"].includes(
   process.env.VUE_APP_ENABLE_CONSENTS.toLowerCase()
 );
