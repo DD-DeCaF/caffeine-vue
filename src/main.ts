@@ -1,5 +1,6 @@
 import Vue from "vue";
-import VueAnalytics from "vue-analytics";
+import analytics from "./plugins/analytics";
+import googleAnalyticsPlugin from "analytics-plugin-ga";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
@@ -53,12 +54,20 @@ if (sentryDSN) {
 Vue.use(require("vue-moment"));
 Vue.use(promisedDialog);
 
-if (gaTrackingID) {
-  Vue.use(VueAnalytics, {
-    id: gaTrackingID,
-    router
-  });
-}
+Vue.use(analytics, {
+  // Own options
+  store,
+  // Analytics options (https://github.com/DavidWells/analytics)
+  plugins: [
+    // TODO: Make sure the app doesn't error if there's no gaTrackingID
+    googleAnalyticsPlugin({
+      trackingId: gaTrackingID,
+      autoTrack: true
+    })
+  ],
+  // Vue analytics options (https://github.com/MatteoGabriele/vue-analytics)
+  router
+});
 
 Vue.config.productionTip = false;
 
