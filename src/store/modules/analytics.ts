@@ -83,6 +83,9 @@ export default vuexStoreModule({
     updateUser({ state }, payload) {
       state.analytics!.identify(null, payload);
     },
+    page({ state }, payload) {
+      state.analytics!.page(payload);
+    },
     link({ state }, payload) {
       state.analytics!.track("outbound_link", payload);
     },
