@@ -1,6 +1,7 @@
 import Vue from "vue";
 import analytics from "./plugins/analytics";
 import googleAnalyticsPlugin from "analytics-plugin-ga";
+import { disableAnalyticsPlugin } from "@/utils/analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
@@ -59,6 +60,7 @@ Vue.use(analytics, {
   store,
   // Analytics options (https://github.com/DavidWells/analytics)
   plugins: [
+    disableAnalyticsPlugin({ store }),
     // TODO: Make sure the app doesn't error if there's no gaTrackingID
     googleAnalyticsPlugin({
       trackingId: gaTrackingID,
