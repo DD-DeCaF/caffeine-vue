@@ -26,6 +26,6 @@ export const analyticsModelDirective: DirectiveOptions = {
           "in the commands list."
       );
     }
-    fn.apply(vnode.context, payload);
+    fn.call(vnode.context, payload);
   }
 };
