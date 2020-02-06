@@ -1,6 +1,13 @@
 <template>
   <div>
-    <v-dialog v-model="isDialogVisible" width="650">
+    <v-dialog
+      v-model="isDialogVisible"
+      v-analytics-model="{
+        command: 'trackDialog',
+        payload: { dialogName: 'new_strain' }
+      }"
+      width="650"
+    >
       <NewProject
         v-model="isProjectCreationDialogVisible"
         @return-object="passProject"

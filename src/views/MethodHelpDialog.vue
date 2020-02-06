@@ -1,5 +1,12 @@
 <template>
-  <v-dialog v-model="showMethodHelpDialogLocal" width="1200">
+  <v-dialog
+    v-model="showMethodHelpDialogLocal"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'method_help' }
+    }"
+    width="1200"
+  >
     <v-card>
       <v-card-title class="headline primary white--text" primary-title>
         Constraint-based modeling

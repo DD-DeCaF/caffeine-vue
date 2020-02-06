@@ -1,6 +1,13 @@
 /* eslint-disable prettier/prettier */
 <template>
-  <v-dialog v-model="showDialog" width="1200">
+  <v-dialog
+    v-model="showDialog"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'data_driven_card' }
+    }"
+    width="1200"
+  >
     <v-card class="pa-2">
       <v-tabs grow color="primary" dark>
         <v-tabs-slider color="white"></v-tabs-slider>

@@ -1,5 +1,12 @@
 <template>
-  <v-dialog v-model="showDialog" width="500">
+  <v-dialog
+    v-model="showDialog"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'new_metabolite' }
+    }"
+    width="500"
+  >
     <v-card class="pa-3">
       <v-container grid-list-lg>
         <v-layout column wrap>

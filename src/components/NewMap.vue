@@ -8,7 +8,14 @@
     <!--      v-model="isProjectModelDialogVisible"-->
     <!--      @return-object="passModel"-->
     <!--    />-->
-    <v-dialog v-model="isVisible" width="650">
+    <v-dialog
+      v-model="isVisible"
+      v-analytics-model="{
+        command: 'trackDialog',
+        payload: { dialogName: 'new_map' }
+      }"
+      width="650"
+    >
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
