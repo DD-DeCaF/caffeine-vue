@@ -39,16 +39,21 @@ export interface Analytics {
 
 export interface AnalyticsState {
   analytics: Analytics | null;
+  lastEscherSearch: string | null;
 }
 
 export default vuexStoreModule({
   namespaced: true,
   state: {
-    analytics: null
+    analytics: null,
+    lastEscherSearch: null
   } as AnalyticsState,
   mutations: {
     setAnalytics(state, analytics: Analytics) {
       state.analytics = analytics;
+    },
+    setLastEscherSearch(state, query) {
+      state.lastEscherSearch = query;
     }
   },
   actions: {
@@ -155,8 +160,20 @@ export default vuexStoreModule({
     sendToVisualize({ state }, payload) {
       state.analytics!.track("send_to_visualize", payload);
     },
-    searchEscher({ state }, payload) {
-      state.analytics!.track("search_escher", payload);
+    searchEscher({ commit, state }, payload) {
+      const { searchItem, results } = payload;
+      // Track searched query only after 2 secs to avoid tracking every
+      // keystroke
+      commit("setLastEscherSearch", searchItem);
+      setTimeout(() => {
+        if (state.lastEscherSearch !== searchItem) {
+          return;
+        }
+        state.analytics!.track("search_escher", {
+          searchItem,
+          resultsCount: results.length
+        });
+      }, 2000);
     }
   }
 });
