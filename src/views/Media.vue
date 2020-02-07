@@ -289,8 +289,7 @@ export default Vue.extend({
     isMediumEditDialogVisible: false,
     isDeletionDialogVisible: false,
     filteredCompounds: [],
-    compounds: [],
-    idsBeforeEditing: [],
+    existingCompoundsInCurrentMedium: [],
     headers: [
       { text: "Name", align: "left", value: "name", width: "45%" },
       { text: "Actions", value: "name", sortable: false, width: "15%" }
@@ -315,26 +314,21 @@ export default Vue.extend({
     availableMedia() {
       return this.$store.state.media.media;
     },
+    availableCompounds() {
+      return this.$store.state.media.compounds;
+    },
     availableProjects() {
       return this.$store.state.projects.projects;
-    }
+    },
   },
   created() {
-    this.$store.dispatch("media/fetchCachedCompounds").then(response => {
-      this.compounds = response;
-    });
     this.$store.state.media.mediaPromise.then(() => {
-      this.isLoading = false;
+        this.$store.state.media.compoundsPromise.then(
+          () => {this.isLoading = false
+        })
     });
   },
   methods: {
-    getCompounds() {
-      this.isLoading = true;
-      this.$store.dispatch("media/fetchCachedCompounds").then(response => {
-        this.compounds = response;
-      });
-      this.isLoading = false;
-    },
     onEnter() {
       if (this.$refs.form.validate()) {
         this.editMedium();
@@ -348,12 +342,13 @@ export default Vue.extend({
       );
       this.mediumItemIndex = this.availableMedia.indexOf(item);
       this.isMediumEditDialogVisible = true;
-      this.filteredCompounds = this.compounds.filter(
+      this.existingCompoundsInCurrentMedium = this.availableCompounds.filter(
         element => element.medium_id === this.id
       );
-      for (const {id: i} of this.filteredCompounds) {
-        this.idsBeforeEditing.push(i);
-      }
+      console.log(this.existingCompoundsInCurrentMedium)
+      console.log(this.filteredCompounds)
+      this.filteredCompounds = this.existingCompoundsInCurrentMedium.map(x => x);
+      console.log(this.filteredCompounds)
     },
     deleteItem(item) {
       this.mediumItem = item;
@@ -374,20 +369,26 @@ export default Vue.extend({
             index: this.mediumItemIndex
           };
           this.$store.commit("media/editMedium", commitPayload);
-          this.isMediumEditSuccess = true;
         })
         .then(() => {
           return Promise.all(
-            this.idsBeforeEditing.forEach(compound_id => {
-              this.deleteCompoundByID(compound_id);
+            this.existingCompoundsInCurrentMedium.map( compound => {
+              const index = this.availableCompounds.indexOf(compound)
+              this.deleteCompoundByID(compound.id);
+              this.$store.commit("media/deleteCompound", compound.index);
             })
           )
         })
         .then(() => {
           return Promise.all(
-            this.idsBeforeEditing.forEach(compound => {
+            this.filteredCompounds.map(compound => {
               this.postCompounds(compound);
+              this.$store.commit("media/addCompound", compound);
             }));
+        })
+        .then(() => {
+          return Promise.all(
+            this.store.commit("media/setCompounds"));
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -401,7 +402,7 @@ export default Vue.extend({
           }
         })
         .then(() => {
-          this.getCompounds;
+          this.isMediumEditSuccess = true;
           this.$store.commit("toggleDialog", "loader");
           this.isMediumEditDialogVisible = false;
         });

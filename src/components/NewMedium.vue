@@ -232,6 +232,7 @@ export default Vue.extend({
             mass_concentration: compound.mass_concentration,
             medium_id: mediumId
           };
+          this.$store.commit("media/addCompound", payload);
           return axios.post(
             `${settings.apis.warehouse}/media/compounds`,
             payload

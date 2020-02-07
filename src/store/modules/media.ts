@@ -23,8 +23,9 @@ export default vuexStoreModule({
   namespaced: true,
   state: {
     media: [] as MediumItem[],
+    compounds: [] as MediumCompound[],
     mediaPromise: null as Promise<void> | null,
-    _compoundsPromise: null as Promise<MediumCompound[]> | null
+    compoundsPromise: null as Promise<MediumCompound[]> | null
   },
   mutations: {
     setMedia(state, media: MediumItem[]) {
@@ -39,11 +40,20 @@ export default vuexStoreModule({
     delete(state, ids) {
       state.media = state.media.filter(medium => !ids.includes(medium.id));
     },
+    setCompounds(state, compounds: MediumCompound[]) {
+      state.compounds = compounds;
+    },
+    addCompound(state, compound: MediumCompound) {
+      state.compounds.push(compound);
+    },
+    deleteCompound(state, ids) {
+      state.compounds = state.compounds.filter(compound => !ids.includes(compound.id));
+    },
     setMediaPromise(state, mediaPromise) {
       state.mediaPromise = mediaPromise;
     },
     setCompoundsPromise(state, compoundsPromise) {
-      state._compoundsPromise = compoundsPromise;
+      state.compoundsPromise = compoundsPromise;
     }
   },
   actions: {
@@ -64,20 +74,17 @@ export default vuexStoreModule({
      * once - on first demand. To ensure correct usage, they should only be
      * accessed through fetchCachedCompounds.
      */
-    fetchCachedCompounds({ commit, dispatch, state }) {
-      if (state._compoundsPromise) {
-        return state._compoundsPromise;
-      }
-
+    fetchCachedCompounds({ commit, dispatch}) {
       const compoundsPromise = axios
-        .get<MediumCompound[]>(`${settings.apis.warehouse}/media/compounds`)
-        .then(response => response.data)
+        .get(`${settings.apis.warehouse}/media/compounds`)
+        .then((response: AxiosResponse<MediumCompound[]>) => {
+          commit("setCompounds", response.data);
+        }) 
         .catch(error => {
           dispatch("setFetchError", error, { root: true });
           throw error;
         });
       commit("setCompoundsPromise", compoundsPromise);
-      return compoundsPromise;
     }
   }
 });
