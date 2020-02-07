@@ -10,6 +10,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@amcharts/amcharts4": "^4.8.9",
     "@dd-decaf/escher": "^1.9.5-decaf",
     "@sentry/browser": "^5.8.0",
     "@sentry/integrations": "^5.8.0",
