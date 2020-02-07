@@ -189,7 +189,9 @@
                           compound.compound_namespace = $event.namespace;
                         "
                         :modelIds="modelIds"
-                        :passedMetabolite="convertToMetaNetXMetabolite(compound)"
+                        :passedMetabolite="
+                          convertToMetaNetXMetabolite(compound)
+                        "
                       ></AutocompleteMnxMetabolite>
                     </v-flex>
 
@@ -253,7 +255,10 @@ import Vue from "vue";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
-import { MetaNetXMetabolite, Annotation } from '../components/AutocompleteMnxMetabolite.vue';
+import {
+  MetaNetXMetabolite,
+  Annotation
+} from "../components/AutocompleteMnxMetabolite.vue";
 
 export default Vue.extend({
   name: "Media",
@@ -319,13 +324,13 @@ export default Vue.extend({
     },
     availableProjects() {
       return this.$store.state.projects.projects;
-    },
+    }
   },
   created() {
     this.$store.state.media.mediaPromise.then(() => {
-        this.$store.state.media.compoundsPromise.then(
-          () => {this.isLoading = false
-        })
+      this.$store.state.media.compoundsPromise.then(() => {
+        this.isLoading = false;
+      });
     });
   },
   methods: {
@@ -345,10 +350,12 @@ export default Vue.extend({
       this.existingCompoundsInCurrentMedium = this.availableCompounds.filter(
         element => element.medium_id === this.id
       );
-      console.log(this.existingCompoundsInCurrentMedium)
-      console.log(this.filteredCompounds)
-      this.filteredCompounds = this.existingCompoundsInCurrentMedium.map(x => x);
-      console.log(this.filteredCompounds)
+      console.log(this.existingCompoundsInCurrentMedium);
+      console.log(this.filteredCompounds);
+      this.filteredCompounds = this.existingCompoundsInCurrentMedium.map(
+        x => x
+      );
+      console.log(this.filteredCompounds);
     },
     deleteItem(item) {
       this.mediumItem = item;
@@ -372,23 +379,23 @@ export default Vue.extend({
         })
         .then(() => {
           return Promise.all(
-            this.existingCompoundsInCurrentMedium.map( compound => {
-              const index = this.availableCompounds.indexOf(compound)
+            this.existingCompoundsInCurrentMedium.map(compound => {
+              const index = this.availableCompounds.indexOf(compound);
               this.deleteCompoundByID(compound.id);
               this.$store.commit("media/deleteCompound", compound.index);
             })
-          )
+          );
         })
         .then(() => {
           return Promise.all(
             this.filteredCompounds.map(compound => {
               this.postCompounds(compound);
               this.$store.commit("media/addCompound", compound);
-            }));
+            })
+          );
         })
         .then(() => {
-          return Promise.all(
-            this.store.commit("media/setCompounds"));
+          return Promise.all(this.store.commit("media/setCompounds"));
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -408,12 +415,10 @@ export default Vue.extend({
         });
     },
     deleteCompoundByID(id) {
-      return axios
-        .delete(`${settings.apis.warehouse}/media/compounds/${id}`)
+      return axios.delete(`${settings.apis.warehouse}/media/compounds/${id}`);
     },
     postCompounds(payload) {
-      return axios
-        .post(`${settings.apis.warehouse}/media/compounds/`, payload)
+      return axios.post(`${settings.apis.warehouse}/media/compounds/`, payload);
     },
     passProject(project) {
       this.project = project;
@@ -421,8 +426,17 @@ export default Vue.extend({
     toggleLoader() {
       this.isDeleting = !this.isDeleting;
     },
-    convertToMetaNetXMetabolite({compound_name, compound_identifier, compound_namespace}) {
-      return {name: compound_name, id: compound_identifier, namespace: compound_namespace, formula: 'Unavailable'}; 
+    convertToMetaNetXMetabolite({
+      compound_name,
+      compound_identifier,
+      compound_namespace
+    }) {
+      return {
+        name: compound_name,
+        id: compound_identifier,
+        namespace: compound_namespace,
+        formula: "Unavailable"
+      };
     }
   }
 });
