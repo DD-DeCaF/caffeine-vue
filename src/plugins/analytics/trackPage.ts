@@ -48,7 +48,8 @@ export function autoTracking() {
       trackRoute(router.currentRoute);
     }
     router.afterEach((to, from) => {
-      const { skipSamePath, shouldRouterUpdate } = autoTracking || {};
+      const { skipSamePath = null, shouldRouterUpdate = null } =
+        autoTracking || {};
 
       // Default behaviour of the router when the `skipSamePath` is turned on.
       // Skip router change when current and previous route have the same path

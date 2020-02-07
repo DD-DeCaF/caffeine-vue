@@ -106,14 +106,14 @@ export default vuexStoreModule({
       state.analytics!.track("export", payload);
     },
     visualize({ state }, payload) {
-      // destructure nullable properties
+      // Destructure nullable properties
       const { project = {}, model = {}, map = {}, card = {} } = payload;
       const {
-        method,
-        showProteomicsData,
-        type,
-        uuid: cardId,
-        name: cardName,
+        method = null,
+        showProteomicsData = null,
+        type = null,
+        uuid: cardId = null,
+        name: cardName = null,
         organism = {},
         sample = {},
         experiment = {},
@@ -123,14 +123,21 @@ export default vuexStoreModule({
           maximize: isObjectiveMaximize = null
         } = {}
       } = card || {};
-      const { id: projectId, name: projectName } = project || {};
-      const { id: modelId, name: modelName } = model || {};
-      const { id: organismId, name: organismName } = organism || {};
-      const { id: sampleId } = sample || {};
-      const { id: experimentId, name: experimentName } = experiment || {};
-      const { id: conditionId, name: conditionName, medium = {}, strain = {} } =
-        conditionData || {};
-      const { id: objectiveId, name: objectiveName } = objectiveReaction || {};
+      const { id: projectId = null, name: projectName = null } = project || {};
+      const { id: modelId = null, name: modelName = null } = model || {};
+      const { id: organismId = null, name: organismName = null } =
+        organism || {};
+      const { id: sampleId = null } = sample || {};
+      const { id: experimentId = null, name: experimentName = null } =
+        experiment || {};
+      const {
+        id: conditionId = null,
+        name: conditionName = null,
+        medium = {},
+        strain = {}
+      } = conditionData || {};
+      const { id: objectiveId = null, name: objectiveName = null } =
+        objectiveReaction || {};
 
       const data = {
         projectId,
