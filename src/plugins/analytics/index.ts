@@ -30,9 +30,17 @@ import { analyticsModelDirective } from "./directives";
 import config, { TrackPageConfig, update } from "./config";
 import { autoTracking } from "./trackPage";
 
-interface AnalyticsConfig extends TrackPageConfig {
-  store: Store<object>;
+interface AnalyticsPackageConfig {
+  app?: string;
+  debug?: boolean;
+  reducers?: object;
+  version?: string;
 }
+
+type AnalyticsConfig = TrackPageConfig &
+  AnalyticsPackageConfig & {
+    store: Store<object>;
+  };
 
 export default function install(Vue, options: AnalyticsConfig) {
   // Set up analytics package
