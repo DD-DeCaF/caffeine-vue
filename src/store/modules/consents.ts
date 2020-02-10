@@ -228,6 +228,29 @@ export default vuexStoreModule({
     }
   },
   actions: {
+    clearLocalStorageOnExit({ getters, state }) {
+      /**
+       * Take care of clearing cookies based on "preferences" cookie consent
+       * status.
+       *
+       * If user rejects "preferences" cookie or the consents are cleared
+       * (e.g. on log out), then preferences are removed from localStorage.
+       */
+      window.addEventListener("beforeunload", () => {
+        if (!state.enableConsents) {
+          return;
+        }
+        const consentGiven = getters.isConsentAccepted({
+          type: "cookie",
+          category: "preferences"
+        });
+        if (!consentGiven) {
+          ["jwt", "cookie:accepted", "consents"].forEach(k =>
+            localStorage.removeItem(k)
+          );
+        }
+      });
+    },
     fetchConsents({ commit, rootState, state }) {
       if (!state.enableConsents) {
         return;
