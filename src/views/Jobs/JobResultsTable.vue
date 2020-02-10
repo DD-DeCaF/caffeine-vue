@@ -1011,8 +1011,8 @@ export default Vue.extend({
               });
 
               // Apply the values from diffFVA results as bounds for simulation
-              const editedBounds = jobPrediction.manipulations.map(
-                manipulation => {
+              const editedBounds = jobPrediction.manipulations
+                .map(manipulation => {
                   // First find the original bounds for the reaction, because one of them
                   // will need to be part of the request to modify bounds.
                   let oldLowerBound;
@@ -1041,6 +1041,12 @@ export default Vue.extend({
                   }
 
                   // manipulation.value can never be equal to zero hence we don't need to check for it.
+                  // TODO: see DD-DeCaF/scrum#1034. Backend does in fact
+                  // sometimes return 0.
+                  // TEMPFIX: filter out the zero values until backend is fixed
+                  if (manipulation.value === 0) {
+                    return;
+                  }
                   const newBound = manipulation.value;
 
                   if (
@@ -1066,8 +1072,11 @@ export default Vue.extend({
                       upperBound: newBound
                     };
                   }
-                }
-              );
+                })
+                // TODO: see DD-DeCaF/scrum#1034. Backend does in fact
+                // sometimes return 0.
+                // TEMPFIX: filter out incorrect values until backend is fixed
+                .filter(Boolean);
 
               // Commit all the resolved manipulations. Note that committing them all
               // in a single mutation is much faster than committing each one
