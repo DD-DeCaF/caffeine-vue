@@ -245,9 +245,7 @@ export default vuexStoreModule({
           category: "preferences"
         });
         if (!consentGiven) {
-          ["jwt", "cookie:accepted", "consents"].forEach(k =>
-            localStorage.removeItem(k)
-          );
+          localStorage.clear();
         }
       });
     },
