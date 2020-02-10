@@ -204,13 +204,13 @@ export function namespacePluginHooks(
 ) {
   if (!plugins) {
     throw TypeError(
-      "makeChainedPlugin requires a single or a list of plugins."
+      "namespacePluginHooks requires a single or a list of plugins."
     );
   }
   const pluginsArr = Array.isArray(plugins) ? plugins : [plugins];
   if (!namespaces) {
     throw TypeError(
-      "makeChainedPlugin requires a single string or a list of strings as " +
+      "namespacePluginHooks requires a single string or a list of strings as " +
         "namespaces."
     );
   }
