@@ -151,6 +151,22 @@ export function snakecasePropertiesPlugin() {
   };
 }
 
+/**
+ * Print out payload for debugging
+ */
+export function printPayloadPlugin() {
+  function printPayload({ payload }) {
+    console.log(payload);
+    return payload;
+  }
+  return {
+    name: "print-payload",
+    track: printPayload,
+    identify: printPayload,
+    page: printPayload
+  };
+}
+
 export function chainPlugins(plugins: any[]) {
   if (!plugins) {
     throw TypeError("chainPlugin requires a list of plugins.");
