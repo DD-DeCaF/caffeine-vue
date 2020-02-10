@@ -118,10 +118,10 @@ export function enrichAnalyticsPlugin({ store, router }) {
     };
   }
 
-  const enrichAnalyticsFactory = makePayloadPropertyModifierFactory(
-    "enrich-analytics",
-    (obj, { config }) => enrichProperties(obj, config.store, config.router)
-  );
+  const enrichAnalyticsFactory = makePayloadPropertyMutatorFactory({
+    name: "enrich-analytics",
+    mutator: (obj, config) => enrichProperties(obj, config.store, config.router)
+  });
 
   return {
     name: "enrich-analytics",
@@ -136,10 +136,9 @@ export function enrichAnalyticsPlugin({ store, router }) {
  * objects
  */
 export function dropNoValuePropertiesPlugin() {
-  const omitNilPropertiesFactory = makePayloadPropertyModifierFactory(
-    "drop-no-value-properties",
-    obj => omitBy(obj, isNil)
-  );
+  const omitNilPropertiesFactory = makePayloadPropertyMutatorFactory({
+    mutator: obj => omitBy(obj, isNil)
+  });
 
   return {
     name: "drop-no-value-properties",
@@ -153,10 +152,9 @@ export function dropNoValuePropertiesPlugin() {
  * Format property keys to snakecase
  */
 export function snakecasePropertiesPlugin() {
-  const snakeCasePayloadFactory = makePayloadPropertyModifierFactory(
-    "snakecase-properties",
-    obj => snakeCasePropertyNames(obj)
-  );
+  const snakeCasePayloadFactory = makePayloadPropertyMutatorFactory({
+    mutator: obj => snakeCasePropertyNames(obj)
+  });
   return {
     name: "snakecase-properties",
     track: snakeCasePayloadFactory("properties"),
@@ -239,41 +237,48 @@ export function namespacePluginHooks(
 }
 
 /**
- * Factory decorator for creating plugin hook functions that modify specific
- * only specific properties of the payload.
- * @param {Function} fn function that accepts value of a payload property and
+ * Factory decorator for creating plugin hook functions that modify only
+ * specific properties of the payload.
+ * @param {object} options Options object
+ * @param {Function} options.fn function that accepts value of a payload property and
  *                      context, and returns the modified part of the payload
+ * @param {string} options.name Name of the plugin the generated functions
+ *                              relate to. Optional. Required to access
+ *                              original plugin's config in namescaped hooks.
  * @returns factory function that accepts payload key(s) (string or list
  *          of strings) and returns a plugin hook function that modifies only
  *          those properties on the payload object
  */
-function makePayloadPropertyModifierFactory(
-  name,
-  fn: (value: any, ctx: { [key: string]: any }, ...args) => any
-) {
-  function payloadPropertyModifierFactory(payloadKeys: string | string[]) {
+function makePayloadPropertyMutatorFactory(options: {
+  name?: string;
+  mutator: (value: any, ctx: { [key: string]: any }, ...args) => any;
+}) {
+  const { name = "", mutator } = options;
+  function payloadPropertyMutatorFactory(payloadKeys: string | string[]) {
     if (!payloadKeys) {
       throw TypeError(
-        "payloadPropertyModifierFactory requires a single string or a list " +
+        "payloadPropertyMutatorFactory requires a single string or a list " +
           "of strings."
       );
     }
     const keys = Array.isArray(payloadKeys) ? payloadKeys : [payloadKeys];
-    function pluginHookWrapper({ payload = {}, plugins = {} }) {
+    function pluginHookWrapper({ config = {}, payload = {}, plugins = {} }) {
       // TEMPFIX: In namespaced hooks, we don't have access to the own plugin's
       // config object, so we pass current plugin along to make up for that
       // see https://github.com/DavidWells/analytics/issues/25
-      const plugin = plugins[name];
       const args = Array.from(arguments);
       const modifiedPayload = keys.reduce((tempPayload, key) => {
+        const currConfig = key.includes(":") ? plugins[name].config : config;
         return {
           ...tempPayload,
-          ...{ [key]: fn.call(null, tempPayload[key], plugin, ...args) }
+          ...{
+            [key]: mutator.call(null, tempPayload[key], currConfig, ...args)
+          }
         };
       }, payload);
       return modifiedPayload;
     }
     return pluginHookWrapper;
   }
-  return payloadPropertyModifierFactory;
+  return payloadPropertyMutatorFactory;
 }
