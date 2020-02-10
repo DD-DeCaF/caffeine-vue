@@ -4,12 +4,13 @@ import googleAnalyticsPlugin from "analytics-plugin-ga";
 import doNotTrackPlugin from "analytics-plugin-do-not-track";
 import originalSourcePlugin from "analytics-plugin-original-source";
 import {
+  chainPlugins,
+  disableAnalyticsPlugin,
   dropNoValuePropertiesPlugin,
   enrichAnalyticsPlugin,
   namespacePluginHooks,
   requireConsentPlugin,
-  disableAnalyticsPlugin,
-  chainPlugins
+  snakecasePropertiesPlugin
 } from "@/utils/analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
@@ -77,8 +78,9 @@ Vue.use(analytics, {
       enrichAnalyticsPlugin({ store, router }),
       // NOTE: dropNoValuePropertiesPlugin currently doesn't work,
       //       see https://github.com/DavidWells/analytics/issues/26
+      dropNoValuePropertiesPlugin(),
       namespacePluginHooks(
-        dropNoValuePropertiesPlugin(),
+        snakecasePropertiesPlugin(),
         "google-analytics"
       )
     ])

@@ -129,6 +129,28 @@ export function dropNoValuePropertiesPlugin() {
   };
 }
 
+/**
+ * Format property keys to snakecase
+ */
+export function snakecasePropertiesPlugin() {
+  function snakeCaseProperties(obj) {
+    return Object.keys(obj).reduce((agg, key) => {
+      agg[snakeCase(key)] = obj[key];
+      return agg;
+    }, {});
+  }
+  const snakeCasePayloadFactory = makePayloadPropertyModifierFactory(
+    "snakecase-properties",
+    obj => snakeCaseProperties(obj)
+  );
+  return {
+    name: "snakecase-properties",
+    track: snakeCasePayloadFactory("properties"),
+    identify: snakeCasePayloadFactory("traits"),
+    page: snakeCasePayloadFactory("properties")
+  };
+}
+
 export function chainPlugins(plugins: any[]) {
   if (!plugins) {
     throw TypeError("chainPlugin requires a list of plugins.");
