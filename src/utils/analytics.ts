@@ -1,4 +1,5 @@
-import { omitBy, isNil, snakeCase } from "lodash";
+import { omitBy, isNil } from "lodash";
+import { snakeCasePropertyNames } from "./utility";
 
 export function requireConsentPlugin({ store }) {
   async function isConsentGiven(store) {
@@ -152,15 +153,9 @@ export function dropNoValuePropertiesPlugin() {
  * Format property keys to snakecase
  */
 export function snakecasePropertiesPlugin() {
-  function snakeCaseProperties(obj) {
-    return Object.keys(obj).reduce((agg, key) => {
-      agg[snakeCase(key)] = obj[key];
-      return agg;
-    }, {});
-  }
   const snakeCasePayloadFactory = makePayloadPropertyModifierFactory(
     "snakecase-properties",
-    obj => snakeCaseProperties(obj)
+    obj => snakeCasePropertyNames(obj)
   );
   return {
     name: "snakecase-properties",
