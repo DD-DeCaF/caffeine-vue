@@ -187,7 +187,7 @@ export function chainPlugins(plugins: any[]) {
   return chainedPlugins;
 }
 
-function namespacePluginHooks(
+export function namespacePluginHooks(
   plugins: object | object[],
   namespaces: string | string[],
   hooks?: string | string[]
