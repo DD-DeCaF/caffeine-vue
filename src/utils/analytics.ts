@@ -127,3 +127,43 @@ function namespacePluginHooks(
     };
   });
 }
+
+/**
+ * Factory decorator for creating plugin hook functions that modify specific
+ * only specific properties of the payload.
+ * @param {Function} fn function that accepts value of a payload property and
+ *                      context, and returns the modified part of the payload
+ * @returns factory function that accepts payload key(s) (string or list
+ *          of strings) and returns a plugin hook function that modifies only
+ *          those properties on the payload object
+ */
+function makePayloadPropertyModifierFactory(
+  name,
+  fn: (value: any, ctx: object) => any
+) {
+  function payloadPropertyModifierFactory(payloadKeys: string | string[]) {
+    if (!payloadKeys) {
+      throw TypeError(
+        "payloadPropertyModifierFactory requires a single string or a list " +
+          "of strings."
+      );
+    }
+    const keys = Array.isArray(payloadKeys) ? payloadKeys : [payloadKeys];
+    function pluginHookWrapper({ payload = {}, plugins = {} }) {
+      // TEMPFIX: In namespaced hooks, we don't have access to the own plugin's
+      // config object, so we pass current plugin along to make up for that
+      // see https://github.com/DavidWells/analytics/issues/25
+      const plugin = plugins[name];
+      const args = arguments;
+      const modifiedPayload = keys.reduce((tempPayload, key) => {
+        return {
+          ...tempPayload,
+          ...{ [key]: fn.call(null, tempPayload[key], plugin, ...args) }
+        };
+      }, payload);
+      return modifiedPayload;
+    }
+    return pluginHookWrapper;
+  }
+  return payloadPropertyModifierFactory;
+}
