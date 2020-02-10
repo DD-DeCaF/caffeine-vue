@@ -44,11 +44,7 @@
           </v-data-table>
           <!-- Cross-Feeding -->
           <h2>Cross-Feeding</h2>
-           <div
-          ref="chartdiv"
-          class="hello"
-          >
-          </div>
+          <div ref="chartdiv" class="hello"></div>
           <v-data-table
             :headers="headersCrossFeeding"
             :items="communityData.cross_feeding"
@@ -178,7 +174,8 @@ export default Vue.extend({
     communityData: {
       growth_rate: null,
       cross_feeding: [],
-      abundance: []},
+      abundance: []
+    },
     headersAbundance: [
       { text: "Organism", value: "id" },
       { text: "Model", value: "id" },
@@ -304,19 +301,18 @@ export default Vue.extend({
     if (this.chart) {
       this.chart.dispose();
     }
-  }, 
+  },
   methods: {
-    cleanData(cross_feeding){
+    cleanData(cross_feeding) {
       if (cross_feeding.length > 0) {
-      let output = cross_feeding.map((obj) => ({ 
-        ...obj, 
-        to: this.getModelByID(obj.to).name, 
-        from: this.getModelByID(obj.from).name})
-      )
-      return output
-      }
-      else {
-        return []
+        let output = cross_feeding.map(obj => ({
+          ...obj,
+          to: this.getModelByID(obj.to).name,
+          from: this.getModelByID(obj.from).name
+        }));
+        return output;
+      } else {
+        return [];
       }
     },
     renderCrossfeeding() {
@@ -324,9 +320,9 @@ export default Vue.extend({
 
       chart.data = this.cleanData(this.communityData.cross_feeding);
 
-      chart.dataFields.fromName="from";
-      chart.dataFields.toName="to";
-      chart.dataFields.value="value";
+      chart.dataFields.fromName = "from";
+      chart.dataFields.toName = "to";
+      chart.dataFields.value = "value";
       chart.sortBy = "value";
       chart.responsive.enabled = true;
 
@@ -343,42 +339,42 @@ export default Vue.extend({
       nodeTemplate.propertyFields.fill = "color";
 
       // Hovering over a Node highlights all connections that emmanate from that node.
-      nodeTemplate.events.on("over", function (event) {    
-          var node = event.target;
-          node.outgoingDataItems.each(function (dataItem) {
-              if(dataItem.toNode){
-                  dataItem.link.isHover = true;
-                  dataItem.toNode.label.isHover = true;
-              }
-          })
-          node.incomingDataItems.each(function (dataItem) {
-              if(dataItem.fromNode){
-                  dataItem.link.isHover = true;
-                  dataItem.fromNode.label.isHover = true;
-              }
-          }) 
+      nodeTemplate.events.on("over", function(event) {
+        var node = event.target;
+        node.outgoingDataItems.each(function(dataItem) {
+          if (dataItem.toNode) {
+            dataItem.link.isHover = true;
+            dataItem.toNode.label.isHover = true;
+          }
+        });
+        node.incomingDataItems.each(function(dataItem) {
+          if (dataItem.fromNode) {
+            dataItem.link.isHover = true;
+            dataItem.fromNode.label.isHover = true;
+          }
+        });
 
-          node.label.isHover = true;   
-      })
+        node.label.isHover = true;
+      });
 
       // Moving off a Node removes the highlights.
-      nodeTemplate.events.on("out", function (event) {
-          var node = event.target;
-          node.outgoingDataItems.each(function (dataItem) {        
-              if(dataItem.toNode){
-                  dataItem.link.isHover = false;                
-                  dataItem.toNode.label.isHover = false;
-              }
-          })
-          node.incomingDataItems.each(function (dataItem) {
-              if(dataItem.fromNode){
-                  dataItem.link.isHover = false;
-                dataItem.fromNode.label.isHover = false;
-              }
-          })
+      nodeTemplate.events.on("out", function(event) {
+        var node = event.target;
+        node.outgoingDataItems.each(function(dataItem) {
+          if (dataItem.toNode) {
+            dataItem.link.isHover = false;
+            dataItem.toNode.label.isHover = false;
+          }
+        });
+        node.incomingDataItems.each(function(dataItem) {
+          if (dataItem.fromNode) {
+            dataItem.link.isHover = false;
+            dataItem.fromNode.label.isHover = false;
+          }
+        });
 
-          node.label.isHover = false;
-      })
+        node.label.isHover = false;
+      });
 
       var label = nodeTemplate.label;
       label.relativeRotation = 90;
@@ -390,7 +386,8 @@ export default Vue.extend({
       var linkTemplate = chart.links.template;
       linkTemplate.strokeOpacity = 0;
       linkTemplate.fillOpacity = 0.1;
-      linkTemplate.tooltipText = "{fromName} provides {value.value} mmol/l {metabolite} to {toName}";
+      linkTemplate.tooltipText =
+        "{fromName} provides {value.value} mmol/l {metabolite} to {toName}";
 
       var hoverState = linkTemplate.states.create("hover");
       hoverState.properties.fillOpacity = 0.7;
@@ -409,7 +406,7 @@ export default Vue.extend({
         .post(`${settings.apis.simulations}/community/simulate`, payload)
         .then(response => {
           this.communityData = response.data;
-          this.renderCrossfeeding()
+          this.renderCrossfeeding();
           this.isUpdating = false;
         })
         .catch(error => {
