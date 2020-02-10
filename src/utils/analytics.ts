@@ -1,4 +1,4 @@
-import { omitBy, isNil } from "lodash";
+import { capitalize, omitBy, isNil } from "lodash";
 import { snakeCasePropertyNames } from "./utility";
 
 export function requireConsentPlugin({ store }) {
