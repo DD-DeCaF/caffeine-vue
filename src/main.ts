@@ -16,6 +16,7 @@ import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
 import { gaTrackingID, sentryDSN } from "./utils/settings";
+import { tryCatchCall } from "@/utils/utility";
 import store from "./store/index";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
@@ -85,11 +86,16 @@ Vue.use(analytics, {
       }),
       ["google-analytics"]
     ),
-    // TODO: Make sure the app doesn't error if there's no gaTrackingID
-    googleAnalyticsPlugin({
-      trackingId: gaTrackingID,
-      autoTrack: true
-    })
+    // Load 3rd party analytics safely in case any of them would error on load
+    ...[
+      [
+        googleAnalyticsPlugin,
+        null,
+        { trackingId: gaTrackingID, autoTrack: true }
+      ]
+    ]
+      .map(([fn, ctx, ...args]) => tryCatchCall(fn, ctx, ...args))
+      .filter(Boolean)
   ],
   // Vue analytics options (https://github.com/MatteoGabriele/vue-analytics)
   router
