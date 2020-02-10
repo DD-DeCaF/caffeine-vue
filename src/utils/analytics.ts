@@ -1,45 +1,50 @@
 import { omitBy, isNil, snakeCase } from "lodash";
 
 export function requireConsentPlugin({ store }) {
+  async function isConsentGiven(store) {
+    await store.state.consents.consentsPromise;
+    return store.getters["consents/isConsentAccepted"]({
+      type: "cookie",
+      category: "statistics"
+    });
+  }
+
   return {
     name: "require-consent",
     config: { store },
-    initializeStart: ({ abort, config }) => {
-      if (!isConsentGiven(config.store)) {
+    initializeStart: async ({ abort, config }) => {
+      const consentGiven = await isConsentGiven(config.store);
+      if (!consentGiven) {
         return abort(
           "Cancel initialize call because analytics cookie consent not given"
         );
       }
     },
-    pageStart: ({ abort, config }) => {
-      if (!isConsentGiven(config.store)) {
+    pageStart: async ({ abort, config }) => {
+      const consentGiven = await isConsentGiven(config.store);
+      if (!consentGiven) {
         return abort(
           "Cancel page call because analytics cookie consent not given"
         );
       }
     },
-    identifyStart: ({ abort, config }) => {
-      if (!isConsentGiven(config.store)) {
+    identifyStart: async ({ abort, config }) => {
+      const consentGiven = await isConsentGiven(config.store);
+      if (!consentGiven) {
         return abort(
           "Cancel identify call because analytics cookie consent not given"
         );
       }
     },
-    trackStart: ({ abort, config }) => {
-      if (!isConsentGiven(config.store)) {
+    trackStart: async ({ abort, config }) => {
+      const consentGiven = await isConsentGiven(config.store);
+      if (!consentGiven) {
         return abort(
           "Cancel track call because analytics cookie consent not given"
         );
       }
     }
   };
-
-  function isConsentGiven(store) {
-    return store.getters["consents/isConsentAccepted"]({
-      type: "cookie",
-      category: "analytics"
-    });
-  }
 }
 
 export function disableAnalyticsPlugin({ store }) {
