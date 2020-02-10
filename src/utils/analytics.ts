@@ -111,6 +111,24 @@ export function enrichAnalyticsPlugin({ store, router }) {
   };
 }
 
+/**
+ * Remove properties with null or undefined values from properties/traits
+ * objects
+ */
+export function dropNoValuePropertiesPlugin() {
+  const omitNilPropertiesFactory = makePayloadPropertyModifierFactory(
+    "drop-no-value-properties",
+    obj => omitBy(obj, isNil)
+  );
+
+  return {
+    name: "drop-no-value-properties",
+    track: omitNilPropertiesFactory("properties"),
+    identify: omitNilPropertiesFactory("traits"),
+    page: omitNilPropertiesFactory("properties")
+  };
+}
+
 export function chainPlugins(plugins: any[]) {
   if (!plugins) {
     throw TypeError("chainPlugin requires a list of plugins.");

@@ -4,10 +4,12 @@ import googleAnalyticsPlugin from "analytics-plugin-ga";
 import doNotTrackPlugin from "analytics-plugin-do-not-track";
 import originalSourcePlugin from "analytics-plugin-original-source";
 import {
+  dropNoValuePropertiesPlugin,
   enrichAnalyticsPlugin,
   namespacePluginHooks,
   requireConsentPlugin,
-  disableAnalyticsPlugin
+  disableAnalyticsPlugin,
+  chainPlugins
 } from "@/utils/analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
@@ -71,10 +73,15 @@ Vue.use(analytics, {
     requireConsentPlugin({ store }),
     disableAnalyticsPlugin({ store }),
     originalSourcePlugin(),
-    namespacePluginHooks(
+    ...chainPlugins([
       enrichAnalyticsPlugin({ store, router }),
-      "google-analytics"
-    )
+      // NOTE: dropNoValuePropertiesPlugin currently doesn't work,
+      //       see https://github.com/DavidWells/analytics/issues/26
+      namespacePluginHooks(
+        dropNoValuePropertiesPlugin(),
+        "google-analytics"
+      )
+    ])
     // TODO: Make sure the app doesn't error if there's no gaTrackingID
     googleAnalyticsPlugin({
       trackingId: gaTrackingID,
