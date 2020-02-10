@@ -37,7 +37,7 @@ import { Route } from "vue-router";
 
 export function autoTracking() {
   const { router, autoTracking, $vue } = config;
-  const { page, pageviewOnLoad } = autoTracking || {};
+  const { page = null, pageviewOnLoad = null } = autoTracking || {};
 
   if (!page || !router) {
     return;
@@ -77,7 +77,8 @@ export function trackRoute(route: Route) {
     return;
   }
   const { router, autoTracking } = config;
-  const { transformQueryString, prependBase } = autoTracking || {};
+  const { transformQueryString = null, prependBase = null } =
+    autoTracking || {};
 
   // Get path from route
   const queryString = getQueryString(route.query);

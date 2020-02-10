@@ -237,7 +237,7 @@ export function namespacePluginHooks(
  */
 function makePayloadPropertyModifierFactory(
   name,
-  fn: (value: any, ctx: object) => any
+  fn: (value: any, ctx: { [key: string]: any }, ...args) => any
 ) {
   function payloadPropertyModifierFactory(payloadKeys: string | string[]) {
     if (!payloadKeys) {
@@ -252,7 +252,7 @@ function makePayloadPropertyModifierFactory(
       // config object, so we pass current plugin along to make up for that
       // see https://github.com/DavidWells/analytics/issues/25
       const plugin = plugins[name];
-      const args = arguments;
+      const args = Array.from(arguments);
       const modifiedPayload = keys.reduce((tempPayload, key) => {
         return {
           ...tempPayload,

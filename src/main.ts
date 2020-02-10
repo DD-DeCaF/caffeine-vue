@@ -79,10 +79,7 @@ Vue.use(analytics, {
       // NOTE: dropNoValuePropertiesPlugin currently doesn't work,
       //       see https://github.com/DavidWells/analytics/issues/26
       dropNoValuePropertiesPlugin(),
-      namespacePluginHooks(
-        snakecasePropertiesPlugin(),
-        "google-analytics"
-      )
+      namespacePluginHooks(snakecasePropertiesPlugin(), "google-analytics")
     ])
     // TODO: Make sure the app doesn't error if there's no gaTrackingID
     googleAnalyticsPlugin({
