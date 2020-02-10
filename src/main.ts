@@ -4,6 +4,8 @@ import googleAnalyticsPlugin from "analytics-plugin-ga";
 import doNotTrackPlugin from "analytics-plugin-do-not-track";
 import originalSourcePlugin from "analytics-plugin-original-source";
 import {
+  enrichAnalyticsPlugin,
+  namespacePluginHooks,
   requireConsentPlugin,
   disableAnalyticsPlugin
 } from "@/utils/analytics";
@@ -69,6 +71,10 @@ Vue.use(analytics, {
     requireConsentPlugin({ store }),
     disableAnalyticsPlugin({ store }),
     originalSourcePlugin(),
+    namespacePluginHooks(
+      enrichAnalyticsPlugin({ store, router }),
+      "google-analytics"
+    )
     // TODO: Make sure the app doesn't error if there's no gaTrackingID
     googleAnalyticsPlugin({
       trackingId: gaTrackingID,

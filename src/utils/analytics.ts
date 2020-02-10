@@ -71,6 +71,46 @@ export function disableAnalyticsPlugin({ store }) {
   }
 }
 
+/**
+ * Enrich data with common properties
+ * @param {object} options
+ * @param {Store} options.store
+ * @param {Router} options.router
+ */
+export function enrichAnalyticsPlugin({ store, router }) {
+  /**
+   * Enrich analytics payload with common properties
+   *
+   * @param {Object} payload Payload object
+   * @param {Store} store Vuex store
+   * @return {Object} Enriched payload object
+   */
+  function enrichProperties(properties, store, router) {
+    const { id: projectId = null, name: projectName = null } =
+      store.state.projects.activeProject || {};
+    const route = router.currentRoute;
+    return {
+      ...properties,
+      projectId,
+      projectName,
+      url: window.location.href,
+      path: route.fullPath
+    };
+  }
+
+  const enrichAnalyticsFactory = makePayloadPropertyModifierFactory(
+    "enrich-analytics",
+    (obj, { config }) => enrichProperties(obj, config.store, config.router)
+  );
+
+  return {
+    name: "enrich-analytics",
+    config: { store, router },
+    track: enrichAnalyticsFactory("properties"),
+    page: enrichAnalyticsFactory("properties")
+  };
+}
+
 export function chainPlugins(plugins: any[]) {
   if (!plugins) {
     throw TypeError("chainPlugin requires a list of plugins.");
