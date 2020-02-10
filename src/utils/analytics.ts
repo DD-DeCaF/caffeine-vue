@@ -179,24 +179,6 @@ export function printPayloadPlugin() {
   };
 }
 
-export function chainPlugins(plugins: any[]) {
-  if (!plugins) {
-    throw TypeError("chainPlugin requires a list of plugins.");
-  }
-  const chainedPlugins = plugins
-    .map((plugin, index, arr) => {
-      const isLastPlugin = index === arr.length - 1;
-      if (isLastPlugin) {
-        return plugin;
-      }
-      const nextPlugin = arr[index + 1];
-      return namespacePluginHooks(plugin, nextPlugin.name);
-    })
-    // Flatten results from namespacePluginHooks
-    .reduce((acc, val) => acc.concat(val), []);
-  return chainedPlugins;
-}
-
 export function namespacePluginHooks(
   plugins: object | object[],
   namespaces: string | string[],
@@ -234,6 +216,71 @@ export function namespacePluginHooks(
       ...namespacedPlugin
     };
   });
+}
+
+/**
+ * Compose multiple plugins into a single plugin object
+ * whose hooks call underlying plugins' respective hooks sequentially,
+ * compounding the modifications to the payload object.
+ * @param {object} options Options object
+ * @param {string} options.name Name of the newly-composed plugin.
+ * @param {object[]} options.plugins List of plugin objects that should be
+ *                                   combined together.
+ */
+export function composePlugins(options: { name: string; plugins: any[] }) {
+  const { name, plugins } = options;
+  if (!plugins) {
+    throw TypeError("composePlugin requires a list of plugins.");
+  }
+  // Chain plugin hooks from inside out, so that the outer (upstream) hook
+  // first processes the payload, and then passes the augmented value to the
+  // inner (downstream) hook
+  const compositePlugin = [...plugins]
+    .reverse()
+    .reduce((aggPlugin, upstreamPlugin) => {
+      Object.keys(upstreamPlugin)
+        .filter(key => key !== "name" && key !== "config")
+        .forEach(key => {
+          if (!aggPlugin[key]) {
+            aggPlugin[key] = ({ payload }) => payload;
+          }
+          aggPlugin[key] = chainHooks(
+            upstreamPlugin[key],
+            aggPlugin[key],
+            upstreamPlugin.config
+          );
+        });
+      return aggPlugin;
+    }, {});
+  compositePlugin.name = name;
+  return compositePlugin;
+}
+
+/**
+ * Given two analytics plugin hook functions, returns a function which wraps
+ * them such that the arguments are first passed to the first function, which
+ * returns the updated payload, and the arguments along with the updated
+ * payload are passed to the second function.
+ * @param {Function} upstreamFn Hook that will be called first
+ * @param {Function} downstreamFn Hook that will be called with payload
+ *                                property updated from upstreamFn
+ * @param {Object} config Config that should be passed to the upstream hook.
+ *                        Defaults to the config of the plugin that was first
+ *                        triggered by the event.
+ */
+function chainHooks(upstreamFn, downstreamFn, config = null) {
+  function fnInner(eventCtx, ...args) {
+    const currEventCtx = {
+      ...eventCtx,
+      config: config || eventCtx.config
+    };
+    const updatedEventCtx = {
+      ...eventCtx,
+      payload: upstreamFn.call(null, currEventCtx, ...args)
+    };
+    return downstreamFn.call(null, updatedEventCtx, ...args);
+  }
+  return fnInner;
 }
 
 /**
