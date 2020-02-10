@@ -95,13 +95,25 @@ export function enrichAnalyticsPlugin({ store, router }) {
   function enrichProperties(properties, store, router) {
     const { id: projectId = null, name: projectName = null } =
       store.state.projects.activeProject || {};
-    const route = router.currentRoute;
+    const path = router.currentRoute.fullPath;
+    const getItem = store.state.analytics.analytics.storage.getItem;
+    // originalSource contains info in format x=a|y=b|z=c|...
+    const originalSource = getItem("__user_original_source")
+      .split("|")
+      .reduce((agg, data) => {
+        const [key, value] = data.split("=");
+        agg[`original${capitalize(key)}`] = value;
+        return agg;
+      }, {});
+    const originalLandingPage = getItem("__user_original_landing_page");
     return {
       ...properties,
+      ...originalSource,
+      originalLandingPage,
       projectId,
       projectName,
-      url: window.location.href,
-      path: route.fullPath
+      path,
+      url: window.location.href
     };
   }
 
