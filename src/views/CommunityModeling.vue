@@ -392,6 +392,11 @@ export default Vue.extend({
       });
     }
   },
+  watch: {
+    communityDataFiltered: function() {
+      this.renderCrossfeeding();
+    }
+  },
   created() {
     this.selectedMedium = this.media[0];
     this.selectedMethod = this.methods[0];
@@ -424,7 +429,7 @@ export default Vue.extend({
       this.disposeChart();
       const chart = am4core.create(this.$refs.chartdiv, am4charts.ChordDiagram);
 
-      chart.data = this.cleanData(this.communityData.cross_feeding);
+      chart.data = this.cleanData(this.communityDataFiltered);
 
       chart.dataFields.fromName = "from";
       chart.dataFields.toName = "to";
