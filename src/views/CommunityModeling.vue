@@ -300,12 +300,12 @@ export default Vue.extend({
   },
   beforeDestroy() {
     this.disposeChart();
-    },
+  },
   methods: {
-    disposeChart(){
+    disposeChart() {
       if (this.chart) {
         this.chart.dispose();
-    }
+      }
     },
     cleanData(cross_feeding) {
       if (cross_feeding.length > 0) {
@@ -344,15 +344,15 @@ export default Vue.extend({
       nodeTemplate.propertyFields.fill = "color";
 
       // Hovering over a Node highlights all connections that emmanate from that node.
-      nodeTemplate.events.on("over", (event) => {
+      nodeTemplate.events.on("over", event => {
         var node = event.target;
-        node.outgoingDataItems.each((dataItem) => {
+        node.outgoingDataItems.each(dataItem => {
           if (dataItem.toNode) {
             dataItem.link.isHover = true;
             dataItem.toNode.isHover = true;
           }
         });
-        node.incomingDataItems.each((dataItem) => {
+        node.incomingDataItems.each(dataItem => {
           if (dataItem.fromNode) {
             dataItem.link.isHover = true;
             dataItem.fromNode.label.isHover = true;
@@ -363,15 +363,15 @@ export default Vue.extend({
       });
 
       // Moving off a Node removes the highlights.
-      nodeTemplate.events.on("out", (event) => {
+      nodeTemplate.events.on("out", event => {
         var node = event.target;
-        node.outgoingDataItems.each((dataItem) => {
+        node.outgoingDataItems.each(dataItem => {
           if (dataItem.toNode) {
             dataItem.link.isHover = false;
             dataItem.toNode.isHover = false;
           }
         });
-        node.incomingDataItems.each((dataItem) => {
+        node.incomingDataItems.each(dataItem => {
           if (dataItem.fromNode) {
             dataItem.link.isHover = false;
             dataItem.fromNode.label.isHover = false;
