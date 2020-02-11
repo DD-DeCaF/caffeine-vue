@@ -44,9 +44,89 @@
           </v-data-table>
           <!-- Cross-Feeding -->
           <h2>Cross-Feeding</h2>
+          <v-layout row justify-space-between>
+            <v-flex xs3>
+              <v-autocomplete
+                v-model="fromSearch"
+                :items="communityData.cross_feeding"
+                filled
+                chips
+                color="primary"
+                label="Source organism"
+                item-value="from"
+                multiple
+              >
+                <template slot="item" slot-scope="data">
+                  {{ getModelByID(data.item.to).name }}
+                </template>
+                <template v-slot:selection="data">
+                  <v-chip
+                    :selected="data.selected"
+                    close
+                    class="chip--select-multi"
+                    @input="removeFromFilter(data.item)"
+                  >
+                    {{ getModelByID(data.item.from).name }}
+                  </v-chip>
+                </template>
+              </v-autocomplete>
+            </v-flex>
+            <v-flex xs3>
+              <v-autocomplete
+                v-model="toSearch"
+                :items="communityData.cross_feeding"
+                filled
+                chips
+                color="primary"
+                label="Target organism"
+                item-value="to"
+                multiple
+              >
+                <template slot="item" slot-scope="data">
+                  {{ getModelByID(data.item.to).name }}
+                </template>
+                <template v-slot:selection="data">
+                  <v-chip
+                    :selected="data.selected"
+                    close
+                    class="chip--select-multi"
+                    @input="removeToFilter(data.item)"
+                  >
+                    {{ getModelByID(data.item.to).name }}
+                  </v-chip>
+                </template>
+              </v-autocomplete>
+            </v-flex>
+            <v-flex xs3>
+              <v-autocomplete
+                v-model="metaboliteSearch"
+                :items="communityData.cross_feeding"
+                filled
+                chips
+                color="primary"
+                label="Search metabolite"
+                item-value="metabolite"
+                multiple
+              >
+                <template slot="item" slot-scope="data">
+                  {{ data.item.metabolite }}
+                </template>
+                <template v-slot:selection="data">
+                  <v-chip
+                    :selected="data.selected"
+                    close
+                    class="chip--select-multi"
+                    @input="removeMetaboliteFilter(data.item)"
+                  >
+                    {{ data.item.metabolite }}
+                  </v-chip>
+                </template>
+              </v-autocomplete>
+            </v-flex>
+          </v-layout>
           <v-data-table
             :headers="headersCrossFeeding"
-            :items="communityData.cross_feeding"
+            :items="communityDataFiltered"
             class="elevation-1 pa-2 my-3"
           >
             <template v-slot:items="props">
@@ -159,6 +239,9 @@ export default Vue.extend({
   name: "CommunityModeling",
   components: {},
   data: () => ({
+    metaboliteSearch: [],
+    fromSearch: [],
+    toSearch: [],
     isUpdating: false,
     selectedModels: [],
     selectedMedium: null,
@@ -278,7 +361,20 @@ export default Vue.extend({
     ...mapGetters({
       getModelByID: "models/getModelById",
       getOrganismByID: "organisms/getOrganismById"
-    })
+    }),
+    communityDataFiltered() {
+      return this.communityData.cross_feeding.filter(i => {
+        return (
+          (!this.metaboliteSearch.length &&
+            !this.fromSearch.length &&
+            !this.toSearch.length) ||
+          (this.metaboliteSearch.length > 0 ===
+            this.metaboliteSearch.includes(i.metabolite) &&
+            this.fromSearch.length > 0 === this.fromSearch.includes(i.from) &&
+            this.toSearch.length > 0 === this.toSearch.includes(i.to))
+        );
+      });
+    }
   },
   created() {
     this.selectedMedium = this.media[0];
@@ -308,6 +404,24 @@ export default Vue.extend({
       const index = this.selectedModels.indexOf(item.id);
       if (index >= 0) {
         this.selectedModels.splice(index, 1);
+      }
+    },
+    removeMetaboliteFilter(item) {
+      const index = this.metaboliteSearch.indexOf(item.metabolite);
+      if (index >= 0) {
+        this.metaboliteSearch.splice(index, 1);
+      }
+    },
+    removeFromFilter(item) {
+      const index = this.fromSearch.indexOf(item.from);
+      if (index >= 0) {
+        this.fromSearch.splice(index, 1);
+      }
+    },
+    removeToFilter(item) {
+      const index = this.toSearch.indexOf(item.to);
+      if (index >= 0) {
+        this.toSearch.splice(index, 1);
       }
     }
   }
