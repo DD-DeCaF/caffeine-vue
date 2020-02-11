@@ -99,8 +99,9 @@ export function enrichAnalyticsPlugin({ store, router }) {
     const path = router.currentRoute.fullPath;
     const getItem = store.state.analytics.analytics.storage.getItem;
     // originalSource contains info in format x=a|y=b|z=c|...
-    const originalSource = getItem("__user_original_source")
+    const originalSource = (getItem("__user_original_source") || "")
       .split("|")
+      .filter(Boolean)
       .reduce((agg, data) => {
         const [key, value] = data.split("=");
         agg[`original${capitalize(key)}`] = value;
