@@ -209,6 +209,9 @@ export default Vue.extend({
     availableMedia() {
       return this.$store.state.media.media;
     },
+    allMediumCompounds() {
+      return this.$store.state.media.compounds;
+    },
     ...mapGetters({
       getModelByID: "models/getModelById",
       getOrganismByID: "organisms/getOrganismById"
@@ -224,7 +227,9 @@ export default Vue.extend({
     simulateCommunity() {
       this.isUpdating = true;
       const payload = {
-        medium: this.selectedMedium.componentIDs,
+        medium: this.allMediumCompounds
+          .filter(c => c.medium_id === this.selectedMedium.id)
+          .map(c => c.compound_identifier),
         model_ids: this.selectedModels,
         method: this.selectedMethod.id
       };
