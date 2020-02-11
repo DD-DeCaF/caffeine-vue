@@ -252,6 +252,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { Prop } from "vue/types/options";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
