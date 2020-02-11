@@ -46,11 +46,6 @@ export default vuexStoreModule({
     addCompound(state, compound: MediumCompound) {
       state.compounds.push(compound);
     },
-    deleteCompound(state, ids) {
-      state.compounds = state.compounds.filter(
-        compound => !ids.includes(compound.id)
-      );
-    },
     setMediaPromise(state, mediaPromise) {
       state.mediaPromise = mediaPromise;
     },
@@ -70,13 +65,7 @@ export default vuexStoreModule({
         });
       commit("setMediaPromise", mediaPromise);
     },
-
-    /**
-     * Because getting all compounds takes a few seconds they are only fetched
-     * once - on first demand. To ensure correct usage, they should only be
-     * accessed through fetchCachedCompounds.
-     */
-    fetchCachedCompounds({ commit, dispatch }) {
+    fetchMediaCompounds({ commit, dispatch }) {
       const compoundsPromise = axios
         .get(`${settings.apis.warehouse}/media/compounds`)
         .then((response: AxiosResponse<MediumCompound[]>) => {

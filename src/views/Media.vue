@@ -346,15 +346,15 @@ export default Vue.extend({
       );
       this.mediumItemIndex = this.availableMedia.indexOf(item);
       this.isMediumEditDialogVisible = true;
-      this.existingCompoundsInCurrentMedium = this.availableCompounds.filter(
-        element => element.medium_id === this.id
-      );
-      console.log(this.existingCompoundsInCurrentMedium);
-      console.log(this.filteredCompounds);
+      // Note: Use Object.assign in order to copy the compound elements from the
+      // store. Without this, modifying the object would incorrectly modify the
+      // store as well for the shared object reference.
+      this.existingCompoundsInCurrentMedium = this.availableCompounds
+        .filter(element => element.medium_id === this.id)
+        .map(compound => Object.assign({}, compound));
       this.filteredCompounds = this.existingCompoundsInCurrentMedium.map(
-        x => x
+        compound => Object.assign({}, compound)
       );
-      console.log(this.filteredCompounds);
     },
     deleteItem(item) {
       this.mediumItem = item;
@@ -375,26 +375,42 @@ export default Vue.extend({
             index: this.mediumItemIndex
           };
           this.$store.commit("media/editMedium", commitPayload);
-        })
-        .then(() => {
+
+          // To update compounds, first delete all existing ones
           return Promise.all(
-            this.existingCompoundsInCurrentMedium.map(compound => {
-              const index = this.availableCompounds.indexOf(compound);
-              this.deleteCompoundByID(compound.id);
-              this.$store.commit("media/deleteCompound", compound.index);
-            })
+            this.existingCompoundsInCurrentMedium.map(compound =>
+              axios.delete(
+                `${settings.apis.warehouse}/media/compounds/${compound.id}`
+              )
+            )
           );
         })
         .then(() => {
+          // Now create the new compounds
           return Promise.all(
-            this.filteredCompounds.map(compound => {
-              this.postCompounds(compound);
-              this.$store.commit("media/addCompound", compound);
-            })
+            this.filteredCompounds
+              // Ignore empty rows
+              .filter(compound => compound.compound_identifier)
+              .map(compound => {
+                return axios.post(
+                  `${settings.apis.warehouse}/media/compounds`,
+                  {
+                    medium_id: this.id,
+                    mass_concentration: compound.mass_concentration || null,
+                    compound_identifier: compound.compound_identifier,
+                    compound_name: compound.compound_name,
+                    compound_namespace: compound.compound_namespace
+                  }
+                );
+              })
           );
         })
         .then(() => {
-          return Promise.all(this.store.commit("media/setCompounds"));
+          // Refetch compounds from the warehouse in order to get updated state.
+          // We could update the store locally and make sure to add the returned
+          // IDs when POSTing the compounds - this is slightly slower for the
+          // user but a lot less complex to implement.
+          return this.$store.dispatch("media/fetchMediaCompounds");
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -412,12 +428,6 @@ export default Vue.extend({
           this.$store.commit("toggleDialog", "loader");
           this.isMediumEditDialogVisible = false;
         });
-    },
-    deleteCompoundByID(id) {
-      return axios.delete(`${settings.apis.warehouse}/media/compounds/${id}`);
-    },
-    postCompounds(payload) {
-      return axios.post(`${settings.apis.warehouse}/media/compounds/`, payload);
     },
     passProject(project) {
       this.project = project;
