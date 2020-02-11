@@ -164,12 +164,6 @@
                     <v-flex xs3>
                       <v-number-field
                         v-model.number="compound.mass_concentration"
-                        :rules="[
-                          rules.conditionallyRequired(
-                            compound.mass_concentration,
-                            !!compound.id
-                          )
-                        ]"
                         name="mass"
                         label="Mass Concentration"
                         hint="mmol l <sup>-1</sup>"
