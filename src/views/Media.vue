@@ -211,6 +211,14 @@
                     </v-flex>
                   </v-layout>
                 </div>
+                <!-- If it's an empty medium, explicitly show a button to add compounds -->
+                <v-btn
+                  v-if="filteredCompounds.length === 0"
+                  icon
+                  @click="filteredCompounds.push({})"
+                >
+                  <v-icon color="primary">add_circle</v-icon>
+                </v-btn>
               </v-layout>
             </v-flex>
           </v-layout>
