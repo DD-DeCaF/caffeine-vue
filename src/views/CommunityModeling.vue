@@ -250,10 +250,7 @@ export default Vue.extend({
   name: "CommunityModeling",
   components: {},
   data: () => ({
-<<<<<<< HEAD
     chart: null,
-=======
->>>>>>> 448dba3bc3e76219609f57c5336cc36e5740b5e7
     metaboliteSearch: [],
     fromSearch: [],
     toSearch: [],
