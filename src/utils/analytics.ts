@@ -309,20 +309,19 @@ function makePayloadPropertyMutatorFactory(options: {
       );
     }
     const keys = Array.isArray(payloadKeys) ? payloadKeys : [payloadKeys];
-    function pluginHookWrapper({ config = {}, payload = {}, plugins = {} }) {
+    async function pluginHookWrapper(hookContext, ...args) {
+      const { config = {}, payload = {}, plugins = {} } = hookContext || {};
       // TEMPFIX: In namespaced hooks, we don't have access to the own plugin's
       // config object, so we pass current plugin along to make up for that
       // see https://github.com/DavidWells/analytics/issues/25
-      const args = Array.from(arguments);
-      const modifiedPayload = keys.reduce((tempPayload, key) => {
+      const args_ = [hookContext, ...args];
+      const modifiedPayload = await keys.reduce(async (tempPayload, key) => {
         const currConfig = key.includes(":") ? plugins[name].config : config;
         return {
           ...tempPayload,
-          ...{
-            [key]: mutator.call(null, tempPayload[key], currConfig, ...args)
-          }
+          [key]: await mutator(tempPayload[key], currConfig, ...args_)
         };
-      }, payload);
+      }, await payload);
       return modifiedPayload;
     }
     return pluginHookWrapper;
