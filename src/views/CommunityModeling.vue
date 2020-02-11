@@ -45,104 +45,109 @@
           <!-- Cross-Feeding -->
           <h2>Cross-Feeding</h2>
           <div ref="chartdiv" class="chart-style"></div>
-          <v-layout row justify-space-between>
-            <v-flex xs3>
-              <v-autocomplete
-                v-model="fromSearch"
-                :items="communityData.cross_feeding"
-                filled
-                chips
-                color="primary"
-                label="Source organism"
-                item-value="from"
-                multiple
-              >
-                <template slot="item" slot-scope="data">
-                  {{ getModelByID(data.item.to).name }}
-                </template>
-                <template v-slot:selection="data">
-                  <v-chip
-                    :selected="data.selected"
-                    close
-                    class="chip--select-multi"
-                    @input="removeFromFilter(data.item)"
+          <v-card>
+            <v-card-title>
+              <v-layout row justify-space-between>
+                <v-flex xs3>
+                  <v-autocomplete
+                    v-model="fromSearch"
+                    :items="communityData.cross_feeding"
+                    filled
+                    chips
+                    color="primary"
+                    label="Source organism"
+                    item-value="from"
+                    multiple
                   >
-                    {{ getModelByID(data.item.from).name }}
-                  </v-chip>
-                </template>
-              </v-autocomplete>
-            </v-flex>
-            <v-flex xs3>
-              <v-autocomplete
-                v-model="toSearch"
-                :items="communityData.cross_feeding"
-                filled
-                chips
-                color="primary"
-                label="Target organism"
-                item-value="to"
-                multiple
-              >
-                <template slot="item" slot-scope="data">
-                  {{ getModelByID(data.item.to).name }}
-                </template>
-                <template v-slot:selection="data">
-                  <v-chip
-                    :selected="data.selected"
-                    close
-                    class="chip--select-multi"
-                    @input="removeToFilter(data.item)"
+                    <template slot="item" slot-scope="data">
+                      {{ getModelByID(data.item.to).name }}
+                    </template>
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :selected="data.selected"
+                        close
+                        class="chip--select-multi"
+                        @input="removeFromFilter(data.item)"
+                      >
+                        {{ getModelByID(data.item.from).name }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
+                </v-flex>
+                <v-flex xs3>
+                  <v-autocomplete
+                    v-model="toSearch"
+                    :items="communityData.cross_feeding"
+                    filled
+                    chips
+                    color="primary"
+                    label="Target organism"
+                    item-value="to"
+                    multiple
                   >
-                    {{ getModelByID(data.item.to).name }}
-                  </v-chip>
-                </template>
-              </v-autocomplete>
-            </v-flex>
-            <v-flex xs3>
-              <v-autocomplete
-                v-model="metaboliteSearch"
-                :items="communityData.cross_feeding"
-                filled
-                chips
-                color="primary"
-                label="Search metabolite"
-                item-value="metabolite"
-                multiple
-              >
-                <template slot="item" slot-scope="data">
-                  {{ data.item.metabolite }}
-                </template>
-                <template v-slot:selection="data">
-                  <v-chip
-                    :selected="data.selected"
-                    close
-                    class="chip--select-multi"
-                    @input="removeMetaboliteFilter(data.item)"
+                    <template slot="item" slot-scope="data">
+                      {{ getModelByID(data.item.to).name }}
+                    </template>
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :selected="data.selected"
+                        close
+                        class="chip--select-multi"
+                        @input="removeToFilter(data.item)"
+                      >
+                        {{ getModelByID(data.item.to).name }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
+                </v-flex>
+                <v-flex xs3>
+                  <v-autocomplete
+                    v-model="metaboliteSearch"
+                    :items="communityData.cross_feeding"
+                    filled
+                    chips
+                    color="primary"
+                    label="Search metabolite"
+                    item-value="metabolite"
+                    multiple
                   >
-                    {{ data.item.metabolite }}
-                  </v-chip>
-                </template>
-              </v-autocomplete>
-            </v-flex>
-          </v-layout>
-          <v-data-table
-            :headers="headersCrossFeeding"
-            :items="communityDataFiltered"
-            class="elevation-1 pa-2 my-3"
-          >
-            <template v-slot:items="props">
-              <td>{{ getModelByID(props.item.from).name }}</td>
-              <td>{{ getModelByID(props.item.to).name }}</td>
-              <td>{{ props.item.metabolite }}</td>
-              <td>{{ props.item.value }}</td>
-            </template>
-            <template v-slot:no-data>
-              <v-alert :value="true" color="error" icon="warning">
-                Cross-feeding could not be calculated. This could be due to
-                mismatching metabolite identifiers between the selected models.
-              </v-alert>
-            </template>
-          </v-data-table>
+                    <template slot="item" slot-scope="data">
+                      {{ data.item.metabolite }}
+                    </template>
+                    <template v-slot:selection="data">
+                      <v-chip
+                        :selected="data.selected"
+                        close
+                        class="chip--select-multi"
+                        @input="removeMetaboliteFilter(data.item)"
+                      >
+                        {{ data.item.metabolite }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
+                </v-flex>
+              </v-layout>
+            </v-card-title>
+            <v-data-table
+              :headers="headersCrossFeeding"
+              :items="communityDataFiltered"
+              class="elevation-1 pa-2 my-3"
+            >
+              <template v-slot:items="props">
+                <td>{{ getModelByID(props.item.from).name }}</td>
+                <td>{{ getModelByID(props.item.to).name }}</td>
+                <td>{{ props.item.metabolite }}</td>
+                <td>{{ props.item.value }}</td>
+              </template>
+              <template v-slot:no-data>
+                <v-alert :value="true" color="error" icon="warning">
+                  Cross-feeding could not be calculated. This could be due to
+                  mismatching metabolite identifiers between the selected
+                  models.
+                </v-alert>
+              </template>
+            </v-data-table>
+          </v-card>
         </v-container>
         <v-container @click="isSidepanelOpen = false" v-else>
           No data to display yet. Select a medium and at least two models, then
@@ -245,7 +250,10 @@ export default Vue.extend({
   name: "CommunityModeling",
   components: {},
   data: () => ({
+<<<<<<< HEAD
     chart: null,
+=======
+>>>>>>> 448dba3bc3e76219609f57c5336cc36e5740b5e7
     metaboliteSearch: [],
     fromSearch: [],
     toSearch: [],
