@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { hashMessage } from "@/utils/analytics";
 import { RootState } from "@/types/vuex";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
 import store from "..";
@@ -84,8 +85,9 @@ export default vuexStoreModule({
     logout({ state }) {
       state.analytics!.reset();
     },
-    identifyUser({ state }, payload) {
-      state.analytics!.identify(payload.registeredEmail, {
+    async identifyUser({ state }, payload) {
+      const id = await hashMessage(payload.registeredEmail, "SHA-256");
+      state.analytics!.identify(id, {
         ...payload,
         registeredEmail: undefined
       });
