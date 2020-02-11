@@ -44,7 +44,7 @@
           </v-data-table>
           <!-- Cross-Feeding -->
           <h2>Cross-Feeding</h2>
-          <div ref="chartdiv" class="hello"></div>
+          <div ref="chartdiv" class="chart-style"></div>
           <v-data-table
             :headers="headersCrossFeeding"
             :items="communityData.cross_feeding"
@@ -165,6 +165,7 @@ export default Vue.extend({
   name: "CommunityModeling",
   components: {},
   data: () => ({
+    chart: null,
     isUpdating: false,
     selectedModels: [],
     selectedMedium: null,
@@ -298,11 +299,14 @@ export default Vue.extend({
     this.renderCrossfeeding();
   },
   beforeDestroy() {
-    if (this.chart) {
-      this.chart.dispose();
-    }
-  },
+    this.disposeChart();
+    },
   methods: {
+    disposeChart(){
+      if (this.chart) {
+        this.chart.dispose();
+    }
+    },
     cleanData(cross_feeding) {
       if (cross_feeding.length > 0) {
         let output = cross_feeding.map(obj => ({
@@ -316,7 +320,8 @@ export default Vue.extend({
       }
     },
     renderCrossfeeding() {
-      let chart = am4core.create(this.$refs.chartdiv, am4charts.ChordDiagram);
+      this.disposeChart();
+      const chart = am4core.create(this.$refs.chartdiv, am4charts.ChordDiagram);
 
       chart.data = this.cleanData(this.communityData.cross_feeding);
 
@@ -326,7 +331,7 @@ export default Vue.extend({
       chart.sortBy = "value";
       chart.responsive.enabled = true;
 
-      let slice = chart.nodes.template.slice;
+      const slice = chart.nodes.template.slice;
       slice.stroke = am4core.color("#000");
       slice.strokeOpacity = 0.8;
       slice.strokeWidth = 1;
@@ -339,15 +344,15 @@ export default Vue.extend({
       nodeTemplate.propertyFields.fill = "color";
 
       // Hovering over a Node highlights all connections that emmanate from that node.
-      nodeTemplate.events.on("over", function(event) {
+      nodeTemplate.events.on("over", (event) => {
         var node = event.target;
-        node.outgoingDataItems.each(function(dataItem) {
+        node.outgoingDataItems.each((dataItem) => {
           if (dataItem.toNode) {
             dataItem.link.isHover = true;
-            dataItem.toNode.label.isHover = true;
+            dataItem.toNode.isHover = true;
           }
         });
-        node.incomingDataItems.each(function(dataItem) {
+        node.incomingDataItems.each((dataItem) => {
           if (dataItem.fromNode) {
             dataItem.link.isHover = true;
             dataItem.fromNode.label.isHover = true;
@@ -358,15 +363,15 @@ export default Vue.extend({
       });
 
       // Moving off a Node removes the highlights.
-      nodeTemplate.events.on("out", function(event) {
+      nodeTemplate.events.on("out", (event) => {
         var node = event.target;
-        node.outgoingDataItems.each(function(dataItem) {
+        node.outgoingDataItems.each((dataItem) => {
           if (dataItem.toNode) {
             dataItem.link.isHover = false;
-            dataItem.toNode.label.isHover = false;
+            dataItem.toNode.isHover = false;
           }
         });
-        node.incomingDataItems.each(function(dataItem) {
+        node.incomingDataItems.each((dataItem) => {
           if (dataItem.fromNode) {
             dataItem.link.isHover = false;
             dataItem.fromNode.label.isHover = false;
@@ -385,7 +390,7 @@ export default Vue.extend({
       // link template
       var linkTemplate = chart.links.template;
       linkTemplate.strokeOpacity = 0;
-      linkTemplate.fillOpacity = 0.1;
+      linkTemplate.fillOpacity = 0.2;
       linkTemplate.tooltipText =
         "{fromName} provides {value.value} mmol/l {metabolite} to {toName}";
 
@@ -426,7 +431,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.hello {
+.chart-style {
   width: 100%;
   height: 600px;
 }
