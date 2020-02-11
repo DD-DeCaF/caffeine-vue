@@ -194,11 +194,7 @@
                         <v-btn icon @click="filteredCompounds.push({})">
                           <v-icon color="primary">add_circle</v-icon>
                         </v-btn>
-                        <v-btn
-                          icon
-                          v-if="filteredCompounds.length > 1"
-                          @click="filteredCompounds.splice(index, 1)"
-                        >
+                        <v-btn icon @click="filteredCompounds.splice(index, 1)">
                           <v-icon color="primary">delete</v-icon>
                         </v-btn>
                       </v-layout>
