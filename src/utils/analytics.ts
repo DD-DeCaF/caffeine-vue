@@ -169,7 +169,7 @@ export function snakecasePropertiesPlugin() {
  */
 export function printPayloadPlugin() {
   function printPayload({ payload }) {
-    console.log(payload);
+    // console.log(payload);
     return payload;
   }
   return {

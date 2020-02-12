@@ -1,4 +1,4 @@
-import Vue from "vue";
+import * as Sentry from "@sentry/browser";
 import moment from "moment";
 import { snakeCase, camelCase } from "lodash";
 import store from "../store";
@@ -109,6 +109,6 @@ export function tryCatchCall(fn, thisArg, ...args) {
   try {
     return fn.call(thisArg, ...args);
   } catch (e) {
-    console.warn(e);
+    Sentry.captureException(e);
   }
 }
