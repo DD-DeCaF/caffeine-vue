@@ -104,11 +104,3 @@ export function camelCasePropertyNames(obj) {
 export function toISOFormat(datetime) {
   return moment(datetime).format("YYYY-MM-DDTHH:mm:ss.SSSSSZ");
 }
-
-export function tryCatchCall(fn, thisArg, ...args) {
-  try {
-    return fn.call(thisArg, ...args);
-  } catch (e) {
-    Sentry.captureException(e);
-  }
-}
