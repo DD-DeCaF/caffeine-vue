@@ -960,6 +960,24 @@
                 </v-data-table>
               </div>
             </v-form-extended>
+            <v-alert
+              v-if="
+                selectedTableKey === 'proteomics' ||
+                  selectedTableKey === 'metabolomics' ||
+                  selectedTableKey === 'molarYields' ||
+                  selectedTableKey === 'uptakeSecretion'
+              "
+              type="info"
+              :value="true"
+              outline
+            >
+              Rows can be copied and pasted directly from excel,
+              <a
+                @click="isPasteDialogVisible = true"
+                style="text-decoration: underline"
+                >click here to learn more</a
+              >
+            </v-alert>
             <v-btn
               color="primary"
               small
@@ -1092,6 +1110,18 @@
         </v-layout>
       </v-container>
     </v-dialog>
+    <v-dialog v-model="isPasteDialogVisible" max-width="800px">
+      <v-card>
+        <v-carousel :cycle="false" :light="true" elevation="0">
+          <v-carousel-item v-for="(slide, i) in slides" :key="i">
+            <v-container grid-list-md text-xs-center>
+              <h2>{{ instructions[i] }}</h2>
+              <img :src="slide" :alt="i" />
+            </v-container>
+          </v-carousel-item>
+        </v-carousel>
+      </v-card>
+    </v-dialog>
     <v-snackbar color="error" v-model="isMoreDataRequired" :timeout="7000">
       Please enter condition, sample and at least one measurement.
     </v-snackbar>
@@ -1136,6 +1166,20 @@ function getInitialState() {
       project_id: null,
       id: null
     },
+    colors: ["indigo", "warning"],
+    slides: [
+      "../assets/tutorials/copy-paste/copy.png",
+      "../assets/tutorials/copy-paste/focus.png",
+      "../assets/tutorials/copy-paste/paste.png",
+      "../assets/tutorials/copy-paste/error.png"
+    ],
+    instructions: [
+      "Copy columns in your excel file that correspond to the columns presented. Columns must correspond to the columns in the form.",
+      "Focus target line corresponding to the leftmost column on the excel file and paste.",
+      "Choose a sample the pasted data should belong to.",
+      "If rows are not copied correctly, fields that are missing will be marked. These lines can be deleted by clicking the delete icon or the missing values can be filled in manually."
+    ],
+    isPasteDialogVisible: false,
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
