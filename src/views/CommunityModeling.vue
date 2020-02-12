@@ -47,8 +47,8 @@
           <div ref="chartdiv" class="chart-style"></div>
           <v-card>
             <v-card-title>
-              <v-layout row justify-space-between>
-                <v-flex xs3>
+              <v-layout row justify-space-around>
+                <v-flex xl3>
                   <v-autocomplete
                     v-model="fromSearch"
                     :items="communityData.cross_feeding"
@@ -74,7 +74,8 @@
                     </template>
                   </v-autocomplete>
                 </v-flex>
-                <v-flex xs3>
+                <v-spacer></v-spacer>
+                <v-flex xl3>
                   <v-autocomplete
                     v-model="toSearch"
                     :items="communityData.cross_feeding"
@@ -100,7 +101,8 @@
                     </template>
                   </v-autocomplete>
                 </v-flex>
-                <v-flex xs3>
+                <v-spacer></v-spacer>
+                <v-flex xl3>
                   <v-autocomplete
                     v-model="metaboliteSearch"
                     :items="communityData.cross_feeding"
@@ -125,6 +127,31 @@
                       </v-chip>
                     </template>
                   </v-autocomplete>
+                </v-flex>
+                <v-spacer></v-spacer>
+                <v-flex xl3 flex-shrink-0>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        flat
+                        color="primary"
+                        :disabled="!communityDataFiltered.length"
+                        class="mt-3"
+                        @click="exportData()"
+                        v-on="on"
+                        ><v-icon v-if="!isExporting">cloud_download</v-icon
+                        ><v-progress-circular
+                          v-if="isExporting"
+                          class="mr-1"
+                          indeterminate
+                          color="primary"
+                          :width="2"
+                          :size="15"
+                        ></v-progress-circular
+                      ></v-btn>
+                    </template>
+                    <span>Download table as csv</span>
+                  </v-tooltip>
                 </v-flex>
               </v-layout>
             </v-card-title>
@@ -262,6 +289,9 @@ export default Vue.extend({
     selectedMethod: null,
     isSidepanelOpen: true,
     hasSimulationError: false,
+    isExporting: false,
+    hasExportError: false,
+    exportErrorMessage: null,
     communityData: {
       growth_rate: null,
       cross_feeding: [],
@@ -490,6 +520,35 @@ export default Vue.extend({
       if (index >= 0) {
         this.toSearch.splice(index, 1);
       }
+    },
+    exportData() {
+      this.isExporting = true;
+      const csvData = this.communityDataFiltered.map(item => ({
+        sourceOrganism: this.getModelByID(item.from).name,
+        targetOrganism: this.getModelByID(item.to).name,
+        metabolite: item.metabolite,
+        value: item.value
+      }));
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += [
+        Object.keys(csvData[0]).join(","),
+        ...csvData.map(item => Object.values(item).join(","))
+      ].join("\n");
+      const fileName = `community_model_${this.$moment().format(
+        "YYYY-MM-DD_HH-mm"
+      )}`;
+      var element = document.createElement("a");
+      element.setAttribute("href", encodeURI(csvContent));
+      element.setAttribute("download", fileName + ".csv");
+
+      element.style.display = "none";
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+
+      this.isExporting = false;
     }
   }
 });
