@@ -98,6 +98,25 @@
           Similar to FVA, parsimonious FVA will estimate the uncertainty of flux
           predictions computed by pFBA.
         </p>
+        <v-divider></v-divider>
+        <br>
+        <h2 class="title">Community Modeling Algorithms</h2>
+        <br>
+        <h3 class="title">SteadyCom</h3>
+        <p>
+          Some text summarizing how the method works.
+        </p>
+        <p><strong>Caveats</strong>:</p>
+        <ul class="mb-3">
+          <li>
+            Maybe one or two caveats?
+          </li>
+        </ul>
+        <p>
+          SteadyCom has been published by <a href="https://doi.org/10.1371/journal.pcbi.1005539"
+            >Chan et al.</a> and has been implemented in Python as part of the <a href="https://github.com/cdanielmachado/reframed"
+            >ReFramed package.</a> by Daniel Machado. Community modeling on Caffeine uses ReFramed version 1.1.0.
+        </p>
       </v-card-text>
 
       <v-divider></v-divider>

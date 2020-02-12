@@ -1,5 +1,9 @@
 <template>
   <v-container>
+     <MethodHelpDialog
+        :showMethodHelpDialog="showMethodHelpDialog"
+        @close-dialog="showMethodHelpDialog = false"
+      />
     <v-card>
       <v-card-title></v-card-title>
       <v-card-text>
@@ -212,6 +216,8 @@
           persistent-hint
           v-model="selectedMethod"
           return-object
+          prepend-icon="help"
+          @click:prepend="showMethodHelpDialog = true"
           :rules="[v => !!v || 'Please choose the simulation method.']"
         ></v-select>
 
@@ -243,13 +249,17 @@ import { partitionedList } from "@/utils/utility";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+import MethodHelpDialog from "@/views/MethodHelpDialog.vue";
 
 am4core.useTheme(am4themes_animated);
 
 export default Vue.extend({
   name: "CommunityModeling",
-  components: {},
+  components: {
+    MethodHelpDialog
+  },
   data: () => ({
+    showMethodHelpDialog: false,
     chart: null,
     metaboliteSearch: [],
     fromSearch: [],
@@ -353,11 +363,11 @@ export default Vue.extend({
         name: "SteadyCom",
         description: "Implementation of SteadyCom (Chan et al 2017)"
       },
-      {
-        id: "steadiercom",
-        name: "SteadierCom",
-        description: "Improvements on SteadyCom by Daniel Machado"
-      }
+      // {
+      //   id: "steadiercom",
+      //   name: "SteadierCom",
+      //   description: "Improvements on SteadyCom by Daniel Machado"
+      // }
     ]
   }),
   computed: {
