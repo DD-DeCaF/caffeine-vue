@@ -1116,7 +1116,7 @@
           <v-carousel-item v-for="(slide, i) in slides" :key="i">
             <v-container grid-list-md text-xs-center>
               <h2>{{ instructions[i] }}</h2>
-              <v-img :src="images[slide]" :alt="i" />
+              <v-img :src="images[slide]" :alt="slide" />
             </v-container>
           </v-carousel-item>
         </v-carousel>
