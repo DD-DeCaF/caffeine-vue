@@ -1116,7 +1116,7 @@
           <v-carousel-item v-for="(slide, i) in slides" :key="i">
             <v-container grid-list-md text-xs-center>
               <h2>{{ instructions[i] }}</h2>
-              <img :src="slide" :alt="i" />
+              <v-img :src="images[slide]" :alt="i" />
             </v-container>
           </v-carousel-item>
         </v-carousel>
@@ -1167,12 +1167,13 @@ function getInitialState() {
       id: null
     },
     colors: ["indigo", "warning"],
-    slides: [
-      "../assets/tutorials/copy-paste/copy.png",
-      "../assets/tutorials/copy-paste/focus.png",
-      "../assets/tutorials/copy-paste/paste.png",
-      "../assets/tutorials/copy-paste/error.png"
-    ],
+    slides: ["copy", "focus", "paste", "error"],
+    images: {
+      copy: require("@/assets/tutorials/copy-paste/copy.png"),
+      focus: require("@/assets/tutorials/copy-paste/focus-window.png"),
+      paste: require("@/assets/tutorials/copy-paste/paste.png"),
+      error: require("@/assets/tutorials/copy-paste/error.png")
+    },
     instructions: [
       "Copy columns in your excel file that correspond to the columns presented. Columns must correspond to the columns in the form.",
       "Focus target line corresponding to the leftmost column on the excel file and paste.",
