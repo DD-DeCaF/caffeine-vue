@@ -247,7 +247,7 @@ export default Vue.extend({
         });
       });
     },
-    login(params: {[x: string]: any}, type: string) {
+    login(params: { [x: string]: any }, type: string) {
       this.isLoading = true;
       return axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
@@ -310,9 +310,10 @@ export default Vue.extend({
                     source: "web"
                   });
                 }
-                // Email is not passed to the login function, so we have to 
+                // Email is not passed to the login function, so we have to
                 // identify user by email here.
-                const email = result.user.email || result.additionalUserInfo.profile.email;
+                const email =
+                  result.user.email || result.additionalUserInfo.profile.email;
                 // Note: identifyUser and updateUser are not guarded by the
                 // isNewUser check as we want to capture the information even
                 // if it is not the first time the user logged in.
