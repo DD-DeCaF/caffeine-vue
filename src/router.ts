@@ -10,6 +10,7 @@ import InteractiveMap from "./views/InteractiveMap/InteractiveMap.vue";
 import Jobs from "./views/Jobs/Jobs.vue";
 import JobDetails from "./views/Jobs/JobDetails.vue";
 import Maps from "./views/Maps.vue";
+import Media from "./views/Media.vue";
 import Models from "./views/Models.vue";
 import Projects from "./views/Projects.vue";
 import ResetRequest from "./views/ResetRequest.vue";
@@ -82,6 +83,11 @@ export default new Router({
       path: "/maps",
       name: "maps",
       component: Maps
+    },
+    {
+      path: "/media",
+      name: "media",
+      component: Media
     },
     {
       path: "/models",

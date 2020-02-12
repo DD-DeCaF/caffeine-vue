@@ -200,6 +200,16 @@
               </v-list-tile-content>
             </v-list-tile>
 
+            <v-list-tile to="/media">
+              <v-list-tile-action>
+                <v-icon>save_alt</v-icon>
+              </v-list-tile-action>
+
+              <v-list-tile-content>
+                <v-list-tile-title>Media</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+
             <v-list-tile to="/models">
               <v-list-tile-action>
                 <v-icon>rounded_corner</v-icon>

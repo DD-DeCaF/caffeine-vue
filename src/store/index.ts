@@ -80,6 +80,7 @@ export default new Vuex.Store({
       dispatch("projects/fetchProjects");
       dispatch("strains/fetchStrains");
       dispatch("media/fetchMedia");
+      dispatch("media/fetchMediaCompounds");
     },
     setFetchError({ commit }, error) {
       // Dispatch this action when failing to retrieve platform data from the
