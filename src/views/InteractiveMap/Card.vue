@@ -343,7 +343,7 @@ import axios from "axios";
 import * as settings from "@/utils/settings";
 import CardDialog from "@/views/InteractiveMap/CardDialog.vue";
 import CardDialogDataDriven from "@/views/InteractiveMap/CardDialogDataDriven.vue";
-import MethodHelpDialog from "@/views/InteractiveMap/MethodHelpDialog.vue";
+import MethodHelpDialog from "@/views/MethodHelpDialog.vue";
 
 export default Vue.extend({
   name: "Card",
