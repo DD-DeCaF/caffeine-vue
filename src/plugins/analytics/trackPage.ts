@@ -33,7 +33,18 @@ import {
   isRouter,
   getBasePath
 } from "./helpers";
-import { Route } from "vue-router";
+import VueRouter, { Route } from "vue-router";
+
+// Router.options and router.history are private properties, so they
+// are not on the original type
+type Router = VueRouter & {
+  options: {
+    base: string;
+  };
+  history: {
+    ready: boolean;
+  };
+};
 
 export function autoTracking() {
   const { router, autoTracking, $vue } = config;
@@ -44,7 +55,7 @@ export function autoTracking() {
   }
 
   router.onReady(() => {
-    if (pageviewOnLoad && router.history.ready) {
+    if (pageviewOnLoad && (router as Router).history.ready) {
       trackRoute(router.currentRoute);
     }
     router.afterEach((to, from) => {
@@ -65,7 +76,7 @@ export function autoTracking() {
         return;
       }
       // see https://github.com/nuxt-community/analytics-module/issues/8
-      $vue.nextTick().then(() => {
+      $vue!.nextTick().then(() => {
         trackRoute(router.currentRoute);
       });
     });
@@ -82,11 +93,10 @@ export function trackRoute(route: Route) {
 
   // Get path from route
   const queryString = getQueryString(route.query);
-  const base = router && router.options.base;
-  const needsBase = prependBase && base;
+  const base = router && (router as Router).options.base;
 
   let path = route.path + (transformQueryString ? queryString : "");
-  path = needsBase ? getBasePath(base, path) : path;
+  path = prependBase && base ? getBasePath(base, path) : path;
 
   trackPage(path);
 }

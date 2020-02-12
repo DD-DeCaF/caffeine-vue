@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-import Vue from "vue";
+import { VueConstructor } from "vue";
 import VueRouter from "vue-router";
 import { merge } from "./helpers";
 
 export interface TrackPageConfig {
-  $vue: Vue | null;
+  $vue: VueConstructor | null;
   router: VueRouter | null;
   ignoreRoutes?: string[];
   autoTracking?: {

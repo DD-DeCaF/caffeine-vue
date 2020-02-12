@@ -24,16 +24,29 @@
  * SOFTWARE.
  */
 
-import { DirectiveOptions } from "vue";
+import { DirectiveOptions, VNode, VNodeData } from "vue";
+
+type VNodeWithModel = VNode & {
+  data: VNodeData & {
+    model: {
+      value: any;
+    };
+  };
+};
 
 /**
  * Directive that dispatches an action in store's analytics module if
- * components's value changes to truthy
+ * components's model value changes to truthy
  */
 export const analyticsModelDirective: DirectiveOptions = {
   update: function(el, binding, vnode, oldVnode) {
-    const value = vnode.data.model.value;
-    const oldValue = oldVnode.data.model.value;
+    if (!(vnode as VNodeWithModel).data.model) {
+      throw TypeError(
+        "analyticsModelDirective used on component without model directive"
+      );
+    }
+    const value = (vnode as VNodeWithModel).data.model.value;
+    const oldValue = (oldVnode as VNodeWithModel).data.model.value;
     // Directive can have optional modifier "not" which negates the value
     const modifiedValue = binding.modifiers.not ? !value : value;
     if (!modifiedValue || value === oldValue) {
