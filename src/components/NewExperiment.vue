@@ -10,6 +10,10 @@
       v-model="isProjectCreationDialogVisible"
       @return-object="passProject"
     />
+    <ExperimentHelpDialog
+      :isDialogVisible="isHelpDialogVisible"
+      @close-dialog="isHelpDialogVisible = false"
+    />
     <v-dialog
       v-model="isDialogVisible"
       full-width
@@ -985,6 +989,12 @@
         <!-- Selection area -->
         <v-flex md2>
           <v-card class="pa-4" height="100%" elevation="0">
+            <div class="font-italic">
+              What are experiments?
+              <v-icon @click="isHelpDialogVisible = true">
+                help
+              </v-icon>
+            </div>
             <v-form-extended
               v-model="isExperimentDataValid"
               immediatelyValidated
@@ -1126,6 +1136,7 @@ import { getMetaboliteId } from "@/utils/metabolite";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import SelectDialog from "@/components/SelectDialog.vue";
 import UniprotInput from "@/components/UniprotInput.vue";
+import ExperimentHelpDialog from "@/views/Experiments/ExperimentHelpDialog.vue";
 import { mapGetters } from "vuex";
 
 function getInitialState() {
@@ -1139,6 +1150,7 @@ function getInitialState() {
     isNewStrainDialogVisible: false,
     isNewMediumDialogVisible: false,
     isProjectCreationDialogVisible: false,
+    isHelpDialogVisible: false,
     isSubmitting: false,
     isExperimentDataValid: true,
     isMoreDataRequired: false,
@@ -1511,6 +1523,7 @@ function getInitialState() {
 export default Vue.extend({
   name: "NewExperiment",
   components: {
+    ExperimentHelpDialog,
     UniprotInput
   },
   props: {
@@ -1549,6 +1562,9 @@ export default Vue.extend({
         return this.value;
       },
       set(value) {
+        if (!value) {
+          this.isHelpDialogVisible = false;
+        }
         this.$emit("input", value);
       }
     },
