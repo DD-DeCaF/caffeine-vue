@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
-import { hashMessage } from "@/utils/analytics";
+import { hashMessage } from "@/utils/utility";
 import { RootState } from "@/types/vuex";
 import { vuexStoreModule } from "@/store/vuexStoreModule";
 import store from "..";

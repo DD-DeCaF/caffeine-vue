@@ -104,3 +104,31 @@ export function camelCasePropertyNames(obj) {
 export function toISOFormat(datetime) {
   return moment(datetime).format("YYYY-MM-DDTHH:mm:ss.SSSSSZ");
 }
+
+/**
+ * Hash message into a fixed-size output - based on the given SHA algorithm -
+ * transformed to a hex string.
+ *
+ * For further details, see https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#Examples
+ *
+ * @param {string} message String message
+ *
+ * @param {string} algorithm Algorithm used to digest the message.
+ *      For full list of supported algorithms, see https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#Supported_algorithms.
+ *
+ * @returns {string} Hashed hex string of the original message
+ *
+ * @example
+ * await hashMessage("hello world") // "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+ */
+export async function hashMessage(message, algorithm) {
+  // encode as (utf-8) Uint8Array
+  const msgUint8 = new TextEncoder().encode(message);
+  // hash the message
+  const hashBuffer = await crypto.subtle.digest(algorithm, msgUint8);
+  // convert buffer to byte array
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  // convert bytes to hex string
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  return hashHex;
+}

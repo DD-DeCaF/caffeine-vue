@@ -4,14 +4,10 @@ import googleAnalyticsPlugin from "analytics-plugin-ga";
 import doNotTrackPlugin from "analytics-plugin-do-not-track";
 import originalSourcePlugin from "analytics-plugin-original-source";
 import {
-  composePlugins,
   disableAnalyticsPlugin,
-  dropNoValuePropertiesPlugin,
-  enrichAnalyticsPlugin,
-  namespacePluginHooks,
-  requireConsentPlugin,
-  snakecasePropertiesPlugin
-} from "@/utils/analytics";
+  processPayloadPlugin,
+  requireConsentPlugin
+} from "@/plugins/analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
@@ -68,27 +64,16 @@ Vue.use(promisedDialog);
 Vue.use(analytics, {
   // Own options
   store,
+  router,
   // Analytics options (https://github.com/DavidWells/analytics)
   plugins: [
     doNotTrackPlugin(),
     requireConsentPlugin({ store }),
     disableAnalyticsPlugin({ store }),
     originalSourcePlugin(),
-    ...namespacePluginHooks(
-      composePlugins({
-        name: "payload-pipeline",
-        plugins: [
-          enrichAnalyticsPlugin({ store, router }),
-          dropNoValuePropertiesPlugin(),
-          snakecasePropertiesPlugin()
-        ]
-      }),
-      ["google-analytics"]
-    ),
+    processPayloadPlugin({ store, router }, ["google-analytics"]),
     googleAnalyticsPlugin({ trackingId: gaTrackingID, autoTrack: true })
-  ],
-  // Vue analytics options (https://github.com/MatteoGabriele/vue-analytics)
-  router
+  ]
 });
 
 Vue.config.productionTip = false;
