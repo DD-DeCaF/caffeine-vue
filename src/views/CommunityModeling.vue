@@ -361,7 +361,7 @@ export default Vue.extend({
       {
         id: "steadycom",
         name: "SteadyCom",
-        description: "Implementation of SteadyCom (Chan et al 2017)"
+        description: "ReFramed implementation of SteadyCom (Chan et. al. 2017)"
       }
       // {
       //   id: "steadiercom",
