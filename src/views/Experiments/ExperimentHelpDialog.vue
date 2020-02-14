@@ -52,13 +52,14 @@
           <li>
             The entries will be uploaded. If you're uploading data with
             identifiers (such as proteins, metabolites or reactions), the IDs
-            will be matched and validated against biochemical databases that we have integrated.
+            will be matched and validated against biochemical databases that we
+            have integrated.
           </li>
           <br />
           <li>
             In case of an identifier mismatch, the rows will be highlighted and
-            will need to be fixed manually. To do this conveniently, you can 
-            move all rows containing mismatched identifies to the top of the 
+            will need to be fixed manually. To do this conveniently, you can
+            move all rows containing mismatched identifies to the top of the
             view.
           </li>
         </ol>
@@ -74,8 +75,8 @@
             Example: To make it easier to understand the different concepts,
             let's use the hypothetical example of observing growth of a novel
             <strong>Saccharomyces cerevisae</strong>
-            strain in 3 different media with periodic
-            measurements over 72 hours.
+            strain in 3 different media with periodic measurements over 72
+            hours.
           </i>
         </p>
         <h3 class="title">Experiments</h3>
@@ -85,28 +86,28 @@
         </p>
         <p>
           <i>
-            Example: This means that all data we've observed for
-            our yeast strain would be entered under a single experiment.
+            Example: This means that all data we've observed for our yeast
+            strain would be entered under a single experiment.
           </i>
         </p>
         <h3 class="title">Conditions</h3>
         <p>
           Conditions group data measured at specific conditions such as
-          different media, available gases, temperature, etc. When taking 
-          multiple samples over a period of time, all these samples are 
-          still related to a single condition.
+          different media, available gases, temperature, etc. When taking
+          multiple samples over a period of time, all these samples are still
+          related to a single condition.
         </p>
         <p>
           <i>
-            Example: Each medium is a distinct condition that we expose our 
+            Example: Each medium is a distinct condition that we expose our
             novel strain to.
           </i>
         </p>
         <h3 class="title">Samples</h3>
         <p>
-          Samples represent a collection of individual data points that have 
-          been measured at a discrete occasions. 
-          The data could be a single or several values.
+          Samples represent a collection of individual data points that have
+          been measured at a discrete occasions. The data could be a single or
+          several values.
         </p>
         <p>
           <i>
