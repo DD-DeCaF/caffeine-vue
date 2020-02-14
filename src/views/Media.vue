@@ -177,13 +177,7 @@
                       <AutocompleteMnxMetabolite
                         label="Compound"
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
-                        @change="
-                          compound.compound_name = $event.name;
-                          compound.compound_identifier =
-                            $event.annotation['bigg.metabolite'][0] ||
-                            $event.id;
-                          compound.compound_namespace = $event.namespace;
-                        "
+                        @change="updateCompound(compound, $event)"
                         :modelIds="modelIds"
                         :passedMetabolite="
                           convertToMetaNetXMetabolite(compound)
@@ -448,6 +442,22 @@ export default Vue.extend({
         namespace: compound_namespace,
         formula: "Unavailable"
       };
+    },
+    updateCompound(localCompound, newCompound) {
+      localCompound.compound_name = newCompound.name;
+      if (
+        "bigg.metabolite" in newCompound.annotation &&
+        newCompound.annotation["bigg.metabolite"].length > 0
+      ) {
+        // Use the BiGG identifier if one exists
+        localCompound.compound_identifier =
+          newCompound.annotation["bigg.metabolite"][0];
+        localCompound.compound_namespace = "bigg.metabolite";
+      } else {
+        // Fall back to the mnx id
+        localCompound.compound_identifier = newCompound.id;
+        localCompound.compound_namespace = newCompound.namespace;
+      }
     }
   }
 });
