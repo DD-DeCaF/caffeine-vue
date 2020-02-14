@@ -391,13 +391,13 @@ export default Vue.extend({
         this.chart.dispose();
       }
     },
-    translateModelIDs(id){
-      // Translates numeric model warehouse IDs in cross_feedling response to 
+    translateModelIDs(id) {
+      // Translates numeric model warehouse IDs in cross_feedling response to
       // Model name but leaves 'medium' untouched.
-      if (id !== 'medium') {
-      return this.getModelByID(id).name;
+      if (id !== "medium") {
+        return this.getModelByID(id).name;
       } else {
-      return 'Medium';
+        return "Medium";
       }
     },
     cleanData(cross_feeding) {
