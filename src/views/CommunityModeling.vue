@@ -160,23 +160,24 @@
               </v-layout>
             </v-card-title>
             <v-data-table
-            :headers="headersCrossFeeding"
-            :items="communityData.cross_feeding"
-            class="elevation-1 pa-2 my-3"
-          >
-            <template v-slot:items="props">
-              <td>{{ translateModelIDs(props.item.from) }}</td>
-              <td>{{ translateModelIDs(props.item.to) }}</td>
-              <td>{{ props.item.metabolite_name }}</td>
-              <td>{{ props.item.value }}</td>
-            </template>
-            <template v-slot:no-data>
-              <v-alert :value="true" color="error" icon="warning">
-                Cross-feeding could not be calculated. This could be due to
-                mismatching metabolite identifiers between the selected models.
-              </v-alert>
-            </template>
-          </v-data-table>
+              :headers="headersCrossFeeding"
+              :items="communityData.cross_feeding"
+              class="elevation-1 pa-2 my-3"
+            >
+              <template v-slot:items="props">
+                <td>{{ translateModelIDs(props.item.from) }}</td>
+                <td>{{ translateModelIDs(props.item.to) }}</td>
+                <td>{{ props.item.metabolite_name }}</td>
+                <td>{{ props.item.value }}</td>
+              </template>
+              <template v-slot:no-data>
+                <v-alert :value="true" color="error" icon="warning">
+                  Cross-feeding could not be calculated. This could be due to
+                  mismatching metabolite identifiers between the selected
+                  models.
+                </v-alert>
+              </template>
+            </v-data-table>
           </v-card>
         </v-container>
         <v-container @click="isSidepanelOpen = false" v-else>
