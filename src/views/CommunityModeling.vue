@@ -1,9 +1,9 @@
 <template>
   <v-container>
-     <MethodHelpDialog
-        :showMethodHelpDialog="showMethodHelpDialog"
-        @close-dialog="showMethodHelpDialog = false"
-      />
+    <MethodHelpDialog
+      :showMethodHelpDialog="showMethodHelpDialog"
+      @close-dialog="showMethodHelpDialog = false"
+    />
     <v-card>
       <v-card-title></v-card-title>
       <v-card-text>
@@ -362,7 +362,7 @@ export default Vue.extend({
         id: "steadycom",
         name: "SteadyCom",
         description: "Implementation of SteadyCom (Chan et al 2017)"
-      },
+      }
       // {
       //   id: "steadiercom",
       //   name: "SteadierCom",
