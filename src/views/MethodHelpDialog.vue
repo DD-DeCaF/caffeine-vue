@@ -34,6 +34,7 @@
             >here</a
           >.
         </p>
+        <h2 class="title">Methods on the Interactive Map component</h2>
         <h3 class="title">Flux Balance Analysis (FBA)</h3>
         <p>
           Flux balance analysis optimizes a biological objective to predict a
@@ -100,23 +101,52 @@
         </p>
         <v-divider></v-divider>
         <br>
-        <h2 class="title">Community Modeling Algorithms</h2>
+        <h2 class="title">Methods on the Community Modeling component</h2>
         <br>
         <h3 class="title">SteadyCom</h3>
         <p>
-          Some text summarizing how the method works.
+           SteadyCom has been published by 
+           <a href="https://doi.org/10.1371/journal.pcbi.1005539">Chan et al.</a> 
+           and has been implemented in Python as part of the 
+           <a href="https://github.com/cdanielmachado/reframed">ReFramed package.</a> 
+           by Daniel Machado. Community modeling on Caffeine uses ReFramed version 1.1.0, 
+           which itself uses 
+           <a href="https://www.ibm.com/analytics/cplex-optimizer">CPLEX</a>.
+        </p>
+        <p>
+          SteadyCom predicts a steady-state microbiota composition by imposing a 
+          time-averaged constant growth rate on the entire community. Individual 
+          fluxes of each microbe model are scaled by the abundance of each organism.
+          Moreover in a growing community, an organism can have non-zero fluxes 
+          if and only if both its total biomass and biomass production rate are 
+          non-zero. 
+          A non-growing organism in a growing community will quickly become extinct 
+          and therefore it will be unable to contribute to community metabolite 
+          exchange at a community steady-state.
+
+          SteadyCom is initially non-linear but becomes linear if the community 
+          growth rate is fixed. The implementation in ReFramed therefore starts 
+          at a fixed, low initial growth rate and then iteratively checks
+          if current value is feasible. If it is feasible it doubles the 
+          community growth rate, if it is infeasible it halves the community 
+          growth rate, and then checks again for feasibility
+          until the highest feasible solution is found.
+
+          Generally, less than ten iterations are required for an accuracy of 10<sup>−6</sup>.
         </p>
         <p><strong>Caveats</strong>:</p>
         <ul class="mb-3">
           <li>
-            Maybe one or two caveats?
+            SteadyCom operates on the assumption that the studied microbial 
+            communities are stable and growing at a time-averaged constant growth rate.
+          </li>
+          <li>
+            Physiologically relevant constraints on organism-specific uptake 
+            rates should be imposed whenever available. Unrestricted uptake of 
+            nutrients in individual members of the community may skew the 
+            resulting abundances.
           </li>
         </ul>
-        <p>
-          SteadyCom has been published by <a href="https://doi.org/10.1371/journal.pcbi.1005539"
-            >Chan et al.</a> and has been implemented in Python as part of the <a href="https://github.com/cdanielmachado/reframed"
-            >ReFramed package.</a> by Daniel Machado. Community modeling on Caffeine uses ReFramed version 1.1.0.
-        </p>
       </v-card-text>
 
       <v-divider></v-divider>
