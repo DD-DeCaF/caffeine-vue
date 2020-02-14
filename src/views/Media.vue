@@ -179,7 +179,9 @@
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
                         @change="
                           compound.compound_name = $event.name;
-                          compound.compound_identifier = $event.id;
+                          compound.compound_identifier =
+                            $event.annotation['bigg.metabolite'][0] ||
+                            $event.id;
                           compound.compound_namespace = $event.namespace;
                         "
                         :modelIds="modelIds"
