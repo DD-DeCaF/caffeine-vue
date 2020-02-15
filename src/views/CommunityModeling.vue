@@ -172,7 +172,7 @@
               </template>
               <template v-slot:no-data>
                 <v-alert :value="true" color="warning" icon="warning">
-                  Warning: Cross-feeding could not be calculated. This could be 
+                  Warning: Cross-feeding could not be calculated. This could be
                   due to mismatching metabolite identifiers between the selected
                   models or because no items match the chosen filters..
                 </v-alert>
