@@ -112,8 +112,7 @@
             >ReFramed package.</a
           >
           by Daniel Machado. Community modeling on Caffeine uses ReFramed
-          version 1.1.0, which itself uses
-          <a href="https://www.ibm.com/analytics/cplex-optimizer">CPLEX</a>.
+          version 1.1.0.
         </p>
         <p>
           SteadyCom predicts a steady-state microbiota composition by imposing a
