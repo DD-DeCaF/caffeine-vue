@@ -64,7 +64,7 @@
                     multiple
                   >
                     <template slot="item" slot-scope="data">
-                      {{ translateModelIDs(data.item.to) }}
+                      {{ translateModelIDs(data.item.from) }}
                     </template>
                     <template v-slot:selection="data">
                       <v-chip
@@ -114,7 +114,7 @@
                     chips
                     color="primary"
                     label="Search metabolite"
-                    item-value="metabolite"
+                    item-value="metabolite_name"
                     multiple
                   >
                     <template slot="item" slot-scope="data">
@@ -161,7 +161,7 @@
             </v-card-title>
             <v-data-table
               :headers="headersCrossFeeding"
-              :items="communityData.cross_feeding"
+              :items="communityDataFiltered"
               class="elevation-1 pa-2 my-3"
             >
               <template v-slot:items="props">
@@ -171,10 +171,10 @@
                 <td>{{ props.item.value }}</td>
               </template>
               <template v-slot:no-data>
-                <v-alert :value="true" color="error" icon="warning">
-                  Cross-feeding could not be calculated. This could be due to
-                  mismatching metabolite identifiers between the selected
-                  models.
+                <v-alert :value="true" color="warning" icon="warning">
+                  Warning: Cross-feeding could not be calculated. This could be 
+                  due to mismatching metabolite identifiers between the selected
+                  models or because no items match the chosen filters..
                 </v-alert>
               </template>
             </v-data-table>
@@ -362,7 +362,7 @@ export default Vue.extend({
             !this.fromSearch.length &&
             !this.toSearch.length) ||
           (this.metaboliteSearch.length > 0 ===
-            this.metaboliteSearch.includes(i.metabolite) &&
+            this.metaboliteSearch.includes(i.metabolite_name) &&
             this.fromSearch.length > 0 === this.fromSearch.includes(i.from) &&
             this.toSearch.length > 0 === this.toSearch.includes(i.to))
         );
@@ -523,7 +523,7 @@ export default Vue.extend({
       }
     },
     removeMetaboliteFilter(item) {
-      const index = this.metaboliteSearch.indexOf(item.metabolite);
+      const index = this.metaboliteSearch.indexOf(item.metabolite_name);
       if (index >= 0) {
         this.metaboliteSearch.splice(index, 1);
       }
@@ -545,7 +545,8 @@ export default Vue.extend({
       const csvData = this.communityDataFiltered.map(item => ({
         sourceOrganism: this.getModelByID(item.from).name,
         targetOrganism: this.getModelByID(item.to).name,
-        metabolite: item.metabolite,
+        metaboliteID: item.metabolite_id,
+        metaboliteName: item.metabolite_name,
         value: item.value
       }));
       let csvContent = "data:text/csv;charset=utf-8,";
