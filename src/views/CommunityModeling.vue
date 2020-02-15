@@ -483,7 +483,9 @@ export default Vue.extend({
 
       // link template
       var linkTemplate = chart.links.template;
-      linkTemplate.strokeOpacity = 0;
+      linkTemplate.stroke = am4core.color("#000");
+      linkTemplate.strokeWidth = 0.5;
+      linkTemplate.strokeOpacity = 0.1;
       linkTemplate.fillOpacity = 0.2;
       linkTemplate.tooltipText =
         "{fromName} provides {value.value} mmol/l {metabolite_name} to {toName}";
