@@ -210,6 +210,13 @@ export default Vue.extend({
           this.isMediumCreationSuccess = true;
           this.isDialogVisible = false;
         })
+        .then(() => {
+          // Refetch compounds from the warehouse in order to get updated state.
+          // We could update the store locally and make sure to add the returned
+          // IDs when POSTing the compounds - this is slightly slower for the
+          // user but a lot less complex to implement.
+          return this.$store.dispatch("media/fetchMediaCompounds");
+        })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
