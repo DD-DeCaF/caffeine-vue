@@ -223,7 +223,7 @@ export default Vue.extend({
             compound_identifier: compound.id,
             compound_name: compound.name,
             compound_namespace: compound.namespace,
-            mass_concentration: compound.mass_concentration,
+            mass_concentration: compound.mass_concentration || null,
             medium_id: mediumId
           };
           this.$store.commit("media/addCompound", payload);
