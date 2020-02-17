@@ -1,5 +1,5 @@
 <template>
-  <a v-bind="$attrs" @click="trackClick">
+  <a v-bind="$attrs" @click="trackClick" @contextmenu="trackClick">
     <slot></slot>
   </a>
 </template>
