@@ -256,11 +256,13 @@ export function processPayloadPlugin(config, plugins) {
     identify: processPayloadFactory(pipelines.identify),
     page: processPayloadFactory(pipelines.page)
   };
+  // Scope the enrichment pipeline to specific plugins
   if (plugins) {
-    plugins.forEach(pluginName => {
-      ["track", "identify", "page"].forEach(action => {
+    ["track", "identify", "page"].forEach(action => {
+      plugins.forEach(pluginName => {
         plugin[`${action}:${pluginName}`] = plugin[action];
       });
+      delete plugin[action];
     });
   }
   return plugin;
