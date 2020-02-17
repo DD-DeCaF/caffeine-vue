@@ -20,6 +20,10 @@
                 <v-flex md6>
                   <h3>Add a new medium</h3>
                 </v-flex>
+                <v-alert :value="true" type="info">
+                  Please note: Gases must be added as part of the medium. For
+                  example, for aerobic conditions, please add oxygen explicitly.
+                </v-alert>
                 <v-flex>
                   <v-text-field
                     v-model="medium.name"
