@@ -158,6 +158,27 @@
                   </v-tooltip>
                 </v-flex>
               </v-layout>
+              <v-layout row justify-space-around>
+                <v-slider
+                  label="Minimum exchange value"
+                  v-model="slider"
+                  class="align-center"
+                  :max="maxSlider"
+                  :min="0"
+                  hide-details
+                >
+                  <template v-slot:append>
+                    <v-text-field
+                      v-model="slider"
+                      class="mt-0 pt-0"
+                      hide-details
+                      single-line
+                      type="number"
+                      style="width: 60px"
+                    ></v-text-field>
+                  </template>
+                </v-slider>
+              </v-layout>
             </v-card-title>
             <v-data-table
               :headers="headersCrossFeeding"
@@ -292,6 +313,7 @@ export default Vue.extend({
     metaboliteSearch: [],
     fromSearch: [],
     toSearch: [],
+    slider: 0,
     isUpdating: false,
     isLoading: true,
     selectedModels: [],
@@ -332,6 +354,14 @@ export default Vue.extend({
     ]
   }),
   computed: {
+    maxSlider() {
+      return this.communityData.cross_feeding.length === 0
+        ? 50
+        : this.communityData.cross_feeding.reduce(
+            (max, p) => (p.value > max ? p.value : max),
+            this.communityData.cross_feeding[0].value
+          );
+    },
     isValid() {
       if (this.selectedModels.length >= 2 && this.selectedMedium !== null) {
         return true;
@@ -360,11 +390,13 @@ export default Vue.extend({
         return (
           (!this.metaboliteSearch.length &&
             !this.fromSearch.length &&
-            !this.toSearch.length) ||
+            !this.toSearch.length &&
+            this.slider < i.value) ||
           (this.metaboliteSearch.length > 0 ===
             this.metaboliteSearch.includes(i.metabolite_name) &&
             this.fromSearch.length > 0 === this.fromSearch.includes(i.from) &&
-            this.toSearch.length > 0 === this.toSearch.includes(i.to))
+            this.toSearch.length > 0 === this.toSearch.includes(i.to) &&
+            this.slider < i.value)
         );
       });
     }
