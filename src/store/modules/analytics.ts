@@ -38,9 +38,16 @@ export interface Analytics {
   };
 }
 
+export interface Hotjar {
+  // NOTE: Define additional properties once needed
+  optOut: boolean;
+}
+
 export interface AnalyticsState {
   enableAnalytics: boolean;
+  enableHotjar: boolean;
   analytics: Analytics | null;
+  hotjar: Hotjar | null;
   lastEscherSearch: string | null;
 }
 
@@ -48,15 +55,28 @@ export default vuexStoreModule({
   namespaced: true,
   state: {
     enableAnalytics: settings.enableAnalytics,
+    enableHotjar: settings.enableHotjar,
     analytics: null,
+    hotjar: null,
     lastEscherSearch: null
   } as AnalyticsState,
   mutations: {
     setEnableAnalytics(state, enabled) {
       state.enableAnalytics = enabled;
     },
+    setEnableHotjar(state, enabled) {
+      state.enableHotjar = enabled;
+    },
     setAnalytics(state, analytics: Analytics) {
       state.analytics = analytics;
+    },
+    setHotjar(state, hotjar: Hotjar) {
+      state.hotjar = hotjar;
+    },
+    setHotjarOptOut(state, optOut) {
+      if (state.hotjar) {
+        state.hotjar!.optOut = optOut;
+      }
     },
     setLastEscherSearch(state, query) {
       state.lastEscherSearch = query;
@@ -191,6 +211,45 @@ export default vuexStoreModule({
           resultsCount: results.length
         });
       }, 2000);
+    },
+    loadHotjar({ commit, getters }) {
+      if (getters.hotjarAllowed) {
+        // Hotjar installation script modified to take ID and snippet version
+        // from settings.
+        (function(h: any, o: any, t: any, j: any, a?: any, r?: any) {
+          h.hj =
+            h.hj ||
+            function() {
+              (h.hj.q = h.hj.q || []).push(arguments);
+            };
+          h._hjSettings = {
+            // NOTE: Our modification start
+            hjid: settings.hotjarID,
+            hjsv: settings.hotjarSnippetVersion
+            // NOTE: Our modification end
+          };
+          a = o.getElementsByTagName("head")[0];
+          r = o.createElement("script");
+          r.async = 1;
+          r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+          a.appendChild(r);
+        })(window, document, "https://static.hotjar.com/c/hotjar-", ".js?sv=");
+      } // Hotjar installation script end
+      commit("setHotjar", (window as any).hj);
+
+      // Enabling/Disabling Hotjar is done via Hotjar's `optOut` property
+      store.watch(
+        () =>
+          this.getters["analytics/hotjarAllowed"] &&
+          this.getters["consents/isConsentAccepted"]({
+            type: "cookie",
+            category: "statistics"
+          }),
+        canOptIn => commit("setHotjarOptOut", !canOptIn)
+      );
     }
+  },
+  getters: {
+    hotjarAllowed: state => state.enableAnalytics && state.enableHotjar
   }
 });
