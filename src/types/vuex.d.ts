@@ -1,3 +1,4 @@
+import { AnalyticsState } from "@/store/modules/analytics";
 import { ConsentsState } from "@/store/modules/consents";
 import { DesignsState } from "@/store//modules/designs";
 import { ExperimentsState } from "@/store/modules/experiments";
@@ -14,6 +15,7 @@ import { StrainsState } from "@/store/modules/strains";
 // Fix for when using rootState in a Vuex module, TypeScript doesn't know
 // about the other modules
 export type RootState = {
+  analytics: AnalyticsState;
   consents: ConsentsState;
   designs: DesignsState;
   experiments: ExperimentsState;
