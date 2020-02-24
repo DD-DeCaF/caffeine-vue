@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/browser";
 import moment from "moment";
 import { snakeCase, camelCase } from "lodash";
 import store from "../store";
