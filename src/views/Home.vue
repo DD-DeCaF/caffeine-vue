@@ -77,9 +77,9 @@
         </p>
         <h3 id="login-optional-">Login (optional)</h3>
         <p>
-          You can log in by navigating to the
-          menu in the upper right-hand corner. You can register and account or
-          sign-on through a number of social media platforms.
+          You can log in by navigating to the menu in the upper right-hand
+          corner. You can register and account or sign-on through a number of
+          social media platforms.
         </p>
         <img
           src="../assets/gifs/login.gif"
