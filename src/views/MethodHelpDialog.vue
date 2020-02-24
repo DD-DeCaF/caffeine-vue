@@ -1,5 +1,12 @@
 <template>
-  <v-dialog v-model="showMethodHelpDialogLocal" width="1200">
+  <v-dialog
+    v-model="showMethodHelpDialogLocal"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'method_help' }
+    }"
+    width="1200"
+  >
     <v-card>
       <v-card-title class="headline primary white--text" primary-title>
         Constraint-based modeling
@@ -14,10 +21,13 @@
           concentrations are constant and production and consumption fluxes
           perfectly balance each other.<br />
           This is a reasonable assumption when the environment is constant (e.g.
-          in a <a href="https://en.wikipedia.org/wiki/Chemostat">chemostat</a>)
-          or there is nutrient excess (e.g. a microbial culture growing in
-          <a href="https://en.wikipedia.org/wiki/Bacterial_growth#Phases"
-            >exponential phase</a
+          in a
+          <a-extended href="https://en.wikipedia.org/wiki/Chemostat"
+            >chemostat</a-extended
+          >) or there is nutrient excess (e.g. a microbial culture growing in
+          <a-extended
+            href="https://en.wikipedia.org/wiki/Bacterial_growth#Phases"
+            >exponential phase</a-extended
           >).
         </p>
         <p>
@@ -29,9 +39,9 @@
         <p>
           You can find a comprehensive overview of constraint-based modeling and
           its applications
-          <a
+          <a-extended
             href="http://www.sciencedirect.com/science/article/pii/S0092867415005681?via%3Dihub"
-            >here</a
+            >here</a-extended
           >.
         </p>
         <h2 class="title">Methods on the Interactive Map component</h2>
@@ -46,8 +56,9 @@
           <li>
             In general, flux distributions predicted through FBA are not unique.
             Uncertainties in the predicted fluxes can be assessed through
-            <a href="http://cobramethods.wikidot.com/flux-variability-analysis"
-              >Flux Variability Analysis</a
+            <a-extended
+              href="http://cobramethods.wikidot.com/flux-variability-analysis"
+              >Flux Variability Analysis</a-extended
             >
             (see also below).
           </li>
@@ -62,8 +73,8 @@
         <h3 class="title">Parsimonious FBA (recommended)</h3>
         <p>
           In addition to maximizing growth yield (see FVA below),
-          <a href="http://cobramethods.wikidot.com/pfba"
-            >Parsimonious Flux Balance Analysis</a
+          <a-extended href="http://cobramethods.wikidot.com/pfba"
+            >Parsimonious Flux Balance Analysis</a-extended
           >
           (pFBA) will simultaneously minimize the sum of all fluxes which is a
           proxy for minimizing enzyme expression.
@@ -74,21 +85,24 @@
             Flux minimization is only a proxy for the minimization of protein
             expression cost. For more accurate modeling approaches to proteome
             allocation, please refer to the
-            <a
+            <a-extended
               href="http://onlinelibrary.wiley.com/doi/10.15252/msb.20167411/abstract"
-              >GECKO</a
+              >GECKO</a-extended
             >
             method (already supported for <em>S. cerevisae</em>) and
-            <a href="http://msb.embopress.org/content/9/1/693">ME</a> models
-            (which will be made available soon).
+            <a-extended href="http://msb.embopress.org/content/9/1/693">
+              ME
+            </a-extended>
+            models (which will be made available soon).
           </li>
         </ul>
         <h3 class="title">Flux Variability Analysis (FVA)</h3>
         <p>
           In general, constraint-based modeling solutions will have many
           alternative optima.
-          <a href="http://cobramethods.wikidot.com/flux-variability-analysis"
-            >Flux Variability Analysis</a
+          <a-extended
+            href="http://cobramethods.wikidot.com/flux-variability-analysis"
+            >Flux Variability Analysis</a-extended
           >
           (FVA) allows the estimation of the uncertainty in flux predictions
           computed by FBA. Uncertain reaction rates are highlighted using

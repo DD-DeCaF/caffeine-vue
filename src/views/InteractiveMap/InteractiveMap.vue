@@ -197,7 +197,12 @@ export default Vue.extend({
       // (cards added from other components won't initially be simulated)
       this.$store.state.interactiveMap.cards.forEach(card => {
         const model = this.$store.getters["models/getModelById"](card.modelId);
-        this.simulate(card, model);
+        this.simulate(card, model, {
+          analytics: {
+            source: "load",
+            sourceType: "navigation"
+          }
+        });
       });
       // Select the last card in the list by default.
       this.selectedCardId = this.$store.state.interactiveMap.cards[
@@ -297,7 +302,12 @@ export default Vue.extend({
       };
       this.$store.commit("interactiveMap/addCard", card);
       this.selectedCardId = card.uuid;
-      this.simulate(card, model);
+      this.simulate(card, model, {
+        analytics: {
+          source: "load",
+          sourceType: "initial_load"
+        }
+      });
     },
     removeCard(card) {
       if (card === this.selectedCard) {
@@ -334,7 +344,7 @@ export default Vue.extend({
         this.playingInterval = setInterval(this.selectNextCard, 1000);
       }
     },
-    simulate(card, model) {
+    simulate(card, model, options) {
       // Note that the card and model objects are passed instead of using
       // `selectedCard`, as the selected card could have
       // been changed by the time this is called.
@@ -446,6 +456,20 @@ export default Vue.extend({
             props: { isSimulating: false }
           });
         });
+
+      // Track simulation only if the modification has been done on the current
+      // card
+      if (card.uuid === this.selectedCardId) {
+        this.$store.dispatch("analytics/visualize", {
+          card,
+          model,
+          map: this.$store.state.maps.maps.find(
+            map => map.id === this.$store.state.interactiveMap.currentMapId
+          ),
+          project: this.$store.state.projects.activeProject,
+          ...(options.analytics || {})
+        });
+      }
     },
     designSaved(design) {
       this.hasSaveDesignSuccess = true;

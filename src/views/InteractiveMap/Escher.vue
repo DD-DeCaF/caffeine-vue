@@ -293,6 +293,16 @@ export default Vue.extend({
 
       // Wait for escher to initialize before loading the map.
       this.onEscherReady.then(loadMap);
+
+      this.$store.dispatch("analytics/visualize", {
+        card: this.card,
+        model: this.model,
+        map: this.$store.state.maps.maps.find(
+          map => map.id === this.$store.state.interactiveMap.currentMapId
+        ),
+        project: this.$store.state.projects.activeProject,
+        source: "map_change"
+      });
     },
     model: {
       deep: true,
@@ -311,6 +321,17 @@ export default Vue.extend({
           this.onEscherReady.then(this.setReactionAdditions);
         }
       }
+    },
+    card(card) {
+      this.$store.dispatch("analytics/visualize", {
+        card: this.card,
+        model: this.model,
+        map: this.$store.state.maps.maps.find(
+          map => map.id === this.$store.state.interactiveMap.currentMapId
+        ),
+        project: this.$store.state.projects.activeProject,
+        source: "card_change"
+      });
     },
     // Add separate watchers for the different properties on the card, instead
     // of a single deep watcher on the card, to be able to only update the
@@ -381,6 +402,11 @@ export default Vue.extend({
           objectiveDirection: this.setObjectiveDirection,
           changeBounds: this.editBounds,
           resetBounds: this.resetBounds
+        },
+        search_callbacks: {
+          search: search => {
+            this.$store.dispatch("analytics/searchEscher", search);
+          }
         }
       });
     });
@@ -663,14 +689,24 @@ export default Vue.extend({
           reactionId: reactionId
         });
       }
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "reaction_setObjective",
+          sourceId: reactionId
+        }
+      });
     },
     setObjectiveDirection(reactionId: string) {
       this.$store.commit("interactiveMap/setObjectiveDirection", {
         uuid: this.card.uuid,
         maximize: !this.card.objective.maximize
       });
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "reaction_setObjectiveDirection",
+          sourceId: reactionId
+        }
+      });
     },
     knockoutReaction(reactionId: string) {
       // Both knockout and undo knockout will call this, so depend the behaviour
@@ -686,7 +722,12 @@ export default Vue.extend({
           reactionId: reactionId
         });
       }
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "reaction_knockoutReaction",
+          sourceId: reactionId
+        }
+      });
     },
     knockoutGene(geneId: string) {
       // Both knockout and undo knockout will call this, so depend the behaviour
@@ -702,7 +743,12 @@ export default Vue.extend({
           geneId: geneId
         });
       }
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "gene_knockoutGene",
+          sourceId: geneId
+        }
+      });
     },
     editBounds(reactionId: string, lower: string, upper: string) {
       const lowerBound = parseFloat(lower);
@@ -726,15 +772,24 @@ export default Vue.extend({
         // Update existing modification
         this.$store.commit("interactiveMap/updateEditedBounds", payload);
       }
-
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "reaction_editBounds",
+          sourceId: reactionId
+        }
+      });
     },
     resetBounds(reactionId: string) {
       this.$store.commit("interactiveMap/undoEditBounds", {
         uuid: this.card.uuid,
         reactionId: reactionId
       });
-      this.$emit("simulate-card", this.card, this.model);
+      this.simulateCard({
+        analytics: {
+          sourceType: "reaction_resetBounds",
+          sourceId: reactionId
+        }
+      });
     },
     toggleColorScheme() {
       if (this.card.showDiffFVAScore) {
@@ -758,6 +813,15 @@ export default Vue.extend({
           this.defaultReactionStyles
         );
       }
+    },
+    simulateCard(options) {
+      this.$emit("simulate-card", this.card, this.model, {
+        ...(options || {}),
+        analytics: {
+          source: "escher",
+          ...((options || {}).analytics || {})
+        }
+      });
     }
   }
 });

@@ -1,5 +1,13 @@
 import Vue from "vue";
-import VueAnalytics from "vue-analytics";
+import analytics from "./plugins/analytics";
+import googleAnalyticsPlugin from "analytics-plugin-ga";
+import doNotTrackPlugin from "analytics-plugin-do-not-track";
+import originalSourcePlugin from "analytics-plugin-original-source";
+import {
+  disableAnalyticsPlugin,
+  processPayloadPlugin,
+  requireConsentPlugin
+} from "@/plugins/analytics";
 import "./plugins/vuetify";
 import App from "./App.vue";
 import router from "./router";
@@ -23,6 +31,7 @@ import VFormExtended from "@/components/VFormExtended";
 import AutocompleteMnxReaction from "@/components/AutocompleteMnxReaction.vue";
 import AutocompleteMnxMetabolite from "@/components/AutocompleteMnxMetabolite.vue";
 import VNumberField from "@/components/VNumberField.vue";
+import AExtended from "@/components/AExtended.vue";
 import { initFromStorage } from "@/utils/startup";
 import promisedDialog from "@/utils/promisedDialog";
 import * as Sentry from "@sentry/browser";
@@ -52,12 +61,20 @@ if (sentryDSN) {
 Vue.use(require("vue-moment"));
 Vue.use(promisedDialog);
 
-if (gaTrackingID) {
-  Vue.use(VueAnalytics, {
-    id: gaTrackingID,
-    router
-  });
-}
+Vue.use(analytics, {
+  // Own options
+  store,
+  router,
+  // Analytics options (https://github.com/DavidWells/analytics)
+  plugins: [
+    doNotTrackPlugin(),
+    requireConsentPlugin({ store }),
+    disableAnalyticsPlugin({ store }),
+    originalSourcePlugin(),
+    processPayloadPlugin({ store, router }, ["google-analytics"]),
+    googleAnalyticsPlugin({ trackingId: gaTrackingID, autoTrack: true })
+  ]
+});
 
 Vue.config.productionTip = false;
 
@@ -73,6 +90,7 @@ Vue.component("FileUpload", FileUpload);
 Vue.component("CookieConsent", CookieConsent);
 Vue.component("AutocompleteMnxReaction", AutocompleteMnxReaction);
 Vue.component("AutocompleteMnxMetabolite", AutocompleteMnxMetabolite);
+Vue.component("a-extended", AExtended);
 Vue.component("v-select-extended", VSelectExtended);
 Vue.component("v-autocomplete-extended", VAutocompleteExtended);
 Vue.component("v-form-extended", VFormExtended);

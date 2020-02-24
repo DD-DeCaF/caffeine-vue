@@ -20,7 +20,11 @@
           :card="card"
           :model="model"
           :modifications="modifications"
-          @simulate-card="simulateCard"
+          @simulate-card="
+            simulateCard({
+              analytics: { sourceType: 'design_card', sourceId: card.uuid }
+            })
+          "
           @simulation-error="$emit('simulation-error')"
           @open-method-help-dialog="showMethodHelpDialog = true"
           @load-data-error="$emit('load-data-error')"
@@ -31,7 +35,11 @@
           :card="card"
           :model="model"
           :modifications="modifications"
-          @simulate-card="simulateCard"
+          @simulate-card="
+            simulateCard({
+              analytics: { sourceType: 'data_driven_card', sourceId: card.uuid }
+            })
+          "
           @simulation-error="$emit('simulation-error')"
           @open-method-help-dialog="showMethodHelpDialog = true"
           @load-data-error="$emit('load-data-error')"
@@ -600,8 +608,14 @@ export default Vue.extend({
       this.$emit("remove-card", this.card);
       this.$store.commit("interactiveMap/removeCard", this.card);
     },
-    simulateCard() {
-      this.$emit("simulate-card", this.card, this.model);
+    simulateCard(options) {
+      this.$emit("simulate-card", this.card, this.model, {
+        ...(options || {}),
+        analytics: {
+          source: "card",
+          ...((options || {}).analytics || {})
+        }
+      });
     },
     saveCard() {
       this.isSaving = true;

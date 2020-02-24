@@ -1,6 +1,13 @@
 /* eslint-disable prettier/prettier */
 <template>
-  <v-dialog v-model="showDialog" width="1200">
+  <v-dialog
+    v-model="showDialog"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'data_driven_card' }
+    }"
+    width="1200"
+  >
     <v-card class="pa-2">
       <v-tabs grow color="primary" dark>
         <v-tabs-slider color="white"></v-tabs-slider>
@@ -130,8 +137,9 @@
                       }}</code>
                       <p class="mt-2">
                         The genotype above is described in
-                        <a href="https://gnomic.readthedocs.io">gnomic</a>
-                        syntax, a grammar to represent genotypes and phenotypes
+                        <a-extended href="https://gnomic.readthedocs.io"
+                          >gnomic</a-extended
+                        >syntax, a grammar to represent genotypes and phenotypes
                         developed at DTU Biosustain.
                       </p>
                     </v-card-text>
@@ -247,12 +255,12 @@
                     >
                       <template v-slot:items="{ item: protein }">
                         <td>
-                          <a
+                          <a-extended
                             :href="
                               `https://www.uniprot.org/uniprot/${protein.identifier}`
                             "
                             target="_blank"
-                            >{{ protein.identifier }}</a
+                            >{{ protein.identifier }}</a-extended
                           >
                         </td>
                         <td>{{ protein.name }}</td>

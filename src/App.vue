@@ -15,7 +15,7 @@
         ></v-toolbar-side-icon>
         <v-toolbar-title>Caffeine</v-toolbar-title>
         <v-spacer></v-spacer>
-        <a
+        <a-extended
           v-if="environment === 'staging'"
           :href="
             `https://github.com/DD-DeCaF/caffeine-vue/commit/${deploymentHash}`
@@ -23,8 +23,8 @@
           class="headline font-weight-black primary--text text--lighten-3"
           style="text-decoration: none;"
           ><span class="text-uppercase">Staging</span> @
-          {{ deploymentHash | truncateEight }}</a
-        >
+          {{ deploymentHash | truncateEight }}
+        </a-extended>
         <span
           v-else-if="environment === 'development'"
           class="headline font-weight-black text-uppercase primary--text text--lighten-3"

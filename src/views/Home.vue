@@ -4,33 +4,38 @@
       <v-flex md6>
         <h1 id="getting-started">Getting started</h1>
         <ul>
-          <li><a href="#login-optional">Login (optional)</a></li>
           <li>
-            <a
+            <a-extended href="#login-optional">Login (optional)</a-extended>
+          </li>
+          <li>
+            <a-extended
               href="#interactive-cell-factory-design-and-omics-data-integration"
-              >Interactive cell factory design and omics data integration</a
+              >Interactive cell factory design and omics data
+              integration</a-extended
             >
           </li>
           <li>
-            <a href="#computational-cell-factory-design"
-              >Computational cell factory design</a
+            <a-extended href="#computational-cell-factory-design"
+              >Computational cell factory design</a-extended
             >
           </li>
           <li>
-            <a href="#assessing-the-capabilities-of-cell-factories"
-              >Assessing the capabilities of cell factories</a
+            <a-extended href="#assessing-the-capabilities-of-cell-factories"
+              >Assessing the capabilities of cell factories</a-extended
             >
           </li>
-          <li><a href="#uploading-data">Uploading data</a></li>
+          <li>
+            <a-extended href="#uploading-data">Uploading data</a-extended>
+          </li>
         </ul>
 
         <p>
           Welcome to our cell factory design and analysis platform! We develop
           the platform as part of the
-          <a href="http://dd-decaf.eu">DD-DeCaF</a> project with the goal to put
-          model-guided and data-driven design into practice in industrial
-          biotechnology. The platform will enable the following key
-          technologies:
+          <a-extended href="http://dd-decaf.eu">DD-DeCaF</a-extended>
+          project with the goal to put model-guided and data-driven design into
+          practice in industrial biotechnology. The platform will enable the
+          following key technologies:
         </p>
         <ul>
           <li>
@@ -56,11 +61,15 @@
           The platform is currently in <strong>beta</strong> and tested
           primarily with Google Chrome. If you&#39;d like to stay up-to-date
           with new releases, please
-          <a href="https://tinyletter.com/dd-decaf">subscribe</a> to our
-          quarterly newsletter. We will be eternally grateful for feedback in
-          case you miss features or you encountered a problem (for now please
-          drop us a message at
-          <a href="mailto:niso@biosustain.dtu.dk">niso@biosustain.dtu.dk</a>).
+          <a-extended href="https://tinyletter.com/dd-decaf"
+            >subscribe</a-extended
+          >
+          to our quarterly newsletter. We will be eternally grateful for
+          feedback in case you miss features or you encountered a problem (for
+          now please drop us a message at
+          <a-extended href="mailto:niso@biosustain.dtu.dk"
+            >niso@biosustain.dtu.dk</a-extended
+          >).
         </p>
         <p>
           The following sections provide an overview of what you can currently
@@ -68,9 +77,9 @@
         </p>
         <h3 id="login-optional-">Login (optional)</h3>
         <p>
-          You can log in by navigating to the
-          menu in the upper right-hand corner. You can register and account or
-          sign-on through a number of social media platforms.
+          You can log in by navigating to the menu in the upper right-hand
+          corner. You can register and account or sign-on through a number of
+          social media platforms.
         </p>
         <img
           src="../assets/gifs/login.gif"
@@ -87,8 +96,8 @@
         </h3>
         <p>
           In the
-          <a href="https://caffeine.dd-decaf.eu/interactive-map"
-            >Interactive Map</a
+          <a-extended href="https://caffeine.dd-decaf.eu/interactive-map"
+            >Interactive Map</a-extended
           >
           we utilize metabolic pathway maps as an intuitive user interface for
           model simulation and data analysis, giving biologists the ability to
@@ -115,11 +124,13 @@
           information (for example the medium composition) and the ability to
           select different model simulation methods. The default simulation
           method,
-          <a href="http://cobramethods.wikidot.com/pfba">pFBA</a> (<em
-            >parsimonious flux balance analysis</em
-          >), will compute a flux distribution that maximizes growth yield and
-          minimizes the cost of enzyme expression simultaneously. Descriptions
-          of the other available methods will follow shortly.
+          <a-extended href="http://cobramethods.wikidot.com/pfba"
+            >pFBA
+          </a-extended>
+          (<em>parsimonious flux balance analysis</em>), will compute a flux
+          distribution that maximizes growth yield and minimizes the cost of
+          enzyme expression simultaneously. Descriptions of the other available
+          methods will follow shortly.
         </p>
         <img
           src="../assets/gifs/side-panel-medium-simulation-methods.gif"
@@ -131,13 +142,17 @@
           Computationally more extensive methods can be chosen to get
           uncertainty estimates for the predicted fluxes. For example, pFBA-FVA
           combines
-          <a href="http://cobramethods.wikidot.com/pfba">pFBA</a> with
-          <a href="http://cobramethods.wikidot.com/flux-variability-analysis"
-            >FVA</a
+          <a-extended href="http://cobramethods.wikidot.com/pfba"
+            >pFBA</a-extended
+          >
+          with
+          <a-extended
+            href="http://cobramethods.wikidot.com/flux-variability-analysis"
+            >FVA</a-extended
           >
           (<em>flux variability analysis</em>). Uncertain
-          <a href="https://en.wikipedia.org/wiki/Flux_(metabolism)"
-            >metabolic fluxes</a
+          <a-extended href="https://en.wikipedia.org/wiki/Flux_(metabolism)"
+            >metabolic fluxes</a-extended
           >
           are highlighted using transparency.
         </p>
@@ -194,11 +209,13 @@
         </h3>
         <p>
           In the
-          <a href="https://caffeine.dd-decaf.eu/design">Design</a>
+          <a-extended href="https://caffeine.dd-decaf.eu/design"
+            >Design</a-extended
+          >
           application you can predict metabolic routes to products that your
           host can not natively produce and share with the
-          <a href="https://caffeine.dd-decaf.eu/interactive-map"
-            >Interactive Map</a
+          <a-extended href="https://caffeine.dd-decaf.eu/interactive-map"
+            >Interactive Map</a-extended
           >
           application for further inspection.
         </p>
@@ -218,7 +235,9 @@
         <h3 id="uploading-data">Uploading data</h3>
         <p>
           The
-          <a href="https://caffeine.dd-decaf.eu/experiments">Upload data</a>
+          <a-extended href="https://caffeine.dd-decaf.eu/experiments"
+            >Upload data</a-extended
+          >
           application will appear in the left panel after you log in. It
           supports a number of different data types and experimental meta data.
         </p>
@@ -230,8 +249,8 @@
 
         <p>
           If you're not comfortable uploading proprietary data, please get in
-          touch with us (<a href="mailto:niso@biosustain.dtu.dk"
-            >niso@biosustain.dtu.dk</a
+          touch with us (<a-extended href="mailto:niso@biosustain.dtu.dk"
+            >niso@biosustain.dtu.dk</a-extended
           >) as our platform can easily be deployed to your own infrastructure.
         </p>
       </v-flex>

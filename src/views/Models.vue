@@ -201,7 +201,7 @@
                 <v-checkbox
                   v-model="ecModel"
                   label="This is an enzyme-constrained model (ecModel)"
-                  hint="If checked, integration of proteomics data on this model will be allowed. <a href='https://geckotoolbox.readthedocs.io'>Read more about GECKO and ecModels</a>"
+                  hint="If checked, integration of proteomics data on this model will be allowed. <a-extended href='https://geckotoolbox.readthedocs.io'>Read more about GECKO and ecModels</a-extended>"
                   persistent-hint
                   required
                 ></v-checkbox>
