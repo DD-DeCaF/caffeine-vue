@@ -131,3 +131,20 @@ export async function hashMessage(message, algorithm) {
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
   return hashHex;
 }
+
+export function updateCompound(localCompound, newCompound) {
+      localCompound.compound_name = newCompound.name;
+      if (
+        "bigg.metabolite" in newCompound.annotation &&
+        newCompound.annotation["bigg.metabolite"].length > 0
+      ) {
+        // Use the BiGG identifier if one exists
+        localCompound.compound_identifier =
+          newCompound.annotation["bigg.metabolite"][0];
+        localCompound.compound_namespace = "bigg.metabolite";
+      } else {
+        // Fall back to the mnx id
+        localCompound.compound_identifier = newCompound.id;
+        localCompound.compound_namespace = newCompound.namespace;
+      }
+    }

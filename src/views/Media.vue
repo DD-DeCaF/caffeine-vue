@@ -255,6 +255,7 @@ import { Prop } from "vue/types/options";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import * as settings from "@/utils/settings";
+import { updateCompound } from "@/utils/utility";
 import {
   MetaNetXMetabolite,
   Annotation
@@ -447,22 +448,6 @@ export default Vue.extend({
         namespace: compound_namespace,
         formula: "Unavailable"
       };
-    },
-    updateCompound(localCompound, newCompound) {
-      localCompound.compound_name = newCompound.name;
-      if (
-        "bigg.metabolite" in newCompound.annotation &&
-        newCompound.annotation["bigg.metabolite"].length > 0
-      ) {
-        // Use the BiGG identifier if one exists
-        localCompound.compound_identifier =
-          newCompound.annotation["bigg.metabolite"][0];
-        localCompound.compound_namespace = "bigg.metabolite";
-      } else {
-        // Fall back to the mnx id
-        localCompound.compound_identifier = newCompound.id;
-        localCompound.compound_namespace = newCompound.namespace;
-      }
     }
   }
 });
