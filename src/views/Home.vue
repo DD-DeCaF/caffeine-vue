@@ -55,10 +55,7 @@
         <p>
           With this interactive web application, we target primarily non-expert
           users that have a need to analyze omics data and compute strains
-          designs. An advance programming interface is provided for expert users
-          (<a-extended href="https://docs.dd-decaf.eu/">API docs</a-extended>)
-          enabling them deviate from the default workflows and perform custom
-          analyses.
+          designs.
         </p>
         <p>
           The platform is currently in <strong>beta</strong> and tested
@@ -80,12 +77,9 @@
         </p>
         <h3 id="login-optional-">Login (optional)</h3>
         <p>
-          You can log in <a-extended appOpenLoginDialog>here</a-extended> or by
-          navigating to the menu in the upper right-hand corner. We support
-          sign-on through a number of social media platforms. Alternatively, you
-          can
-          <a-extended href="mailto:niso@biosustain.dtu.dk">contact</a-extended>
-          us for an account.
+          You can log in by navigating to the
+          menu in the upper right-hand corner. You can register and account or
+          sign-on through a number of social media platforms.
         </p>
         <img
           src="../assets/gifs/login.gif"
@@ -102,7 +96,7 @@
         </h3>
         <p>
           In the
-          <a-extended href="https://caffine.dd-decaf.eu/app/pathwayvis"
+          <a-extended href="https://caffeine.dd-decaf.eu/interactive-map"
             >Interactive Map</a-extended
           >
           we utilize metabolic pathway maps as an intuitive user interface for
@@ -181,10 +175,6 @@
 
         <p>
           You can search the map by pressing Control-F (Command-F on Mac).
-          <em
-            >The arrow buttons for cycling through the matches are currently not
-            visible. This will be fixed soon.</em
-          >
         </p>
         <img
           src="../assets/gifs/searching-on-pathway.gif"
@@ -219,12 +209,12 @@
         </h3>
         <p>
           In the
-          <a-extended href="https://caffine.dd-decaf.eu/app/pathways"
-            >Pathways</a-extended
+          <a-extended href="https://caffeine.dd-decaf.eu/design"
+            >Design</a-extended
           >
           application you can predict metabolic routes to products that your
           host can not natively produce and share with the
-          <a-extended href="https://caffine.dd-decaf.eu/app/pathwayvis"
+          <a-extended href="https://caffeine.dd-decaf.eu/interactive-map"
             >Interactive Map</a-extended
           >
           application for further inspection.
@@ -241,27 +231,11 @@
           identification of gene deletion and expression modulation strategies
           (in addition to the pathway predictions).
         </p>
-        <h3 id="assessing-the-capabilities-of-cell-factories">
-          Assessing the capabilities of cell factories
-        </h3>
-        <p>
-          The
-          <a-extended href="https://caffine.dd-decaf.eu/app/yields"
-            >Theoretical Yield</a-extended
-          >
-          application enables you to evaluate your strain performance in the
-          context of the theoretical production and growth limits.
-        </p>
-        <img
-          src="../assets/gifs/theoretical-yield-app.gif"
-          alt="Theoretical yield app"
-          width="650"
-        />
 
         <h3 id="uploading-data">Uploading data</h3>
         <p>
           The
-          <a-extended href="https://caffine.dd-decaf.eu/app/upload"
+          <a-extended href="https://caffeine.dd-decaf.eu/experiments"
             >Upload data</a-extended
           >
           application will appear in the left panel after you log in. It

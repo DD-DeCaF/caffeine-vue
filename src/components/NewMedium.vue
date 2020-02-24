@@ -27,6 +27,10 @@
                 <v-flex md6>
                   <h3>Add a new medium</h3>
                 </v-flex>
+                <v-alert :value="true" type="info">
+                  Please note: Gases must be added as part of the medium. For
+                  example, for aerobic conditions, please add oxygen explicitly.
+                </v-alert>
                 <v-flex>
                   <v-text-field
                     v-model="medium.name"
@@ -73,12 +77,6 @@
                         <v-flex xs3>
                           <v-number-field
                             v-model.number="compound.mass_concentration"
-                            :rules="[
-                              rules.conditionallyRequired(
-                                compound.mass_concentration,
-                                !!compound.id
-                              )
-                            ]"
                             name="mass"
                             label="Mass Concentration"
                             hint="mmol l <sup>-1</sup>"
@@ -223,6 +221,13 @@ export default Vue.extend({
           this.isMediumCreationSuccess = true;
           this.isDialogVisible = false;
         })
+        .then(() => {
+          // Refetch compounds from the warehouse in order to get updated state.
+          // We could update the store locally and make sure to add the returned
+          // IDs when POSTing the compounds - this is slightly slower for the
+          // user but a lot less complex to implement.
+          return this.$store.dispatch("media/fetchMediaCompounds");
+        })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
@@ -236,7 +241,7 @@ export default Vue.extend({
             compound_identifier: compound.id,
             compound_name: compound.name,
             compound_namespace: compound.namespace,
-            mass_concentration: compound.mass_concentration,
+            mass_concentration: compound.mass_concentration || null,
             medium_id: mediumId
           };
           this.$store.commit("media/addCompound", payload);
