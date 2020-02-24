@@ -405,6 +405,7 @@ export default Vue.extend({
         this.hotreloadStatus = status;
       });
     }
+    this.$store.dispatch("analytics/loadHotjar");
   },
   methods: {
     setActiveProject(projectID: number) {
