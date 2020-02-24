@@ -182,7 +182,7 @@
                       <AutocompleteMnxMetabolite
                         label="Compound"
                         hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
-                        @change="updateCompound(compound, $event)"
+                        @change="updateCompoundMethod(compound, $event)"
                         :modelIds="modelIds"
                         :passedMetabolite="
                           convertToMetaNetXMetabolite(compound)
@@ -448,6 +448,9 @@ export default Vue.extend({
         namespace: compound_namespace,
         formula: "Unavailable"
       };
+    },
+    updateCompoundMethod(localCompound, newCompound) {
+      return updateCompound(localCompound, newCompound);
     }
   }
 });

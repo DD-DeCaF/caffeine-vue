@@ -133,18 +133,26 @@ export async function hashMessage(message, algorithm) {
 }
 
 export function updateCompound(localCompound, newCompound) {
+      console.log("Local Compound"); 
+      console.log(localCompound);
+      console.log("New Compound"); 
+      console.log(newCompound);
       localCompound.compound_name = newCompound.name;
       if (
         "bigg.metabolite" in newCompound.annotation &&
         newCompound.annotation["bigg.metabolite"].length > 0
       ) {
+        console.log("BiGG == True"); 
         // Use the BiGG identifier if one exists
         localCompound.compound_identifier =
           newCompound.annotation["bigg.metabolite"][0];
         localCompound.compound_namespace = "bigg.metabolite";
       } else {
+        console.log("No BiGG."); 
         // Fall back to the mnx id
         localCompound.compound_identifier = newCompound.id;
         localCompound.compound_namespace = newCompound.namespace;
       }
+      console.log(localCompound);
+      return localCompound;
     }

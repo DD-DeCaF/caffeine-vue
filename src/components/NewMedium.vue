@@ -90,7 +90,7 @@
                           <AutocompleteMnxMetabolite
                             label="Compound"
                             hint="Searches the entire <a-extended href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a-extended> database for known compounds."
-                            @change="updateCompound(compound, $event)"
+                            @change="updateCompoundMethod(compound, $event)"
                             :modelIds="modelIds"
                           ></AutocompleteMnxMetabolite>
                         </v-flex>
@@ -210,7 +210,24 @@ export default Vue.extend({
         .post(`${settings.apis.warehouse}/media`, this.medium)
         .then((response: AxiosResponse) => {
           this.medium.id = response.data.id;
-          return Promise.all(this.postCompounds(this.medium.id));
+          // Now create the new compounds
+          return Promise.all(
+            this.compounds
+              // Ignore empty rows
+              .filter(compound => compound.compound_identifier)
+              .map(compound => {
+                return axios.post(
+                  `${settings.apis.warehouse}/media/compounds`,
+                  {
+                    medium_id: this.medium.id,
+                    mass_concentration: compound.mass_concentration || null,
+                    compound_identifier: compound.compound_identifier,
+                    compound_name: compound.compound_name,
+                    compound_namespace: compound.compound_namespace
+                  }
+                );
+              })
+          );
         })
         .then(() => {
           this.$store.commit("media/addMedium", this.medium);
@@ -230,26 +247,11 @@ export default Vue.extend({
         })
         .then(() => (this.isLoading = false));
     },
-    postCompounds(mediumId) {
-      return this.compounds
-        .filter(({ id }) => id)
-        .map(compound => {
-          const payload = {
-            compound_identifier: compound.id,
-            compound_name: compound.name,
-            compound_namespace: compound.namespace,
-            mass_concentration: compound.mass_concentration || null,
-            medium_id: mediumId
-          };
-          this.$store.commit("media/addCompound", payload);
-          return axios.post(
-            `${settings.apis.warehouse}/media/compounds`,
-            payload
-          );
-        });
-    },
     passProject(project) {
       this.medium.project_id = project.id;
+    },
+    updateCompoundMethod(localCompound, newCompound) {
+      return updateCompound(localCompound, newCompound);
     }
   }
 });
