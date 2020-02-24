@@ -90,11 +90,7 @@
                           <AutocompleteMnxMetabolite
                             label="Compound"
                             hint="Searches the entire <a-extended href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a-extended> database for known compounds."
-                            @change="
-                              compound.name = $event.name;
-                              compound.id = $event.id;
-                              compound.namespace = $event.namespace;
-                            "
+                            @change="updateCompound(compound, $event)"
                             :modelIds="modelIds"
                           ></AutocompleteMnxMetabolite>
                         </v-flex>
@@ -161,6 +157,7 @@ import { AxiosResponse } from "axios";
 import { Prop } from "vue/types/options";
 import * as settings from "@/utils/settings";
 import { MediumItem } from "@/store/modules/media";
+import { updateCompound } from "@/utils/utility";
 
 export default Vue.extend({
   name: "NewMedium",
