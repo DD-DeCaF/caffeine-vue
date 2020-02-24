@@ -21,6 +21,28 @@
         <v-container @click="isSidepanelOpen = false" v-if="communityData">
           <!-- Community Growth Rate -->
           <h1>Community Modeling</h1>
+
+          <v-expansion-panel v-if="communityData.warnings">
+            <v-expansion-panel-content key="1">
+              <template v-slot:header>
+                <v-badge left color="yellow">
+                  <template v-slot:badge>
+                    <span>{{ communityData.warnings.length }}</span>
+                  </template>
+                  <span>Warnings</span>
+                </v-badge>
+              </template>
+              <v-card>
+                <v-card-text
+                  v-for="warning in communityData.warnings"
+                  :key="warning"
+                >
+                  {{ warning }}
+                </v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
           <h2>Community Growth Rate</h2>
           <p>{{ communityData.growth_rate }}</p>
           <!-- Abundance -->
