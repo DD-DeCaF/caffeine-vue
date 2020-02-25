@@ -317,20 +317,22 @@ export default Vue.extend({
                 // Note: identifyUser and updateUser are not guarded by the
                 // isNewUser check as we want to capture the information even
                 // if it is not the first time the user logged in.
-                if (email) {
-                  this.$store.dispatch("analytics/identifyUser", {
-                    registeredEmail: email
+                const identifyPromise = email
+                  ? this.$store.dispatch("analytics/identifyUser", {
+                      registeredEmail: email
+                    })
+                  : Promise.resolve();
+                identifyPromise.then(() => {
+                  this.$store.dispatch("analytics/updateUser", {
+                    email,
+                    displayName: result.user.displayName,
+                    photoUrl: result.user.photoURL,
+                    phone: result.user.phoneNumber,
+                    username: result.additionalUserInfo.username,
+                    firstName: result.additionalUserInfo.profile.given_name,
+                    lastName: result.additionalUserInfo.profile.family_name,
+                    dateJoined: result.user.metadata.a // creation time timestamp
                   });
-                }
-                this.$store.dispatch("analytics/updateUser", {
-                  email,
-                  displayName: result.user.displayName,
-                  photoUrl: result.user.photoURL,
-                  phone: result.user.phoneNumber,
-                  username: result.additionalUserInfo.username,
-                  firstName: result.additionalUserInfo.profile.given_name,
-                  lastName: result.additionalUserInfo.profile.family_name,
-                  dateJoined: result.user.metadata.a // creation time timestamp
                 });
                 this.$store.dispatch("analytics/login", {
                   signInMethod: providerKey,
@@ -352,14 +354,17 @@ export default Vue.extend({
         message: this.$refs.disclaimer.textContent,
         source: "web"
       });
-      this.$store.dispatch("analytics/identifyUser", {
-        registeredEmail: params.email
-      });
-      this.$store.dispatch("analytics/updateUser", {
-        ...params,
-        password: undefined, // Hide user's password
-        dateJoined: new Date().getTime()
-      });
+      this.$store
+        .dispatch("analytics/identifyUser", {
+          registeredEmail: params.email
+        })
+        .then(() => {
+          this.$store.dispatch("analytics/updateUser", {
+            ...params,
+            password: undefined, // Hide user's password
+            dateJoined: new Date().getTime()
+          });
+        });
       this.$store.dispatch("analytics/login", {
         signInMethod: "email",
         isNewUser: true

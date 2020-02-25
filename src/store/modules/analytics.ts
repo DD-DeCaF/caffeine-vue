@@ -106,14 +106,17 @@ export default vuexStoreModule({
       state.analytics!.reset();
     },
     async identifyUser({ state }, payload) {
-      const id = await hashMessage(payload.registeredEmail, "SHA-256");
-      state.analytics!.identify(id, {
+      const { registeredEmail, internalId, firebaseId } = payload;
+      const id = registeredEmail
+        ? await hashMessage(registeredEmail, "SHA-256")
+        : internalId || firebaseId;
+      return state.analytics!.identify(id, {
         ...payload,
         registeredEmail: undefined
       });
     },
     updateUser({ state }, payload) {
-      state.analytics!.identify(null, payload);
+      state.analytics!.identify("", payload);
     },
     page({ state }, payload) {
       state.analytics!.page(payload);
