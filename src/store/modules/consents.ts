@@ -245,9 +245,49 @@ export default vuexStoreModule({
           category: "preferences"
         });
         if (!consentGiven) {
-          ["jwt", "cookie:accepted", "consents"].forEach(k =>
-            localStorage.removeItem(k)
-          );
+          // Clear localStorage
+          if (window.localStorage) {
+            [
+              // Session Token
+              "jwt",
+              // Vuex consents store module
+              "consents",
+              // Cookie Law component
+              "cookie:accepted",
+              // Analytics package
+              "__anon_id",
+              "__user_id",
+              "__user_original_landing_page",
+              "__user_original_source",
+              "__user_traits",
+              // HotJar
+              "_hjid"
+            ].forEach(k => window.localStorage.removeItem(k));
+          }
+          // Clear SessionStorage
+          if (window.sessionStorage) {
+            [
+              // HotJar
+              "_hjRecordingEnabled",
+              "_hjRecordingLastActivity",
+              "hjViewportId"
+            ].forEach(k => sessionStorage.removeItem(k));
+          }
+          // Expire cookies
+          if (document.cookie) {
+            [
+              // Google Analytics
+              "_ga",
+              "_gid",
+              // HotJar
+              "_hjid",
+              "_hjIncludedInSample"
+            ].forEach(
+              k =>
+                (document.cookie =
+                  k + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
+            );
+          }
         }
       });
     },
