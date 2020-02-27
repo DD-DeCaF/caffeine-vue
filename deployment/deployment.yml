@@ -22,7 +22,7 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            cpu: "10m"
+            cpu: "1m"
           limits:
             cpu: "2000m"
 
@@ -52,6 +52,6 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            cpu: "10m"
+            cpu: "1m"
           limits:
             cpu: "2000m"
