@@ -237,9 +237,17 @@ export default Vue.extend({
       this.login(
         { email: this.email.value, password: this.password.value },
         "local"
-      );
+      ).then(() => {
+        if (!this.isLoginSuccess) {
+          return;
+        }
+        this.$store.dispatch("analytics/login", {
+          signInMethod: "email",
+          isNewUser: false
+        });
+      });
     },
-    login(params: object, type: string) {
+    login(params: { [x: string]: any }, type: string) {
       this.isLoading = true;
       return axios
         .post(`${settings.apis.iam}/authenticate/${type}`, params)
@@ -249,6 +257,11 @@ export default Vue.extend({
           this.isLoginSuccess = true;
           this.$store.dispatch("consents/addConsentsFromLocalStorage");
           this.$store.dispatch("fetchAllData");
+          this.$store.dispatch("analytics/identifyUser", {
+            registeredEmail: params.email,
+            internalId: params.id,
+            firebaseId: params.uid
+          });
         })
         .catch(error => {
           if (error.response && error.response.status === 401) {
@@ -267,6 +280,7 @@ export default Vue.extend({
       this.isLogoutSuccess = true;
       this.$store.dispatch("fetchAllData");
       this.$router.replace({ name: "home" });
+      this.$store.dispatch("analytics/logout");
     },
     socialLogin(providerKey) {
       firebase.auth().signOut();
@@ -296,6 +310,34 @@ export default Vue.extend({
                     source: "web"
                   });
                 }
+                // Email is not passed to the login function, so we have to
+                // identify user by email here.
+                const email =
+                  result.user.email || result.additionalUserInfo.profile.email;
+                // Note: identifyUser and updateUser are not guarded by the
+                // isNewUser check as we want to capture the information even
+                // if it is not the first time the user logged in.
+                const identifyPromise = email
+                  ? this.$store.dispatch("analytics/identifyUser", {
+                      registeredEmail: email
+                    })
+                  : Promise.resolve();
+                identifyPromise.then(() => {
+                  this.$store.dispatch("analytics/updateUser", {
+                    email,
+                    displayName: result.user.displayName,
+                    photoUrl: result.user.photoURL,
+                    phone: result.user.phoneNumber,
+                    username: result.additionalUserInfo.username,
+                    firstName: result.additionalUserInfo.profile.given_name,
+                    lastName: result.additionalUserInfo.profile.family_name,
+                    dateJoined: result.user.metadata.a // creation time timestamp
+                  });
+                });
+                this.$store.dispatch("analytics/login", {
+                  signInMethod: providerKey,
+                  isNewUser: result.additionalUserInfo.isNewUser
+                });
               });
             });
         })
@@ -303,7 +345,7 @@ export default Vue.extend({
           this.hasLoginError = true;
         });
     },
-    onRegister() {
+    onRegister(params) {
       this.isLoginDialogVisible = false;
       this.isRegisterSuccess = true;
 
@@ -311,6 +353,21 @@ export default Vue.extend({
         category: "registration",
         message: this.$refs.disclaimer.textContent,
         source: "web"
+      });
+      this.$store
+        .dispatch("analytics/identifyUser", {
+          registeredEmail: params.email
+        })
+        .then(() => {
+          this.$store.dispatch("analytics/updateUser", {
+            ...params,
+            password: undefined, // Hide user's password
+            dateJoined: new Date().getTime()
+          });
+        });
+      this.$store.dispatch("analytics/login", {
+        signInMethod: "email",
+        isNewUser: true
       });
     },
     forgotPassword() {

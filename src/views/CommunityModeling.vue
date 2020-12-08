@@ -21,6 +21,28 @@
         <v-container @click="isSidepanelOpen = false" v-if="communityData">
           <!-- Community Growth Rate -->
           <h1>Community Modeling</h1>
+
+          <v-expansion-panel v-if="communityData.warnings">
+            <v-expansion-panel-content key="1">
+              <template v-slot:header>
+                <v-badge left color="yellow">
+                  <template v-slot:badge>
+                    <span>{{ communityData.warnings.length }}</span>
+                  </template>
+                  <span>Warnings</span>
+                </v-badge>
+              </template>
+              <v-card>
+                <v-card-text
+                  v-for="warning in communityData.warnings"
+                  :key="warning"
+                >
+                  {{ warning }}
+                </v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
           <h2>Community Growth Rate</h2>
           <p>{{ communityData.growth_rate }}</p>
           <!-- Abundance -->
@@ -158,6 +180,27 @@
                   </v-tooltip>
                 </v-flex>
               </v-layout>
+              <v-layout row justify-space-around>
+                <v-slider
+                  label="Minimum exchange value"
+                  v-model="slider"
+                  class="align-center"
+                  :max="maxSlider"
+                  :min="0"
+                  hide-details
+                >
+                  <template v-slot:append>
+                    <v-text-field
+                      v-model="slider"
+                      class="mt-0 pt-0"
+                      hide-details
+                      single-line
+                      type="number"
+                      style="width: 60px"
+                    ></v-text-field>
+                  </template>
+                </v-slider>
+              </v-layout>
             </v-card-title>
             <v-data-table
               :headers="headersCrossFeeding"
@@ -292,6 +335,7 @@ export default Vue.extend({
     metaboliteSearch: [],
     fromSearch: [],
     toSearch: [],
+    slider: 0,
     isUpdating: false,
     isLoading: true,
     selectedModels: [],
@@ -332,6 +376,14 @@ export default Vue.extend({
     ]
   }),
   computed: {
+    maxSlider() {
+      return this.communityData.cross_feeding.length === 0
+        ? 50
+        : this.communityData.cross_feeding.reduce(
+            (max, p) => (p.value > max ? p.value : max),
+            this.communityData.cross_feeding[0].value
+          );
+    },
     isValid() {
       if (this.selectedModels.length >= 2 && this.selectedMedium !== null) {
         return true;
@@ -360,11 +412,13 @@ export default Vue.extend({
         return (
           (!this.metaboliteSearch.length &&
             !this.fromSearch.length &&
-            !this.toSearch.length) ||
+            !this.toSearch.length &&
+            this.slider < i.value) ||
           (this.metaboliteSearch.length > 0 ===
             this.metaboliteSearch.includes(i.metabolite_name) &&
             this.fromSearch.length > 0 === this.fromSearch.includes(i.from) &&
-            this.toSearch.length > 0 === this.toSearch.includes(i.to))
+            this.toSearch.length > 0 === this.toSearch.includes(i.to) &&
+            this.slider < i.value)
         );
       });
     }
@@ -483,7 +537,9 @@ export default Vue.extend({
 
       // link template
       var linkTemplate = chart.links.template;
-      linkTemplate.strokeOpacity = 0;
+      linkTemplate.stroke = am4core.color("#000");
+      linkTemplate.strokeWidth = 0.5;
+      linkTemplate.strokeOpacity = 0.1;
       linkTemplate.fillOpacity = 0.2;
       linkTemplate.tooltipText =
         "{fromName} provides {value.value} mmol/l {metabolite_name} to {toName}";

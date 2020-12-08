@@ -107,6 +107,11 @@
             <v-flex md6>
               <h3>Edit {{ name }}</h3>
             </v-flex>
+            <v-alert :value="true" type="info">
+              Please note: Gases must be added as part of the medium. For
+              example, for aerobic conditions, please add oxygen explicitly.
+            </v-alert>
+
             <v-flex>
               <v-form
                 ref="form"

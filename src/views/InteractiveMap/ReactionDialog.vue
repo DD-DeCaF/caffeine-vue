@@ -1,5 +1,12 @@
 <template>
-  <v-dialog v-model="showDialog" width="1000">
+  <v-dialog
+    v-model="showDialog"
+    v-analytics-model="{
+      command: 'trackDialog',
+      payload: { dialogName: 'new_reaction' }
+    }"
+    width="1000"
+  >
     <v-card class="pa-4">
       <v-form ref="form" v-model="isValid" lazy-validation>
         <v-layout align-center>

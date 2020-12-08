@@ -208,7 +208,7 @@
                           :key="index"
                         >
                           <div v-if="index < 10">
-                            <a
+                            <a-extended
                               :href="
                                 reactionLink(reactionKnockin.id, design.method)
                               "
@@ -216,13 +216,13 @@
                               target="_blank"
                             >
                               {{ reactionKnockin.id }}
-                            </a>
+                            </a-extended>
                           </div>
                           <div
                             v-if="index >= 10"
                             :hidden="!showAllReactionKnockins"
                           >
-                            <a
+                            <a-extended
                               :href="
                                 reactionLink(reactionKnockin.id, design.method)
                               "
@@ -230,16 +230,16 @@
                               target="_blank"
                             >
                               {{ reactionKnockin.id }}
-                            </a>
+                            </a-extended>
                           </div>
                         </div>
                         <div v-if="design.design.reactionKnockins.length > 10">
-                          <a
+                          <a-extended
                             @click="showAllReactionKnockins = true"
                             :hidden="showAllReactionKnockins"
                           >
                             ...
-                          </a>
+                          </a-extended>
                         </div>
                       </div>
                     </td>
@@ -251,7 +251,7 @@
                           :key="index"
                         >
                           <div v-if="index < 10">
-                            <a
+                            <a-extended
                               :href="
                                 reactionLink(reactionKnockout.id, design.method)
                               "
@@ -259,13 +259,13 @@
                               target="_blank"
                             >
                               {{ reactionKnockout.id }}
-                            </a>
+                            </a-extended>
                           </div>
                           <div
                             v-if="index >= 10"
                             :hidden="!showAllReactionKnockouts"
                           >
-                            <a
+                            <a-extended
                               :href="
                                 reactionLink(reactionKnockout.id, design.method)
                               "
@@ -273,16 +273,16 @@
                               target="_blank"
                             >
                               {{ reactionKnockout.id }}
-                            </a>
+                            </a-extended>
                           </div>
                         </div>
                         <div v-if="design.design.reactionKnockouts.length > 10">
-                          <a
+                          <a-extended
                             @click="showAllReactionKnockouts = true"
                             :hidden="showAllReactionKnockouts"
                           >
                             ...
-                          </a>
+                          </a-extended>
                         </div>
                       </div>
                     </td>
@@ -294,7 +294,7 @@
                           :key="index"
                         >
                           <div v-if="index < 10">
-                            <a
+                            <a-extended
                               :href="
                                 `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
@@ -302,13 +302,13 @@
                               target="_blank"
                             >
                               {{ geneKnockout.id }}
-                            </a>
+                            </a-extended>
                           </div>
                           <div
                             v-if="index >= 10"
                             :hidden="!showAllGeneKnockouts"
                           >
-                            <a
+                            <a-extended
                               :href="
                                 `http://bigg.ucsd.edu/search?query=${geneKnockout.id}`
                               "
@@ -316,16 +316,16 @@
                               target="_blank"
                             >
                               {{ geneKnockout.id }}
-                            </a>
+                            </a-extended>
                           </div>
                         </div>
                         <div v-if="design.design.geneKnockouts.length > 10">
-                          <a
+                          <a-extended
                             @click="showAllGeneKnockouts = true"
                             :hidden="showAllGeneKnockouts"
                           >
                             ...
-                          </a>
+                          </a-extended>
                         </div>
                       </div>
                     </td>
@@ -499,6 +499,10 @@ export default Vue.extend({
             this.$store.commit("interactiveMap/addCard", card);
             this.$router.push({ name: "interactiveMap" });
           });
+      });
+      this.$store.dispatch("analytics/sendToVisualize", {
+        ids: this.selected.map(design => design.id),
+        type: "design"
       });
     },
     onDeletion(ids) {

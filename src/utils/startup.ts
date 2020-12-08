@@ -5,5 +5,6 @@ export const initFromStorage = () => {
   const token = localStorage.getItem("jwt");
   if (token !== null) {
     store.commit("session/login", JSON.parse(token));
+    store.dispatch("analytics/loginLocalStorage");
   }
 };

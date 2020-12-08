@@ -73,9 +73,9 @@ export default Vue.extend({
   methods: {
     hint() {
       if (this.protein) {
-        return `<a href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a> (${this.protein.fullName})`;
+        return `<a-extended href="https://www.uniprot.org/uniprot/${this.protein.identifier}" target="_blank">${this.protein.identifier}</a-extended> (${this.protein.fullName})`;
       } else {
-        return `Enter any valid <a href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a>.`;
+        return `Enter any valid <a-extended href="https://www.uniprot.org/uniprot/" target="_blank">UniProtKB identifier</a-extended>.`;
       }
     },
     triggerQuery() {

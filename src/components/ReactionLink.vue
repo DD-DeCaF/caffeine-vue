@@ -1,6 +1,8 @@
 <template>
   <span>
-    <a v-if="link" :href="link" target="_blank">{{ identifier }}</a>
+    <a-extended v-if="link" :href="link" target="_blank">
+      {{ identifier }}
+    </a-extended>
     <span v-else>{{ identifier }} ({{ namespace }})</span>
   </span>
 </template>

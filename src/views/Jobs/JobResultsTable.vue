@@ -361,7 +361,7 @@
                           <div v-if="index < 10">
                             <v-tooltip bottom>
                               <template v-slot:activator="{ on }">
-                                <a
+                                <a-extended
                                   :href="
                                     `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
@@ -374,7 +374,7 @@
                                       manipulation.id
                                     }`
                                   }}
-                                </a>
+                                </a-extended>
                               </template>
                               <span
                                 >Score:
@@ -388,7 +388,7 @@
                           >
                             <v-tooltip bottom>
                               <template v-slot:activator="{ on }">
-                                <a
+                                <a-extended
                                   :href="
                                     `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                                   "
@@ -401,7 +401,7 @@
                                       manipulation.id
                                     }`
                                   }}
-                                </a>
+                                </a-extended>
                               </template>
                               <span
                                 >Score:
@@ -424,7 +424,7 @@
                           class="mb-2"
                         >
                           <div v-if="index < 10">
-                            <a
+                            <a-extended
                               :href="
                                 `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
@@ -432,7 +432,7 @@
                               target="_blank"
                             >
                               {{ manipulation.id }}
-                            </a>
+                            </a-extended>
                             <div>
                               <div
                                 v-for="(swap, index) in getSwapManipulation(
@@ -448,7 +448,7 @@
                             v-if="index >= 10"
                             :hidden="!showAllManipulations"
                           >
-                            <a
+                            <a-extended
                               :href="
                                 `http://bigg.ucsd.edu/search?query=${manipulation.id}`
                               "
@@ -456,7 +456,7 @@
                               target="_blank"
                             >
                               {{ manipulation.id }}
-                            </a>
+                            </a-extended>
                             <div>
                               <div
                                 v-for="(swap, index) in getSwapManipulation(
@@ -471,12 +471,12 @@
                         </div>
                       </div>
                       <div v-if="jobPrediction.manipulations.length > 10">
-                        <a
+                        <a-extended
                           @click="showAllManipulations = true"
                           :hidden="showAllManipulations"
                         >
                           ...
-                        </a>
+                        </a-extended>
                       </div>
                       <div
                         v-if="
@@ -502,7 +502,7 @@
                       >
                         <v-menu offset-y max-width="200px" content-class="menu">
                           <template v-slot:activator="{ on }">
-                            <a
+                            <a-extended
                               :hidden="reactionId.startsWith('DM')"
                               class="link"
                               v-on="on"
@@ -512,7 +512,7 @@
                                   ? prediction.result.reactions[reactionId].name
                                   : reactionId
                               }}
-                            </a>
+                            </a-extended>
                           </template>
                           <div class="text-xs-center caption ma-2">
                             {{
@@ -525,17 +525,17 @@
                           <v-container class="pa-2 ml-2">
                             <v-layout>
                               <v-flex>
-                                <a
+                                <a-extended
                                   class="link caption"
                                   :href="
                                     `https://www.metanetx.org/equa_info/${reactionId}`
                                   "
                                   target="_blank"
-                                  >MetaNetX</a
+                                  >MetaNetX</a-extended
                                 >
                               </v-flex>
                               <v-flex>
-                                <a
+                                <a-extended
                                   v-if="
                                     prediction.result.reactions[reactionId]
                                       .annotation.EC
@@ -545,11 +545,11 @@
                                     `https://www.uniprot.org/uniprot/?query=${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
-                                  >UniProt</a
+                                  >UniProt</a-extended
                                 >
                               </v-flex>
                               <v-flex>
-                                <a
+                                <a-extended
                                   v-if="
                                     prediction.result.reactions[reactionId]
                                       .annotation.EC
@@ -559,7 +559,7 @@
                                     `http://gmgc.embl.de/search/${prediction.result.reactions[reactionId].annotation.EC}`
                                   "
                                   target="_blank"
-                                  >GMGC</a
+                                  >GMGC</a-extended
                                 >
                               </v-flex>
                             </v-layout>
@@ -576,7 +576,7 @@
                         :key="index"
                       >
                         <div v-if="index < 10">
-                          <a
+                          <a-extended
                             :href="
                               `http://bigg.ucsd.edu/search?query=${knockout}`
                             "
@@ -584,10 +584,10 @@
                             target="_blank"
                           >
                             {{ knockout }}
-                          </a>
+                          </a-extended>
                         </div>
                         <div v-if="index >= 10" :hidden="!showAllKnockouts">
-                          <a
+                          <a-extended
                             :href="
                               `http://bigg.ucsd.edu/search?query=${knockout}`
                             "
@@ -595,16 +595,16 @@
                             target="_blank"
                           >
                             {{ knockout }}
-                          </a>
+                          </a-extended>
                         </div>
                       </div>
                       <div v-if="jobPrediction.knockouts.length > 10">
-                        <a
+                        <a-extended
                           @click="showAllKnockouts = true"
                           :hidden="showAllKnockouts"
                         >
                           ...
-                        </a>
+                        </a-extended>
                       </div>
                     </div>
                   </td>
@@ -1199,6 +1199,10 @@ export default Vue.extend({
         Promise.all(addingPromises).then(() => {
           this.$router.push({ name: "interactiveMap" });
           this.isVisualizing = false;
+          this.$store.dispatch("analytics/sendToVisualize", {
+            ids: this.selected.map(prediction => prediction.id),
+            type: "prediction"
+          });
         });
       });
     },
@@ -1310,6 +1314,11 @@ export default Vue.extend({
           reader.readAsText(error.response.data);
         })
         .then(() => (this.isExporting = false));
+
+      this.$store.dispatch("analytics/export", {
+        ids: predictionIds,
+        type: "prediction"
+      });
     }
   }
 });

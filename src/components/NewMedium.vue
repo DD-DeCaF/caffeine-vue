@@ -1,6 +1,13 @@
 <template>
   <div>
-    <v-dialog v-model="isDialogVisible" width="650">
+    <v-dialog
+      v-model="isDialogVisible"
+      v-analytics-model="{
+        command: 'trackDialog',
+        payload: { dialogName: 'new_medium' }
+      }"
+      width="650"
+    >
       <NewProject
         v-model="isProjectCreationDialogVisible"
         @return-object="passProject"
@@ -20,6 +27,10 @@
                 <v-flex md6>
                   <h3>Add a new medium</h3>
                 </v-flex>
+                <v-alert :value="true" type="info">
+                  Please note: Gases must be added as part of the medium. For
+                  example, for aerobic conditions, please add oxygen explicitly.
+                </v-alert>
                 <v-flex>
                   <v-text-field
                     v-model="medium.name"
@@ -66,12 +77,6 @@
                         <v-flex xs3>
                           <v-number-field
                             v-model.number="compound.mass_concentration"
-                            :rules="[
-                              rules.conditionallyRequired(
-                                compound.mass_concentration,
-                                !!compound.id
-                              )
-                            ]"
                             name="mass"
                             label="Mass Concentration"
                             hint="mmol l <sup>-1</sup>"
@@ -84,7 +89,7 @@
                         <v-flex xs8>
                           <AutocompleteMnxMetabolite
                             label="Compound"
-                            hint="Searches the entire <a href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a> database for known compounds."
+                            hint="Searches the entire <a-extended href='https://www.metanetx.org/mnxdoc/mnxref.html'>MetaNetX</a-extended> database for known compounds."
                             @change="
                               compound.name = $event.name;
                               compound.id = $event.id;
@@ -216,6 +221,13 @@ export default Vue.extend({
           this.isMediumCreationSuccess = true;
           this.isDialogVisible = false;
         })
+        .then(() => {
+          // Refetch compounds from the warehouse in order to get updated state.
+          // We could update the store locally and make sure to add the returned
+          // IDs when POSTing the compounds - this is slightly slower for the
+          // user but a lot less complex to implement.
+          return this.$store.dispatch("media/fetchMediaCompounds");
+        })
         .catch(error => {
           this.$store.commit("setPostError", error);
         })
@@ -229,7 +241,7 @@ export default Vue.extend({
             compound_identifier: compound.id,
             compound_name: compound.name,
             compound_namespace: compound.namespace,
-            mass_concentration: compound.mass_concentration,
+            mass_concentration: compound.mass_concentration || null,
             medium_id: mediumId
           };
           this.$store.commit("media/addCompound", payload);

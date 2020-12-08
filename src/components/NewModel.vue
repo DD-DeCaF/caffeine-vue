@@ -9,7 +9,14 @@
       v-model="isOrganismCreationDialogVisible"
       @return-object="passOrganism"
     />
-    <v-dialog v-model="isVisible" width="650">
+    <v-dialog
+      v-model="isVisible"
+      v-analytics-model="{
+        command: 'trackDialog',
+        payload: { dialogName: 'new_model' }
+      }"
+      width="650"
+    >
       <v-card class="pa-2">
         <v-container grid-list-lg text-md-left>
           <v-layout fill-height column wrap>
@@ -17,8 +24,10 @@
               <h3>Add a new model</h3>
               <p>
                 We recommend that you visit
-                <a href="https://memote.io" target="_blank">memote.io</a> to
-                validate your model.
+                <a-extended href="https://memote.io" target="_blank">
+                  memote.io
+                </a-extended>
+                to validate your model.
               </p>
             </v-flex>
             <v-flex>
@@ -149,7 +158,7 @@
                 <v-checkbox
                   v-model="ecModel"
                   label="This is an enzyme-constrained model (ecModel)"
-                  hint="If checked, integration of proteomics data on this model will be allowed. <a href='https://geckotoolbox.readthedocs.io'>Read more about GECKO and ecModels</a>"
+                  hint="If checked, integration of proteomics data on this model will be allowed. <a-extended href='https://geckotoolbox.readthedocs.io'>Read more about GECKO and ecModels</a-extended>"
                   persistent-hint
                   required
                 ></v-checkbox>
