@@ -52,7 +52,7 @@
     "eslint-plugin-vue": "^6.0.1",
     "prettier": "^1.19.1",
     "he": "^1.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "sass": "^1.23.3",
     "sass-loader": "^8.0.0",
     "stylus": "^0.54.7",
